@@ -1,0 +1,13 @@
+Entonces la estructura correcta sería:
+
+GitHub
+├── seremprendeads/web       → landing actual
+└── seremprendeads/reservas  → sistema de reservas
+
+Y en producción:
+
+www.seremprende.com
+→ seremprendeads/web
+
+reservas.seremprende.com
+→ seremprendeads/reservas
