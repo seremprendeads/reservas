@@ -19,11 +19,6 @@ function BookingContent() {
             </div>
             <span className="text-xl font-bold text-gray-800">Reserva tu Turno</span>
           </div>
-          <nav className="flex items-center gap-4 text-gray-600">
-            <a href="/admin" className="hover:text-emerald-600 transition-colors">
-              Portal Admin
-            </a>
-          </nav>
         </div>
       </header>
 
@@ -81,16 +76,13 @@ function BookingContent() {
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-6 text-gray-600">
             <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4" />
-              <span>+54 11 1234-5678</span>
-            </div>
-            <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               <span>Buenos Aires, Argentina</span>
             </div>
           </div>
           <p className="text-gray-500 text-sm">
-            Pagos seguros con Mercado Pago
+            Pagos seguros con Mercado Pago 
+
           </p>
         </div>
       </footer>

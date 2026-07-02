@@ -1,9 +1,9 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
@@ -13,103 +13,84 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const MP_ACCESS_TOKEN = Deno.env.get("MERCADO_PAGO_ACCESS_TOKEN");
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-    if (!MP_ACCESS_TOKEN || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error("Missing environment variables");
-    }
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
     const body = await req.json();
-    console.log("Webhook received:", JSON.stringify(body));
 
-    // Handle different notification types
-    if (body.type === "payment") {
-      const paymentId = body.data?.id;
-
-      if (!paymentId) {
-        throw new Error("No payment ID in notification");
-      }
-
-      // Get payment details from Mercado Pago
-      const paymentResponse = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-        headers: {
-          Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-        },
-      });
-
-      if (!paymentResponse.ok) {
-        throw new Error(`Failed to fetch payment: ${paymentResponse.status}`);
-      }
-
-      const payment = await paymentResponse.json();
-      console.log("Payment details:", JSON.stringify(payment));
-
-      const bookingCode = payment.external_reference;
-      const status = payment.status;
-
-      if (!bookingCode) {
-        throw new Error("No external_reference in payment");
-      }
-
-      // Map Mercado Pago status to our status
-      let paymentStatus: string;
-      let bookingStatus: string;
-
-      switch (status) {
-        case "approved":
-          paymentStatus = "approved";
-          bookingStatus = "confirmed";
-          break;
-        case "pending":
-        case "in_process":
-        case "in_mediation":
-          paymentStatus = "pending";
-          bookingStatus = "pending";
-          break;
-        case "rejected":
-        case "cancelled":
-        case "refunded":
-        case "charged_back":
-          paymentStatus = "rejected";
-          bookingStatus = "cancelled";
-          break;
-        default:
-          paymentStatus = "pending";
-          bookingStatus = "pending";
-      }
-
-      // Update booking in database
-      const { error: updateError } = await supabase
-        .from("bookings")
-        .update({
-          payment_status: paymentStatus,
-          payment_id: paymentId.toString(),
-          booking_status: bookingStatus,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("booking_code", bookingCode);
-
-      if (updateError) {
-        console.error("Error updating booking:", updateError);
-        throw updateError;
-      }
-
-      console.log(`Booking ${bookingCode} updated: payment=${paymentStatus}, booking=${bookingStatus}`);
+    // Mercado Pago manda tipo "payment" cuando se aprueba
+    if (body.type !== "payment") {
+      return new Response("OK", { status: 200 });
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    const paymentId = body.data?.id;
+    if (!paymentId) {
+      return new Response("No payment ID", { status: 200 });
+    }
+
+    const MP_ACCESS_TOKEN = Deno.env.get("MERCADO_PAGO_ACCESS_TOKEN");
+
+    // Consultar el pago a Mercado Pago
+    const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+    });
+
+    if (!mpRes.ok) {
+      return new Response("MP API error", { status: 200 });
+    }
+
+    const payment = await mpRes.json();
+
+    if (payment.status !== "approved") {
+      return new Response("Payment not approved", { status: 200 });
+    }
+
+    const bookingCode = payment.external_reference;
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Actualizar la reserva
+    const { data: booking, error } = await supabase
+      .from("bookings")
+      .update({
+        payment_status: "approved",
+        payment_id: String(paymentId),
+        booking_status: "confirmed",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("booking_code", bookingCode)
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+
+    // Notificación ntfy si está habilitada
+    const ntfyTopic = Deno.env.get("NTFY_TOPIC");
+    const ntfyEnabled = Deno.env.get("NTFY_ENABLED");
+
+    if (ntfyTopic && ntfyEnabled === "true" && booking) {
+      const fecha = new Date(booking.booking_date + "T12:00:00").toLocaleDateString("es-AR", {
+        weekday: "long", day: "numeric", month: "long"
+      });
+      const hora = booking.booking_time.slice(0, 5);
+
+      await fetch(`https://ntfy.sh/${ntfyTopic}`, {
+        method: "POST",
+        headers: {
+          "Title": "💰 Nueva reserva confirmada",
+          "Priority": "high",
+          "Tags": "white_check_mark,calendar",
+          "Content-Type": "text/plain",
+        },
+        body: `Cliente: ${booking.customer_name}\nFecha: ${fecha}\nHora: ${hora} hs\nCódigo: ${bookingCode}`,
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (err) {
     console.error("Webhook error:", err);
-    return new Response(
-      JSON.stringify({ error: err.message || "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response("Error", { status: 500 });
   }
 });

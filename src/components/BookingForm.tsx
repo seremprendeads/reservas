@@ -105,7 +105,7 @@ export function BookingForm() {
         .update({ preference_id: preference.id })
         .eq('booking_code', bookingCode);
 
-      setPaymentInfo(preference.id, bookingCode);
+      setPaymentInfo(preference.id, bookingCode, settings.price, settings.currency);
       setStep('payment');
     } catch (error) {
       console.error('Error:', error);

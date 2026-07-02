@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CreditCard, AlertCircle, Check, Loader2, Clock, XCircle } from 'lucide-react';
+import { CreditCard, Loader2, Clock, XCircle } from 'lucide-react';
 import { useBooking } from '../contexts/BookingContext';
-import { supabase, Booking } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 declare global {
   interface Window {
@@ -15,6 +15,7 @@ export function Payment() {
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mpLoaded, setMpLoaded] = useState(false);
+  const [paymentStarted, setPaymentStarted] = useState(false);
 
   const checkPaymentStatus = useCallback(async () => {
     if (!bookingData.bookingCode) return;
@@ -49,15 +50,21 @@ export function Payment() {
       return;
     }
 
+    // Evitar cargar el script dos veces
+    if (document.getElementById('mp-sdk')) {
+      initMercadoPago();
+      setMpLoaded(true);
+      setLoading(false);
+      return;
+    }
+
     const script = document.createElement('script');
+    script.id = 'mp-sdk';
     script.src = 'https://sdk.mercadopago.com/js/v2';
     script.onload = () => {
       setMpLoaded(true);
       setLoading(false);
-
-      setTimeout(() => {
-        initMercadoPago();
-      }, 100);
+      initMercadoPago();
     };
     script.onerror = () => {
       setError('Error al cargar Mercado Pago');
@@ -69,12 +76,15 @@ export function Payment() {
 
     return () => {
       clearInterval(checkInterval);
-      document.head.removeChild(script);
     };
   }, []);
 
   const initMercadoPago = async () => {
     try {
+      // Evitar inicializar si el container ya tiene contenido
+      const container = document.getElementById('mercadopago_container');
+      if (container && container.innerHTML.trim() !== '') return;
+
       const publicKey = await getPublicKey();
 
       if (!publicKey) {
@@ -86,7 +96,7 @@ export function Payment() {
         locale: 'es-AR'
       });
 
-      mp.bricks().create('wallet_container', 'mercadopago_container', {
+      mp.bricks().create('wallet', 'mercadopago_container', {
         initialization: {
           preferenceId: bookingData.preferenceId,
           redirectMode: 'blank'
@@ -96,6 +106,7 @@ export function Payment() {
             setLoading(false);
           },
           onSubmit: async () => {
+            setPaymentStarted(true);
             setChecking(true);
           },
           onError: () => {
@@ -121,8 +132,8 @@ export function Payment() {
 
   if (loading) {
     return (
-      <div className="max-w-xl mx-auto text-center py-20">
-        <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mx-auto mb-4" />
+      <div className="max-w-xl py-20 mx-auto text-center">
+        <Loader2 className="w-12 h-12 mx-auto mb-4 text-emerald-600 animate-spin" />
         <p className="text-gray-600">Preparando el pago...</p>
       </div>
     );
@@ -131,16 +142,15 @@ export function Payment() {
   if (error) {
     return (
       <div className="max-w-xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="p-8 text-center bg-white shadow-lg rounded-2xl">
+          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
             <XCircle className="w-8 h-8 text-red-600" />
           </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Error</h2>
-          <p className="text-red-600 mb-6">{error}</p>
+          <h2 className="mb-2 text-xl font-bold text-gray-800">Error</h2>
+          <p className="mb-6 text-red-600">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold
-              hover:bg-emerald-700 transition-colors"
+            className="w-full py-3 font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700"
           >
             Intentar nuevamente
           </button>
@@ -151,19 +161,19 @@ export function Payment() {
 
   return (
     <div className="max-w-xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg p-8">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="p-8 bg-white shadow-lg rounded-2xl">
+        <div className="mb-8 text-center">
+          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100">
             <CreditCard className="w-8 h-8 text-emerald-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Confirmar tu reserva</h2>
+          <h2 className="mb-2 text-2xl font-bold text-gray-800">Confirmar tu reserva</h2>
           <p className="text-gray-600">
             Para confirmar tu turno debes completar el pago
           </p>
         </div>
 
-        <div className="bg-emerald-50 rounded-xl p-4 mb-6">
-          <div className="flex justify-between items-center">
+        <div className="p-4 mb-6 bg-emerald-50 rounded-xl">
+          <div className="flex items-center justify-between">
             <span className="text-gray-700">Fecha:</span>
             <span className="font-medium">
               {bookingData.date?.toLocaleDateString('es-AR', {
@@ -173,20 +183,20 @@ export function Payment() {
               })}
             </span>
           </div>
-          <div className="flex justify-between items-center mt-2">
+          <div className="flex items-center justify-between mt-2">
             <span className="text-gray-700">Hora:</span>
             <span className="font-medium">{bookingData.time} hs</span>
           </div>
-          <div className="flex justify-between items-center mt-2 pt-2 border-t border-emerald-200">
-            <span className="text-gray-700 font-medium">Total:</span>
-            <span className="font-bold text-emerald-600 text-xl">
-              ${bookingData.bookingCode ? '1,000' : '0'} ARS
+          <div className="flex items-center justify-between pt-2 mt-2 border-t border-emerald-200">
+            <span className="font-medium text-gray-700">Total:</span>
+            <span className="text-xl font-bold text-emerald-600">
+              ${bookingData.amount.toLocaleString('es-AR')} {bookingData.currency}
             </span>
           </div>
         </div>
 
         {checking && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 flex items-center gap-3">
+          <div className="flex items-center gap-3 p-4 mb-6 border border-yellow-200 bg-yellow-50 rounded-xl">
             <Loader2 className="w-5 h-5 text-yellow-600 animate-spin" />
             <p className="text-yellow-700">Verificando estado del pago...</p>
           </div>
@@ -194,31 +204,32 @@ export function Payment() {
 
         <div id="mercadopago_container" className="min-h-[100px]">
           {!mpLoaded && (
-            <div className="text-center py-8">
-              <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto mb-2" />
+            <div className="py-8 text-center">
+              <Loader2 className="w-8 h-8 mx-auto mb-2 text-emerald-600 animate-spin" />
               <p className="text-gray-500">Cargando opciones de pago...</p>
             </div>
           )}
         </div>
 
-        <button
-          onClick={checkPaymentStatus}
-          disabled={checking}
-          className="w-full mt-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium
-            hover:bg-gray-200 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
-        >
-          {checking ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Verificando...
-            </>
-          ) : (
-            <>
-              <Clock className="w-4 h-4" />
-              Ya realize el pago
-            </>
-          )}
-        </button>
+        {paymentStarted && (
+          <button
+            onClick={checkPaymentStatus}
+            disabled={checking}
+            className="flex items-center justify-center w-full gap-2 py-3 mt-6 font-medium text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50"
+          >
+            {checking ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Verificando...
+              </>
+            ) : (
+              <>
+                <Clock className="w-4 h-4" />
+                Ya realicé el pago
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

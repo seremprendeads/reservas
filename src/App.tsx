@@ -7,7 +7,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<BookingPage />} />
-        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/seremprende-entendo-administrativo" element={<AdminPage />} />
       </Routes>
     </BrowserRouter>
   );
