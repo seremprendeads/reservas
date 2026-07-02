@@ -23,6 +23,7 @@ import {
   MessageSquare,
   Download,
   FileText,
+  CheckCircle,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings } from '../lib/supabase';
 
@@ -111,6 +112,7 @@ export function AdminPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [deletedBookings, setDeletedBookings] = useState<Booking[]>([]);
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void }>({ open: false, message: '', onConfirm: () => {} });
+  const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('admin_dark') === '1');
 
   useEffect(() => {
@@ -526,6 +528,7 @@ export function AdminPage() {
             onRefresh={loadData}
             adminEmail={adminEmail}
             adminPassword={adminPassword}
+            showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
           />
         )}
 
@@ -536,6 +539,7 @@ export function AdminPage() {
             onRefresh={loadData}
             adminEmail={adminEmail}
             adminPassword={adminPassword}
+            showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
           />
         )}
 
@@ -608,6 +612,26 @@ export function AdminPage() {
         )}
       </div>
 
+      {/* Success Modal */}
+      {successModal.open && createPortal(
+        <div className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+            <div className="flex items-center justify-center w-14 h-14 bg-green-100 rounded-full mx-auto mb-4">
+              <CheckCircle className="w-7 h-7 text-green-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 text-center mb-2">¡Listo!</h3>
+            <p className="text-gray-500 text-center mb-8">{successModal.message}</p>
+            <button
+              onClick={() => setSuccessModal({ open: false, message: '' })}
+              className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* Confirm Modal */}
       {confirmModal.open && createPortal(
         <div className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4">
@@ -641,13 +665,14 @@ export function AdminPage() {
 
 // ─── Availability Manager ─────────────────────────────────────────────────────
 function AvailabilityManager({
-  availability, blockedDates, onRefresh, adminEmail, adminPassword
+  availability, blockedDates, onRefresh, adminEmail, adminPassword, showSuccess
 }: {
   availability: AvailabilitySetting[];
   blockedDates: BlockedDate[];
   onRefresh: () => void;
   adminEmail: string;
   adminPassword: string;
+  showSuccess: (msg: string) => void;
 }) {
   const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   const [editingDay, setEditingDay] = useState<number | null>(null);
@@ -673,6 +698,7 @@ function AvailabilityManager({
       if (error || !data?.success) throw new Error('Error al guardar');
       setEditingDay(null);
       onRefresh();
+      showSuccess('Horario actualizado correctamente');
     } catch {
       alert('Error al guardar');
     }
@@ -688,6 +714,7 @@ function AvailabilityManager({
       setNewBlockedDate('');
       setNewBlockedReason('');
       onRefresh();
+      showSuccess('Fecha bloqueada agregada');
     } catch { alert('Error al agregar fecha'); }
   };
 
@@ -772,12 +799,13 @@ function AvailabilityManager({
 
 // ─── Settings Manager ─────────────────────────────────────────────────────────
 function SettingsManager({
-  settings, onRefresh, adminEmail, adminPassword
+  settings, onRefresh, adminEmail, adminPassword, showSuccess
 }: {
   settings: Settings;
   onRefresh: () => void;
   adminEmail: string;
   adminPassword: string;
+  showSuccess: (msg: string) => void;
 }) {
   const [price, setPrice] = useState(settings.price.toString());
   const [currency, setCurrency] = useState(settings.currency);
@@ -791,7 +819,7 @@ function SettingsManager({
       });
       if (error || !data?.success) throw new Error('Error al guardar');
       onRefresh();
-      alert('Configuracion guardada');
+      showSuccess('Configuración guardada correctamente');
     } catch { alert('Error al guardar'); }
     finally { setSaving(false); }
   };
