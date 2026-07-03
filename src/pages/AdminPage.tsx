@@ -24,10 +24,26 @@ import {
   Download,
   FileText,
   CheckCircle,
+  ClipboardList,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings } from '../lib/supabase';
 
-type View = 'dashboard' | 'bookings' | 'availability' | 'settings' | 'detail' | 'trash' | 'whatsapp' | 'clients';
+type View = 'dashboard' | 'bookings' | 'availability' | 'settings' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface WaitingListItem {
+  id: string;
+  nombre: string;
+  telefono: string;
+  email: string;
+  fecha_deseada: string;
+  horario_deseado: string | null;
+  servicio: string | null;
+  estado: 'pendiente' | 'contactado' | 'convertido' | 'cancelado';
+  notas: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) => void }) {
@@ -111,6 +127,7 @@ export function AdminPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [deletedBookings, setDeletedBookings] = useState<Booking[]>([]);
+  const [waitingList, setWaitingList] = useState<WaitingListItem[]>([]);
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void }>({ open: false, message: '', onConfirm: () => {} });
   const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('admin_dark') === '1');
@@ -141,6 +158,12 @@ export function AdminPage() {
       if (availRes.data) setAvailability(availRes.data);
       if (blockedRes.data) setBlockedDates(blockedRes.data);
       if (settingsRes.data) setSettings(settingsRes.data);
+
+      // Cargar lista de espera
+      const { data: wlData } = await supabase.functions.invoke('admin-get-waiting-list', {
+        body: { email: adminEmail, password: adminPassword },
+      });
+      if (wlData?.success) setWaitingList(wlData.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -298,6 +321,7 @@ export function AdminPage() {
             { id: 'dashboard', label: 'Dashboard', icon: null },
             { id: 'bookings', label: 'Reservas', icon: <Users className="w-5 h-5" /> },
             { id: 'clients', label: 'Clientes', icon: <FileText className="w-5 h-5" /> },
+            { id: 'waiting', label: `Lista de espera${waitingList.filter(w => w.estado === 'pendiente').length > 0 ? ` (${waitingList.filter(w => w.estado === 'pendiente').length})` : ''}`, icon: <ClipboardList className="w-5 h-5" /> },
             { id: 'availability', label: 'Disponibilidad', icon: <Clock className="w-5 h-5" /> },
             { id: 'settings', label: 'Configuracion', icon: <DollarSign className="w-5 h-5" /> },
             { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquare className="w-5 h-5" /> },
@@ -540,6 +564,17 @@ export function AdminPage() {
             adminEmail={adminEmail}
             adminPassword={adminPassword}
             showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
+          />
+        )}
+
+        {/* Waiting List */}
+        {view === 'waiting' && (
+          <WaitingListManager
+            waitingList={waitingList}
+            onRefresh={loadData}
+            adminEmail={adminEmail}
+            adminPassword={adminPassword}
+            darkMode={darkMode}
           />
         )}
 
@@ -1114,6 +1149,151 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ─── WaitingList Manager ──────────────────────────────────────────────────────
+function WaitingListManager({
+  waitingList, onRefresh, adminEmail, adminPassword, darkMode
+}: {
+  waitingList: WaitingListItem[];
+  onRefresh: () => void;
+  adminEmail: string;
+  adminPassword: string;
+  darkMode: boolean;
+}) {
+  const [search, setSearch] = useState('');
+  const [filterEstado, setFilterEstado] = useState('all');
+  const [saving, setSaving] = useState<string | null>(null);
+
+  const updateItem = async (id: string, estado?: string, action?: string) => {
+    setSaving(id);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-update-waiting-list', {
+        body: { email: adminEmail, password: adminPassword, id, estado, action },
+      });
+      if (error || !data?.success) throw new Error('Error');
+      onRefresh();
+    } catch {
+      alert('Error al actualizar');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const estadoColors: Record<string, string> = {
+    pendiente: 'bg-yellow-100 text-yellow-700',
+    contactado: 'bg-blue-100 text-blue-700',
+    convertido: 'bg-green-100 text-green-700',
+    cancelado: 'bg-red-100 text-red-700',
+  };
+
+  const estadoLabel: Record<string, string> = {
+    pendiente: 'Pendiente',
+    contactado: 'Contactado',
+    convertido: 'Convertido',
+    cancelado: 'Cancelado',
+  };
+
+  const filtered = waitingList.filter(w => {
+    const matchesSearch = w.nombre.toLowerCase().includes(search.toLowerCase()) ||
+      w.telefono.includes(search) || w.email.toLowerCase().includes(search.toLowerCase());
+    const matchesEstado = filterEstado === 'all' || w.estado === filterEstado;
+    return matchesSearch && matchesEstado;
+  });
+
+  const formatDate = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('es-AR', {
+    weekday: 'short', day: 'numeric', month: 'short'
+  });
+
+  return (
+    <div className={`rounded-2xl shadow-sm p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Lista de espera</h2>
+          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            {waitingList.filter(w => w.estado === 'pendiente').length} pendientes de {waitingList.length} total
+          </p>
+        </div>
+        <button onClick={onRefresh} className={`p-2 rounded-xl ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}>
+          <RefreshCw className={`w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
+        </button>
+      </div>
+
+      {/* Filtros */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input type="text" placeholder="Buscar por nombre, teléfono o email..." value={search}
+            onChange={e => setSearch(e.target.value)}
+            className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
+        </div>
+        <select value={filterEstado} onChange={e => setFilterEstado(e.target.value)}
+          className={`px-4 py-3 border rounded-xl focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}>
+          <option value="all">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="contactado">Contactado</option>
+          <option value="convertido">Convertido</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+
+      {/* Lista */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-16">
+          <ClipboardList className={`w-16 h-16 mx-auto mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
+          <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>No hay registros en la lista de espera</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map(item => (
+            <div key={item.id} className={`rounded-xl p-4 border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-1 flex-wrap">
+                    <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{item.nombre}</p>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${estadoColors[item.estado]}`}>
+                      {estadoLabel[item.estado]}
+                    </span>
+                  </div>
+                  <div className={`text-sm flex flex-wrap gap-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{item.telefono}</span>
+                    <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{item.email}</span>
+                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{formatDate(item.fecha_deseada)}</span>
+                    {item.horario_deseado && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{item.horario_deseado.slice(0, 5)} hs</span>}
+                    {item.servicio && <span>• {item.servicio}</span>}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {item.estado === 'pendiente' && (
+                    <button onClick={() => updateItem(item.id, 'contactado')} disabled={saving === item.id}
+                      className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm font-medium transition-colors disabled:opacity-50">
+                      Contactar
+                    </button>
+                  )}
+                  {(item.estado === 'pendiente' || item.estado === 'contactado') && (
+                    <button onClick={() => updateItem(item.id, 'convertido')} disabled={saving === item.id}
+                      className="px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm font-medium transition-colors disabled:opacity-50">
+                      Convertido
+                    </button>
+                  )}
+                  {item.estado !== 'cancelado' && item.estado !== 'convertido' && (
+                    <button onClick={() => updateItem(item.id, 'cancelado')} disabled={saving === item.id}
+                      className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium transition-colors disabled:opacity-50">
+                      Cancelar
+                    </button>
+                  )}
+                  <button onClick={() => updateItem(item.id, undefined, 'delete')} disabled={saving === item.id}
+                    className="p-2 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50">
+                    <Trash2 className="w-4 h-4 text-red-600" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
