@@ -181,11 +181,12 @@ export function Calendar() {
       if (bookingsRes.data) {
         const bookingMap = new Map<string, Set<string>>();
         bookingsRes.data.forEach((booking: Pick<Booking, 'booking_date' | 'booking_time'>) => {
-          const date = booking.booking_date;
-          const times = bookingMap.get(date) || new Set();
-          times.add(booking.booking_time);
-          bookingMap.set(date, times);
-        });
+  const date = booking.booking_date;
+  const times = bookingMap.get(date) || new Set();
+  // Normalizar formato HH:MM:SS → HH:MM
+  times.add(booking.booking_time.slice(0, 5));
+  bookingMap.set(date, times);
+});
         setBookedSlots(bookingMap);
       }
     } catch (error) {
