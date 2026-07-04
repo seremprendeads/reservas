@@ -292,7 +292,7 @@ export function AdminPage() {
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className={`text-dm font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Panel de Administracion</h1>
+                <h1 className={`text-dm font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Administracion</h1>
                 <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>CRM de Reservas</p>
               </div>
             </div>
