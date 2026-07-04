@@ -292,7 +292,7 @@ export function AdminPage() {
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className={`text-dm font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Administracion</h1>
+                <h1 className={`text-dm font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Administración</h1>
                 <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>CRM de Reservas</p>
               </div>
             </div>
@@ -318,7 +318,7 @@ export function AdminPage() {
       <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex flex-wrap justify-center gap-2 mb-6 text-center">
           {[
-            { id: 'dashboard', label: 'Dashboard', icon: null },
+            { id: 'dashboard', label: 'Principal', icon: null },
             { id: 'bookings', label: 'Reservas', icon: <Users className="w-5 h-5" /> },
             { id: 'clients', label: 'Clientes', icon: <FileText className="w-5 h-5" /> },
             { id: 'waiting', label: `Lista de espera${waitingList.filter(w => w.estado === 'pendiente').length > 0 ? ` (${waitingList.filter(w => w.estado === 'pendiente').length})` : ''}`, icon: <ClipboardList className="w-5 h-5" /> },
