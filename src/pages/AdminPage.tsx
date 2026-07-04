@@ -325,7 +325,7 @@ export function AdminPage() {
             { id: 'availability', label: 'Disponibilidad', icon: <Clock className="w-5 h-5" /> },
             { id: 'settings', label: 'Configuracion', icon: <DollarSign className="w-5 h-5" /> },
             { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquare className="w-5 h-5" /> },
-            { id: 'trash', label: `Papelera${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
+            { id: 'trash', label: `X${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
           ].map((tab) => (
             <button key={tab.id} onClick={() => setView(tab.id as View)}
              className={`px-4 py-2 rounded-lg text-dm font-medium transition-all flex items-center gap-2 ${view === tab.id ? 'bg-emerald-600 text-white shadow-lg' : darkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
