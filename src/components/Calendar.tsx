@@ -260,7 +260,7 @@ export function Calendar() {
     today.setHours(0, 0, 0, 0);
 
     for (let i = 0; i < startingDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-12" />);
+      days.push(<div key={`empty-${i}`} className="h-9" />);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -270,7 +270,7 @@ export function Calendar() {
 
       days.push(
         <button key={day} onClick={() => handleDateClick(date)} disabled={!available}
-          className={`h-12 w-12 rounded-xl text-lg font-medium transition-all duration-200
+          className={`h-9 w-full rounded-lg text-sm font-medium transition-all duration-200
             ${available
               ? isSelected
                 ? 'bg-emerald-600 text-white shadow-lg scale-105'
@@ -293,21 +293,21 @@ export function Calendar() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Selecciona fecha y hora</h2>
-        <p className="text-gray-600">Elige un día disponible y luego selecciona el horario</p>
+    <div className="max-w-4xl mx-auto px-2 sm:px-0">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Selecciona fecha y hora</h2>
+        <p className="text-gray-600 text-sm sm:text-base">Elige un día disponible y luego selecciona el horario</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
         {/* Calendario */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-3 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
               <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <h3 className="text-xl font-semibold text-gray-800">
+            <h3 className="text-base sm:text-xl font-semibold text-gray-800">
               {MONTHS[currentMonth.getMonth()]} {currentMonth.getFullYear()}
             </h3>
             <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
@@ -316,18 +316,18 @@ export function Calendar() {
             </button>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 mb-2">
+          <div className="grid grid-cols-7 gap-0.5 mb-1">
             {DAYS_SHORT.map((day, i) => (
-              <div key={i} className="text-center text-sm font-medium text-gray-500 py-2">{day}</div>
+              <div key={i} className="text-center text-xs font-medium text-gray-500 py-1">{day}</div>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-1">{renderCalendar()}</div>
+          <div className="grid grid-cols-7 gap-0.5">{renderCalendar()}</div>
 
-          <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
-            <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-emerald-600" /><span>Seleccionado</span></div>
-            <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-gray-100" /><span>Disponible</span></div>
-            <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-gray-200 opacity-50" /><span>No disponible</span></div>
+          <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-gray-500">
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-emerald-600" /><span>Seleccionado</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-gray-100" /><span>Disponible</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-gray-200 opacity-50" /><span>No disponible</span></div>
           </div>
         </div>
 
