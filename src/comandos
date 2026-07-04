@@ -1,0 +1,18 @@
+Sube a Vercel:
+---------------
+
+git add .
+git commit -m "banner plan pro texto mas grande"
+git push
+
+----------------------------------------------
+
+Elimina hoja o carpeta de Vercel: (/carpeta)
+Ejemplo:
+--------
+git rm -r --cached (nombre de hoja o carpeta)
+git add .
+git commit -m "remove (nombre de hoja o carpeta) folder"
+git push
+
+---------------------------------------

@@ -5,3 +5,5 @@ dist
 .DS_Store
 reserva-unica.zip
 .bolt/
+.datos
+.comados
