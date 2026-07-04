@@ -328,7 +328,7 @@ export function AdminPage() {
             { id: 'trash', label: `Papelera${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
           ].map((tab) => (
             <button key={tab.id} onClick={() => setView(tab.id as View)}
-              className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${view === tab.id ? 'bg-emerald-600 text-white shadow-lg' : darkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
+             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${view === tab.id ? 'bg-emerald-600 text-white shadow-lg' : darkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
               {tab.icon}{tab.label}
             </button>
           ))}
