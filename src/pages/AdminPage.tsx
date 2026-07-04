@@ -1122,7 +1122,7 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
           <div className="relative flex items-start gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <span className="px-3 py-1 text-xs font-bold tracking-wide text-yellow-900 uppercase bg-yellow-400 rounded-full">Plan Pro</span>
+                <span className="px-3 py-1 text-sm font-bold tracking-wide text-center text-yellow-900 uppercase bg-yellow-400 rounded-full">Plan Pro</span>
                 <p className="text-base font-bold text-white">Automatizá este mensaje</p>
               </div>
               <p className="text-sm leading-relaxed text-purple-100">
