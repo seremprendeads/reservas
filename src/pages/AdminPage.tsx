@@ -1119,17 +1119,32 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
         <div className="relative p-6 mb-5 overflow-hidden shadow-lg rounded-2xl bg-gradient-to-r from-purple-600 to-violet-600">
           <div className="absolute top-0 right-0 w-32 h-32 translate-x-8 -translate-y-8 bg-white rounded-full opacity-5" />
           <div className="absolute bottom-0 left-0 w-24 h-24 -translate-x-6 translate-y-6 bg-white rounded-full opacity-5" />
-          <div className="relative flex items-start gap-4">
-            <div className="flex-1 text-center">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-3 py-1 text-sm font-bold tracking-wide text-center text-yellow-900 uppercase bg-yellow-400 rounded-full">Plan Pro</span>
-                <p className="text-base font-bold text-white">Automatizá mensajes</p>
-                 </div>
-                  <p className="text-sm leading-relaxed text-purple-100">
-                Con el Plan Pro el cliente recibe la confirmación por WhatsApp <span className="font-semibold text-white"><br></br>AUTOMATICAMENTE AL PAGAR</span><br></br> sin intervención manual, <span className="font-semibold text-white">24 hs, 7 días, feriados incluidos.</span>
-              </p>
-              </div>
-          </div>
+        <div className="relative flex flex-col items-center gap-4 text-center">
+
+  <span className="px-3 py-1 text-sm font-bold tracking-wide text-yellow-900 uppercase bg-yellow-400 rounded-full">
+    Plan Pro
+  </span>
+
+  <div className="flex-1">
+    <p className="mb-2 text-base font-bold text-white">
+      Automatizá mensajes
+    </p>
+
+    <p className="text-sm leading-relaxed text-purple-100">
+      Con el Plan Pro el cliente recibe la confirmación por WhatsApp{" "}
+      <span className="font-semibold text-white">
+        <br />
+        AUTOMÁTICAMENTE AL PAGAR
+      </span>
+      <br />
+      sin intervención manual,{" "}
+      <span className="font-semibold text-white">
+        24 hs, 7 días, feriados incluidos.
+      </span>
+    </p>
+  </div>
+
+</div>
         </div>
         <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Plantilla del mensaje</label>
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3}
