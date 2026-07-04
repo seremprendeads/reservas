@@ -526,6 +526,16 @@ export function AdminPage() {
                   <p className="text-2xl font-bold text-gray-800">${selectedBooking.amount.toLocaleString('es-AR')} ARS</p>
                 </div>
               </div>
+
+              {/* Notas internas del admin */}
+              <hr className="my-6" />
+              <NotasAdmin
+                booking={selectedBooking}
+                adminEmail={adminEmail}
+                adminPassword={adminPassword}
+                onSaved={() => loadData()}
+              />
+
               <div className="flex gap-3 mt-8">
                 {selectedBooking.booking_status === 'pending' && (
                   <button onClick={() => { updateBookingStatus(selectedBooking.id, 'confirmed'); setView('bookings'); }} className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700">Confirmar</button>
@@ -1294,6 +1304,72 @@ function WaitingListManager({
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Notas internas del admin ─────────────────────────────────────────────────
+function NotasAdmin({
+  booking, adminEmail, adminPassword, onSaved
+}: {
+  booking: Booking;
+  adminEmail: string;
+  adminPassword: string;
+  onSaved: () => void;
+}) {
+  const [nota, setNota] = useState((booking as any).notas_admin || '');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const saveNota = async () => {
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-update-booking', {
+        body: {
+          email: adminEmail,
+          password: adminPassword,
+          booking_id: booking.id,
+          notas_admin: nota,
+        },
+      });
+      if (error || !data?.success) throw new Error('Error al guardar');
+      setSaved(true);
+      onSaved();
+      setTimeout(() => setSaved(false), 2000);
+    } catch {
+      alert('Error al guardar la nota');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+          📝 Notas internas
+          <span className="text-xs text-gray-400 font-normal">(solo visible para el admin)</span>
+        </label>
+        {saved && (
+          <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+            <CheckCircle className="w-3 h-3" /> Guardado
+          </span>
+        )}
+      </div>
+      <textarea
+        value={nota}
+        onChange={e => setNota(e.target.value)}
+        rows={3}
+        placeholder="Ej: cliente puntual / siempre llega tarde / requiere preparación especial..."
+        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-colors resize-none text-gray-700 text-sm"
+      />
+      <button
+        onClick={saveNota}
+        disabled={saving}
+        className="mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 disabled:opacity-50 transition-colors"
+      >
+        {saving ? 'Guardando...' : 'Guardar nota'}
+      </button>
     </div>
   );
 }

@@ -13,7 +13,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { email, password, booking_id, booking_status } = await req.json();
+    const { email, password, booking_id, booking_status, notas_admin } = await req.json();
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -43,9 +43,14 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Construir objeto de actualización dinámicamente
+    const updates: any = { updated_at: new Date().toISOString() };
+    if (booking_status !== undefined) updates.booking_status = booking_status;
+    if (notas_admin !== undefined) updates.notas_admin = notas_admin;
+
     const { error } = await supabase
       .from("bookings")
-      .update({ booking_status, updated_at: new Date().toISOString() })
+      .update(updates)
       .eq("id", booking_id);
 
     if (error) throw error;
