@@ -76,34 +76,34 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) =
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
+      <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-2xl">
         <div className="flex items-center justify-center mb-8">
-          <div className="w-14 h-14 bg-emerald-600 rounded-2xl flex items-center justify-center">
+          <div className="flex items-center justify-center w-14 h-14 bg-emerald-600 rounded-2xl">
             <Lock className="w-8 h-8 text-white" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 text-center mb-2">Panel Admin</h1>
-        <p className="text-gray-500 text-center mb-8">Ingresá tus credenciales para continuar</p>
+        <h1 className="mb-2 text-2xl font-bold text-center text-gray-800">Panel Admin</h1>
+        <p className="mb-8 text-center text-gray-500">Ingresá tus credenciales para continuar</p>
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-center gap-3">
-            <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <div className="flex items-center gap-3 p-4 mb-6 border border-red-200 bg-red-50 rounded-xl">
+            <XCircle className="flex-shrink-0 w-5 h-5 text-red-500" />
             <p className="text-red-700">{error}</p>
           </div>
         )}
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">Email</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="admin@email.com"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg" />
+              className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">Contraseña</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg" />
+              className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none" />
           </div>
           <button type="submit" disabled={loading}
-            className="w-full py-4 bg-emerald-600 text-white rounded-xl font-semibold text-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors">
+            className="w-full py-4 text-lg font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
@@ -276,8 +276,8 @@ export function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600" />
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="w-12 h-12 border-b-2 rounded-full animate-spin border-emerald-600" />
       </div>
     );
   }
@@ -285,10 +285,10 @@ export function AdminPage() {
   return (
     <div className={`min-h-screen relative ${darkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} shadow-sm sticky top-0 z-40`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
+              <div className="flex items-center justify-center w-10 h-10 bg-emerald-600 rounded-xl">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -297,7 +297,7 @@ export function AdminPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <a href="/" className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+              <a href="/" className="flex items-center gap-2 px-4 py-2 text-gray-600 transition-colors rounded-lg hover:text-emerald-600 hover:bg-emerald-50">
                 <ArrowLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Pagina de Reservas</span>
               </a>
@@ -315,7 +315,7 @@ export function AdminPage() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex flex-wrap gap-2 mb-6">
           {[
             { id: 'dashboard', label: 'Dashboard', icon: null },
@@ -337,7 +337,7 @@ export function AdminPage() {
         {/* Dashboard */}
         {view === 'dashboard' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { label: 'Reservas hoy', value: todaysBookings.length, color: 'blue', icon: <Calendar className="w-6 h-6 text-blue-600" /> },
                 { label: 'Reservas futuras', value: upcomingBookings.length, color: 'emerald', icon: <Users className="w-6 h-6 text-emerald-600" /> },
@@ -358,8 +358,8 @@ export function AdminPage() {
                   {todaysBookings.map((booking) => (
                     <div key={booking.id} className={`flex items-center justify-between p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl`}>
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                          <span className="text-emerald-600 font-bold">{booking.booking_time.slice(0, 5)}</span>
+                        <div className="flex items-center justify-center w-12 h-12 bg-emerald-100 rounded-xl">
+                          <span className="font-bold text-emerald-600">{booking.booking_time.slice(0, 5)}</span>
                         </div>
                         <div>
                           <p className={`font-medium text-lg ${darkMode ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
@@ -404,9 +404,9 @@ export function AdminPage() {
         {/* Bookings */}
         {view === 'bookings' && (
           <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex flex-col gap-4 mb-6 sm:flex-row">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
                 <input type="text" placeholder="Buscar por nombre, telefono, email o codigo..." value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className={`w-full pl-12 pr-4 py-3 border rounded-xl text-lg focus:border-emerald-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
@@ -441,7 +441,7 @@ export function AdminPage() {
                     <tr key={booking.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
                       <td className={`py-4 px-3 font-mono text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{booking.booking_code}</td>
                       <td className={`py-4 px-3 font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</td>
-                      <td className="py-4 px-3 hidden md:table-cell">
+                      <td className="hidden px-3 py-4 md:table-cell">
                         <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                           <div className="flex items-center gap-1"><Phone className="w-3 h-3" />{booking.customer_phone}</div>
                           <div className="flex items-center gap-1"><Mail className="w-3 h-3" />{booking.customer_email}</div>
@@ -449,30 +449,30 @@ export function AdminPage() {
                       </td>
                       <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')}</td>
                       <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{booking.booking_time}</td>
-                      <td className="py-4 px-3">
+                      <td className="px-3 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.payment_status === 'approved' ? 'bg-green-100 text-green-700' : booking.payment_status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                           {booking.payment_status === 'approved' ? 'Pagado' : booking.payment_status === 'rejected' ? 'Rechazado' : 'Pendiente'}
                         </span>
                       </td>
-                      <td className="py-4 px-3">
+                      <td className="px-3 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.booking_status === 'confirmed' ? 'bg-green-100 text-green-700' : booking.booking_status === 'completed' ? 'bg-blue-100 text-blue-700' : booking.booking_status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                           {booking.booking_status === 'confirmed' ? 'Confirmada' : booking.booking_status === 'completed' ? 'Completada' : booking.booking_status === 'cancelled' ? 'Cancelada' : 'Pendiente'}
                         </span>
                       </td>
-                      <td className="py-4 px-3">
+                      <td className="px-3 py-4">
                         <div className="flex items-center justify-center gap-1">
                           <button onClick={() => { setSelectedBooking(booking); setView('detail'); }} className={`p-2 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded-lg`} title="Ver detalle"><Eye className={`w-4 h-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} /></button>
                           {booking.booking_status === 'pending' && (
-                            <button onClick={() => updateBookingStatus(booking.id, 'confirmed')} className="p-2 hover:bg-green-100 rounded-lg" title="Confirmar"><Calendar className="w-4 h-4 text-green-600" /></button>
+                            <button onClick={() => updateBookingStatus(booking.id, 'confirmed')} className="p-2 rounded-lg hover:bg-green-100" title="Confirmar"><Calendar className="w-4 h-4 text-green-600" /></button>
                           )}
                           {booking.booking_status === 'confirmed' && (
-                            <button onClick={() => updateBookingStatus(booking.id, 'completed')} className="p-2 hover:bg-blue-100 rounded-lg" title="Completar"><Clock className="w-4 h-4 text-blue-600" /></button>
+                            <button onClick={() => updateBookingStatus(booking.id, 'completed')} className="p-2 rounded-lg hover:bg-blue-100" title="Completar"><Clock className="w-4 h-4 text-blue-600" /></button>
                           )}
                           {(booking.booking_status === 'pending' || booking.booking_status === 'confirmed') && (
-                            <button onClick={() => updateBookingStatus(booking.id, 'cancelled')} className="p-2 hover:bg-red-100 rounded-lg" title="Cancelar"><XCircle className="w-4 h-4 text-red-600" /></button>
+                            <button onClick={() => updateBookingStatus(booking.id, 'cancelled')} className="p-2 rounded-lg hover:bg-red-100" title="Cancelar"><XCircle className="w-4 h-4 text-red-600" /></button>
                           )}
                           {(booking.booking_status === 'cancelled' || booking.booking_status === 'completed') && (
-                            <button onClick={() => deleteBooking(booking.id)} className="p-2 hover:bg-red-100 rounded-lg" title="Eliminar"><Trash2 className="w-4 h-4 text-red-600" /></button>
+                            <button onClick={() => deleteBooking(booking.id)} className="p-2 rounded-lg hover:bg-red-100" title="Eliminar"><Trash2 className="w-4 h-4 text-red-600" /></button>
                           )}
                         </div>
                       </td>
@@ -488,41 +488,41 @@ export function AdminPage() {
         {/* Detail */}
         {view === 'detail' && selectedBooking && (
           <div className="max-w-2xl mx-auto">
-            <button onClick={() => setView('bookings')} className="flex items-center gap-2 text-gray-600 hover:text-emerald-600 mb-6">
+            <button onClick={() => setView('bookings')} className="flex items-center gap-2 mb-6 text-gray-600 hover:text-emerald-600">
               <ArrowLeft className="w-5 h-5" /> Volver
             </button>
-            <div className="bg-white rounded-2xl shadow-sm p-8">
+            <div className="p-8 bg-white shadow-sm rounded-2xl">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Detalle de reserva</h2>
                 <span className="font-mono text-gray-500">{selectedBooking.booking_code}</span>
               </div>
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div className="grid gap-6 mb-6 md:grid-cols-2">
                 <div className="space-y-3">
-                  <p className="font-bold text-gray-800 text-lg">{selectedBooking.customer_name}</p>
+                  <p className="text-lg font-bold text-gray-800">{selectedBooking.customer_name}</p>
                   <div className="flex items-center gap-2 text-gray-700"><Phone className="w-5 h-5" />{selectedBooking.customer_phone}</div>
                   <div className="flex items-center gap-2 text-gray-700"><Mail className="w-5 h-5" />{selectedBooking.customer_email}</div>
                 </div>
                 <div className="space-y-3">
-                  <div className="bg-emerald-50 rounded-xl p-4">
+                  <div className="p-4 bg-emerald-50 rounded-xl">
                     <p className="text-sm text-gray-500">Fecha</p>
                     <p className="font-medium text-gray-800">{new Date(selectedBooking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                   </div>
-                  <div className="bg-emerald-50 rounded-xl p-4">
+                  <div className="p-4 bg-emerald-50 rounded-xl">
                     <p className="text-sm text-gray-500">Hora</p>
                     <p className="font-medium text-gray-800">{selectedBooking.booking_time} hs</p>
                   </div>
                 </div>
               </div>
               <hr className="my-6" />
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid gap-6 md:grid-cols-2">
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Estado del pago</p>
+                  <p className="mb-1 text-sm text-gray-500">Estado del pago</p>
                   <span className={`px-3 py-2 rounded-lg font-medium ${selectedBooking.payment_status === 'approved' ? 'bg-green-100 text-green-700' : selectedBooking.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
                     {selectedBooking.payment_status === 'approved' ? 'Pagado' : selectedBooking.payment_status === 'pending' ? 'Pendiente' : 'Rechazado'}
                   </span>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Monto</p>
+                  <p className="mb-1 text-sm text-gray-500">Monto</p>
                   <p className="text-2xl font-bold text-gray-800">${selectedBooking.amount.toLocaleString('es-AR')} ARS</p>
                 </div>
               </div>
@@ -538,16 +538,16 @@ export function AdminPage() {
 
               <div className="flex gap-3 mt-8">
                 {selectedBooking.booking_status === 'pending' && (
-                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'confirmed'); setView('bookings'); }} className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700">Confirmar</button>
+                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'confirmed'); setView('bookings'); }} className="flex-1 py-3 font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700">Confirmar</button>
                 )}
                 {selectedBooking.booking_status === 'confirmed' && (
-                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'completed'); setView('bookings'); }} className="flex-1 py-3 bg-blue-100 text-blue-700 rounded-xl font-semibold hover:bg-blue-200">Completar</button>
+                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'completed'); setView('bookings'); }} className="flex-1 py-3 font-semibold text-blue-700 bg-blue-100 rounded-xl hover:bg-blue-200">Completar</button>
                 )}
                 {(selectedBooking.booking_status === 'pending' || selectedBooking.booking_status === 'confirmed') && (
-                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'cancelled'); setView('bookings'); }} className="flex-1 py-3 bg-red-100 text-red-700 rounded-xl font-semibold hover:bg-red-200">Cancelar</button>
+                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'cancelled'); setView('bookings'); }} className="flex-1 py-3 font-semibold text-red-700 bg-red-100 rounded-xl hover:bg-red-200">Cancelar</button>
                 )}
                 {(selectedBooking.booking_status === 'cancelled' || selectedBooking.booking_status === 'completed') && (
-                  <button onClick={() => { deleteBooking(selectedBooking.id); setView('bookings'); }} className="flex-1 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700">Eliminar</button>
+                  <button onClick={() => { deleteBooking(selectedBooking.id); setView('bookings'); }} className="flex-1 py-3 font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700">Eliminar</button>
                 )}
               </div>
             </div>
@@ -608,7 +608,7 @@ export function AdminPage() {
               </div>
             </div>
             {deletedBookings.length === 0 ? (
-              <div className="text-center py-16">
+              <div className="py-16 text-center">
                 <Trash2 className={`w-16 h-16 mx-auto mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
                 <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>La papelera está vacía</p>
               </div>
@@ -633,7 +633,7 @@ export function AdminPage() {
                       <div className="flex items-center gap-2 ml-4">
                         <button
                           onClick={() => restoreBooking(booking.id)}
-                          className="flex items-center gap-1 px-3 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors text-sm font-medium"
+                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
                           title="Restaurar"
                         >
                           <RotateCcw className="w-4 h-4" />
@@ -641,7 +641,7 @@ export function AdminPage() {
                         </button>
                         <button
                           onClick={() => purgeBooking(booking.id)}
-                          className="flex items-center gap-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200"
                           title="Eliminar definitivamente"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -660,15 +660,15 @@ export function AdminPage() {
       {/* Success Modal */}
       {successModal.open && createPortal(
         <div className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4">
-          <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-            <div className="flex items-center justify-center w-14 h-14 bg-green-100 rounded-full mx-auto mb-4">
-              <CheckCircle className="w-7 h-7 text-green-600" />
+          <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-2xl">
+            <div className="flex items-center justify-center mx-auto mb-4 bg-green-100 rounded-full w-14 h-14">
+              <CheckCircle className="text-green-600 w-7 h-7" />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 text-center mb-2">¡Listo!</h3>
-            <p className="text-gray-500 text-center mb-8">{successModal.message}</p>
+            <h3 className="mb-2 text-xl font-bold text-center text-gray-800">¡Listo!</h3>
+            <p className="mb-8 text-center text-gray-500">{successModal.message}</p>
             <button
               onClick={() => setSuccessModal({ open: false, message: '' })}
-              className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
+              className="w-full py-3 font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700"
             >
               Aceptar
             </button>
@@ -680,22 +680,22 @@ export function AdminPage() {
       {/* Confirm Modal */}
       {confirmModal.open && createPortal(
         <div className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4">
-          <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-            <div className="flex items-center justify-center w-14 h-14 bg-red-100 rounded-full mx-auto mb-4">
-              <Trash2 className="w-7 h-7 text-red-600" />
+          <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-2xl">
+            <div className="flex items-center justify-center mx-auto mb-4 bg-red-100 rounded-full w-14 h-14">
+              <Trash2 className="text-red-600 w-7 h-7" />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Eliminar reserva</h3>
-            <p className="text-gray-500 text-center mb-8">{confirmModal.message}</p>
+            <h3 className="mb-2 text-xl font-bold text-center text-gray-800">Eliminar reserva</h3>
+            <p className="mb-8 text-center text-gray-500">{confirmModal.message}</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))}
-                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                className="flex-1 py-3 font-semibold text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200"
               >
                 Cancelar
               </button>
               <button
                 onClick={confirmModal.onConfirm}
-                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
+                className="flex-1 py-3 font-semibold text-white transition-colors bg-red-600 rounded-xl hover:bg-red-700"
               >
                 Eliminar
               </button>
@@ -774,9 +774,9 @@ function AvailabilityManager({
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-6">Dias laborables</h2>
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="p-6 bg-white shadow-sm rounded-2xl">
+        <h2 className="mb-6 text-xl font-bold text-gray-800">Dias laborables</h2>
         <div className="space-y-3">
           {availability.map((day) => (
             <div key={day.id} className="p-4 bg-gray-50 rounded-xl">
@@ -785,7 +785,7 @@ function AvailabilityManager({
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-800">{DAYS[day.day_of_week]}</span>
                     <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="w-5 h-5 rounded border-gray-300 text-emerald-600" />
+                      <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="w-5 h-5 border-gray-300 rounded text-emerald-600" />
                       <span>Activo</span>
                     </label>
                   </div>
@@ -795,8 +795,8 @@ function AvailabilityManager({
                     <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="px-3 py-2 border rounded-lg" />
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={saveDay} className="flex-1 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">Guardar</button>
-                    <button onClick={() => setEditingDay(null)} className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Cancelar</button>
+                    <button onClick={saveDay} className="flex-1 py-2 text-white rounded-lg bg-emerald-600 hover:bg-emerald-700">Guardar</button>
+                    <button onClick={() => setEditingDay(null)} className="flex-1 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
                   </div>
                 </div>
               ) : (
@@ -806,7 +806,7 @@ function AvailabilityManager({
                     <span className="font-medium text-gray-800">{DAYS[day.day_of_week]}</span>
                     <span className="text-gray-600">{day.start_time.slice(0, 5)} - {day.end_time.slice(0, 5)}</span>
                   </div>
-                  <button onClick={() => startEditing(day)} className="p-2 hover:bg-gray-200 rounded-lg">
+                  <button onClick={() => startEditing(day)} className="p-2 rounded-lg hover:bg-gray-200">
                     <Edit className="w-4 h-4 text-gray-600" />
                   </button>
                 </div>
@@ -816,26 +816,26 @@ function AvailabilityManager({
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-6">Fechas bloqueadas</h2>
-        <div className="space-y-3 mb-6">
+      <div className="p-6 bg-white shadow-sm rounded-2xl">
+        <h2 className="mb-6 text-xl font-bold text-gray-800">Fechas bloqueadas</h2>
+        <div className="mb-6 space-y-3">
           <input type="date" value={newBlockedDate} onChange={(e) => setNewBlockedDate(e.target.value)} min={new Date().toISOString().split('T')[0]} className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
           <input type="text" value={newBlockedReason} onChange={(e) => setNewBlockedReason(e.target.value)} placeholder="Razon (opcional)" className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
-          <button onClick={addBlockedDate} disabled={!newBlockedDate} className="w-full py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 disabled:opacity-50">Agregar fecha bloqueada</button>
+          <button onClick={addBlockedDate} disabled={!newBlockedDate} className="w-full py-3 font-medium text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">Agregar fecha bloqueada</button>
         </div>
         <div className="space-y-2">
           {blockedDates.map((blocked) => (
-            <div key={blocked.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div key={blocked.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
               <div>
                 <p className="font-medium text-gray-800">{new Date(blocked.date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
                 {blocked.reason && <p className="text-sm text-gray-500">{blocked.reason}</p>}
               </div>
-              <button onClick={() => removeBlockedDate(blocked.id)} className="p-2 hover:bg-red-100 rounded-lg">
+              <button onClick={() => removeBlockedDate(blocked.id)} className="p-2 rounded-lg hover:bg-red-100">
                 <Trash2 className="w-4 h-4 text-red-600" />
               </button>
             </div>
           ))}
-          {blockedDates.length === 0 && <p className="text-gray-500 text-center py-4">No hay fechas bloqueadas</p>}
+          {blockedDates.length === 0 && <p className="py-4 text-center text-gray-500">No hay fechas bloqueadas</p>}
         </div>
       </div>
     </div>
@@ -871,25 +871,25 @@ function SettingsManager({
 
   return (
     <div className="max-w-xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-6">Configuracion general</h2>
+      <div className="p-6 bg-white shadow-sm rounded-2xl">
+        <h2 className="mb-6 text-xl font-bold text-gray-800">Configuracion general</h2>
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Precio de la reserva</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">Precio de la reserva</label>
             <div className="flex items-center gap-2">
               <span className="text-xl text-gray-500">$</span>
-              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="flex-1 px-4 py-3 text-xl border border-gray-200 rounded-xl focus:border-emerald-500 outline-none" />
+              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="flex-1 px-4 py-3 text-xl border border-gray-200 outline-none rounded-xl focus:border-emerald-500" />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 outline-none">
+            <label className="block mb-2 text-sm font-medium text-gray-700">Moneda</label>
+            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full px-4 py-3 border border-gray-200 outline-none rounded-xl focus:border-emerald-500">
               <option value="ARS">ARS - Peso Argentino</option>
               <option value="USD">USD - Dolar Americano</option>
               <option value="MXN">MXN - Peso Mexicano</option>
             </select>
           </div>
-          <button onClick={saveSettings} disabled={saving} className="w-full py-4 bg-emerald-600 text-white rounded-xl font-semibold text-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors">
+          <button onClick={saveSettings} disabled={saving} className="w-full py-4 text-lg font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
             {saving ? 'Guardando...' : 'Guardar configuracion'}
           </button>
         </div>
@@ -1016,19 +1016,19 @@ function ClientsManager({ bookings, darkMode }: { bookings: Booking[]; darkMode:
           <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{clients.length} clientes encontrados</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors font-medium text-sm">
+          <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200">
             <Download className="w-4 h-4" /> CSV
           </button>
-          <button onClick={exportPDF} className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-xl hover:bg-red-200 transition-colors font-medium text-sm">
+          <button onClick={exportPDF} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-xl hover:bg-red-200">
             <FileText className="w-4 h-4" /> PDF
           </button>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
           <input type="text" placeholder="Buscar por nombre o teléfono..." value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
@@ -1061,8 +1061,8 @@ function ClientsManager({ bookings, darkMode }: { bookings: Booking[]; darkMode:
                 </td>
                 <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatDate(c.firstBooking)}</td>
                 <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatDate(c.lastBooking)}</td>
-                <td className="py-4 px-3">
-                  <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">{c.totalBookings}</span>
+                <td className="px-3 py-4">
+                  <span className="px-2 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-700">{c.totalBookings}</span>
                 </td>
               </tr>
             ))}
@@ -1116,15 +1116,25 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
         <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Seleccioná una reserva y enviá el mensaje por WhatsApp</p>
       </div>
       <div className="mb-6">
+        <div className="flex items-start gap-3 p-4 mb-5 border border-purple-200 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl">
+          <div className="text-2xl">⚡</div>
+          <div className="flex-1">
+            <p className="mb-1 text-sm font-semibold text-purple-800">Plan Pro — Automatizá este mensaje</p>
+            <p className="text-xs leading-relaxed text-purple-600">
+              Con el Plan Pro, el cliente recibe la confirmación por WhatsApp automáticamente al completar el pago —
+              sin intervención manual, los 7 días de la semana, 24 hs, feriados incluidos.
+            </p>
+          </div>
+        </div>
         <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Plantilla del mensaje</label>
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3}
           className={`w-full px-4 py-3 border rounded-xl text-base resize-none focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-          Variables: <code className="bg-gray-100 px-1 rounded">{'{nombre}'}</code> <code className="bg-gray-100 px-1 rounded">{'{fecha}'}</code> <code className="bg-gray-100 px-1 rounded">{'{hora}'}</code>
+          Variables: <code className="px-1 bg-gray-100 rounded">{'{nombre}'}</code> <code className="px-1 bg-gray-100 rounded">{'{fecha}'}</code> <code className="px-1 bg-gray-100 rounded">{'{hora}'}</code>
         </p>
       </div>
       <div className="relative mb-4">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
         <input type="text" placeholder="Buscar por nombre o teléfono..." value={search} onChange={(e) => setSearch(e.target.value)}
           className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
       </div>
@@ -1146,14 +1156,14 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
                 </div>
               </div>
               <button onClick={() => sendWhatsApp(booking)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors font-medium text-sm ml-4">
+                className="flex items-center gap-2 px-4 py-2 ml-4 text-sm font-medium text-white transition-colors bg-green-500 rounded-xl hover:bg-green-600">
                 <MessageSquare className="w-4 h-4" /> Enviar
               </button>
             </div>
             {selectedBooking?.id === booking.id && (
-              <div className="mt-3 pt-3 border-t border-emerald-200">
-                <p className="text-xs text-emerald-600 font-medium mb-1">Vista previa:</p>
-                <p className="text-sm text-gray-700 bg-white rounded-lg p-3 border border-emerald-200">{buildMessage(booking)}</p>
+              <div className="pt-3 mt-3 border-t border-emerald-200">
+                <p className="mb-1 text-xs font-medium text-emerald-600">Vista previa:</p>
+                <p className="p-3 text-sm text-gray-700 bg-white border rounded-lg border-emerald-200">{buildMessage(booking)}</p>
               </div>
             )}
           </div>
@@ -1232,9 +1242,9 @@ function WaitingListManager({
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
           <input type="text" placeholder="Buscar por nombre, teléfono o email..." value={search}
             onChange={e => setSearch(e.target.value)}
             className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
@@ -1251,7 +1261,7 @@ function WaitingListManager({
 
       {/* Lista */}
       {filtered.length === 0 ? (
-        <div className="text-center py-16">
+        <div className="py-16 text-center">
           <ClipboardList className={`w-16 h-16 mx-auto mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
           <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>No hay registros en la lista de espera</p>
         </div>
@@ -1259,9 +1269,9 @@ function WaitingListManager({
         <div className="space-y-3">
           {filtered.map(item => (
             <div key={item.id} className={`rounded-xl p-4 border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1 flex-wrap">
+                  <div className="flex flex-wrap items-center gap-3 mb-1">
                     <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{item.nombre}</p>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${estadoColors[item.estado]}`}>
                       {estadoLabel[item.estado]}
@@ -1275,27 +1285,27 @@ function WaitingListManager({
                     {item.servicio && <span>• {item.servicio}</span>}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-wrap items-center gap-2">
                   {item.estado === 'pendiente' && (
                     <button onClick={() => updateItem(item.id, 'contactado')} disabled={saving === item.id}
-                      className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm font-medium transition-colors disabled:opacity-50">
+                      className="px-3 py-2 text-sm font-medium text-blue-700 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200 disabled:opacity-50">
                       Contactar
                     </button>
                   )}
                   {(item.estado === 'pendiente' || item.estado === 'contactado') && (
                     <button onClick={() => updateItem(item.id, 'convertido')} disabled={saving === item.id}
-                      className="px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm font-medium transition-colors disabled:opacity-50">
+                      className="px-3 py-2 text-sm font-medium text-green-700 transition-colors bg-green-100 rounded-lg hover:bg-green-200 disabled:opacity-50">
                       Convertido
                     </button>
                   )}
                   {item.estado !== 'cancelado' && item.estado !== 'convertido' && (
                     <button onClick={() => updateItem(item.id, 'cancelado')} disabled={saving === item.id}
-                      className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium transition-colors disabled:opacity-50">
+                      className="px-3 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200 disabled:opacity-50">
                       Cancelar
                     </button>
                   )}
                   <button onClick={() => updateItem(item.id, undefined, 'delete')} disabled={saving === item.id}
-                    className="p-2 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50">
+                    className="p-2 transition-colors rounded-lg hover:bg-red-100 disabled:opacity-50">
                     <Trash2 className="w-4 h-4 text-red-600" />
                   </button>
                 </div>
@@ -1346,12 +1356,12 @@ function NotasAdmin({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
           📝 Notas internas
-          <span className="text-xs text-gray-400 font-normal">(solo visible para el admin)</span>
+          <span className="text-xs font-normal text-gray-400">(solo visible para el admin)</span>
         </label>
         {saved && (
-          <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+          <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
             <CheckCircle className="w-3 h-3" /> Guardado
           </span>
         )}
@@ -1361,12 +1371,12 @@ function NotasAdmin({
         onChange={e => setNota(e.target.value)}
         rows={3}
         placeholder="Ej: cliente puntual / siempre llega tarde / requiere preparación especial..."
-        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-colors resize-none text-gray-700 text-sm"
+        className="w-full px-4 py-3 text-sm text-gray-700 transition-colors border-2 border-gray-200 resize-none rounded-xl focus:outline-none focus:border-emerald-500"
       />
       <button
         onClick={saveNota}
         disabled={saving}
-        className="mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 disabled:opacity-50 transition-colors"
+        className="px-4 py-2 mt-2 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50"
       >
         {saving ? 'Guardando...' : 'Guardar nota'}
       </button>
