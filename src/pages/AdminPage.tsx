@@ -1116,17 +1116,17 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
         <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Seleccioná una reserva y enviá el mensaje por WhatsApp</p>
       </div>
       <div className="mb-6">
-        <div className="relative p-5 mb-5 overflow-hidden shadow-lg rounded-2xl bg-gradient-to-r from-purple-600 to-violet-600">
+        <div className="relative p-6 mb-5 overflow-hidden shadow-lg rounded-2xl bg-gradient-to-r from-purple-600 to-violet-600">
           <div className="absolute top-0 right-0 w-32 h-32 translate-x-8 -translate-y-8 bg-white rounded-full opacity-5" />
           <div className="absolute bottom-0 left-0 w-24 h-24 -translate-x-6 translate-y-6 bg-white rounded-full opacity-5" />
           <div className="relative flex items-start gap-4">
-            <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 text-xl bg-white bg-opacity-20 rounded-xl">⚡</div>
+            <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 text-2xl bg-white bg-opacity-20 rounded-xl">⚡</div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Plan Pro</span>
-                <p className="text-sm font-bold text-white">Automatizá este mensaje</p>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="px-3 py-1 text-xs font-bold tracking-wide text-yellow-900 uppercase bg-yellow-400 rounded-full">Plan Pro</span>
+                <p className="text-base font-bold text-white">Automatizá este mensaje</p>
               </div>
-              <p className="text-xs leading-relaxed text-purple-100">
+              <p className="text-sm leading-relaxed text-purple-100">
                 Con el Plan Pro el cliente recibe la confirmación por WhatsApp <span className="font-semibold text-white">automáticamente al pagar</span> — sin intervención manual, <span className="font-semibold text-white">24 hs, 7 días, feriados incluidos.</span>
               </p>
             </div>
