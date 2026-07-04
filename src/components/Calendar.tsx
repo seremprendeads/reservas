@@ -56,15 +56,15 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
 
   if (success) {
     return (
-      <div className="text-center py-8">
-        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="py-8 text-center">
+        <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100">
           <CheckCircle className="w-8 h-8 text-emerald-600" />
         </div>
-        <h3 className="text-xl font-bold text-gray-800 mb-2">¡Listo!</h3>
-        <p className="text-gray-600 mb-6">
+        <h3 className="mb-2 text-xl font-bold text-gray-800">¡Listo!</h3>
+        <p className="mb-6 text-gray-600">
           Te agregamos a la lista de espera. Te avisaremos si se libera un horario.
         </p>
-        <button onClick={onClose} className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors">
+        <button onClick={onClose} className="px-6 py-3 font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700">
           Volver al calendario
         </button>
       </div>
@@ -74,7 +74,7 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-100">
           <Users className="w-5 h-5 text-amber-600" />
         </div>
         <div>
@@ -86,49 +86,49 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
       </div>
 
       {errors.submit && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-red-700 text-sm">{errors.submit}</div>
+        <div className="p-3 mb-4 text-sm text-red-700 border border-red-200 bg-red-50 rounded-xl">{errors.submit}</div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">Nombre completo *</label>
           <input type="text" value={nombre} onChange={e => setNombre(e.target.value)}
             placeholder="Juan Pérez"
             className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.nombre ? 'border-red-300' : 'border-gray-200 focus:border-emerald-500'}`} />
-          {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
+          {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">Teléfono *</label>
           <input type="tel" value={telefono} onChange={e => setTelefono(e.target.value)}
             placeholder="+54 11 1234-5678"
             className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.telefono ? 'border-red-300' : 'border-gray-200 focus:border-emerald-500'}`} />
-          {errors.telefono && <p className="text-red-500 text-xs mt-1">{errors.telefono}</p>}
+          {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">Email *</label>
           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
             placeholder="juan@email.com"
             className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.email ? 'border-red-300' : 'border-gray-200 focus:border-emerald-500'}`} />
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Horario deseado <span className="text-gray-400">(opcional)</span></label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">Horario deseado <span className="text-gray-400">(opcional)</span></label>
           <input type="time" value={horario} onChange={e => setHorario(e.target.value)}
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-colors" />
+            className="w-full px-4 py-3 transition-colors border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Servicio <span className="text-gray-400">(opcional)</span></label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">Servicio <span className="text-gray-400">(opcional)</span></label>
           <input type="text" value={servicio} onChange={e => setServicio(e.target.value)}
             placeholder="Ej: Consulta, limpieza, etc."
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-colors" />
+            className="w-full px-4 py-3 transition-colors border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500" />
         </div>
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose}
-            className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
+            className="flex-1 py-3 font-semibold text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200">
             Cancelar
           </button>
           <button type="submit" disabled={loading}
-            className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 disabled:opacity-50 transition-colors">
+            className="flex-1 py-3 font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
             {loading ? 'Guardando...' : 'Anotarme'}
           </button>
         </div>
@@ -287,38 +287,38 @@ export function Calendar() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600" />
+        <div className="w-12 h-12 border-b-2 rounded-full animate-spin border-emerald-600" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-2 sm:px-0">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Selecciona fecha y hora</h2>
-        <p className="text-gray-600 text-sm sm:text-base">Elige un día disponible y luego selecciona el horario</p>
+    <div className="max-w-4xl px-2 mx-auto sm:px-0">
+      <div className="mb-6 text-center">
+        <h2 className="mb-2 text-2xl font-bold text-gray-800 sm:text-3xl">Selecciona fecha y hora</h2>
+        <p className="text-sm text-gray-600 sm:text-base">Elige un día disponible y luego selecciona el horario</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
+      <div className="grid gap-4 md:grid-cols-2 sm:gap-8">
         {/* Calendario */}
-        <div className="bg-white rounded-2xl shadow-lg p-3 sm:p-6">
+        <div className="p-3 bg-white shadow-lg rounded-2xl sm:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              className="p-2 transition-colors rounded-lg hover:bg-gray-100">
               <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <h3 className="text-base sm:text-xl font-semibold text-gray-800">
+            <h3 className="text-base font-semibold text-gray-800 sm:text-xl">
               {MONTHS[currentMonth.getMonth()]} {currentMonth.getFullYear()}
             </h3>
             <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              className="p-2 transition-colors rounded-lg hover:bg-gray-100">
               <ChevronRight className="w-5 h-5 text-gray-600" />
             </button>
           </div>
 
           <div className="grid grid-cols-7 gap-0.5 mb-1">
             {DAYS_SHORT.map((day, i) => (
-              <div key={i} className="text-center text-xs font-medium text-gray-500 py-1">{day}</div>
+              <div key={i} className="py-1 text-xs font-medium text-center text-gray-500">{day}</div>
             ))}
           </div>
 
@@ -326,13 +326,13 @@ export function Calendar() {
 
           <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-gray-500">
             <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-emerald-600" /><span>Seleccionado</span></div>
-            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-gray-100" /><span>Disponible</span></div>
-            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-gray-200 opacity-50" /><span>No disponible</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 bg-gray-100 rounded" /><span>Disponible</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 bg-gray-200 rounded opacity-50" /><span>No disponible</span></div>
           </div>
         </div>
 
         {/* Horarios / Lista de espera */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="p-6 bg-white shadow-lg rounded-2xl">
           {showWaitingForm && selectedDate ? (
             <WaitingListForm
               selectedDate={selectedDate}
@@ -361,15 +361,15 @@ export function Calendar() {
                   </div>
                 ) : (
                   // No hay horarios disponibles → mostrar lista de espera
-                  <div className="text-center py-8">
-                    <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="py-8 text-center">
+                    <div className="flex items-center justify-center mx-auto mb-4 rounded-full w-14 h-14 bg-amber-100">
                       <CalendarIcon className="w-7 h-7 text-amber-500" />
                     </div>
-                    <p className="text-gray-700 font-medium mb-2">No hay turnos disponibles para esta fecha</p>
-                    <p className="text-gray-500 text-sm mb-6">Podés anotarte en la lista de espera y te avisamos si se libera un horario.</p>
+                    <p className="mb-2 font-medium text-gray-700">No hay turnos disponibles para esta fecha</p>
+                    <p className="mb-6 text-sm text-gray-500">Podés anotarte en la lista de espera y te avisamos si se libera un horario.</p>
                     <button
                       onClick={() => setShowWaitingForm(true)}
-                      className="flex items-center gap-2 mx-auto px-6 py-3 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 transition-colors"
+                      className="flex items-center gap-2 px-6 py-3 mx-auto font-semibold text-white transition-colors bg-amber-500 rounded-xl hover:bg-amber-600"
                     >
                       <Users className="w-5 h-5" />
                       Unirme a la lista de espera
@@ -377,20 +377,20 @@ export function Calendar() {
                   </div>
                 )
               ) : (
-                <div className="text-center py-10">
-                  <CalendarIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <div className="py-10 text-center">
+                  <CalendarIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                   <p className="text-gray-500">Selecciona una fecha para ver los horarios</p>
                 </div>
               )}
 
               {selectedDate && availableTimeSlots.length > 0 && (
-                <div className="border-t pt-4">
-                  <div className="flex items-center gap-2 text-gray-600 mb-4">
+                <div className="pt-4 border-t">
+                  <div className="flex items-center gap-2 mb-4 text-gray-600">
                     <CalendarIcon className="w-5 h-5" />
                     <span>{selectedDate.toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                   </div>
                   {bookingData.time && (
-                    <div className="flex items-center gap-2 text-gray-600 mb-4">
+                    <div className="flex items-center gap-2 mb-4 text-gray-600">
                       <Clock className="w-5 h-5" />
                       <span>{bookingData.time} hs</span>
                     </div>

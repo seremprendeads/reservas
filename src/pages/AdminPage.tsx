@@ -1162,21 +1162,21 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
         {filtered.length === 0 && <p className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No hay reservas disponibles</p>}
         {filtered.map((booking) => (
           <div key={booking.id} className={`rounded-xl p-4 border ${selectedBooking?.id === booking.id ? 'border-emerald-500 bg-emerald-50' : darkMode ? 'border-gray-700 bg-gray-700' : 'border-gray-200 bg-gray-50'}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex-1 cursor-pointer" onClick={() => setSelectedBooking(booking === selectedBooking ? null : booking)}>
-                <div className="flex items-center gap-3 mb-1">
-                  <p className={`font-medium ${darkMode && selectedBooking?.id !== booking.id ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${booking.booking_status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setSelectedBooking(booking === selectedBooking ? null : booking)}>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <p className={`font-medium truncate ${darkMode && selectedBooking?.id !== booking.id ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${booking.booking_status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                     {booking.booking_status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
                   </span>
                 </div>
-                <div className={`text-sm flex items-center gap-3 ${darkMode && selectedBooking?.id !== booking.id ? 'text-gray-400' : 'text-gray-500'}`}>
-                  <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{booking.customer_phone}</span>
+                <div className={`text-sm flex flex-wrap items-center gap-2 ${darkMode && selectedBooking?.id !== booking.id ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <span className="flex items-center gap-1"><Phone className="flex-shrink-0 w-3 h-3" />{booking.customer_phone}</span>
                   <span>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} — {booking.booking_time.slice(0, 5)} hs</span>
                 </div>
               </div>
               <button onClick={() => sendWhatsApp(booking)}
-                className="flex items-center gap-2 px-4 py-2 ml-4 text-sm font-medium text-white transition-colors bg-green-500 rounded-xl hover:bg-green-600">
+                className="flex items-center justify-center flex-shrink-0 w-full gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-green-500 rounded-xl hover:bg-green-600 sm:w-auto">
                 <MessageSquare className="w-4 h-4" /> Enviar
               </button>
             </div>
