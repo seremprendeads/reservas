@@ -1125,8 +1125,6 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
                 <span className="px-3 py-1 text-sm font-bold tracking-wide text-center text-yellow-900 uppercase bg-yellow-400 rounded-full">Plan Pro</span>
                 <p className="text-base font-bold text-white">Automatizá mensajes</p>
                   <p className="text-sm leading-relaxed text-purple-100">
-              </p>
-              </p>
                 Con el Plan Pro el cliente recibe la confirmación por WhatsApp <span className="font-semibold text-white"><br></br>AUTOMATICAMENTE AL PAGAR</span><br></br> sin intervención manual, <span className="font-semibold text-white">24 hs, 7 días, feriados incluidos.</span>
               </p>
                </div>
