@@ -1133,7 +1133,7 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
     <p className="text-sm leading-relaxed text-purple-100">
       Con el Plan Pro el cliente recibe la confirmación por WhatsApp{" "}
       <span className="font-semibold text-white">   
-        AUTOMÁTICAMENTE AL PAGAR
+        <br><b>AUTOMÁTICAMENTE AL PAGAR</b></br>
       </span>   
       sin intervención manual,{" "}
       <span className="font-semibold text-white">
