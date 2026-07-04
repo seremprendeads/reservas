@@ -1120,7 +1120,6 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
           <div className="absolute top-0 right-0 w-32 h-32 translate-x-8 -translate-y-8 bg-white rounded-full opacity-5" />
           <div className="absolute bottom-0 left-0 w-24 h-24 -translate-x-6 translate-y-6 bg-white rounded-full opacity-5" />
           <div className="relative flex items-start gap-4">
-            <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 text-2xl bg-white bg-opacity-20 rounded-xl">⚡</div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <span className="px-3 py-1 text-xs font-bold tracking-wide text-yellow-900 uppercase bg-yellow-400 rounded-full">Plan Pro</span>
