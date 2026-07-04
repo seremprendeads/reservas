@@ -316,7 +316,7 @@ export function AdminPage() {
       </header>
 
       <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap justify-center gap-2 mb-6 text-center">
           {[
             { id: 'dashboard', label: 'Dashboard', icon: null },
             { id: 'bookings', label: 'Reservas', icon: <Users className="w-5 h-5" /> },
