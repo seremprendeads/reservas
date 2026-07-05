@@ -384,7 +384,7 @@ export function AdminPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <a href="/" className="flex items-center gap-2 px-4 py-2 text-gray-600 transition-colors rounded-lg hover:text-emerald-600 hover:bg-emerald-50">
+              <a href="/" className="flex items-center gap-2 px-4 py-2 text-gray-300 transition-colors rounded-lg hover:text-emerald-600 hover:bg-emerald-50">
                 <ArrowLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Pagina de Reservas</span>
               </a>
@@ -575,7 +575,7 @@ export function AdminPage() {
         {/* Detail */}
         {view === 'detail' && selectedBooking && (
           <div className="max-w-2xl mx-auto">
-            <button onClick={() => setView('bookings')} className="flex items-center gap-2 mb-6 text-gray-600 hover:text-emerald-600">
+            <button onClick={() => setView('bookings')} className="flex items-center gap-2 mb-6 text-gray-300 hover:text-emerald-600">
               <ArrowLeft className="w-5 h-5" /> Volver
             </button>
             <div className="p-8 bg-white shadow-sm rounded-2xl">
