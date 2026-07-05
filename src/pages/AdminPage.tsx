@@ -439,7 +439,7 @@ export function AdminPage() {
               ))}
             </div>
             <div className={`${darkMode ? 'bg-gray-200' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
-              <h2 className={`text-xl font-bold mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-800'}`}>Reservas de hoy</h2>
+              <h2 className={`text-xl font-bold mb-4 ${darkMode ? 'text-gray-800' : 'text-gray-800'}`}>Reservas de hoy</h2>
               {todaysBookings.length > 0 ? (
                 <div className="space-y-3">
                   {todaysBookings.map((booking) => (
