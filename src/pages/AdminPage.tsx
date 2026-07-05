@@ -438,8 +438,8 @@ export function AdminPage() {
                 </div>
               ))}
             </div>
-            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
-              <h2 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Reservas de hoy</h2>
+            <div className={`${darkMode ? 'bg-gray-200' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
+              <h2 className={`text-xl font-bold mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-800'}`}>Reservas de hoy</h2>
               {todaysBookings.length > 0 ? (
                 <div className="space-y-3">
                   {todaysBookings.map((booking) => (
@@ -461,8 +461,8 @@ export function AdminPage() {
                 </div>
               ) : <p className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No hay reservas para hoy</p>}
             </div>
-            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
-              <h2 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Proximas reservas</h2>
+            <div className={`${darkMode ? 'bg-gray-100' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
+              <h2 className={`text-xl font-bold mb-4 ${darkMode ? 'text-gray-800' : 'text-gray-800'}`}>Proximas reservas</h2>
               {upcomingBookings.length > 0 ? (
                 <div className="space-y-3">
                   {upcomingBookings.slice(0, 5).map((booking) => (
