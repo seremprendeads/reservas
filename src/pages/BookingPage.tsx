@@ -17,7 +17,7 @@ function BookingContent() {
             <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
               <Clock className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-300">Reserva tu Turno</span>
+            <span className="text-xl font-bold text-gray-100">Reserva tu Turno</span>
           </div>
         </div>
       </header>
@@ -74,13 +74,13 @@ function BookingContent() {
       {/* Footer */}
       <footer className="bg-gray-800 mt-auto py-8">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-6 text-gray-600">
+          <div className="flex items-center gap-6 text-gray-200">
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               <span>Buenos Aires, Argentina</span>
             </div>
           </div>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-200 text-sm">
             Pagos seguros con Mercado Pago 
 
           </p>
