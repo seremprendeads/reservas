@@ -25,6 +25,8 @@ import {
   FileText,
   CheckCircle,
   ClipboardList,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings } from '../lib/supabase';
 
@@ -47,9 +49,13 @@ interface WaitingListItem {
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) => void }) {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -75,38 +81,119 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) =
     }
   };
 
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    if (!name.trim()) { setError('El nombre es obligatorio'); return; }
+    if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return; }
+    setLoading(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('admin-register', {
+        body: { name: name.trim(), email: email.trim(), password },
+      });
+      if (fnError || !data?.success) {
+        setError(data?.error || 'Error al registrar');
+      } else {
+        setSuccess('Cuenta creada correctamente. Ya podés iniciar sesión.');
+        setMode('login');
+        setName('');
+        setPassword('');
+      }
+    } catch {
+      setError('Error al conectar con el servidor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-2xl">
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center mb-6">
           <div className="flex items-center justify-center w-14 h-14 bg-emerald-600 rounded-2xl">
             <Lock className="w-8 h-8 text-white" />
           </div>
         </div>
-        <h1 className="mb-2 text-2xl font-bold text-center text-gray-800">Panel Admin</h1>
-        <p className="mb-8 text-center text-gray-500">Ingresá tus credenciales para continuar</p>
+        <h1 className="mb-1 text-2xl font-bold text-center text-gray-800">
+          {mode === 'login' ? 'Panel Admin' : 'Crear cuenta'}
+        </h1>
+        <p className="mb-6 text-sm text-center text-gray-500">
+          {mode === 'login' ? 'Ingresá tus credenciales para continuar' : 'Completá los datos para registrarte'}
+        </p>
+
         {error && (
-          <div className="flex items-center gap-3 p-4 mb-6 border border-red-200 bg-red-50 rounded-xl">
+          <div className="flex items-center gap-3 p-4 mb-4 border border-red-200 bg-red-50 rounded-xl">
             <XCircle className="flex-shrink-0 w-5 h-5 text-red-500" />
-            <p className="text-red-700">{error}</p>
+            <p className="text-sm text-red-700">{error}</p>
           </div>
         )}
-        <form onSubmit={handleLogin} className="space-y-5">
+        {success && (
+          <div className="flex items-center gap-3 p-4 mb-4 border border-green-200 bg-green-50 rounded-xl">
+            <CheckCircle className="flex-shrink-0 w-5 h-5 text-green-500" />
+            <p className="text-sm text-green-700">{success}</p>
+          </div>
+        )}
+
+        <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-4">
+          {mode === 'register' && (
+            <div>
+              <label className="block mb-1 text-sm font-medium text-gray-700">Nombre completo</label>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} required
+                placeholder="Tu nombre"
+                className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none" />
+            </div>
+          )}
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Email</label>
+            <label className="block mb-1 text-sm font-medium text-gray-700">Email</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="admin@email.com"
-              className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none" />
+              className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none" />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Contraseña</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••"
-              className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none" />
+            <label className="block mb-1 text-sm font-medium text-gray-700">Contraseña</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="w-full px-4 py-3 pr-12 text-base border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none"
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute text-gray-400 -translate-y-1/2 right-4 top-1/2 hover:text-gray-600 transition-colors">
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+            {mode === 'register' && <p className="mt-1 text-xs text-gray-400">Mínimo 6 caracteres</p>}
           </div>
           <button type="submit" disabled={loading}
-            className="w-full py-4 text-lg font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
-            {loading ? 'Ingresando...' : 'Ingresar'}
+            className="w-full py-4 mt-2 text-lg font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
+            {loading
+              ? (mode === 'login' ? 'Ingresando...' : 'Creando cuenta...')
+              : (mode === 'login' ? 'Ingresar' : 'Crear cuenta')}
           </button>
         </form>
+
+        <div className="mt-5 text-center">
+          {mode === 'login' ? (
+            <p className="text-sm text-gray-500">
+              ¿No tenés cuenta?{' '}
+              <button onClick={() => { setMode('register'); setError(''); setSuccess(''); }}
+                className="font-medium text-emerald-600 hover:underline">
+                Registrate
+              </button>
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500">
+              ¿Ya tenés cuenta?{' '}
+              <button onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
+                className="font-medium text-emerald-600 hover:underline">
+                Iniciá sesión
+              </button>
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
