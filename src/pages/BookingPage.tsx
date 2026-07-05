@@ -9,9 +9,9 @@ function BookingContent() {
   const { step } = useBooking();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
+    <div className="min-h-screen bg-gray-800">
       {/* Header */}
-      <header className="bg-gray-800 shadow-sm">
+      <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
