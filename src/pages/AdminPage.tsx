@@ -862,7 +862,7 @@ function AvailabilityManager({
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="p-6 bg-grey-800 shadow-sm rounded-2xl">
+      <div className="p-6 bg-gray-800 shadow-sm rounded-2xl">
         <h2 className="mb-6 text-xl font-bold text-gray-300">Dias laborables</h2>
         <div className="space-y-3">
           {availability.map((day) => (
@@ -903,7 +903,7 @@ function AvailabilityManager({
         </div>
       </div>
 
-      <div className="p-6 bg-grey-800 shadow-sm rounded-2xl">
+      <div className="p-6 bg-gray-800 shadow-sm rounded-2xl">
         <h2 className="mb-6 text-xl font-bold text-gray-300">Fechas bloqueadas</h2>
         <div className="mb-6 space-y-3">
           <input type="date" value={newBlockedDate} onChange={(e) => setNewBlockedDate(e.target.value)} min={new Date().toISOString().split('T')[0]} className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
@@ -1235,7 +1235,7 @@ function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode
         </div>
         <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Plantilla del mensaje</label>
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3}
-          className={`w-full px-4 py-3 border rounded-xl text-base resize-none focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-300 border-gray-600 text-gray-800 placeholder-gray-400' : 'border-gray-200'}`} />
+          className={`w-full px-4 py-3 border rounded-xl text-base resize-none focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-200 border-gray-600 text-gray-800 placeholder-gray-400' : 'border-gray-200'}`} />
         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
           Variables: <code className="px-1 bg-gray-100 rounded">{'{nombre}'}</code> <code className="px-1 bg-gray-100 rounded">{'{fecha}'}</code> <code className="px-1 bg-gray-100 rounded">{'{hora}'}</code>
         </p>
