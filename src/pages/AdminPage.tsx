@@ -862,8 +862,8 @@ function AvailabilityManager({
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="p-6 bg-white shadow-sm rounded-2xl">
-        <h2 className="mb-6 text-xl font-bold text-gray-800">Dias laborables</h2>
+      <div className="p-6 bg-grey-800 shadow-sm rounded-2xl">
+        <h2 className="mb-6 text-xl font-bold text-gray-300">Dias laborables</h2>
         <div className="space-y-3">
           {availability.map((day) => (
             <div key={day.id} className="p-4 bg-gray-50 rounded-xl">
@@ -903,8 +903,8 @@ function AvailabilityManager({
         </div>
       </div>
 
-      <div className="p-6 bg-white shadow-sm rounded-2xl">
-        <h2 className="mb-6 text-xl font-bold text-gray-800">Fechas bloqueadas</h2>
+      <div className="p-6 bg-grey-800 shadow-sm rounded-2xl">
+        <h2 className="mb-6 text-xl font-bold text-gray-300">Fechas bloqueadas</h2>
         <div className="mb-6 space-y-3">
           <input type="date" value={newBlockedDate} onChange={(e) => setNewBlockedDate(e.target.value)} min={new Date().toISOString().split('T')[0]} className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
           <input type="text" value={newBlockedReason} onChange={(e) => setNewBlockedReason(e.target.value)} placeholder="Razon (opcional)" className="w-full px-4 py-3 border border-gray-200 rounded-xl" />

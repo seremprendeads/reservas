@@ -1,23 +1,33 @@
+# logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# dependencies
 node_modules
+
+# build
 dist
 dist-ssr
+
+# env
+.env
 *.local
 
-.vscode/*
+# IDE
+.vscode/
 !.vscode/extensions.json
 .idea
+
+# OS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.env
+
+# personal
+notas.txt
+comandos.txt
+esquema-proyecto.txt
+.bolt/
+estrutura.txt
