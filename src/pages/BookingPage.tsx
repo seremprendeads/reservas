@@ -11,7 +11,7 @@ function BookingContent() {
   return (
     <div className="min-h-screen bg-gray-800">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-gray-900 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
@@ -47,7 +47,7 @@ function BookingContent() {
           ))}
         </div>
 
-        <div className="flex justify-center gap-4 text-sm text-gray-600 mb-8">
+        <div className="flex justify-center gap-4 text-sm text-gray-300 mb-8">
           <span className={step === 'calendar' ? 'font-semibold text-emerald-600' : ''}>
             Fecha y hora
           </span>
