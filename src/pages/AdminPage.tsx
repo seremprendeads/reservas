@@ -71,6 +71,7 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) =
         sessionStorage.setItem('admin_logged_in', '1');
         sessionStorage.setItem('admin_email', email);
         sessionStorage.setItem('admin_password', password);
+        sessionStorage.setItem('admin_name', data.name || '');
         onLogin(email, password);
       }
     } catch {
@@ -185,6 +186,7 @@ export function AdminPage() {
   const [loggedIn, setLoggedIn] = useState(!!sessionStorage.getItem('admin_logged_in'));
   const [adminEmail, setAdminEmail] = useState(sessionStorage.getItem('admin_email') || '');
   const [adminPassword, setAdminPassword] = useState(sessionStorage.getItem('admin_password') || '');
+  const [adminName, setAdminName] = useState(sessionStorage.getItem('admin_name') || '');
   const [view, setView] = useState<View>('dashboard');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [availability, setAvailability] = useState<AvailabilitySetting[]>([]);
@@ -242,6 +244,7 @@ export function AdminPage() {
   const handleLogin = (email: string, password: string) => {
     setAdminEmail(email);
     setAdminPassword(password);
+    setAdminName(sessionStorage.getItem('admin_name') || '');
     setLoggedIn(true);
   };
 
@@ -392,6 +395,7 @@ export function AdminPage() {
             { id: 'waiting', label: `Lista de espera${waitingList.filter(w => w.estado === 'pendiente').length > 0 ? ` (${waitingList.filter(w => w.estado === 'pendiente').length})` : ''}`, icon: <ClipboardList className="w-5 h-5" /> },
             { id: 'availability', label: 'Disponibilidad', icon: <Clock className="w-5 h-5" /> },
             { id: 'settings', label: 'Configuracion', icon: <DollarSign className="w-5 h-5" /> },
+            { id: 'profile', label: 'Perfil', icon: <UserCircle className="w-5 h-5" /> },
             { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquare className="w-5 h-5" /> },
             { id: 'trash', label: `${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
           ].map((tab) => (
@@ -664,6 +668,23 @@ export function AdminPage() {
         {/* WhatsApp */}
         {view === 'whatsapp' && (
           <WhatsAppManager bookings={bookings} darkMode={darkMode} />
+        )}
+
+        {/* Profile */}
+        {view === 'profile' && (
+          <ProfileManager
+            adminEmail={adminEmail}
+            adminPassword={adminPassword}
+            adminName={adminName}
+            darkMode={darkMode}
+            onRefresh={loadData}
+            showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
+            onProfileUpdated={(name, email, password) => {
+              setAdminName(name);
+              setAdminEmail(email);
+              setAdminPassword(password);
+            }}
+          />
         )}
 
         {/* Trash */}
@@ -1402,6 +1423,132 @@ function WaitingListManager({
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Profile Manager ───────────────────────────────────────────────────────────
+function ProfileManager({
+  adminEmail, adminPassword, adminName, darkMode, onRefresh, showSuccess, onProfileUpdated
+}: {
+  adminEmail: string;
+  adminPassword: string;
+  adminName: string;
+  darkMode: boolean;
+  onRefresh: () => void;
+  showSuccess: (msg: string) => void;
+  onProfileUpdated: (name: string, email: string, password: string) => void;
+}) {
+  const [name, setName] = useState(adminName);
+  const [email, setEmail] = useState(adminEmail);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSave = async () => {
+    setError('');
+
+    if (!name.trim()) {
+      setError('El nombre es obligatorio');
+      return;
+    }
+    if (!email.trim() || !email.includes('@')) {
+      setError('Ingresá un email válido');
+      return;
+    }
+    if (newPassword && newPassword.length < 6) {
+      setError('La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    if (newPassword && newPassword !== confirmPassword) {
+      setError('Las contraseñas nuevas no coinciden');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('admin-update-profile', {
+        body: {
+          email: adminEmail,
+          password: adminPassword,
+          name: name.trim(),
+          newEmail: email.trim() !== adminEmail ? email.trim() : null,
+          newPassword: newPassword || null,
+        },
+      });
+
+      if (fnError || !data?.success) {
+        setError(data?.error || 'Error al guardar el perfil');
+        return;
+      }
+
+      sessionStorage.setItem('admin_email', email.trim());
+      sessionStorage.setItem('admin_name', name.trim());
+      if (newPassword) {
+        sessionStorage.setItem('admin_password', newPassword);
+      }
+
+      onProfileUpdated(name.trim(), email.trim(), newPassword || adminPassword);
+      onRefresh();
+      showSuccess('Perfil actualizado correctamente');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch {
+      setError('Error al conectar con el servidor');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="max-w-xl mx-auto">
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
+        <h2 className={`text-xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Mi Perfil</h2>
+
+        {error && (
+          <div className="flex items-center gap-3 p-4 mb-4 border border-red-200 bg-red-50 rounded-xl">
+            <XCircle className="flex-shrink-0 w-5 h-5 text-red-500" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
+        <div className="space-y-6">
+          <div>
+            <label className={`block mb-2 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nombre</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+              className={`w-full px-4 py-3 text-base border-2 rounded-xl focus:border-emerald-500 focus:outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`} />
+          </div>
+          <div>
+            <label className={`block mb-2 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              className={`w-full px-4 py-3 text-base border-2 rounded-xl focus:border-emerald-500 focus:outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`} />
+          </div>
+
+          <hr className={`${darkMode ? 'border-gray-700' : 'border-gray-200'}`} />
+          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            Dejá los campos en blanco si no querés cambiar la contraseña.
+          </p>
+
+          <div>
+            <label className={`block mb-2 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nueva contraseña</label>
+            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="••••••••"
+              className={`w-full px-4 py-3 text-base border-2 rounded-xl focus:border-emerald-500 focus:outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
+          </div>
+          <div>
+            <label className={`block mb-2 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Confirmar nueva contraseña</label>
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              className={`w-full px-4 py-3 text-base border-2 rounded-xl focus:border-emerald-500 focus:outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
+          </div>
+
+          <button onClick={handleSave} disabled={saving}
+            className="w-full py-4 text-lg font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
+            {saving ? 'Guardando...' : 'Guardar cambios'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
