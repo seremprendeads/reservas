@@ -64,7 +64,6 @@ export default function AdminProfile() {
   return (
     <div class="max-w-4xl mx-auto p-6 md:p-10 bg-white font-sans text-stone-900">
       
-      <!-- Encabezado corporativo -->
       <div class="border-b border-stone-200 pb-5 mb-8">
         <h1 class="text-2xl font-semibold tracking-tight text-stone-900">Mi Perfil</h1>
         <p class="text-sm text-stone-500 mt-1">Gestioná las credenciales de acceso de la plataforma de reservas.</p>
@@ -72,13 +71,11 @@ export default function AdminProfile() {
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         
-        <!-- Columna Datos Fijos -->
         <div class="md:col-span-1">
           <h2 class="text-xs font-semibold tracking-wider uppercase text-stone-400">Datos de la Cuenta</h2>
           <p class="text-xs text-stone-500 mt-1">Identificación del administrador en el sistema.</p>
         </div>
 
-        <!-- Inputs congelados de lectura -->
         <div class="md:col-span-2 bg-stone-50 p-6 rounded border border-stone-100 space-y-4">
           <div>
             <label class="block text-xs font-medium text-stone-600 uppercase tracking-wider mb-1">Rol de Acceso</label>
@@ -90,16 +87,13 @@ export default function AdminProfile() {
           </div>
         </div>
 
-        <!-- Separador sutil -->
         <div class="col-span-1 md:col-span-3 border-t border-stone-200 my-4"></div>
 
-        <!-- Columna Acción Seguridad -->
         <div class="md:col-span-1">
           <h2 class="text-xs font-semibold tracking-wider uppercase text-stone-900">Seguridad</h2>
           <p class="text-xs text-stone-500 mt-1">Colocá la clave temporal que te llegó por email para establecer tu contraseña definitiva.</p>
         </div>
 
-        <!-- Formulario activo de cambio de clave -->
         <div class="md:col-span-2">
           <form onSubmit={handlePasswordChange} class="space-y-4">
             
@@ -141,7 +135,6 @@ export default function AdminProfile() {
               </div>
             </div>
 
-            <!-- Feedback visual de estados -->
             {statusMessage && (
               <div class={`text-xs py-2 px-3 rounded border ${
                 statusMessage.type === 'success' 
@@ -152,7 +145,6 @@ export default function AdminProfile() {
               </div>
             )}
 
-            <!-- Botón de guardado -->
             <div class="flex justify-end pt-2">
               <button 
                 type="submit" 
