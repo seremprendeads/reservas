@@ -1006,8 +1006,8 @@ function SettingsManager({
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">Precio de la reserva</label>
             <div className="flex items-center gap-2">
-              <span className="text-xl text-gray-500">$</span>
-              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="flex-1 px-4 py-3 text-xl border border-gray-200 outline-none rounded-xl focus:border-emerald-500" />
+              <span className="text-lg text-gray-500 sm:text-xl">$</span>
+              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="flex-1 min-w-0 px-4 py-3 text-base border border-gray-200 outline-none rounded-xl focus:border-emerald-500 sm:text-xl" />
             </div>
           </div>
           <div>
