@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Calendar,
   Clock,
@@ -8,6 +9,7 @@ import {
   XCircle,
   AlertCircle,
   RefreshCw,
+  Edit,
   Trash2,
   Eye,
   ArrowLeft,
@@ -17,10 +19,13 @@ import {
   LogOut,
   Sun,
   Moon,
+  RotateCcw,
   MessageSquare,
+  Download,
   FileText,
   CheckCircle,
   ClipboardList,
+  Eye,
   EyeOff,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings } from '../lib/supabase';
@@ -41,14 +46,6 @@ interface WaitingListItem {
   created_at: string;
   updated_at: string;
 }
-
-// Mapas estáticos para clases seguras de Tailwind
-const colorMap: Record<string, { bg: string; text: string }> = {
-  blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
-  emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600' },
-  green: { bg: 'bg-green-100', text: 'text-green-600' },
-  yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600' },
-};
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) => void }) {
@@ -200,6 +197,12 @@ export function AdminPage() {
   const [deletedBookings, setDeletedBookings] = useState<Booking[]>([]);
   const [waitingList, setWaitingList] = useState<WaitingListItem[]>([]);
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void }>({ open: false, message: '', onConfirm: () => {} });
+  const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('admin_dark') === '1');
+
+  useEffect(() => {
+    localStorage.setItem('admin_dark', darkMode ? '1' : '0');
+  }, [darkMode]);
 
   useEffect(() => {
     if (loggedIn) loadData();
@@ -224,6 +227,7 @@ export function AdminPage() {
       if (blockedRes.data) setBlockedDates(blockedRes.data);
       if (settingsRes.data) setSettings(settingsRes.data);
 
+      // Cargar lista de espera
       const { data: wlData } = await supabase.functions.invoke('admin-get-waiting-list', {
         body: { email: adminEmail, password: adminPassword },
       });
@@ -328,9 +332,6 @@ export function AdminPage() {
     return matchesSearch && matchesStatus;
   });
 
-  // Clientes únicos basados en email/teléfono
-  const uniqueClients = Array.from(new Map(bookings.map(b => [b.customer_email, b])).values());
-
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayStr = today.toISOString().split('T')[0];
@@ -338,12 +339,6 @@ export function AdminPage() {
   const upcomingBookings = bookings.filter((b) => b.booking_date > todayStr);
   const paidBookings = bookings.filter((b) => b.payment_status === 'approved');
   const pendingPayments = bookings.filter((b) => b.payment_status === 'pending');
-
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('admin_dark') === '1');
-
-  useEffect(() => {
-    localStorage.setItem('admin_dark', darkMode ? '1' : '0');
-  }, [darkMode]);
 
   if (!loggedIn) return <LoginScreen onLogin={handleLogin} />;
 
@@ -356,8 +351,8 @@ export function AdminPage() {
   }
 
   return (
-    <div className={`min-h-screen relative ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
-      <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-sm sticky top-0 z-40 border-b`}>
+    <div className={`min-h-screen relative ${darkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+      <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} shadow-sm sticky top-0 z-40`}>
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
@@ -365,14 +360,14 @@ export function AdminPage() {
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className={`text-base font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Administración</h1>
+                <h1 className={`text-dm font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Administración</h1>
                 <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>CRM de Reservas</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <a href="/" className={`flex items-center gap-2 px-4 py-2 transition-colors rounded-lg ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}>
+              <a href="/" className="flex items-center gap-2 px-4 py-2 text-gray-300 transition-colors rounded-lg hover:text-emerald-600 hover:bg-emerald-50">
                 <ArrowLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Página de Reservas</span>
+                <span className="hidden sm:inline">Pagina de Reservas</span>
               </a>
               <button onClick={() => setDarkMode(!darkMode)}
                 className={`p-2 rounded-lg transition-colors ${darkMode ? 'text-yellow-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}
@@ -394,14 +389,14 @@ export function AdminPage() {
             { id: 'dashboard', label: 'Principal', icon: null },
             { id: 'bookings', label: 'Reservas', icon: <Users className="w-5 h-5" /> },
             { id: 'clients', label: 'Clientes', icon: <FileText className="w-5 h-5" /> },
-            { id: 'waiting', label: `Lista de espera ${waitingList.filter(w => w.estado === 'pendiente').length > 0 ? `(${waitingList.filter(w => w.estado === 'pendiente').length})` : ''}`, icon: <ClipboardList className="w-5 h-5" /> },
+            { id: 'waiting', label: `Lista de espera${waitingList.filter(w => w.estado === 'pendiente').length > 0 ? ` (${waitingList.filter(w => w.estado === 'pendiente').length})` : ''}`, icon: <ClipboardList className="w-5 h-5" /> },
             { id: 'availability', label: 'Disponibilidad', icon: <Clock className="w-5 h-5" /> },
-            { id: 'settings', label: 'Configuración', icon: <DollarSign className="w-5 h-5" /> },
+            { id: 'settings', label: 'Configuracion', icon: <DollarSign className="w-5 h-5" /> },
             { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquare className="w-5 h-5" /> },
-            { id: 'trash', label: `Papelera ${deletedBookings.length > 0 ? `(${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
+            { id: 'trash', label: `${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
           ].map((tab) => (
             <button key={tab.id} onClick={() => setView(tab.id as View)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${view === tab.id ? 'bg-emerald-600 text-white shadow-lg' : darkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
+             className={`px-4 py-2 rounded-lg text-dm font-medium transition-all flex items-center gap-2 ${view === tab.id ? 'bg-emerald-600 text-white shadow-lg' : darkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
               {tab.icon}{tab.label}
             </button>
           ))}
@@ -416,20 +411,16 @@ export function AdminPage() {
                 { label: 'Reservas futuras', value: upcomingBookings.length, color: 'emerald', icon: <Users className="w-6 h-6 text-emerald-600" /> },
                 { label: 'Reservas pagadas', value: paidBookings.length, color: 'green', icon: <DollarSign className="w-6 h-6 text-green-600" /> },
                 { label: 'Pagos pendientes', value: pendingPayments.length, color: 'yellow', icon: <AlertCircle className="w-6 h-6 text-yellow-600" /> },
-              ].map((stat) => {
-                const colors = colorMap[stat.color] || { bg: 'bg-gray-100', text: 'text-gray-600' };
-                return (
-                  <div key={stat.label} className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6`}>
-                    <div className={`w-12 h-12 ${colors.bg} rounded-xl flex items-center justify-center mb-4`}>{stat.icon}</div>
-                    <p className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{stat.value}</p>
-                    <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>{stat.label}</p>
-                  </div>
-                );
-              })}
+              ].map((stat) => (
+                <div key={stat.label} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
+                  <div className={`w-12 h-12 bg-${stat.color}-100 rounded-xl flex items-center justify-center mb-4`}>{stat.icon}</div>
+                  <p className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{stat.value}</p>
+                  <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>{stat.label}</p>
+                </div>
+              ))}
             </div>
-
-            <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6`}>
-              <h2 className="text-xl font-bold mb-4">Reservas de hoy</h2>
+            <div className={`${darkMode ? 'bg-gray-200' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
+              <h2 className={`text-xl font-bold mb-4 ${darkMode ? 'text-gray-800' : 'text-gray-800'}`}>Reservas de hoy</h2>
               {todaysBookings.length > 0 ? (
                 <div className="space-y-3">
                   {todaysBookings.map((booking) => (
@@ -439,21 +430,20 @@ export function AdminPage() {
                           <span className="font-bold text-emerald-600">{booking.booking_time.slice(0, 5)}</span>
                         </div>
                         <div>
-                          <p className="font-medium text-lg">{booking.customer_name}</p>
+                          <p className={`font-medium text-lg ${darkMode ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
                           <p className={`flex items-center gap-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}><Phone className="w-4 h-4" />{booking.customer_phone}</p>
                         </div>
                       </div>
                       <button onClick={() => { setSelectedBooking(booking); setView('detail'); }} className={`p-2 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded-lg`}>
-                        <Eye className="w-5 h-5" />
+                        <Eye className={`w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
                       </button>
                     </div>
                   ))}
                 </div>
-              ) : <p className="text-center py-8 text-gray-500">No hay reservas para hoy</p>}
+              ) : <p className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No hay reservas para hoy</p>}
             </div>
-
-            <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6`}>
-              <h2 className="text-xl font-bold mb-4">Próximas reservas</h2>
+            <div className={`${darkMode ? 'bg-gray-100' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
+              <h2 className={`text-xl font-bold mb-4 ${darkMode ? 'text-gray-800' : 'text-gray-800'}`}>Proximas reservas</h2>
               {upcomingBookings.length > 0 ? (
                 <div className="space-y-3">
                   {upcomingBookings.slice(0, 5).map((booking) => (
@@ -461,35 +451,35 @@ export function AdminPage() {
                       <div className="flex items-center gap-4">
                         <div className="text-center">
                           <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { month: 'short' })}</p>
-                          <p className="text-xl font-bold">{new Date(booking.booking_date + 'T12:00:00').getDate()}</p>
+                          <p className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{new Date(booking.booking_date + 'T12:00:00').getDate()}</p>
                         </div>
                         <div>
-                          <p className="font-medium">{booking.customer_name}</p>
+                          <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
                           <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{booking.booking_time} hs</p>
                         </div>
                       </div>
                       <button onClick={() => { setSelectedBooking(booking); setView('detail'); }} className={`p-2 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded-lg`}>
-                        <Eye className="w-5 h-5" />
+                        <Eye className={`w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
                       </button>
                     </div>
                   ))}
                 </div>
-              ) : <p className="text-center py-8 text-gray-500">No hay reservas futuras</p>}
+              ) : <p className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No hay reservas futuras</p>}
             </div>
           </div>
         )}
 
         {/* Bookings */}
         {view === 'bookings' && (
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6`}>
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
             <div className="flex flex-col gap-4 mb-6 sm:flex-row">
               <div className="relative flex-1">
                 <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
-                <input type="text" placeholder="Buscar por nombre, teléfono, email o código..." value={searchTerm}
+                <input type="text" placeholder="Buscar por nombre, telefono, email o codigo..." value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:border-emerald-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
+                  className={`w-full pl-12 pr-4 py-3 border rounded-xl text-lg focus:border-emerald-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
               </div>
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={`px-4 py-3 border rounded-xl text-base focus:border-emerald-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}>
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={`px-4 py-3 border rounded-xl text-lg focus:border-emerald-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}>
                 <option value="all">Todos los estados</option>
                 <option value="confirmed">Confirmadas</option>
                 <option value="pending">Pendientes</option>
@@ -500,34 +490,33 @@ export function AdminPage() {
                 <RefreshCw className="w-5 h-5" />
               </button>
             </div>
-
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Código</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Cliente</th>
-                    <th className="text-left py-4 px-3 font-medium hidden md:table-cell text-gray-500">Contacto</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Fecha</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Hora</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Pago</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Estado</th>
-                    <th className="text-center py-4 px-3 font-medium text-gray-500">Acciones</th>
+                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Codigo</th>
+                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Cliente</th>
+                    <th className={`text-left py-4 px-3 font-medium hidden md:table-cell ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Contacto</th>
+                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Fecha</th>
+                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Hora</th>
+                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Pago</th>
+                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Estado</th>
+                    <th className={`text-center py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Acciones</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
                   {filteredBookings.map((booking) => (
                     <tr key={booking.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
-                      <td className="py-4 px-3 font-mono text-sm">{booking.booking_code}</td>
-                      <td className="py-4 px-3 font-medium">{booking.customer_name}</td>
+                      <td className={`py-4 px-3 font-mono text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{booking.booking_code}</td>
+                      <td className={`py-4 px-3 font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</td>
                       <td className="hidden px-3 py-4 md:table-cell">
-                        <div className="text-sm text-gray-500">
+                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                           <div className="flex items-center gap-1"><Phone className="w-3 h-3" />{booking.customer_phone}</div>
                           <div className="flex items-center gap-1"><Mail className="w-3 h-3" />{booking.customer_email}</div>
                         </div>
                       </td>
-                      <td className="py-4 px-3">{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')}</td>
-                      <td className="py-4 px-3">{booking.booking_time}</td>
+                      <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')}</td>
+                      <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{booking.booking_time}</td>
                       <td className="px-3 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.payment_status === 'approved' ? 'bg-green-100 text-green-700' : booking.payment_status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                           {booking.payment_status === 'approved' ? 'Pagado' : booking.payment_status === 'rejected' ? 'Rechazado' : 'Pendiente'}
@@ -540,7 +529,7 @@ export function AdminPage() {
                       </td>
                       <td className="px-3 py-4">
                         <div className="flex items-center justify-center gap-1">
-                          <button onClick={() => { setSelectedBooking(booking); setView('detail'); }} className={`p-2 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded-lg`} title="Ver detalle"><Eye className="w-4 h-4" /></button>
+                          <button onClick={() => { setSelectedBooking(booking); setView('detail'); }} className={`p-2 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded-lg`} title="Ver detalle"><Eye className={`w-4 h-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} /></button>
                           {booking.booking_status === 'pending' && (
                             <button onClick={() => updateBookingStatus(booking.id, 'confirmed')} className="p-2 rounded-lg hover:bg-green-100" title="Confirmar"><Calendar className="w-4 h-4 text-green-600" /></button>
                           )}
@@ -559,244 +548,926 @@ export function AdminPage() {
                   ))}
                 </tbody>
               </table>
-              {filteredBookings.length === 0 && <p className="text-center py-12 text-gray-500">No se encontraron reservas</p>}
+              {filteredBookings.length === 0 && <p className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No se encontraron reservas</p>}
             </div>
           </div>
         )}
 
-        {/* Detail View */}
+        {/* Detail */}
         {view === 'detail' && selectedBooking && (
           <div className="max-w-2xl mx-auto">
-            <button onClick={() => setView('bookings')} className={`flex items-center gap-2 mb-6 transition-colors ${darkMode ? 'text-gray-300 hover:text-emerald-500' : 'text-gray-600 hover:text-emerald-600'}`}>
-              <ArrowLeft className="w-5 h-5" /> Volver a reservas
+            <button onClick={() => setView('bookings')} className="flex items-center gap-2 mb-6 text-gray-300 hover:text-emerald-600">
+              <ArrowLeft className="w-5 h-5" /> Volver
             </button>
-            <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-8 border shadow-sm rounded-2xl`}>
+            <div className="p-8 bg-white shadow-sm rounded-2xl">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Detalle de reserva</h2>
-                <span className="font-mono text-gray-500 text-sm bg-gray-100 px-3 py-1 rounded-lg">{selectedBooking.booking_code}</span>
+                <h2 className="text-2xl font-bold text-gray-800">Detalle de reserva</h2>
+                <span className="font-mono text-gray-500">{selectedBooking.booking_code}</span>
               </div>
               <div className="grid gap-6 mb-6 md:grid-cols-2">
                 <div className="space-y-3">
-                  <p className="text-lg font-bold">{selectedBooking.customer_name}</p>
-                  <div className="flex items-center gap-2 text-gray-500"><Phone className="w-5 h-5" />{selectedBooking.customer_phone}</div>
-                  <div className="flex items-center gap-2 text-gray-500"><Mail className="w-5 h-5" />{selectedBooking.customer_email}</div>
+                  <p className="text-lg font-bold text-gray-800">{selectedBooking.customer_name}</p>
+                  <div className="flex items-center gap-2 text-gray-700"><Phone className="w-5 h-5" />{selectedBooking.customer_phone}</div>
+                  <div className="flex items-center gap-2 text-gray-700"><Mail className="w-5 h-5" />{selectedBooking.customer_email}</div>
                 </div>
                 <div className="space-y-3">
-                  <div className={`p-4 ${darkMode ? 'bg-gray-700' : 'bg-emerald-50'} rounded-xl`}>
-                    <p className="text-xs text-gray-400 uppercase font-semibold">Fecha</p>
-                    <p className="font-medium">{new Date(selectedBooking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  <div className="p-4 bg-emerald-50 rounded-xl">
+                    <p className="text-sm text-gray-500">Fecha</p>
+                    <p className="font-medium text-gray-800">{new Date(selectedBooking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                   </div>
-                  <div className={`p-4 ${darkMode ? 'bg-gray-700' : 'bg-emerald-50'} rounded-xl`}>
-                    <p className="text-xs text-gray-400 uppercase font-semibold">Hora de atención</p>
-                    <p className="font-medium">{selectedBooking.booking_time} hs</p>
+                  <div className="p-4 bg-emerald-50 rounded-xl">
+                    <p className="text-sm text-gray-500">Hora</p>
+                    <p className="font-medium text-gray-800">{selectedBooking.booking_time} hs</p>
                   </div>
                 </div>
               </div>
-              <hr className={`my-6 ${darkMode ? 'border-gray-700' : 'border-gray-200'}`} />
-              <div className="flex flex-wrap gap-2">
+              <hr className="my-6" />
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <p className="mb-1 text-sm text-gray-500">Estado del pago</p>
+                  <span className={`px-3 py-2 rounded-lg font-medium ${selectedBooking.payment_status === 'approved' ? 'bg-green-100 text-green-700' : selectedBooking.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+                    {selectedBooking.payment_status === 'approved' ? 'Pagado' : selectedBooking.payment_status === 'pending' ? 'Pendiente' : 'Rechazado'}
+                  </span>
+                </div>
+                <div>
+                  <p className="mb-1 text-sm text-gray-500">Monto</p>
+                  <p className="text-2xl font-bold text-gray-800">${selectedBooking.amount.toLocaleString('es-AR')} ARS</p>
+                </div>
+              </div>
+
+              {/* Notas internas del admin */}
+              <hr className="my-6" />
+              <NotasAdmin
+                booking={selectedBooking}
+                adminEmail={adminEmail}
+                adminPassword={adminPassword}
+                onSaved={() => loadData()}
+              />
+
+              <div className="flex gap-3 mt-8">
                 {selectedBooking.booking_status === 'pending' && (
-                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'confirmed'); setView('bookings'); }} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-semibold transition-colors">Confirmar Turno</button>
+                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'confirmed'); setView('bookings'); }} className="flex-1 py-3 font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700">Confirmar</button>
                 )}
                 {selectedBooking.booking_status === 'confirmed' && (
-                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'completed'); setView('bookings'); }} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-colors">Marcar como Completado</button>
+                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'completed'); setView('bookings'); }} className="flex-1 py-3 font-semibold text-blue-700 bg-blue-100 rounded-xl hover:bg-blue-200">Completar</button>
                 )}
-                {selectedBooking.booking_status !== 'cancelled' && selectedBooking.booking_status !== 'completed' && (
-                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'cancelled'); setView('bookings'); }} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-colors">Cancelar Reserva</button>
+                {(selectedBooking.booking_status === 'pending' || selectedBooking.booking_status === 'confirmed') && (
+                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'cancelled'); setView('bookings'); }} className="flex-1 py-3 font-semibold text-red-700 bg-red-100 rounded-xl hover:bg-red-200">Cancelar</button>
+                )}
+                {(selectedBooking.booking_status === 'cancelled' || selectedBooking.booking_status === 'completed') && (
+                  <button onClick={() => { deleteBooking(selectedBooking.id); setView('bookings'); }} className="flex-1 py-3 font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700">Eliminar</button>
                 )}
               </div>
             </div>
           </div>
         )}
 
-        {/* Clients View */}
-        {view === 'clients' && (
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6`}>
-            <h2 className="text-xl font-bold mb-4">Directorio de Clientes</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Nombre Completo</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Teléfono</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Email</th>
-                    <th className="text-center py-4 px-3 font-medium text-gray-500">Historial</th>
-                  </tr>
-                </thead>
-                <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
-                  {uniqueClients.map((client) => (
-                    <tr key={client.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
-                      <td className="py-4 px-3 font-medium">{client.customer_name}</td>
-                      <td className="py-4 px-3">{client.customer_phone}</td>
-                      <td className="py-4 px-3">{client.customer_email}</td>
-                      <td className="py-4 px-3 text-center">
-                        <button onClick={() => { setSearchTerm(client.customer_name); setView('bookings'); }} className="text-xs bg-emerald-50 text-emerald-700 font-semibold px-3 py-1 rounded-lg hover:bg-emerald-100 transition-colors">Ver reservas</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {uniqueClients.length === 0 && <p className="text-center py-12 text-gray-500">No hay clientes registrados</p>}
-            </div>
-          </div>
-        )}
-
-        {/* Waiting List View */}
-        {view === 'waiting' && (
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6`}>
-            <h2 className="text-xl font-bold mb-4">Lista de Espera Automatizada</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Cliente</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Fecha Deseada</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Horario / Servicio</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Estado</th>
-                  </tr>
-                </thead>
-                <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
-                  {waitingList.map((item) => (
-                    <tr key={item.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
-                      <td className="py-4 px-3">
-                        <p className="font-medium">{item.nombre}</p>
-                        <p className="text-xs text-gray-400">{item.telefono}</p>
-                      </td>
-                      <td className="py-4 px-3">{new Date(item.fecha_deseada + 'T12:00:00').toLocaleDateString('es-AR')}</td>
-                      <td className="py-4 px-3">
-                        <p className="text-sm">{item.horario_deseado || 'Cualquier horario'}</p>
-                        <p className="text-xs text-gray-400">{item.servicio || 'General'}</p>
-                      </td>
-                      <td className="py-4 px-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-700' : item.estado === 'contactado' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                          {item.estado.toUpperCase()}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {waitingList.length === 0 && <p className="text-center py-12 text-gray-500">La lista de espera está vacía</p>}
-            </div>
-          </div>
-        )}
-
-        {/* Availability Settings View */}
+        {/* Availability */}
         {view === 'availability' && (
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6`}>
-              <h2 className="text-xl font-bold mb-4">Horarios de Atención Semanal</h2>
-              <div className="space-y-4">
-                {availability.map((setting) => (
-                  <div key={setting.id} className={`flex items-center justify-between p-3 border rounded-xl ${darkMode ? 'border-gray-700 bg-gray-700' : 'border-gray-100 bg-gray-50'}`}>
-                    <span className="font-medium uppercase text-sm w-24">Día {setting.day_of_week}</span>
-                    <div className="text-sm">
-                      {setting.is_available ? `${setting.start_time.slice(0, 5)} - ${setting.end_time.slice(0, 5)} hs` : <span className="text-red-500 font-semibold">Cerrado</span>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6`}>
-              <h2 className="text-xl font-bold mb-4">Fechas y Días Bloqueados</h2>
-              <div className="space-y-2">
-                {blockedDates.map((block) => (
-                  <div key={block.id} className="flex justify-between items-center text-sm p-2 border-b border-gray-700">
-                    <span>{new Date(block.date + 'T12:00:00').toLocaleDateString('es-AR')}</span>
-                    <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">Bloqueado ({block.reason || 'Sin motivo'})</span>
-                  </div>
-                ))}
-                {blockedDates.length === 0 && <p className="text-sm text-gray-500">No hay bloqueos específicos configurados</p>}
-              </div>
-            </div>
-          </div>
+          <AvailabilityManager
+            availability={availability}
+            blockedDates={blockedDates}
+            onRefresh={loadData}
+            adminEmail={adminEmail}
+            adminPassword={adminPassword}
+            showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
+          />
         )}
 
-        {/* Settings View */}
-        {view === 'settings' && (
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6 max-w-xl mx-auto`}>
-            <h2 className="text-xl font-bold mb-4">Configuración Comercial y Pasarela</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Nombre Comercial</label>
-                <input type="text" disabled value={settings?.business_name || 'Cargando...'} className="w-full px-4 py-2 rounded-xl border border-gray-700 bg-transparent outline-none opacity-60" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Monto de Seña ($)</label>
-                <input type="text" disabled value={`$${settings?.deposit_amount || '0.00'}`} className="w-full px-4 py-2 rounded-xl border border-gray-700 bg-transparent outline-none opacity-60 font-mono" />
-              </div>
-              <p className="text-xs text-gray-400 italic">Los cambios globales de configuración de la pasarela se realizan mediante variables de entorno protegidas o flujos globales de base de datos.</p>
-            </div>
-          </div>
+        {/* Settings */}
+        {view === 'settings' && settings && (
+          <SettingsManager
+            settings={settings}
+            onRefresh={loadData}
+            adminEmail={adminEmail}
+            adminPassword={adminPassword}
+            showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
+          />
         )}
 
-        {/* WhatsApp Integration Panel */}
+        {/* Waiting List */}
+        {view === 'waiting' && (
+          <WaitingListManager
+            waitingList={waitingList}
+            onRefresh={loadData}
+            adminEmail={adminEmail}
+            adminPassword={adminPassword}
+            darkMode={darkMode}
+          />
+        )}
+
+        {/* Clients */}
+        {view === 'clients' && (
+          <ClientsManager bookings={bookings} darkMode={darkMode} />
+        )}
+
+        {/* WhatsApp */}
         {view === 'whatsapp' && (
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6 max-w-xl mx-auto text-center`}>
-            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MessageSquare className="w-8 h-8" />
-            </div>
-            <h2 className="text-xl font-bold mb-2">Automatización de Notificaciones por WhatsApp</h2>
-            <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>El sistema despacha alertas instantáneas y recordatorios automáticos 24 horas antes de cada cita confirmada.</p>
-            <div className="p-4 bg-green-50 text-green-800 rounded-xl text-xs font-mono text-left">
-              API Status: ONLINE <br />
-              Webhooks conectados: Confirmaciones, Cancelaciones y Lista de Espera.
-            </div>
-          </div>
+          <WhatsAppManager bookings={bookings} darkMode={darkMode} />
         )}
 
-        {/* Trash View */}
+        {/* Trash */}
         {view === 'trash' && (
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl border shadow-sm p-6`}>
-            <h2 className="text-xl font-bold mb-4">Papelera de Reciclaje (Eliminación Automática a los 21 días)</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Cliente</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Fecha del Turno</th>
-                    <th className="text-left py-4 px-3 font-medium text-gray-500">Días Restantes</th>
-                    <th className="text-center py-4 px-3 font-medium text-gray-500">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
-                  {deletedBookings.map((booking) => (
-                    <tr key={booking.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
-                      <td className="py-4 px-3 font-medium">{booking.customer_name}</td>
-                      <td className="py-4 px-3">{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')}</td>
-                      <td className="py-4 px-3 text-red-500 font-medium">{booking.deleted_at ? `${daysUntilPurge(booking.deleted_at)} días` : '-'}</td>
-                      <td className="py-4 px-3">
-                        <div className="flex items-center justify-center gap-2">
-                          <button onClick={() => restoreBooking(booking.id)} className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-semibold hover:bg-green-200 transition-colors">Restaurar</button>
-                          <button onClick={() => purgeBooking(booking.id)} className="p-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors" title="Eliminar definitivamente"><Trash2 className="w-4 h-4" /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {deletedBookings.length === 0 && <p className="text-center py-12 text-gray-500">La papelera está vacía</p>}
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Papelera</h2>
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Las reservas se eliminan definitivamente a los 21 días</p>
+              </div>
             </div>
+            {deletedBookings.length === 0 ? (
+              <div className="py-16 text-center">
+                <Trash2 className={`w-16 h-16 mx-auto mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>La papelera está vacía</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {deletedBookings.map((booking) => {
+                  const days = daysUntilPurge((booking as any).deleted_at);
+                  return (
+                    <div key={booking.id} className={`flex items-center justify-between p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl`}>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
+                          <span className="font-mono text-xs text-gray-400">{booking.booking_code}</span>
+                        </div>
+                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} flex items-center gap-3`}>
+                          <span>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} {booking.booking_time}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${days <= 3 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            Se elimina en {days} días
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <button
+                          onClick={() => restoreBooking(booking.id)}
+                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                          title="Restaurar"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                          Restaurar
+                        </button>
+                        <button
+                          onClick={() => purgeBooking(booking.id)}
+                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200"
+                          title="Eliminar definitivamente"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Confirmation Modal */}
-      {confirmModal.open && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'} max-w-sm w-full p-6 rounded-2xl border shadow-xl`}>
-            <div className="flex items-center gap-3 text-yellow-500 mb-3">
-              <AlertCircle className="w-6 h-6 flex-shrink-0" />
-              <h3 className="text-lg font-bold">¿Estás seguro?</h3>
+      {/* Success Modal */}
+      {successModal.open && createPortal(
+        <div className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4">
+          <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-2xl">
+            <div className="flex items-center justify-center mx-auto mb-4 bg-green-100 rounded-full w-14 h-14">
+              <CheckCircle className="text-green-600 w-7 h-7" />
             </div>
-            <p className={`text-sm mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{confirmModal.message}</p>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))} className={`px-4 py-2 rounded-xl text-sm font-semibold ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}>Cancelar</button>
-              <button onClick={confirmModal.onConfirm} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-colors">Confirmar Acción</button>
+            <h3 className="mb-2 text-xl font-bold text-center text-gray-800">¡Listo!</h3>
+            <p className="mb-8 text-center text-gray-500">{successModal.message}</p>
+            <button
+              onClick={() => setSuccessModal({ open: false, message: '' })}
+              className="w-full py-3 font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal.open && createPortal(
+        <div className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4">
+          <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-2xl">
+            <div className="flex items-center justify-center mx-auto mb-4 bg-red-100 rounded-full w-14 h-14">
+              <Trash2 className="text-red-600 w-7 h-7" />
+            </div>
+            <h3 className="mb-2 text-xl font-bold text-center text-gray-800">Eliminar reserva</h3>
+            <p className="mb-8 text-center text-gray-500">{confirmModal.message}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))}
+                className="flex-1 py-3 font-semibold text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className="flex-1 py-3 font-semibold text-white transition-colors bg-red-600 rounded-xl hover:bg-red-700"
+              >
+                Eliminar
+              </button>
             </div>
           </div>
         </div>,
         document.body
       )}
+    </div>
+  );
+}
+
+// ─── Availability Manager ─────────────────────────────────────────────────────
+function AvailabilityManager({
+  availability, blockedDates, onRefresh, adminEmail, adminPassword, showSuccess
+}: {
+  availability: AvailabilitySetting[];
+  blockedDates: BlockedDate[];
+  onRefresh: () => void;
+  adminEmail: string;
+  adminPassword: string;
+  showSuccess: (msg: string) => void;
+}) {
+  const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const [editingDay, setEditingDay] = useState<number | null>(null);
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [isActive, setIsActive] = useState(false);
+  const [newBlockedDate, setNewBlockedDate] = useState('');
+  const [newBlockedReason, setNewBlockedReason] = useState('');
+
+  const startEditing = (day: AvailabilitySetting) => {
+    setEditingDay(day.day_of_week);
+    setStartTime(day.start_time);
+    setEndTime(day.end_time);
+    setIsActive(day.is_active);
+  };
+
+  const saveDay = async () => {
+    if (editingDay === null) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-update-availability', {
+        body: { email: adminEmail, password: adminPassword, day_of_week: editingDay, start_time: startTime, end_time: endTime, is_active: isActive },
+      });
+      if (error || !data?.success) throw new Error('Error al guardar');
+      setEditingDay(null);
+      onRefresh();
+      showSuccess('Horario actualizado correctamente');
+    } catch {
+      alert('Error al guardar');
+    }
+  };
+
+  const addBlockedDate = async () => {
+    if (!newBlockedDate) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-manage-blocked-dates', {
+        body: { email: adminEmail, password: adminPassword, action: 'add', date: newBlockedDate, reason: newBlockedReason || null },
+      });
+      if (error || !data?.success) throw new Error('Error al agregar');
+      setNewBlockedDate('');
+      setNewBlockedReason('');
+      onRefresh();
+      showSuccess('Fecha bloqueada agregada');
+    } catch { alert('Error al agregar fecha'); }
+  };
+
+  const removeBlockedDate = async (id: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-manage-blocked-dates', {
+        body: { email: adminEmail, password: adminPassword, action: 'remove', id },
+      });
+      if (error || !data?.success) throw new Error('Error al eliminar');
+      onRefresh();
+    } catch { alert('Error al eliminar fecha'); }
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="p-6 bg-gray-800 shadow-sm rounded-2xl">
+        <h2 className="mb-6 text-xl font-bold text-gray-300">Dias laborables</h2>
+        <div className="space-y-3">
+          {availability.map((day) => (
+            <div key={day.id} className="p-4 bg-gray-50 rounded-xl">
+              {editingDay === day.day_of_week ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-gray-800">{DAYS[day.day_of_week]}</span>
+                    <label className="flex items-center gap-2">
+                      <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="w-5 h-5 border-gray-300 rounded text-emerald-600" />
+                      <span>Activo</span>
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="px-3 py-2 border rounded-lg" />
+                    <span>a</span>
+                    <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="px-3 py-2 border rounded-lg" />
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={saveDay} className="flex-1 py-2 text-white rounded-lg bg-emerald-600 hover:bg-emerald-700">Guardar</button>
+                    <button onClick={() => setEditingDay(null)} className="flex-1 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${day.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
+                    <span className="font-medium text-gray-800">{DAYS[day.day_of_week]}</span>
+                    <span className="text-gray-600">{day.start_time.slice(0, 5)} - {day.end_time.slice(0, 5)}</span>
+                  </div>
+                  <button onClick={() => startEditing(day)} className="p-2 rounded-lg hover:bg-gray-200">
+                    <Edit className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-6 bg-gray-800 shadow-sm rounded-2xl">
+        <h2 className="mb-6 text-xl font-bold text-gray-300">Fechas bloqueadas</h2>
+        <div className="mb-6 space-y-3">
+          <input type="date" value={newBlockedDate} onChange={(e) => setNewBlockedDate(e.target.value)} min={new Date().toISOString().split('T')[0]} className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
+          <input type="text" value={newBlockedReason} onChange={(e) => setNewBlockedReason(e.target.value)} placeholder="Razon (opcional)" className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
+          <button onClick={addBlockedDate} disabled={!newBlockedDate} className="w-full py-3 font-medium text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">Agregar fecha bloqueada</button>
+        </div>
+        <div className="space-y-2">
+          {blockedDates.map((blocked) => (
+            <div key={blocked.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+              <div>
+                <p className="font-medium text-gray-800">{new Date(blocked.date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                {blocked.reason && <p className="text-sm text-gray-500">{blocked.reason}</p>}
+              </div>
+              <button onClick={() => removeBlockedDate(blocked.id)} className="p-2 rounded-lg hover:bg-red-100">
+                <Trash2 className="w-4 h-4 text-red-600" />
+              </button>
+            </div>
+          ))}
+          {blockedDates.length === 0 && <p className="py-4 text-center text-gray-500">No hay fechas bloqueadas</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Settings Manager ─────────────────────────────────────────────────────────
+function SettingsManager({
+  settings, onRefresh, adminEmail, adminPassword, showSuccess
+}: {
+  settings: Settings;
+  onRefresh: () => void;
+  adminEmail: string;
+  adminPassword: string;
+  showSuccess: (msg: string) => void;
+}) {
+  const [price, setPrice] = useState(settings.price.toString());
+  const [currency, setCurrency] = useState(settings.currency);
+  const [saving, setSaving] = useState(false);
+
+  const saveSettings = async () => {
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-update-settings', {
+        body: { email: adminEmail, password: adminPassword, price, currency },
+      });
+      if (error || !data?.success) throw new Error('Error al guardar');
+      onRefresh();
+      showSuccess('Configuración guardada correctamente');
+    } catch { alert('Error al guardar'); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div className="max-w-xl mx-auto">
+      <div className="p-6 bg-white shadow-sm rounded-2xl">
+        <h2 className="mb-6 text-xl font-bold text-gray-800">Configuracion general</h2>
+        <div className="space-y-6">
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700">Precio de la reserva</label>
+            <div className="flex items-center gap-2">
+              <span className="text-xl text-gray-500">$</span>
+              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="flex-1 px-4 py-3 text-xl border border-gray-200 outline-none rounded-xl focus:border-emerald-500" />
+            </div>
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700">Moneda</label>
+            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full px-4 py-3 border border-gray-200 outline-none rounded-xl focus:border-emerald-500">
+              <option value="ARS">ARS - Peso Argentino</option>
+              <option value="USD">USD - Dolar Americano</option>
+              <option value="MXN">MXN - Peso Mexicano</option>
+            </select>
+          </div>
+          <button onClick={saveSettings} disabled={saving} className="w-full py-4 text-lg font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
+            {saving ? 'Guardando...' : 'Guardar configuracion'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Clients Manager ──────────────────────────────────────────────────────────
+interface ClientData {
+  name: string;
+  phone: string;
+  email: string;
+  firstBooking: string;
+  lastBooking: string;
+  totalBookings: number;
+}
+
+function ClientsManager({ bookings, darkMode }: { bookings: Booking[]; darkMode: boolean }) {
+  const [search, setSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+
+  // Agrupar reservas por email (cliente único)
+  const clientMap = new Map<string, ClientData>();
+  bookings.forEach((b) => {
+    const key = b.customer_email || b.customer_phone;
+    if (clientMap.has(key)) {
+      const c = clientMap.get(key)!;
+      c.totalBookings += 1;
+      if (b.booking_date > c.lastBooking) c.lastBooking = b.booking_date;
+      if (b.booking_date < c.firstBooking) c.firstBooking = b.booking_date;
+    } else {
+      clientMap.set(key, {
+        name: b.customer_name,
+        phone: b.customer_phone,
+        email: b.customer_email,
+        firstBooking: b.booking_date,
+        lastBooking: b.booking_date,
+        totalBookings: 1,
+      });
+    }
+  });
+
+  let clients = Array.from(clientMap.values());
+
+  // Filtros
+  if (search) {
+    clients = clients.filter(c =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.phone.includes(search)
+    );
+  }
+  if (dateFrom) clients = clients.filter(c => c.firstBooking >= dateFrom);
+  if (dateTo) clients = clients.filter(c => c.firstBooking <= dateTo);
+
+  const formatDate = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('es-AR');
+
+  const exportCSV = () => {
+    const headers = ['Nombre', 'WhatsApp', 'Email', 'Primera reserva', 'Última reserva', 'Total reservas'];
+    const rows = clients.map(c => [
+      c.name, c.phone, c.email,
+      formatDate(c.firstBooking), formatDate(c.lastBooking),
+      c.totalBookings
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'clientes.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPDF = async () => {
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text('Listado de Clientes', 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')}`, 14, 28);
+
+    let y = 40;
+    const lineH = 8;
+
+    // Headers
+    doc.setFillColor(16, 185, 129);
+    doc.rect(14, y - 5, 182, lineH, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.text('Nombre', 16, y);
+    doc.text('WhatsApp', 70, y);
+    doc.text('Email', 105, y);
+    doc.text('Registro', 148, y);
+    doc.text('Reservas', 178, y);
+    y += lineH;
+
+    doc.setTextColor(0, 0, 0);
+    clients.forEach((c, i) => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      if (i % 2 === 0) {
+        doc.setFillColor(245, 245, 245);
+        doc.rect(14, y - 5, 182, lineH, 'F');
+      }
+      doc.setFontSize(8);
+      doc.text(c.name.slice(0, 20), 16, y);
+      doc.text(c.phone.slice(0, 15), 70, y);
+      doc.text(c.email.slice(0, 22), 105, y);
+      doc.text(formatDate(c.firstBooking), 148, y);
+      doc.text(String(c.totalBookings), 182, y);
+      y += lineH;
+    });
+
+    doc.save('clientes.pdf');
+  };
+
+  return (
+    <div className={`rounded-2xl shadow-sm p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Clientes</h2>
+          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{clients.length} clientes encontrados</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200">
+            <Download className="w-4 h-4" /> CSV
+          </button>
+          <button onClick={exportPDF} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-xl hover:bg-red-200">
+            <FileText className="w-4 h-4" /> PDF
+          </button>
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
+          <input type="text" placeholder="Buscar por nombre o teléfono..." value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
+        </div>
+        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+          className={`px-4 py-3 border rounded-xl focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`} />
+        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+          className={`px-4 py-3 border rounded-xl focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`} />
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              {['Nombre', 'WhatsApp', 'Email', 'Primera reserva', 'Última reserva', 'Total'].map(h => (
+                <th key={h} className={`text-left py-4 px-3 font-medium text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
+            {clients.map((c, i) => (
+              <tr key={i} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
+                <td className={`py-4 px-3 font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{c.name}</td>
+                <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <div className="flex items-center gap-1"><Phone className="w-3 h-3" />{c.phone}</div>
+                </td>
+                <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <div className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</div>
+                </td>
+                <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatDate(c.firstBooking)}</td>
+                <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatDate(c.lastBooking)}</td>
+                <td className="px-3 py-4">
+                  <span className="px-2 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-700">{c.totalBookings}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {clients.length === 0 && (
+          <p className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No se encontraron clientes</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── WhatsApp Manager ─────────────────────────────────────────────────────────
+function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode: boolean }) {
+  const DEFAULT_TEMPLATE = 'Hola {nombre} 👋 Tu reserva fue aprobada. Te esperamos el día {fecha} a las {hora}. ¡Gracias!';
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [message, setMessage] = useState(DEFAULT_TEMPLATE);
+  const [search, setSearch] = useState('');
+
+  const pendingBookings = bookings.filter(b =>
+    b.booking_status === 'pending' || b.booking_status === 'confirmed'
+  );
+
+  const filtered = pendingBookings.filter(b =>
+    b.customer_name.toLowerCase().includes(search.toLowerCase()) ||
+    b.customer_phone.includes(search)
+  );
+
+  const buildMessage = (booking: Booking) => {
+    const fecha = new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', {
+      weekday: 'long', day: 'numeric', month: 'long'
+    });
+    const hora = booking.booking_time.slice(0, 5);
+    return message
+      .replace('{nombre}', booking.customer_name)
+      .replace('{fecha}', fecha)
+      .replace('{hora}', hora);
+  };
+
+  const sendWhatsApp = (booking: Booking) => {
+    const phone = booking.customer_phone.replace(/\D/g, '');
+    const text = encodeURIComponent(buildMessage(booking));
+    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+  };
+
+  return (
+    <div className={`rounded-2xl shadow-sm p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className="mb-6">
+        <h2 className={`text-xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Enviar mensaje de aprobación</h2>
+        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Seleccioná una reserva y enviá el mensaje por WhatsApp</p>
+      </div>
+      <div className="mb-6">
+        <div className="relative p-6 mb-5 overflow-hidden shadow-lg rounded-2xl bg-gradient-to-r from-purple-600 to-violet-600">
+          <div className="absolute top-0 right-0 w-32 h-32 translate-x-8 -translate-y-8 bg-white rounded-full opacity-5" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 -translate-x-6 translate-y-6 bg-white rounded-full opacity-5" />
+        <div className="relative flex flex-col items-center gap-4 text-center">
+
+  <span className="px-3 py-1 text-sm font-bold tracking-wide text-yellow-900 uppercase bg-yellow-400 rounded-full">
+    Plan Pro
+  </span>
+
+  <div className="flex-1">
+    <p className="mb-2 text-base font-bold text-white">
+      Automatizá mensajes
+    </p>
+
+    <p className="text-sm leading-relaxed text-purple-100">
+      Con el Plan Pro el cliente recibe la confirmación por WhatsApp{" "}
+      <span className="font-semibold text-white">
+        <br />
+        AUTOMÁTICAMENTE AL PAGAR
+      </span>
+      <br />
+      sin intervención manual,{" "}
+      <span className="font-semibold text-white">
+        24 hs, 7 días, feriados incluidos.
+      </span>
+    </p>
+  </div>
+
+</div>
+        </div>
+        <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Plantilla del mensaje</label>
+        <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3}
+          className={`w-full px-4 py-3 border rounded-xl text-base resize-none focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-200 border-gray-600 text-gray-800 placeholder-gray-400' : 'border-gray-200'}`} />
+        <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+          Variables: <code className="px-1 bg-gray-100 rounded">{'{nombre}'}</code> <code className="px-1 bg-gray-100 rounded">{'{fecha}'}</code> <code className="px-1 bg-gray-100 rounded">{'{hora}'}</code>
+        </p>
+      </div>
+      <div className="relative mb-4">
+        <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
+        <input type="text" placeholder="Buscar por nombre o teléfono..." value={search} onChange={(e) => setSearch(e.target.value)}
+          className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
+      </div>
+      <div className="space-y-3">
+        {filtered.length === 0 && <p className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No hay reservas disponibles</p>}
+        {filtered.map((booking) => (
+          <div key={booking.id} className={`rounded-xl p-4 border ${selectedBooking?.id === booking.id ? 'border-emerald-500 bg-emerald-50' : darkMode ? 'border-gray-700 bg-gray-700' : 'border-gray-200 bg-gray-50'}`}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setSelectedBooking(booking === selectedBooking ? null : booking)}>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <p className={`font-medium truncate ${darkMode && selectedBooking?.id !== booking.id ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${booking.booking_status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {booking.booking_status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                  </span>
+                </div>
+                <div className={`text-sm flex flex-wrap items-center gap-2 ${darkMode && selectedBooking?.id !== booking.id ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <span className="flex items-center gap-1"><Phone className="flex-shrink-0 w-3 h-3" />{booking.customer_phone}</span>
+                  <span>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} — {booking.booking_time.slice(0, 5)} hs</span>
+                </div>
+              </div>
+              <button onClick={() => sendWhatsApp(booking)}
+                className="flex items-center justify-center flex-shrink-0 w-full gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-green-500 rounded-xl hover:bg-green-600 sm:w-auto">
+                <MessageSquare className="w-4 h-4" /> Enviar
+              </button>
+            </div>
+            {selectedBooking?.id === booking.id && (
+              <div className="pt-3 mt-3 border-t border-emerald-200">
+                <p className="mb-1 text-xs font-medium text-emerald-600">Vista previa:</p>
+                <p className="p-3 text-sm text-gray-700 bg-white border rounded-lg border-emerald-200">{buildMessage(booking)}</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── WaitingList Manager ──────────────────────────────────────────────────────
+function WaitingListManager({
+  waitingList, onRefresh, adminEmail, adminPassword, darkMode
+}: {
+  waitingList: WaitingListItem[];
+  onRefresh: () => void;
+  adminEmail: string;
+  adminPassword: string;
+  darkMode: boolean;
+}) {
+  const [search, setSearch] = useState('');
+  const [filterEstado, setFilterEstado] = useState('all');
+  const [saving, setSaving] = useState<string | null>(null);
+
+  const updateItem = async (id: string, estado?: string, action?: string) => {
+    setSaving(id);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-update-waiting-list', {
+        body: { email: adminEmail, password: adminPassword, id, estado, action },
+      });
+      if (error || !data?.success) throw new Error('Error');
+      onRefresh();
+    } catch {
+      alert('Error al actualizar');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const estadoColors: Record<string, string> = {
+    pendiente: 'bg-yellow-100 text-yellow-700',
+    contactado: 'bg-blue-100 text-blue-700',
+    convertido: 'bg-green-100 text-green-700',
+    cancelado: 'bg-red-100 text-red-700',
+  };
+
+  const estadoLabel: Record<string, string> = {
+    pendiente: 'Pendiente',
+    contactado: 'Contactado',
+    convertido: 'Convertido',
+    cancelado: 'Cancelado',
+  };
+
+  const filtered = waitingList.filter(w => {
+    const matchesSearch = w.nombre.toLowerCase().includes(search.toLowerCase()) ||
+      w.telefono.includes(search) || w.email.toLowerCase().includes(search.toLowerCase());
+    const matchesEstado = filterEstado === 'all' || w.estado === filterEstado;
+    return matchesSearch && matchesEstado;
+  });
+
+  const formatDate = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('es-AR', {
+    weekday: 'short', day: 'numeric', month: 'short'
+  });
+
+  return (
+    <div className={`rounded-2xl shadow-sm p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Lista de espera</h2>
+          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            {waitingList.filter(w => w.estado === 'pendiente').length} pendientes de {waitingList.length} total
+          </p>
+        </div>
+        <button onClick={onRefresh} className={`p-2 rounded-xl ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}>
+          <RefreshCw className={`w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
+        </button>
+      </div>
+
+      {/* Filtros */}
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
+          <input type="text" placeholder="Buscar por nombre, teléfono o email..." value={search}
+            onChange={e => setSearch(e.target.value)}
+            className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
+        </div>
+        <select value={filterEstado} onChange={e => setFilterEstado(e.target.value)}
+          className={`px-4 py-3 border rounded-xl focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}>
+          <option value="all">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="contactado">Contactado</option>
+          <option value="convertido">Convertido</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+
+      {/* Lista */}
+      {filtered.length === 0 ? (
+        <div className="py-16 text-center">
+          <ClipboardList className={`w-16 h-16 mx-auto mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
+          <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>No hay registros en la lista de espera</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map(item => (
+            <div key={item.id} className={`rounded-xl p-4 border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-3 mb-1">
+                    <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{item.nombre}</p>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${estadoColors[item.estado]}`}>
+                      {estadoLabel[item.estado]}
+                    </span>
+                  </div>
+                  <div className={`text-sm flex flex-wrap gap-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{item.telefono}</span>
+                    <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{item.email}</span>
+                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{formatDate(item.fecha_deseada)}</span>
+                    {item.horario_deseado && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{item.horario_deseado.slice(0, 5)} hs</span>}
+                    {item.servicio && <span>• {item.servicio}</span>}
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {item.estado === 'pendiente' && (
+                    <button onClick={() => updateItem(item.id, 'contactado')} disabled={saving === item.id}
+                      className="px-3 py-2 text-sm font-medium text-blue-700 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200 disabled:opacity-50">
+                      Contactar
+                    </button>
+                  )}
+                  {(item.estado === 'pendiente' || item.estado === 'contactado') && (
+                    <button onClick={() => updateItem(item.id, 'convertido')} disabled={saving === item.id}
+                      className="px-3 py-2 text-sm font-medium text-green-700 transition-colors bg-green-100 rounded-lg hover:bg-green-200 disabled:opacity-50">
+                      Convertido
+                    </button>
+                  )}
+                  {item.estado !== 'cancelado' && item.estado !== 'convertido' && (
+                    <button onClick={() => updateItem(item.id, 'cancelado')} disabled={saving === item.id}
+                      className="px-3 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200 disabled:opacity-50">
+                      Cancelar
+                    </button>
+                  )}
+                  <button onClick={() => updateItem(item.id, undefined, 'delete')} disabled={saving === item.id}
+                    className="p-2 transition-colors rounded-lg hover:bg-red-100 disabled:opacity-50">
+                    <Trash2 className="w-4 h-4 text-red-600" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Notas internas del admin ─────────────────────────────────────────────────
+function NotasAdmin({
+  booking, adminEmail, adminPassword, onSaved
+}: {
+  booking: Booking;
+  adminEmail: string;
+  adminPassword: string;
+  onSaved: () => void;
+}) {
+  const [nota, setNota] = useState((booking as any).notas_admin || '');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const saveNota = async () => {
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-update-booking', {
+        body: {
+          email: adminEmail,
+          password: adminPassword,
+          booking_id: booking.id,
+          notas_admin: nota,
+        },
+      });
+      if (error || !data?.success) throw new Error('Error al guardar');
+      setSaved(true);
+      onSaved();
+      setTimeout(() => setSaved(false), 2000);
+    } catch {
+      alert('Error al guardar la nota');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          📝 Notas internas
+          <span className="text-xs font-normal text-gray-400">(solo visible para el admin)</span>
+        </label>
+        {saved && (
+          <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+            <CheckCircle className="w-3 h-3" /> Guardado
+          </span>
+        )}
+      </div>
+      <textarea
+        value={nota}
+        onChange={e => setNota(e.target.value)}
+        rows={3}
+        placeholder="Ej: cliente puntual / siempre llega tarde / requiere preparación especial..."
+        className="w-full px-4 py-3 text-sm text-gray-700 transition-colors border-2 border-gray-200 resize-none rounded-xl focus:outline-none focus:border-emerald-500"
+      />
+      <button
+        onClick={saveNota}
+        disabled={saving}
+        className="px-4 py-2 mt-2 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50"
+      >
+        {saving ? 'Guardando...' : 'Guardar nota'}
+      </button>
     </div>
   );
 }
