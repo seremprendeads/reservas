@@ -27,6 +27,8 @@ import {
   ClipboardList,
   EyeOff,
   UserCircle,
+  Menu,
+  X,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings } from '../lib/supabase';
 
@@ -201,6 +203,7 @@ export function AdminPage() {
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void }>({ open: false, message: '', onConfirm: () => {} });
   const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('admin_dark') === '1');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('admin_dark', darkMode ? '1' : '0');
@@ -387,24 +390,54 @@ export function AdminPage() {
       </header>
 
       <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="flex flex-wrap justify-center gap-2 mb-6 text-center">
-          {[
-            { id: 'dashboard', label: 'Principal', icon: null },
-            { id: 'bookings', label: 'Reservas', icon: <Users className="w-5 h-5" /> },
-            { id: 'clients', label: 'Clientes', icon: <FileText className="w-5 h-5" /> },
-            { id: 'waiting', label: `Lista de espera${waitingList.filter(w => w.estado === 'pendiente').length > 0 ? ` (${waitingList.filter(w => w.estado === 'pendiente').length})` : ''}`, icon: <ClipboardList className="w-5 h-5" /> },
-            { id: 'availability', label: 'Disponibilidad', icon: <Clock className="w-5 h-5" /> },
-            { id: 'settings', label: 'Configuracion', icon: <DollarSign className="w-5 h-5" /> },
-            { id: 'profile', label: 'Perfil', icon: <UserCircle className="w-5 h-5" /> },
-            { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquare className="w-5 h-5" /> },
-            { id: 'trash', label: `${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
-          ].map((tab) => (
-            <button key={tab.id} onClick={() => setView(tab.id as View)}
-             className={`px-4 py-2 rounded-lg text-dm font-medium transition-all flex items-center gap-2 ${view === tab.id ? 'bg-emerald-600 text-white shadow-lg' : darkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
-              {tab.icon}{tab.label}
-            </button>
-          ))}
-        </div>
+        {(() => {
+          const tabs = [
+            { id: 'dashboard' as View, label: 'Principal', icon: null as React.ReactNode },
+            { id: 'bookings' as View, label: 'Reservas', icon: <Users className="w-5 h-5" /> },
+            { id: 'clients' as View, label: 'Clientes', icon: <FileText className="w-5 h-5" /> },
+            { id: 'waiting' as View, label: `Lista de espera${waitingList.filter(w => w.estado === 'pendiente').length > 0 ? ` (${waitingList.filter(w => w.estado === 'pendiente').length})` : ''}`, icon: <ClipboardList className="w-5 h-5" /> },
+            { id: 'availability' as View, label: 'Disponibilidad', icon: <Clock className="w-5 h-5" /> },
+            { id: 'settings' as View, label: 'Configuracion', icon: <DollarSign className="w-5 h-5" /> },
+            { id: 'profile' as View, label: 'Perfil', icon: <UserCircle className="w-5 h-5" /> },
+            { id: 'whatsapp' as View, label: 'WhatsApp', icon: <MessageSquare className="w-5 h-5" /> },
+            { id: 'trash' as View, label: `${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
+          ];
+          const currentTab = tabs.find(t => t.id === view);
+          return (
+            <>
+              {/* Mobile hamburger menu */}
+              <div className="mb-6 sm:hidden">
+                <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-dm font-medium shadow-sm ${darkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-700'}`}>
+                  <span className="flex items-center gap-2">
+                    {currentTab?.icon}
+                    {currentTab?.label}
+                  </span>
+                  {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
+                {mobileMenuOpen && (
+                  <div className={`mt-2 space-y-1 rounded-xl shadow-sm p-2 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                    {tabs.map(tab => (
+                      <button key={tab.id} onClick={() => { setView(tab.id); setMobileMenuOpen(false); }}
+                        className={`w-full flex items-center gap-2 px-4 py-3 rounded-lg text-dm font-medium transition-all ${view === tab.id ? 'bg-emerald-600 text-white' : darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}>
+                        {tab.icon}{tab.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* Desktop horizontal nav */}
+              <div className="hidden sm:flex flex-wrap justify-center gap-2 mb-6 text-center">
+                {tabs.map(tab => (
+                  <button key={tab.id} onClick={() => setView(tab.id)}
+                   className={`px-4 py-2 rounded-lg text-dm font-medium transition-all flex items-center gap-2 ${view === tab.id ? 'bg-emerald-600 text-white shadow-lg' : darkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
+                    {tab.icon}{tab.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          );
+        })()}
 
         {/* Dashboard */}
         {view === 'dashboard' && (
