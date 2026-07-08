@@ -2,7 +2,8 @@ Sube a Vercel:
 ---------------
 
 git add .
-git commit -m "banner plan pro texto mas grande"
+git commit -m "banner plan pro texto mas 
+grande"
 git push
 
 ----------------------------------------------
