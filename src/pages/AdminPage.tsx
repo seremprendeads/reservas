@@ -371,7 +371,7 @@ export function AdminPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <a href="/" className="flex items-center gap-2 px-4 py-2 text-gray-300 transition-colors rounded-lg hover:text-emerald-600 hover:bg-emerald-50">
+              <a href="/" className="flex items-center gap-2 px-4 py-2 text-gray-500 transition-colors rounded-lg hover:text-emerald-600 hover:bg-emerald-50">
                 <ArrowLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Pagina de Reservas</span>
               </a>
@@ -578,7 +578,7 @@ export function AdminPage() {
                             <button onClick={() => updateBookingStatus(booking.id, 'cancelled')} className="p-2 rounded-lg hover:bg-red-100" title="Cancelar"><XCircle className="w-4 h-4 text-red-600" /></button>
                           )}
                           {(booking.booking_status === 'cancelled' || booking.booking_status === 'completed') && (
-                            <button onClick={() => deleteBooking(booking.id)} className="p-2 rounded-lg hover:bg-red-100" title="Eliminar"><Trash2 className="w-4 h-4 text-red-600" /></button>
+                            <button onClick={() => deleteBooking(booking.id)} className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200" title="Eliminar"><Trash2 className="w-4 h-4" /> Eliminar</button>
                           )}
                         </div>
                       </td>
@@ -594,7 +594,7 @@ export function AdminPage() {
         {/* Detail */}
         {view === 'detail' && selectedBooking && (
           <div className="max-w-2xl mx-auto">
-            <button onClick={() => setView('bookings')} className="flex items-center gap-2 mb-6 text-gray-300 hover:text-emerald-600">
+            <button onClick={() => setView('bookings')} className="flex items-center gap-2 mb-6 text-gray-500 hover:text-emerald-600">
               <ArrowLeft className="w-5 h-5" /> Volver
             </button>
             <div className="p-8 bg-white shadow-sm rounded-2xl">
@@ -959,8 +959,8 @@ function AvailabilityManager({
                 <p className="font-medium text-gray-800">{new Date(blocked.date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
                 {blocked.reason && <p className="text-sm text-gray-500">{blocked.reason}</p>}
               </div>
-              <button onClick={() => removeBlockedDate(blocked.id)} className="p-2 rounded-lg hover:bg-red-100">
-                <Trash2 className="w-4 h-4 text-red-600" />
+              <button onClick={() => removeBlockedDate(blocked.id)} className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200">
+                <Trash2 className="w-4 h-4" /> Eliminar
               </button>
             </div>
           ))}
@@ -1454,8 +1454,8 @@ function WaitingListManager({
                     </button>
                   )}
                   <button onClick={() => updateItem(item.id, undefined, 'delete')} disabled={saving === item.id}
-                    className="p-2 transition-colors rounded-lg hover:bg-red-100 disabled:opacity-50">
-                    <Trash2 className="w-4 h-4 text-red-600" />
+                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200 disabled:opacity-50">
+                    <Trash2 className="w-4 h-4" /> Eliminar
                   </button>
                 </div>
               </div>
