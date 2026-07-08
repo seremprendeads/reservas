@@ -49,10 +49,9 @@ interface WaitingListItem {
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) => void }) {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'forgot'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -81,27 +80,18 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) =
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (!name.trim()) { setError('El nombre es obligatorio'); return; }
-    if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return; }
     setLoading(true);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('admin-register', {
-        body: { name: name.trim(), email: email.trim(), password },
+      await supabase.functions.invoke('admin-forgot-password', {
+        body: { email: email.trim() },
       });
-      if (fnError || !data?.success) {
-        setError(data?.error || 'Error al registrar');
-      } else {
-        setSuccess('Cuenta creada correctamente. Ya podés iniciar sesión.');
-        setMode('login');
-        setName('');
-        setPassword('');
-      }
+      setSuccess('Si el email existe, te enviamos una contraseña temporal. Revisá tu bandeja de entrada.');
     } catch {
-      setError('Error al conectar con el servidor');
+      setError('Error al enviar el email. Intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -116,10 +106,10 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) =
           </div>
         </div>
         <h1 className="mb-1 text-2xl font-bold text-center text-gray-800">
-          {mode === 'login' ? 'Panel Admin' : 'Crear cuenta'}
+          {mode === 'login' ? 'Panel Admin' : 'Recuperar contraseña'}
         </h1>
         <p className="mb-6 text-sm text-center text-gray-500">
-          {mode === 'login' ? 'Ingresá tus credenciales para continuar' : 'Completá los datos para registrarte'}
+          {mode === 'login' ? 'Ingresá tus credenciales para continuar' : 'Te enviamos una contraseña temporal por email'}
         </p>
 
         {error && (
@@ -135,65 +125,56 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) =
           </div>
         )}
 
-        <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-4">
-          {mode === 'register' && (
-            <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">Nombre completo</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} required
-                placeholder="Tu nombre"
-                className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none" />
-            </div>
-          )}
+        <form onSubmit={mode === 'login' ? handleLogin : handleForgot} className="space-y-4">
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="admin@email.com"
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+              placeholder="admin@email.com"
               className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none" />
           </div>
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">Contraseña</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-                className="w-full px-4 py-3 pr-12 text-base border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none"
-              />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}
-                className="absolute text-gray-400 -translate-y-1/2 right-4 top-1/2 hover:text-gray-600 transition-colors">
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
+
+          {mode === 'login' && (
+            <div>
+              <label className="block mb-1 text-sm font-medium text-gray-700">Contraseña</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 pr-12 text-base border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none"
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute text-gray-400 -translate-y-1/2 right-4 top-1/2 hover:text-gray-600 transition-colors">
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+              <div className="mt-2 text-right">
+                <button type="button" onClick={() => { setMode('forgot'); setError(''); setSuccess(''); }}
+                  className="text-xs text-emerald-600 hover:underline">
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
             </div>
-            {mode === 'register' && <p className="mt-1 text-xs text-gray-400">Mínimo 6 caracteres</p>}
-          </div>
+          )}
+
           <button type="submit" disabled={loading}
             className="w-full py-4 mt-2 text-lg font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
             {loading
-              ? (mode === 'login' ? 'Ingresando...' : 'Creando cuenta...')
-              : (mode === 'login' ? 'Ingresar' : 'Crear cuenta')}
+              ? (mode === 'login' ? 'Ingresando...' : 'Enviando...')
+              : (mode === 'login' ? 'Ingresar' : 'Enviar contraseña temporal')}
           </button>
         </form>
 
-        <div className="mt-5 text-center">
-          {mode === 'login' ? (
-            <p className="text-sm text-gray-500">
-              ¿No tenés cuenta?{' '}
-              <button onClick={() => { setMode('register'); setError(''); setSuccess(''); }}
-                className="font-medium text-emerald-600 hover:underline">
-                Registrate
-              </button>
-            </p>
-          ) : (
-            <p className="text-sm text-gray-500">
-              ¿Ya tenés cuenta?{' '}
-              <button onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
-                className="font-medium text-emerald-600 hover:underline">
-                Iniciá sesión
-              </button>
-            </p>
-          )}
-        </div>
+        {mode === 'forgot' && (
+          <div className="mt-5 text-center">
+            <button onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
+              className="text-sm font-medium text-emerald-600 hover:underline">
+              ← Volver al login
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
