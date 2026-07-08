@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 function generateTempPassword(): string {
-  // Restauramos los caracteres válidos
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
   return Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
@@ -40,6 +39,7 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
 
     if (!admin) {
+      // Por seguridad, no revelamos si el email existe o no
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -54,11 +54,7 @@ Deno.serve(async (req: Request) => {
       p_new_password: tempPassword,
     });
 
-    if (updateError) {
-      console.error("Error en Supabase RPC:", updateError);
-      // Lanzamos el error con el mensaje de Supabase
-      throw new Error(`Error en Base de Datos: ${updateError.message}`);
-    }
+    if (updateError) throw updateError;
 
     // Enviar email con Resend
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -94,19 +90,15 @@ Deno.serve(async (req: Request) => {
     if (!emailRes.ok) {
       const errData = await emailRes.text();
       console.error("Resend error:", errData);
-      // Lanzamos el error detallado de Resend
-      throw new Error(`Resend falló: ${errData}`);
+      throw new Error("Error al enviar el email");
     }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err: any) {
-    console.error("Error capturado:", err);
-    
-    // MODIFICACIÓN CLAVE: Ahora devolvemos el mensaje real al frontend
-    // ¡Asegúrate de cambiar esto de nuevo a "Error interno" cuando pases a producción!
-    return new Response(JSON.stringify({ success: false, error: err.message || "Error desconocido" }), {
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ success: false, error: "Error interno" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
