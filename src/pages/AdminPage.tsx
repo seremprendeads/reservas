@@ -449,11 +449,12 @@ export function AdminPage() {
                 { label: 'Reservas pagadas', value: paidBookings.length, color: 'green', icon: <DollarSign className="w-6 h-6 text-green-600" /> },
                 { label: 'Pagos pendientes', value: pendingPayments.length, color: 'yellow', icon: <AlertCircle className="w-6 h-6 text-yellow-600" /> },
               ].map((stat) => (
-                <div key={stat.label} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
+                <button key={stat.label} onClick={() => setView('bookings')}
+                  className={`w-full text-left ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6 cursor-pointer transition-transform active:scale-[0.98] hover:shadow-md`}>
                   <div className={`w-12 h-12 bg-${stat.color}-100 rounded-xl flex items-center justify-center mb-4`}>{stat.icon}</div>
                   <p className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{stat.value}</p>
                   <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>{stat.label}</p>
-                </div>
+                </button>
               ))}
             </div>
             <div className={`${darkMode ? 'bg-gray-200' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
