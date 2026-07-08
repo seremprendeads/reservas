@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Calendar } from '../components/Calendar';
 import { BookingForm } from '../components/BookingForm';
 import { Payment } from '../components/Payment';
@@ -7,6 +8,15 @@ import { Clock, Phone, MapPin } from 'lucide-react';
 
 function BookingContent() {
   const { step } = useBooking();
+
+  useEffect(() => {
+    if (!document.getElementById('mp-sdk')) {
+      const script = document.createElement('script');
+      script.id = 'mp-sdk';
+      script.src = 'https://sdk.mercadopago.com/js/v2';
+      document.head.appendChild(script);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-900">

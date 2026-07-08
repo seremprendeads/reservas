@@ -50,11 +50,19 @@ export function Payment() {
       return;
     }
 
-    // Evitar cargar el script dos veces
-    if (document.getElementById('mp-sdk')) {
-      initMercadoPago();
-      setMpLoaded(true);
-      setLoading(false);
+    const existingScript = document.getElementById('mp-sdk');
+    if (existingScript) {
+      if (window.MercadoPago) {
+        initMercadoPago();
+        setMpLoaded(true);
+        setLoading(false);
+        return;
+      }
+      existingScript.onload = () => {
+        setMpLoaded(true);
+        setLoading(false);
+        initMercadoPago();
+      };
       return;
     }
 
