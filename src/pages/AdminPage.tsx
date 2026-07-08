@@ -400,7 +400,7 @@ export function AdminPage() {
             { id: 'settings' as View, label: 'Configuracion', icon: <DollarSign className="w-5 h-5" /> },
             { id: 'profile' as View, label: 'Perfil', icon: <UserCircle className="w-5 h-5" /> },
             { id: 'whatsapp' as View, label: 'WhatsApp', icon: <MessageSquare className="w-5 h-5" /> },
-            { id: 'trash' as View, label: `${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
+            { id: 'trash' as View, label: `Papelera${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
           ];
           const currentTab = tabs.find(t => t.id === view);
           return (
