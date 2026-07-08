@@ -912,10 +912,16 @@ function AvailabilityManager({
                       <span>Activo</span>
                     </label>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="flex-1 min-w-0 px-3 py-2 border rounded-lg" />
-                    <span className="flex-shrink-0">a</span>
-                    <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="flex-1 min-w-0 px-3 py-2 border rounded-lg" />
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-gray-600 w-12 flex-shrink-0">Desde</label>
+                      <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" />
+                    </div>
+                    <span className="hidden sm:inline flex-shrink-0 self-center">a</span>
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-gray-600 w-12 flex-shrink-0">Hasta</label>
+                      <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" />
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={saveDay} className="flex-1 py-2 text-white rounded-lg bg-emerald-600 hover:bg-emerald-700">Guardar</button>
