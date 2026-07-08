@@ -295,8 +295,8 @@ export function Calendar() {
   return (
     <div className="max-w-4xl px-2 mx-auto sm:px-0">
       <div className="mb-6 text-center">
-        <h2 className="mb-2 text-2xl font-bold text-gray-800 sm:text-3xl">Selecciona fecha y hora</h2>
-        <p className="text-sm text-gray-600 sm:text-base">Elige un día disponible y luego selecciona el horario</p>
+        <h2 className="mb-2 text-2xl font-bold text-white sm:text-3xl">Selecciona fecha y hora</h2>
+        <p className="text-sm text-gray-300 sm:text-base">Elige un día disponible y luego selecciona el horario</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 sm:gap-8">
