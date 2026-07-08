@@ -913,9 +913,9 @@ function AvailabilityManager({
                     </label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="px-3 py-2 border rounded-lg" />
-                    <span>a</span>
-                    <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="px-3 py-2 border rounded-lg" />
+                    <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="flex-1 min-w-0 px-3 py-2 border rounded-lg" />
+                    <span className="flex-shrink-0">a</span>
+                    <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="flex-1 min-w-0 px-3 py-2 border rounded-lg" />
                   </div>
                   <div className="flex gap-2">
                     <button onClick={saveDay} className="flex-1 py-2 text-white rounded-lg bg-emerald-600 hover:bg-emerald-700">Guardar</button>
@@ -923,13 +923,13 @@ function AvailabilityManager({
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${day.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="font-medium text-gray-800">{DAYS[day.day_of_week]}</span>
-                    <span className="text-gray-600">{day.start_time.slice(0, 5)} - {day.end_time.slice(0, 5)}</span>
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={`flex-shrink-0 w-3 h-3 rounded-full ${day.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
+                    <span className="font-medium text-gray-800 whitespace-nowrap">{DAYS[day.day_of_week]}</span>
+                    <span className="text-gray-600 truncate">{day.start_time.slice(0, 5)} - {day.end_time.slice(0, 5)}</span>
                   </div>
-                  <button onClick={() => startEditing(day)} className="p-2 rounded-lg hover:bg-gray-200">
+                  <button onClick={() => startEditing(day)} className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-200">
                     <Edit className="w-4 h-4 text-gray-600" />
                   </button>
                 </div>
