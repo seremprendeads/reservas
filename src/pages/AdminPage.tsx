@@ -393,13 +393,13 @@ export function AdminPage() {
         {(() => {
           const tabs = [
             { id: 'dashboard' as View, label: 'Principal', icon: null as React.ReactNode },
-            { id: 'bookings' as View, label: 'Reservas', icon: <Users className="w-5 h-5" /> },
+            { id: 'bookings' as View, label: 'Reservas', icon: null },
             { id: 'clients' as View, label: 'Clientes', icon: <FileText className="w-5 h-5" /> },
             { id: 'waiting' as View, label: `Lista de espera${waitingList.filter(w => w.estado === 'pendiente').length > 0 ? ` (${waitingList.filter(w => w.estado === 'pendiente').length})` : ''}`, icon: <ClipboardList className="w-5 h-5" /> },
-            { id: 'availability' as View, label: 'Disponibilidad', icon: <Clock className="w-5 h-5" /> },
+            { id: 'availability' as View, label: 'Disponibilidad', icon: null },
             { id: 'settings' as View, label: 'Configuracion', icon: <DollarSign className="w-5 h-5" /> },
-            { id: 'profile' as View, label: 'Perfil', icon: <UserCircle className="w-5 h-5" /> },
-            { id: 'whatsapp' as View, label: 'WhatsApp', icon: <MessageSquare className="w-5 h-5" /> },
+            { id: 'profile' as View, label: 'Perfil', icon: null },
+            { id: 'whatsapp' as View, label: 'WhatsApp', icon: null },
             { id: 'trash' as View, label: `Papelera${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
           ];
           const currentTab = tabs.find(t => t.id === view);
