@@ -55,6 +55,8 @@ export type Branding = {
   subtitle: string;
   primary_color: string;
   background_color: string;
+  card_bg_color: string;
+  text_color: string;
   background_image_url: string;
   updated_at: string;
 };

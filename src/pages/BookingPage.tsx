@@ -32,11 +32,16 @@ function BookingContent() {
 
   const b = branding;
   const primaryColor = b?.primary_color || '#059669';
-  const primaryHover = '#047857';
+  const primaryHover = b?.primary_color ? (() => {
+    const num = parseInt(b.primary_color.replace('#', ''), 16);
+    const r = Math.max(0, (num >> 16) - 30);
+    const g = Math.max(0, ((num >> 8) & 0xFF) - 30);
+    const b2 = Math.max(0, (num & 0xFF) - 30);
+    return `#${(r << 16 | g << 8 | b2).toString(16).padStart(6, '0')}`;
+  })() : '#047857';
   const bgColor = b?.background_color || '#111827';
-  const cardBg = '#1f2937';
-  const borderColor = '#374151';
-  const textColor = '#f3f4f6';
+  const cardBg = b?.card_bg_color || '#1f2937';
+  const textColor = b?.text_color || '#f3f4f6';
   const mutedColor = '#9ca3af';
   const logoUrl = b?.logo_url || '';
   const title = b?.title || 'Reserva tu Turno';
@@ -50,7 +55,6 @@ function BookingContent() {
       root.style.setProperty('--booking-primary-hover', primaryHover);
       root.style.setProperty('--booking-bg', bgColor);
       root.style.setProperty('--booking-card-bg', cardBg);
-      root.style.setProperty('--booking-card-border', borderColor);
       root.style.setProperty('--booking-text', textColor);
       root.style.setProperty('--booking-text-muted', mutedColor);
     }
@@ -124,10 +128,10 @@ function BookingContent() {
           <div className="flex items-center gap-6" style={{ color: textColor }}>
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              <span>Buenos Aires, Argentina</span>
+              <span style={{ color: textColor, opacity: 0.8 }}>Buenos Aires, Argentina</span>
             </div>
           </div>
-          <p className="text-sm" style={{ color: textColor }}>
+          <p className="text-sm" style={{ color: textColor, opacity: 0.8 }}>
             Pagos seguros con Mercado Pago
           </p>
         </div>

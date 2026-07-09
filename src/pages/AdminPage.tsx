@@ -1185,12 +1185,12 @@ function ProfileManager({
 // ─── Appearance (Branding) Manager ─────────────────────────────────────────────
 
 const COLOR_PALETTES = [
-  { name: 'Verde Esmeralda', primary: '#059669', bg: '#111827', card: '#1f2937', border: '#374151', primaryHover: '#047857' },
-  { name: 'Azul Marino', primary: '#2563eb', bg: '#0f172a', card: '#1e293b', border: '#334155', primaryHover: '#1d4ed8' },
-  { name: 'Violeta', primary: '#7c3aed', bg: '#1e1b4b', card: '#2e1065', border: '#4c1d95', primaryHover: '#6d28d9' },
-  { name: 'Rosa', primary: '#db2777', bg: '#1f0f18', card: '#2d1b24', border: '#4a2636', primaryHover: '#be185d' },
-  { name: 'Naranja', primary: '#ea580c', bg: '#1c1109', card: '#2d1a0f', border: '#4a2a18', primaryHover: '#d4530a' },
-  { name: 'Personalizado', primary: '#059669', bg: '#111827', card: '#1f2937', border: '#374151', primaryHover: '#047857' },
+  { name: 'Verde Esmeralda', primary: '#059669', bg: '#111827', card: '#1f2937', text: '#f3f4f6' },
+  { name: 'Azul Cobalto', primary: '#2563eb', bg: '#0f172a', card: '#1e293b', text: '#f1f5f9' },
+  { name: 'Violeta Real', primary: '#7c3aed', bg: '#1e1b4b', card: '#2e1065', text: '#f3f4f6' },
+  { name: 'Rosa Elegante', primary: '#be185d', bg: '#1a0f14', card: '#2d1b24', text: '#fce7f3' },
+  { name: 'Terracota', primary: '#c2410c', bg: '#1c1109', card: '#2d1a0f', text: '#f3f4f6' },
+  { name: 'Gris Pizarra', primary: '#475569', bg: '#0f172a', card: '#1e293b', text: '#f1f5f9' },
 ];
 
 function hexToHover(hex: string): string {
@@ -1215,6 +1215,8 @@ function AppearanceManager({
   const [subtitle, setSubtitle] = useState(branding?.subtitle || 'Sistema de Reserva');
   const [primaryColor, setPrimaryColor] = useState(branding?.primary_color || '#059669');
   const [bgColor, setBgColor] = useState(branding?.background_color || '#111827');
+  const [cardBgColor, setCardBgColor] = useState(branding?.card_bg_color || '#1f2937');
+  const [textColor, setTextColor] = useState(branding?.text_color || '#f3f4f6');
   const [bgImageUrl, setBgImageUrl] = useState(branding?.background_image_url || '');
   const [saving, setSaving] = useState(false);
   const [selectedPalette, setSelectedPalette] = useState<number>(-1);
@@ -1227,6 +1229,8 @@ function AppearanceManager({
     setSelectedPalette(index);
     setPrimaryColor(p.primary);
     setBgColor(p.bg);
+    setCardBgColor(p.card);
+    setTextColor(p.text);
   };
 
   const uploadFile = async (file: File, type: 'logo' | 'bg') => {
@@ -1271,6 +1275,8 @@ function AppearanceManager({
         subtitle,
         primary_color: primaryColor,
         background_color: bgColor,
+        card_bg_color: cardBgColor,
+        text_color: textColor,
         background_image_url: bgImageUrl,
       };
 
@@ -1302,10 +1308,10 @@ function AppearanceManager({
         </CardHeader>
         <CardContent className="p-0">
           <div
-            className="min-h-[120px] px-6 py-4 flex items-center justify-between"
+            className="min-h-[120px] px-6 py-4 flex items-center"
             style={{ backgroundColor: bgColor, backgroundImage: bgImageUrl ? `url(${bgImageUrl})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}
           >
-            <div className="flex items-center gap-3" style={{ backgroundColor: bgImageUrl ? 'rgba(0,0,0,0.5)' : 'transparent', padding: bgImageUrl ? '8px 12px' : '0', borderRadius: bgImageUrl ? '12px' : '0' }}>
+            <div className="flex items-center gap-3" style={{ backgroundColor: bgImageUrl ? 'rgba(0,0,0,0.5)' : cardBgColor, padding: '12px 16px', borderRadius: '12px' }}>
               {logoUrl ? (
                 <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-cover" />
               ) : (
@@ -1314,8 +1320,8 @@ function AppearanceManager({
                 </div>
               )}
               <div>
-                <span className="text-xl font-bold" style={{ color: '#fff' }}>{title || 'Reserva tu Turno'}</span>
-                <p className="text-sm" style={{ color: '#d1d5db' }}>{subtitle || 'Sistema de Reserva'}</p>
+                <span className="text-xl font-bold" style={{ color: textColor }}>{title || 'Reserva tu Turno'}</span>
+                <p className="text-sm" style={{ color: textColor, opacity: 0.7 }}>{subtitle || 'Sistema de Reserva'}</p>
               </div>
             </div>
           </div>
@@ -1385,6 +1391,7 @@ function AppearanceManager({
                 >
                   <div className="flex gap-1">
                     <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.primary }} />
+                    <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.card }} />
                     <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.bg }} />
                   </div>
                   <span className="text-xs font-medium" style={{ color: '#e5e7eb' }}>{p.name}</span>
@@ -1396,7 +1403,7 @@ function AppearanceManager({
           {/* Custom Colors */}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Color principal</label>
+              <label className="text-sm font-medium">Color principal (botones, acentos)</label>
               <div className="flex items-center gap-3">
                 <input type="color" value={primaryColor} onChange={(e) => { setPrimaryColor(e.target.value); setSelectedPalette(-1); }}
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
@@ -1405,12 +1412,30 @@ function AppearanceManager({
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Color de fondo</label>
+              <label className="text-sm font-medium">Color de fondo (página)</label>
               <div className="flex items-center gap-3">
                 <input type="color" value={bgColor} onChange={(e) => { setBgColor(e.target.value); setSelectedPalette(-1); }}
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
                 <Input type="text" value={bgColor} onChange={(e) => { setBgColor(e.target.value); setSelectedPalette(-1); }}
                   className="h-12 font-mono" placeholder="#111827" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Color de tarjetas (header, footer)</label>
+              <div className="flex items-center gap-3">
+                <input type="color" value={cardBgColor} onChange={(e) => { setCardBgColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
+                <Input type="text" value={cardBgColor} onChange={(e) => { setCardBgColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-12 font-mono" placeholder="#1f2937" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Color de texto</label>
+              <div className="flex items-center gap-3">
+                <input type="color" value={textColor} onChange={(e) => { setTextColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
+                <Input type="text" value={textColor} onChange={(e) => { setTextColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-12 font-mono" placeholder="#f3f4f6" />
               </div>
             </div>
           </div>
