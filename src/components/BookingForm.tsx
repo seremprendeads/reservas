@@ -119,7 +119,7 @@ export function BookingForm() {
     <div className="max-w-xl mx-auto">
       <button
         onClick={() => setStep('calendar')}
-        className="flex items-center gap-2 text-gray-600 hover:text-emerald-600 mb-6 transition-colors"
+        className="flex items-center gap-2 text-gray-600 hover:text-booking-primary mb-6 transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
         <span>Volver</span>
@@ -131,9 +131,9 @@ export function BookingForm() {
           Completa tu informacion para confirmar la reserva
         </p>
 
-        <div className="bg-emerald-50 rounded-xl p-4 mb-8">
+        <div className="bg-booking-primary-light rounded-xl p-4 mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-booking-primary rounded-full flex items-center justify-center">
               <span className="text-white font-bold">
                 {bookingData.date?.getDate()}
               </span>
@@ -173,7 +173,7 @@ export function BookingForm() {
                 className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-colors text-lg
                   ${errors.name
                     ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                    : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200'
+                    : 'border-gray-200 focus:border-booking-primary focus:ring-booking-primary'
                   } focus:outline-none focus:ring-2`}
               />
             </div>
@@ -196,7 +196,7 @@ export function BookingForm() {
                 className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-colors text-lg
                   ${errors.phone
                     ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                    : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200'
+                    : 'border-gray-200 focus:border-booking-primary focus:ring-booking-primary'
                   } focus:outline-none focus:ring-2`}
               />
             </div>
@@ -219,7 +219,7 @@ export function BookingForm() {
                 className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-colors text-lg
                   ${errors.email
                     ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                    : 'border-gray-200 focus:border-emerald-500 focus:ring-emeralg-200'
+                    : 'border-gray-200 focus:border-booking-primary focus:ring-booking-primary'
                   } focus:outline-none focus:ring-2`}
               />
             </div>
@@ -231,7 +231,7 @@ export function BookingForm() {
           {settings && (
             <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
               <span className="text-gray-700 font-medium">Total a pagar:</span>
-              <span className="text-2xl font-bold text-emerald-600">
+              <span className="text-2xl font-bold text-booking-primary">
                 ${settings.price.toLocaleString('es-AR')} {settings.currency}
               </span>
             </div>
@@ -240,8 +240,8 @@ export function BookingForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-emerald-600 text-white rounded-xl font-semibold text-lg
-              hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed
+            className="w-full py-4 bg-booking-primary text-white rounded-xl font-semibold text-lg
+              hover:bg-booking-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed
               transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             {loading ? 'Procesando...' : 'Continuar al pago'}

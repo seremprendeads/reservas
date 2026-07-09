@@ -34,8 +34,9 @@ import {
   LayoutDashboard,
   ExternalLink,
   Camera,
+  Palette,
 } from 'lucide-react';
-import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings } from '../lib/supabase';
+import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings, Branding } from '../lib/supabase';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
@@ -50,7 +51,7 @@ import { Skeleton } from '../components/ui/skeleton';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { cn } from '../lib/utils';
 
-type View = 'dashboard' | 'bookings' | 'availability' | 'settings' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile';
+type View = 'dashboard' | 'bookings' | 'availability' | 'settings' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance';
 
 interface WaitingListItem {
   id: string;
@@ -1181,6 +1182,273 @@ function ProfileManager({
   );
 }
 
+// ─── Appearance (Branding) Manager ─────────────────────────────────────────────
+
+const COLOR_PALETTES = [
+  { name: 'Verde Esmeralda', primary: '#059669', bg: '#111827', card: '#1f2937', border: '#374151', primaryHover: '#047857' },
+  { name: 'Azul Marino', primary: '#2563eb', bg: '#0f172a', card: '#1e293b', border: '#334155', primaryHover: '#1d4ed8' },
+  { name: 'Violeta', primary: '#7c3aed', bg: '#1e1b4b', card: '#2e1065', border: '#4c1d95', primaryHover: '#6d28d9' },
+  { name: 'Rosa', primary: '#db2777', bg: '#1f0f18', card: '#2d1b24', border: '#4a2636', primaryHover: '#be185d' },
+  { name: 'Naranja', primary: '#ea580c', bg: '#1c1109', card: '#2d1a0f', border: '#4a2a18', primaryHover: '#d4530a' },
+  { name: 'Personalizado', primary: '#059669', bg: '#111827', card: '#1f2937', border: '#374151', primaryHover: '#047857' },
+];
+
+function hexToHover(hex: string): string {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.max(0, (num >> 16) - 30);
+  const g = Math.max(0, ((num >> 8) & 0xFF) - 30);
+  const b = Math.max(0, (num & 0xFF) - 30);
+  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+}
+
+function AppearanceManager({
+  branding, onRefresh, adminEmail, adminPassword, showSuccess
+}: {
+  branding: Branding | null;
+  onRefresh: () => void;
+  adminEmail: string;
+  adminPassword: string;
+  showSuccess: (msg: string) => void;
+}) {
+  const [logoUrl, setLogoUrl] = useState(branding?.logo_url || '');
+  const [title, setTitle] = useState(branding?.title || 'Reserva tu Turno');
+  const [subtitle, setSubtitle] = useState(branding?.subtitle || 'Sistema de Reserva');
+  const [primaryColor, setPrimaryColor] = useState(branding?.primary_color || '#059669');
+  const [bgColor, setBgColor] = useState(branding?.background_color || '#111827');
+  const [bgImageUrl, setBgImageUrl] = useState(branding?.background_image_url || '');
+  const [saving, setSaving] = useState(false);
+  const [selectedPalette, setSelectedPalette] = useState<number>(-1);
+  const [uploading, setUploading] = useState({ logo: false, bg: false });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const bgFileInputRef = useRef<HTMLInputElement>(null);
+
+  const applyPalette = (index: number) => {
+    const p = COLOR_PALETTES[index];
+    setSelectedPalette(index);
+    setPrimaryColor(p.primary);
+    setBgColor(p.bg);
+  };
+
+  const uploadFile = async (file: File, type: 'logo' | 'bg') => {
+    const bucket = 'branding';
+    const ext = file.name.split('.').pop() || 'jpg';
+    const fileName = `${type}-${Date.now()}.${ext}`;
+
+    setUploading(prev => ({ ...prev, [type]: true }));
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(fileName, file, { upsert: false });
+
+      if (uploadError) throw new Error(uploadError.message);
+
+      const { data: urlData } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(fileName);
+
+      const publicUrl = (urlData?.publicUrl || '') + `?t=${Date.now()}`;
+
+      if (type === 'logo') setLogoUrl(publicUrl);
+      else setBgImageUrl(publicUrl);
+    } catch (err) {
+      console.error(`Upload ${type} error:`, err);
+      showSuccess(`Error al subir ${type === 'logo' ? 'logo' : 'fondo'}. Verificá que exista el bucket "${bucket}" en Supabase.`);
+    } finally {
+      if (type === 'logo' && fileInputRef.current) fileInputRef.current.value = '';
+      if (type === 'bg' && bgFileInputRef.current) bgFileInputRef.current.value = '';
+      setUploading(prev => ({ ...prev, [type]: false }));
+    }
+  };
+
+  const saveBranding = async () => {
+    setSaving(true);
+    try {
+      const data = {
+        email: adminEmail,
+        password: adminPassword,
+        logo_url: logoUrl,
+        title,
+        subtitle,
+        primary_color: primaryColor,
+        background_color: bgColor,
+        background_image_url: bgImageUrl,
+      };
+
+      const { data: res, error } = await supabase.functions.invoke('admin-update-branding', {
+        body: data,
+      });
+
+      if (error || !res?.success) {
+        showSuccess(res?.error || 'Error al guardar');
+        return;
+      }
+
+      onRefresh();
+      showSuccess('Apariencia guardada correctamente');
+    } catch {
+      showSuccess('Error al conectar con el servidor');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-6">
+      {/* Preview */}
+      <Card className="overflow-hidden">
+        <CardHeader>
+          <CardTitle>Vista previa</CardTitle>
+          <CardDescription>Así se ve la página de reservas actualmente</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div
+            className="min-h-[120px] px-6 py-4 flex items-center justify-between"
+            style={{ backgroundColor: bgColor, backgroundImage: bgImageUrl ? `url(${bgImageUrl})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}
+          >
+            <div className="flex items-center gap-3" style={{ backgroundColor: bgImageUrl ? 'rgba(0,0,0,0.5)' : 'transparent', padding: bgImageUrl ? '8px 12px' : '0', borderRadius: bgImageUrl ? '12px' : '0' }}>
+              {logoUrl ? (
+                <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-cover" />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: primaryColor }}>
+                  <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+              )}
+              <div>
+                <span className="text-xl font-bold" style={{ color: '#fff' }}>{title || 'Reserva tu Turno'}</span>
+                <p className="text-sm" style={{ color: '#d1d5db' }}>{subtitle || 'Sistema de Reserva'}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Personalizar apariencia</CardTitle>
+          <CardDescription>Logo, colores y fondo de la página pública de reservas</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Logo */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Logo</label>
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl overflow-hidden border" style={{ backgroundColor: primaryColor }}>
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="h-full w-full object-cover" />
+                ) : (
+                  <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={() => fileInputRef.current?.click()} disabled={uploading.logo} variant="outline" size="sm">
+                  {uploading.logo ? 'Subiendo...' : logoUrl ? 'Cambiar' : 'Subir logo'}
+                </Button>
+                {logoUrl && (
+                  <Button onClick={() => setLogoUrl('')} variant="ghost" size="sm" className="text-destructive">
+                    Eliminar
+                  </Button>
+                )}
+              </div>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, 'logo'); }} />
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Texts */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Título principal</label>
+              <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="h-12" placeholder="Reserva tu Turno" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Subtítulo</label>
+              <Input type="text" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="h-12" placeholder="Sistema de Reserva" />
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Color Palettes */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Paletas de colores</label>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
+              {COLOR_PALETTES.map((p, i) => (
+                <button
+                  key={p.name}
+                  onClick={() => applyPalette(i)}
+                  className={`relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all duration-200 hover:shadow-md ${
+                    selectedPalette === i ? 'border-primary ring-2 ring-primary/20' : 'border-transparent'
+                  }`}
+                  style={{ backgroundColor: p.bg }}
+                >
+                  <div className="flex gap-1">
+                    <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.primary }} />
+                    <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.bg }} />
+                  </div>
+                  <span className="text-xs font-medium" style={{ color: '#e5e7eb' }}>{p.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Custom Colors */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Color principal</label>
+              <div className="flex items-center gap-3">
+                <input type="color" value={primaryColor} onChange={(e) => { setPrimaryColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
+                <Input type="text" value={primaryColor} onChange={(e) => { setPrimaryColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-12 font-mono" placeholder="#059669" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Color de fondo</label>
+              <div className="flex items-center gap-3">
+                <input type="color" value={bgColor} onChange={(e) => { setBgColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
+                <Input type="text" value={bgColor} onChange={(e) => { setBgColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-12 font-mono" placeholder="#111827" />
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Background Image */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Imagen de fondo (opcional)</label>
+            {bgImageUrl && (
+              <div className="relative mb-3 h-32 w-full overflow-hidden rounded-xl">
+                <img src={bgImageUrl} alt="Fondo" className="h-full w-full object-cover" />
+                <button onClick={() => setBgImageUrl('')}
+                  className="absolute right-2 top-2 rounded-lg bg-black/50 p-1.5 text-white backdrop-blur-sm hover:bg-black/70 transition-colors">
+                  <XCircle className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Button onClick={() => bgFileInputRef.current?.click()} disabled={uploading.bg} variant="outline" size="sm">
+                {uploading.bg ? 'Subiendo...' : bgImageUrl ? 'Cambiar fondo' : 'Subir fondo'}
+              </Button>
+              <span className="text-xs text-muted-foreground self-center">1920×1080 recomendado · Máx 5MB</span>
+            </div>
+            <input ref={bgFileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, 'bg'); }} />
+          </div>
+
+          <Separator />
+
+          <Button onClick={saveBranding} disabled={saving} size="lg" className="w-full">
+            {saving ? 'Guardando...' : 'Guardar apariencia'}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 // ─── Sidebar Navigation ──────────────────────────────────────────────────────
 
 interface NavItem {
@@ -1203,6 +1471,7 @@ export function AdminPage() {
   const [availability, setAvailability] = useState<AvailabilitySetting[]>([]);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [branding, setBranding] = useState<Branding | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -1232,11 +1501,12 @@ export function AdminPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [bookingsRes, availRes, blockedRes, settingsRes] = await Promise.all([
+      const [bookingsRes, availRes, blockedRes, settingsRes, brandingRes] = await Promise.all([
         supabase.from('bookings').select('*').order('booking_date', { ascending: true }),
         supabase.from('availability_settings').select('*').order('day_of_week'),
         supabase.from('blocked_dates').select('*').order('date'),
         supabase.from('settings').select('*').maybeSingle(),
+        supabase.from('branding').select('*').maybeSingle(),
       ]);
       if (bookingsRes.data) {
         const active = bookingsRes.data.filter((b: any) => !b.deleted_at);
@@ -1247,6 +1517,7 @@ export function AdminPage() {
       if (availRes.data) setAvailability(availRes.data);
       if (blockedRes.data) setBlockedDates(blockedRes.data);
       if (settingsRes.data) setSettings(settingsRes.data);
+      if (brandingRes.data) setBranding(brandingRes.data);
 
       const { data: wlData } = await supabase.functions.invoke('admin-get-waiting-list', {
         body: { email: adminEmail, password: adminPassword },
@@ -1373,6 +1644,7 @@ export function AdminPage() {
     },
     { id: 'availability', label: 'Disponibilidad', icon: <Clock className="h-5 w-5" /> },
     { id: 'settings', label: 'Configuración', icon: <Settings2 className="h-5 w-5" /> },
+    { id: 'appearance', label: 'Apariencia', icon: <Palette className="h-5 w-5" /> },
     { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
     { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquareText className="h-5 w-5" /> },
     {
@@ -1388,6 +1660,7 @@ export function AdminPage() {
     waiting: 'Lista de Espera',
     availability: 'Disponibilidad',
     settings: 'Configuración',
+    appearance: 'Apariencia',
     profile: 'Perfil',
     whatsapp: 'WhatsApp',
     trash: 'Papelera',
@@ -1860,6 +2133,17 @@ export function AdminPage() {
             <SettingsManager
               settings={settings}
               onRefresh={loadData}
+              adminEmail={adminEmail}
+              adminPassword={adminPassword}
+              showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
+            />
+          )}
+
+          {/* ─── Appearances ────────────────────────────────── */}
+          {view === 'appearance' && (
+            <AppearanceManager
+              branding={branding}
+              onRefresh={() => { loadData(); }}
               adminEmail={adminEmail}
               adminPassword={adminPassword}
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}

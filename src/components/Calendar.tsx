@@ -57,14 +57,14 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
   if (success) {
     return (
       <div className="py-8 text-center">
-        <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100">
-          <CheckCircle className="w-8 h-8 text-emerald-600" />
+        <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-booking-primary-light">
+          <CheckCircle className="w-8 h-8 text-booking-primary" />
         </div>
         <h3 className="mb-2 text-xl font-bold text-gray-800">¡Listo!</h3>
         <p className="mb-6 text-gray-600">
           Te agregamos a la lista de espera. Te avisaremos si se libera un horario.
         </p>
-        <button onClick={onClose} className="px-6 py-3 font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700">
+        <button onClick={onClose} className="px-6 py-3 font-semibold text-white transition-colors bg-booking-primary rounded-xl hover:bg-booking-primary-hover">
           Volver al calendario
         </button>
       </div>
@@ -94,33 +94,33 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
           <label className="block mb-1 text-sm font-medium text-gray-700">Nombre completo *</label>
           <input type="text" value={nombre} onChange={e => setNombre(e.target.value)}
             placeholder="Juan Pérez"
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.nombre ? 'border-red-300' : 'border-gray-200 focus:border-emerald-500'}`} />
+            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.nombre ? 'border-red-300' : 'border-gray-200 focus:border-booking-primary'}`} />
           {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre}</p>}
         </div>
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">Teléfono *</label>
           <input type="tel" value={telefono} onChange={e => setTelefono(e.target.value)}
             placeholder="+54 11 1234-5678"
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.telefono ? 'border-red-300' : 'border-gray-200 focus:border-emerald-500'}`} />
+            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.telefono ? 'border-red-300' : 'border-gray-200 focus:border-booking-primary'}`} />
           {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono}</p>}
         </div>
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">Email *</label>
           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
             placeholder="juan@email.com"
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.email ? 'border-red-300' : 'border-gray-200 focus:border-emerald-500'}`} />
+            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.email ? 'border-red-300' : 'border-gray-200 focus:border-booking-primary'}`} />
           {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
         </div>
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">Horario deseado <span className="text-gray-400">(opcional)</span></label>
           <input type="time" value={horario} onChange={e => setHorario(e.target.value)}
-            className="w-full px-4 py-3 transition-colors border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500" />
+            className="w-full px-4 py-3 transition-colors border-2 border-gray-200 rounded-xl focus:outline-none focus:border-booking-primary" />
         </div>
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">Servicio <span className="text-gray-400">(opcional)</span></label>
           <input type="text" value={servicio} onChange={e => setServicio(e.target.value)}
             placeholder="Ej: Consulta, limpieza, etc."
-            className="w-full px-4 py-3 transition-colors border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500" />
+            className="w-full px-4 py-3 transition-colors border-2 border-gray-200 rounded-xl focus:outline-none focus:border-booking-primary" />
         </div>
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose}
@@ -128,7 +128,7 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
             Cancelar
           </button>
           <button type="submit" disabled={loading}
-            className="flex-1 py-3 font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
+            className="flex-1 py-3 font-semibold text-white transition-colors bg-booking-primary rounded-xl hover:bg-booking-primary-hover disabled:opacity-50">
             {loading ? 'Guardando...' : 'Anotarme'}
           </button>
         </div>
@@ -273,8 +273,8 @@ export function Calendar() {
           className={`h-9 w-full rounded-lg text-sm font-medium transition-all duration-200
             ${available
               ? isSelected
-                ? 'bg-emerald-600 text-white shadow-lg scale-105'
-                : 'hover:bg-emerald-100 text-gray-700'
+                ? 'bg-booking-primary text-white shadow-lg scale-105'
+                : 'hover:bg-booking-primary-light text-gray-700'
               : 'text-gray-300 cursor-not-allowed'
             }`}>
           {day}
@@ -287,7 +287,7 @@ export function Calendar() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-12 h-12 border-b-2 rounded-full animate-spin border-emerald-600" />
+        <div className="w-12 h-12 border-b-2 rounded-full animate-spin border-booking-primary" />
       </div>
     );
   }
@@ -325,7 +325,7 @@ export function Calendar() {
           <div className="grid grid-cols-7 gap-0.5">{renderCalendar()}</div>
 
           <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-gray-500">
-            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-emerald-600" /><span>Seleccionado</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-booking-primary" /><span>Seleccionado</span></div>
             <div className="flex items-center gap-1"><div className="w-3 h-3 bg-gray-100 rounded" /><span>Disponible</span></div>
             <div className="flex items-center gap-1"><div className="w-3 h-3 bg-gray-200 rounded opacity-50" /><span>No disponible</span></div>
           </div>
@@ -341,7 +341,7 @@ export function Calendar() {
           ) : (
             <>
               <div className="flex items-center gap-2 mb-6">
-                <Clock className="w-6 h-6 text-emerald-600" />
+                <Clock className="w-6 h-6 text-booking-primary" />
                 <h3 className="text-xl font-semibold text-gray-800">Horarios disponibles</h3>
               </div>
 
@@ -353,7 +353,7 @@ export function Calendar() {
                       return (
                         <button key={time} onClick={() => setTime(time)}
                           className={`py-3 px-4 rounded-xl text-lg font-medium transition-all duration-200
-                            ${isSelected ? 'bg-emerald-600 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-emerald-50'}`}>
+                            ${isSelected ? 'bg-booking-primary text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-booking-primary-light'}`}>
                           {time}
                         </button>
                       );
@@ -401,7 +401,7 @@ export function Calendar() {
               <button onClick={handleContinue} disabled={!bookingData.date || !bookingData.time}
                 className={`w-full py-4 rounded-xl text-lg font-semibold transition-all duration-300
                   ${bookingData.date && bookingData.time
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg hover:shadow-xl'
+                    ? 'bg-booking-primary text-white hover:bg-booking-primary-hover shadow-lg hover:shadow-xl'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   }`}>
                 Continuar

@@ -68,3 +68,31 @@
     text-wrap: balance;
   }
 }
+
+/* Booking page dynamic theme variables (set via JS at runtime) */
+:root {
+  --booking-primary: #059669;
+  --booking-primary-hover: #047857;
+  --booking-primary-light: #d1fae5;
+  --booking-primary-dark: #065f46;
+  --booking-bg: #111827;
+  --booking-card-bg: #1f2937;
+  --booking-card-border: #374151;
+  --booking-text: #f3f4f6;
+  --booking-text-muted: #9ca3af;
+}
+
+.bg-booking-primary { background-color: var(--booking-primary); }
+.hover\:bg-booking-primary-hover:hover { background-color: var(--booking-primary-hover); }
+.bg-booking-primary-light { background-color: var(--booking-primary-light); }
+.text-booking-primary { color: var(--booking-primary); }
+.text-booking-primary-dark { color: var(--booking-primary-dark); }
+.ring-booking-primary { --tw-ring-color: var(--booking-primary); }
+.border-booking-primary { border-color: var(--booking-primary); }
+.from-booking-primary { --tw-gradient-from: var(--booking-primary); }
+.to-booking-primary-hover { --tw-gradient-to: var(--booking-primary-hover); }
+.bg-booking-bg { background-color: var(--booking-bg); }
+.bg-booking-card { background-color: var(--booking-card-bg); }
+.border-booking-card { border-color: var(--booking-card-border); }
+.text-booking-text { color: var(--booking-text); }
+.text-booking-muted { color: var(--booking-text-muted); }

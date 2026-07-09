@@ -47,3 +47,14 @@ export type Settings = {
   currency: string;
   slot_duration_minutes: number;
 };
+
+export type Branding = {
+  id: string;
+  logo_url: string;
+  title: string;
+  subtitle: string;
+  primary_color: string;
+  background_color: string;
+  background_image_url: string;
+  updated_at: string;
+};

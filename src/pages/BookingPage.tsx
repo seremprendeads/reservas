@@ -1,13 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar } from '../components/Calendar';
 import { BookingForm } from '../components/BookingForm';
 import { Payment } from '../components/Payment';
 import { Confirmation } from '../components/Confirmation';
 import { BookingProvider, useBooking } from '../contexts/BookingContext';
-import { Clock, Phone, MapPin } from 'lucide-react';
+import { Phone, MapPin } from 'lucide-react';
+import { supabase, Branding } from '../lib/supabase';
 
 function BookingContent() {
   const { step } = useBooking();
+  const [branding, setBranding] = useState<Branding | null>(null);
 
   useEffect(() => {
     if (!document.getElementById('mp-sdk')) {
@@ -18,63 +20,98 @@ function BookingContent() {
     }
   }, []);
 
+  useEffect(() => {
+    supabase
+      .from('branding')
+      .select('*')
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setBranding(data as Branding);
+      });
+  }, []);
+
+  const b = branding;
+  const primaryColor = b?.primary_color || '#059669';
+  const primaryHover = '#047857';
+  const bgColor = b?.background_color || '#111827';
+  const cardBg = '#1f2937';
+  const borderColor = '#374151';
+  const textColor = '#f3f4f6';
+  const mutedColor = '#9ca3af';
+  const logoUrl = b?.logo_url || '';
+  const title = b?.title || 'Reserva tu Turno';
+  const subtitle = b?.subtitle || 'Sistema de Reserva';
+  const bgImageUrl = b?.background_image_url || '';
+
+  useEffect(() => {
+    if (b) {
+      const root = document.documentElement;
+      root.style.setProperty('--booking-primary', primaryColor);
+      root.style.setProperty('--booking-primary-hover', primaryHover);
+      root.style.setProperty('--booking-bg', bgColor);
+      root.style.setProperty('--booking-card-bg', cardBg);
+      root.style.setProperty('--booking-card-border', borderColor);
+      root.style.setProperty('--booking-text', textColor);
+      root.style.setProperty('--booking-text-muted', mutedColor);
+    }
+  }, [b]);
+
+  const stepIndex = ['calendar', 'form', 'payment', 'confirmation'];
+
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: bgColor, backgroundImage: bgImageUrl ? `url(${bgImageUrl})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       {/* Header */}
-      <header className="bg-gray-800 shadow-sm">
+      <header style={{ backgroundColor: bgImageUrl ? 'rgba(0,0,0,0.6)' : cardBg, backdropFilter: bgImageUrl ? 'blur(8px)' : undefined }}>
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
-              <Clock className="w-6 h-6 text-white" />
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-cover" />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: primaryColor }}>
+                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+            )}
+            <div>
+              <span className="text-xl font-bold" style={{ color: textColor }}>{title}</span>
+              {subtitle && <p className="text-sm" style={{ color: mutedColor }}>{subtitle}</p>}
             </div>
-            <span className="text-xl font-bold text-gray-100">Reserva tu Turno</span>
           </div>
         </div>
       </header>
 
       {/* Progress Steps */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 py-6 w-full">
         <div className="flex items-center justify-center gap-2 mb-8">
           {['calendar', 'form', 'payment', 'confirmation'].map((s, i) => (
             <div key={s} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                ${step === s || ['calendar', 'form', 'payment', 'confirmation'].indexOf(step) > i
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-gray-200 text-gray-500'
-                }`}
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
+                style={{
+                  backgroundColor: step === s || stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb',
+                  color: step === s || stepIndex.indexOf(step) > i ? '#fff' : '#6b7280'
+                }}
               >
                 {i + 1}
               </div>
               {i < 3 && (
-                <div className={`w-12 h-1 mx-2 rounded
-                  ${['calendar', 'form', 'payment', 'confirmation'].indexOf(step) > i
-                    ? 'bg-emerald-600'
-                    : 'bg-gray-200'
-                  }`}
+                <div className="w-12 h-1 mx-2 rounded"
+                  style={{ backgroundColor: stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb' }}
                 />
               )}
             </div>
           ))}
         </div>
 
-        <div className="flex justify-center gap-4 text-sm text-gray-300 mb-8">
-          <span className={step === 'calendar' ? 'font-semibold text-emerald-600' : ''}>
-            Fecha y hora
-          </span>
-          <span className={step === 'form' ? 'font-semibold text-emerald-600' : ''}>
-            Tus datos
-          </span>
-          <span className={step === 'payment' ? 'font-semibold text-emerald-600' : ''}>
-            Pago
-          </span>
-          <span className={step === 'confirmation' ? 'font-semibold text-emerald-600' : ''}>
-            Confirmacion
-          </span>
+        <div className="flex justify-center gap-4 text-sm mb-8" style={{ color: mutedColor }}>
+          {['Fecha y hora', 'Tus datos', 'Pago', 'Confirmación'].map((label, i) => (
+            <span key={label} style={{ fontWeight: stepIndex.indexOf(step) === i ? 600 : 400, color: stepIndex.indexOf(step) === i ? primaryColor : mutedColor }}>
+              {label}
+            </span>
+          ))}
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 pb-12">
+      <main className="max-w-6xl mx-auto px-4 pb-12 w-full">
         {step === 'calendar' && <Calendar />}
         {step === 'form' && <BookingForm />}
         {step === 'payment' && <Payment />}
@@ -82,17 +119,16 @@ function BookingContent() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 mt-auto py-8">
+      <footer className="mt-auto py-8" style={{ backgroundColor: bgImageUrl ? 'rgba(0,0,0,0.6)' : cardBg, backdropFilter: bgImageUrl ? 'blur(8px)' : undefined }}>
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-6 text-gray-200">
+          <div className="flex items-center gap-6" style={{ color: textColor }}>
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               <span>Buenos Aires, Argentina</span>
             </div>
           </div>
-          <p className="text-gray-200 text-sm">
-            Pagos seguros con Mercado Pago 
-
+          <p className="text-sm" style={{ color: textColor }}>
+            Pagos seguros con Mercado Pago
           </p>
         </div>
       </footer>

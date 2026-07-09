@@ -141,7 +141,7 @@ export function Payment() {
   if (loading) {
     return (
       <div className="max-w-xl py-20 mx-auto text-center">
-        <Loader2 className="w-12 h-12 mx-auto mb-4 text-emerald-600 animate-spin" />
+        <Loader2 className="w-12 h-12 mx-auto mb-4 text-booking-primary animate-spin" />
         <p className="text-gray-600">Preparando el pago...</p>
       </div>
     );
@@ -158,7 +158,7 @@ export function Payment() {
           <p className="mb-6 text-red-600">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-3 font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700"
+            className="w-full py-3 font-semibold text-white transition-colors bg-booking-primary rounded-xl hover:bg-booking-primary-hover"
           >
             Intentar nuevamente
           </button>
@@ -171,8 +171,8 @@ export function Payment() {
     <div className="max-w-xl mx-auto">
       <div className="p-8 bg-white shadow-lg rounded-2xl">
         <div className="mb-8 text-center">
-          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100">
-            <CreditCard className="w-8 h-8 text-emerald-600" />
+          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-booking-primary-light">
+            <CreditCard className="w-8 h-8 text-booking-primary" />
           </div>
           <h2 className="mb-2 text-2xl font-bold text-gray-800">Confirmar tu reserva</h2>
           <p className="text-gray-600">
@@ -180,7 +180,7 @@ export function Payment() {
           </p>
         </div>
 
-        <div className="p-4 mb-6 bg-emerald-50 rounded-xl">
+        <div className="p-4 mb-6 bg-booking-primary-light rounded-xl">
           <div className="flex items-center justify-between">
             <span className="text-gray-700">Fecha:</span>
             <span className="font-medium">
@@ -195,9 +195,9 @@ export function Payment() {
             <span className="text-gray-700">Hora:</span>
             <span className="font-medium">{bookingData.time} hs</span>
           </div>
-          <div className="flex items-center justify-between pt-2 mt-2 border-t border-emerald-200">
+          <div className="flex items-center justify-between pt-2 mt-2 border-t border-booking-card">
             <span className="font-medium text-gray-700">Total:</span>
-            <span className="text-xl font-bold text-emerald-600">
+            <span className="text-xl font-bold text-booking-primary">
               ${bookingData.amount.toLocaleString('es-AR')} {bookingData.currency}
             </span>
           </div>
@@ -213,7 +213,7 @@ export function Payment() {
         <div id="mercadopago_container" className="min-h-[100px]">
           {!mpLoaded && (
             <div className="py-8 text-center">
-              <Loader2 className="w-8 h-8 mx-auto mb-2 text-emerald-600 animate-spin" />
+              <Loader2 className="w-8 h-8 mx-auto mb-2 text-booking-primary animate-spin" />
               <p className="text-gray-500">Cargando opciones de pago...</p>
             </div>
           )}

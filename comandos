@@ -17,5 +17,9 @@ git commit -m "remove (nombre de hoja o carpeta) folder"
 git push
 
 ---------------------------------------
+git add .
+git commit -m "Perfil imagen"
+git push
+
 
 
