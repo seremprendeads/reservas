@@ -25,7 +25,8 @@ function BookingContent() {
       .from('branding')
       .select('*')
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        console.log('Branding data:', data, 'Error:', error);
         if (data) setBranding(data as Branding);
       });
   }, []);
