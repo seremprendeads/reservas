@@ -1185,12 +1185,12 @@ function ProfileManager({
 // ─── Appearance (Branding) Manager ─────────────────────────────────────────────
 
 const COLOR_PALETTES = [
-  { name: 'Verde Esmeralda', primary: '#059669', bg: '#111827', card: '#1f2937', text: '#f3f4f6' },
-  { name: 'Azul Cobalto', primary: '#2563eb', bg: '#0f172a', card: '#1e293b', text: '#f1f5f9' },
-  { name: 'Violeta Real', primary: '#7c3aed', bg: '#1e1b4b', card: '#2e1065', text: '#f3f4f6' },
-  { name: 'Rosa Elegante', primary: '#be185d', bg: '#1a0f14', card: '#2d1b24', text: '#fce7f3' },
-  { name: 'Terracota', primary: '#c2410c', bg: '#1c1109', card: '#2d1a0f', text: '#f3f4f6' },
-  { name: 'Gris Pizarra', primary: '#475569', bg: '#0f172a', card: '#1e293b', text: '#f1f5f9' },
+  { name: 'Verde Esmeralda', primary: '#059669', bg: '#111827', card: '#1f2937', text: '#f3f4f6', muted: '#9ca3af' },
+  { name: 'Azul Cobalto', primary: '#2563eb', bg: '#0f172a', card: '#1e293b', text: '#f1f5f9', muted: '#94a3b8' },
+  { name: 'Violeta Real', primary: '#7c3aed', bg: '#1e1b4b', card: '#2e1065', text: '#f3f4f6', muted: '#9ca3af' },
+  { name: 'Rosa Elegante', primary: '#be185d', bg: '#1a0f14', card: '#2d1b24', text: '#fce7f3', muted: '#d4a3b3' },
+  { name: 'Terracota', primary: '#c2410c', bg: '#1c1109', card: '#2d1a0f', text: '#f3f4f6', muted: '#b89a8a' },
+  { name: 'Gris Pizarra', primary: '#475569', bg: '#0f172a', card: '#1e293b', text: '#f1f5f9', muted: '#64748b' },
 ];
 
 function hexToHover(hex: string): string {
@@ -1217,6 +1217,7 @@ function AppearanceManager({
   const [bgColor, setBgColor] = useState(branding?.background_color || '#111827');
   const [cardBgColor, setCardBgColor] = useState(branding?.card_bg_color || '#1f2937');
   const [textColor, setTextColor] = useState(branding?.text_color || '#f3f4f6');
+  const [mutedColor, setMutedColor] = useState(branding?.muted_color || '#9ca3af');
   const [bgImageUrl, setBgImageUrl] = useState(branding?.background_image_url || '');
   const [saving, setSaving] = useState(false);
   const [selectedPalette, setSelectedPalette] = useState<number>(-1);
@@ -1231,6 +1232,7 @@ function AppearanceManager({
     setBgColor(p.bg);
     setCardBgColor(p.card);
     setTextColor(p.text);
+    setMutedColor(p.muted);
   };
 
   const uploadFile = async (file: File, type: 'logo' | 'bg') => {
@@ -1277,6 +1279,7 @@ function AppearanceManager({
         background_color: bgColor,
         card_bg_color: cardBgColor,
         text_color: textColor,
+        muted_color: mutedColor,
         background_image_url: bgImageUrl,
       };
 
@@ -1321,7 +1324,7 @@ function AppearanceManager({
               )}
               <div>
                 <span className="text-xl font-bold" style={{ color: textColor }}>{title || 'Reserva tu Turno'}</span>
-                <p className="text-sm" style={{ color: textColor, opacity: 0.7 }}>{subtitle || 'Sistema de Reserva'}</p>
+                <p className="text-sm" style={{ color: mutedColor }}>{subtitle || 'Sistema de Reserva'}</p>
               </div>
             </div>
           </div>
@@ -1391,6 +1394,7 @@ function AppearanceManager({
                 >
                   <div className="flex gap-1">
                     <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.primary }} />
+                    <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.muted }} />
                     <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.card }} />
                     <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.bg }} />
                   </div>
@@ -1436,6 +1440,15 @@ function AppearanceManager({
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
                 <Input type="text" value={textColor} onChange={(e) => { setTextColor(e.target.value); setSelectedPalette(-1); }}
                   className="h-12 font-mono" placeholder="#f3f4f6" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Color de subtítulos y textos secundarios</label>
+              <div className="flex items-center gap-3">
+                <input type="color" value={mutedColor} onChange={(e) => { setMutedColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
+                <Input type="text" value={mutedColor} onChange={(e) => { setMutedColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-12 font-mono" placeholder="#9ca3af" />
               </div>
             </div>
           </div>

@@ -55,7 +55,7 @@ export function Confirmation() {
           Reserva confirmada
         </h1>
 
-        <p className="text-gray-600 mb-8">
+        <p className="text-booking-muted mb-8">
           Tu turno ha sido reservado exitosamente. Guarda tu codigo de reserva.
         </p>
 
@@ -79,7 +79,7 @@ export function Confirmation() {
           <div className="space-y-3 text-left">
             <div className="flex items-center gap-3">
               <Calendar className="w-5 h-5 text-booking-primary" />
-              <span className="text-gray-700">{bookingData.date?.toLocaleDateString('es-AR', {
+              <span className="text-booking-text">{bookingData.date?.toLocaleDateString('es-AR', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
@@ -88,7 +88,7 @@ export function Confirmation() {
             </div>
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-booking-primary" />
-              <span className="text-gray-700">{bookingData.time} hs</span>
+              <span className="text-booking-text">{bookingData.time} hs</span>
             </div>
           </div>
         </div>

@@ -43,7 +43,7 @@ function BookingContent() {
   const bgColor = b?.background_color || '#111827';
   const cardBg = b?.card_bg_color || '#1f2937';
   const textColor = b?.text_color || '#f3f4f6';
-  const mutedColor = '#9ca3af';
+  const mutedColor = b?.muted_color || '#9ca3af';
   const logoUrl = b?.logo_url || '';
   const title = b?.title || 'Reserva tu Turno';
   const subtitle = b?.subtitle || 'Sistema de Reserva';
@@ -78,7 +78,7 @@ function BookingContent() {
             )}
             <div>
               <span className="text-xl font-bold" style={{ color: textColor }}>{title}</span>
-              {subtitle && <p className="text-sm" style={{ color: textColor, opacity: 0.7 }}>{subtitle}</p>}
+              {subtitle && <p className="text-sm" style={{ color: mutedColor }}>{subtitle}</p>}
             </div>
           </div>
         </div>
@@ -139,10 +139,10 @@ function BookingContent() {
           <div className="flex items-center gap-6" style={{ color: textColor }}>
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              <span style={{ color: textColor, opacity: 0.8 }}>Buenos Aires, Argentina</span>
+              <span style={{ color: mutedColor }}>Buenos Aires, Argentina</span>
             </div>
           </div>
-          <p className="text-sm" style={{ color: textColor, opacity: 0.8 }}>
+          <p className="text-sm" style={{ color: mutedColor }}>
             Pagos seguros con Mercado Pago
           </p>
         </div>

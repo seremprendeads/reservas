@@ -60,8 +60,8 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
         <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-booking-primary-light">
           <CheckCircle className="w-8 h-8 text-booking-primary" />
         </div>
-        <h3 className="mb-2 text-xl font-bold text-gray-800">¡Listo!</h3>
-        <p className="mb-6 text-gray-600">
+        <h3 className="mb-2 text-xl font-bold text-booking-text">¡Listo!</h3>
+        <p className="mb-6 text-booking-muted">
           Te agregamos a la lista de espera. Te avisaremos si se libera un horario.
         </p>
         <button onClick={onClose} className="px-6 py-3 font-semibold text-white transition-colors bg-booking-primary rounded-xl hover:bg-booking-primary-hover">
@@ -78,8 +78,8 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
           <Users className="w-5 h-5 text-amber-600" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-gray-800">Lista de espera</h3>
-          <p className="text-sm text-gray-500">
+          <h3 className="text-lg font-bold text-booking-text">Lista de espera</h3>
+          <p className="text-sm text-booking-muted">
             {selectedDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
         </div>
@@ -91,40 +91,40 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Nombre completo *</label>
+          <label className="block mb-1 text-sm font-medium text-booking-text">Nombre completo *</label>
           <input type="text" value={nombre} onChange={e => setNombre(e.target.value)}
             placeholder="Juan Pérez"
             className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.nombre ? 'border-red-300' : 'border-gray-200 focus:border-booking-primary'}`} />
           {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre}</p>}
         </div>
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Teléfono *</label>
+          <label className="block mb-1 text-sm font-medium text-booking-text">Teléfono *</label>
           <input type="tel" value={telefono} onChange={e => setTelefono(e.target.value)}
             placeholder="+54 11 1234-5678"
             className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.telefono ? 'border-red-300' : 'border-gray-200 focus:border-booking-primary'}`} />
           {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono}</p>}
         </div>
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Email *</label>
+          <label className="block mb-1 text-sm font-medium text-booking-text">Email *</label>
           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
             placeholder="juan@email.com"
             className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${errors.email ? 'border-red-300' : 'border-gray-200 focus:border-booking-primary'}`} />
           {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
         </div>
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Horario deseado <span className="text-gray-400">(opcional)</span></label>
+          <label className="block mb-1 text-sm font-medium text-booking-text">Horario deseado <span className="text-booking-muted">(opcional)</span></label>
           <input type="time" value={horario} onChange={e => setHorario(e.target.value)}
             className="w-full px-4 py-3 transition-colors border-2 border-gray-200 rounded-xl focus:outline-none focus:border-booking-primary" />
         </div>
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Servicio <span className="text-gray-400">(opcional)</span></label>
+          <label className="block mb-1 text-sm font-medium text-booking-text">Servicio <span className="text-booking-muted">(opcional)</span></label>
           <input type="text" value={servicio} onChange={e => setServicio(e.target.value)}
             placeholder="Ej: Consulta, limpieza, etc."
             className="w-full px-4 py-3 transition-colors border-2 border-gray-200 rounded-xl focus:outline-none focus:border-booking-primary" />
         </div>
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose}
-            className="flex-1 py-3 font-semibold text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200">
+            className="flex-1 py-3 font-semibold text-booking-text transition-colors bg-gray-100 rounded-xl hover:bg-gray-200">
             Cancelar
           </button>
           <button type="submit" disabled={loading}
@@ -274,8 +274,8 @@ export function Calendar() {
             ${available
               ? isSelected
                 ? 'bg-booking-primary text-white shadow-lg scale-105'
-                : 'hover:bg-booking-primary-light text-gray-700'
-              : 'text-gray-300 cursor-not-allowed'
+                : 'hover:bg-booking-primary-light text-booking-text'
+              : 'text-booking-muted opacity-50 cursor-not-allowed'
             }`}>
           {day}
         </button>
@@ -305,26 +305,26 @@ export function Calendar() {
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
               className="p-2 transition-colors rounded-lg hover:bg-gray-100">
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
+              <ChevronLeft className="w-5 h-5 text-booking-muted" />
             </button>
-            <h3 className="text-base font-semibold text-gray-800 sm:text-xl">
+            <h3 className="text-base font-semibold text-booking-text sm:text-xl">
               {MONTHS[currentMonth.getMonth()]} {currentMonth.getFullYear()}
             </h3>
             <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
               className="p-2 transition-colors rounded-lg hover:bg-gray-100">
-              <ChevronRight className="w-5 h-5 text-gray-600" />
+              <ChevronRight className="w-5 h-5 text-booking-muted" />
             </button>
           </div>
 
           <div className="grid grid-cols-7 gap-0.5 mb-1">
             {DAYS_SHORT.map((day, i) => (
-              <div key={i} className="py-1 text-xs font-medium text-center text-gray-500">{day}</div>
+              <div key={i} className="py-1 text-xs font-medium text-center text-booking-muted">{day}</div>
             ))}
           </div>
 
           <div className="grid grid-cols-7 gap-0.5">{renderCalendar()}</div>
 
-          <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-gray-500">
+          <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-booking-muted">
             <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-booking-primary" /><span>Seleccionado</span></div>
             <div className="flex items-center gap-1"><div className="w-3 h-3 bg-gray-100 rounded" /><span>Disponible</span></div>
             <div className="flex items-center gap-1"><div className="w-3 h-3 bg-gray-200 rounded opacity-50" /><span>No disponible</span></div>
@@ -342,7 +342,7 @@ export function Calendar() {
             <>
               <div className="flex items-center gap-2 mb-6">
                 <Clock className="w-6 h-6 text-booking-primary" />
-                <h3 className="text-xl font-semibold text-gray-800">Horarios disponibles</h3>
+                <h3 className="text-xl font-semibold text-booking-text">Horarios disponibles</h3>
               </div>
 
               {selectedDate ? (
@@ -353,7 +353,7 @@ export function Calendar() {
                       return (
                         <button key={time} onClick={() => setTime(time)}
                           className={`py-3 px-4 rounded-xl text-lg font-medium transition-all duration-200
-                            ${isSelected ? 'bg-booking-primary text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-booking-primary-light'}`}>
+                            ${isSelected ? 'bg-booking-primary text-white shadow-lg' : 'bg-gray-100 text-booking-text hover:bg-booking-primary-light'}`}>
                           {time}
                         </button>
                       );
@@ -365,8 +365,8 @@ export function Calendar() {
                     <div className="flex items-center justify-center mx-auto mb-4 rounded-full w-14 h-14 bg-amber-100">
                       <CalendarIcon className="w-7 h-7 text-amber-500" />
                     </div>
-                    <p className="mb-2 font-medium text-gray-700">No hay turnos disponibles para esta fecha</p>
-                    <p className="mb-6 text-sm text-gray-500">Podés anotarte en la lista de espera y te avisamos si se libera un horario.</p>
+                    <p className="mb-2 font-medium text-booking-text">No hay turnos disponibles para esta fecha</p>
+                    <p className="mb-6 text-sm text-booking-muted">Podés anotarte en la lista de espera y te avisamos si se libera un horario.</p>
                     <button
                       onClick={() => setShowWaitingForm(true)}
                       className="flex items-center gap-2 px-6 py-3 mx-auto font-semibold text-white transition-colors bg-amber-500 rounded-xl hover:bg-amber-600"
@@ -379,18 +379,18 @@ export function Calendar() {
               ) : (
                 <div className="py-10 text-center">
                   <CalendarIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p className="text-gray-500">Selecciona una fecha para ver los horarios</p>
+                  <p className="text-booking-muted">Selecciona una fecha para ver los horarios</p>
                 </div>
               )}
 
               {selectedDate && availableTimeSlots.length > 0 && (
                 <div className="pt-4 border-t">
-                  <div className="flex items-center gap-2 mb-4 text-gray-600">
+                  <div className="flex items-center gap-2 mb-4 text-booking-muted">
                     <CalendarIcon className="w-5 h-5" />
                     <span>{selectedDate.toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                   </div>
                   {bookingData.time && (
-                    <div className="flex items-center gap-2 mb-4 text-gray-600">
+                    <div className="flex items-center gap-2 mb-4 text-booking-muted">
                       <Clock className="w-5 h-5" />
                       <span>{bookingData.time} hs</span>
                     </div>
@@ -402,7 +402,7 @@ export function Calendar() {
                 className={`w-full py-4 rounded-xl text-lg font-semibold transition-all duration-300
                   ${bookingData.date && bookingData.time
                     ? 'bg-booking-primary text-white hover:bg-booking-primary-hover shadow-lg hover:shadow-xl'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-booking-muted cursor-not-allowed'
                   }`}>
                 Continuar
               </button>

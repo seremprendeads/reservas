@@ -119,7 +119,7 @@ export function BookingForm() {
     <div className="max-w-xl mx-auto">
       <button
         onClick={() => setStep('calendar')}
-        className="flex items-center gap-2 text-gray-600 hover:text-booking-primary mb-6 transition-colors"
+        className="flex items-center gap-2 text-booking-muted hover:text-booking-primary mb-6 transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
         <span>Volver</span>
@@ -127,7 +127,7 @@ export function BookingForm() {
 
       <div className="bg-white rounded-2xl shadow-lg p-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Tus datos</h2>
-        <p className="text-gray-600 mb-8">
+        <p className="text-booking-muted mb-8">
           Completa tu informacion para confirmar la reserva
         </p>
 
@@ -139,14 +139,14 @@ export function BookingForm() {
               </span>
             </div>
             <div>
-              <p className="font-medium text-gray-800">
+              <p className="font-medium text-booking-text">
                 {bookingData.date?.toLocaleDateString('es-AR', {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
                 })}
               </p>
-              <p className="text-sm text-gray-600">{bookingData.time} hs</p>
+              <p className="text-sm text-booking-muted">{bookingData.time} hs</p>
             </div>
           </div>
         </div>
@@ -160,11 +160,11 @@ export function BookingForm() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-booking-text mb-2">
               Nombre completo
             </label>
             <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-booking-muted" />
               <input
                 type="text"
                 value={name}
@@ -183,11 +183,11 @@ export function BookingForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-booking-text mb-2">
               Celular
             </label>
             <div className="relative">
-              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-booking-muted" />
               <input
                 type="tel"
                 value={phone}
@@ -206,11 +206,11 @@ export function BookingForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-booking-text mb-2">
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-booking-muted" />
               <input
                 type="email"
                 value={email}
@@ -230,7 +230,7 @@ export function BookingForm() {
 
           {settings && (
             <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
-              <span className="text-gray-700 font-medium">Total a pagar:</span>
+              <span className="text-booking-text font-medium">Total a pagar:</span>
               <span className="text-2xl font-bold text-booking-primary">
                 ${settings.price.toLocaleString('es-AR')} {settings.currency}
               </span>
