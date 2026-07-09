@@ -992,7 +992,10 @@ function ProfileManager({
         .from('avatars')
         .upload(fileName, file, { upsert: true });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Supabase upload error:', uploadError);
+        throw new Error(uploadError.message || 'Error al subir');
+      }
 
       const { data: urlData } = supabase.storage
         .from('avatars')
@@ -1001,8 +1004,9 @@ function ProfileManager({
       const publicUrl = urlData?.publicUrl || '';
       onAvatarChange(publicUrl);
       showSuccess('Imagen de perfil actualizada');
-    } catch {
-      setError('Error al subir la imagen. Verificá que exista el bucket "avatars" en Supabase Storage.');
+    } catch (err) {
+      console.error('Avatar upload error:', err);
+      setError(err instanceof Error ? `Error: ${err.message}` : 'Error al subir la imagen');
     } finally {
       setUploading(false);
     }
