@@ -986,11 +986,11 @@ function ProfileManager({
 
     try {
       const fileExt = file.name.split('.').pop() || 'jpg';
-      const fileName = `avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
+      const fileName = `avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file, { upsert: false });
 
       if (uploadError) {
         console.error('Supabase upload error:', uploadError);
@@ -1001,13 +1001,16 @@ function ProfileManager({
         .from('avatars')
         .getPublicUrl(fileName);
 
-      const publicUrl = urlData?.publicUrl || '';
+      const cacheBuster = `?t=${Date.now()}`;
+      const publicUrl = (urlData?.publicUrl || '') + cacheBuster;
+      console.log('Avatar public URL:', publicUrl);
       onAvatarChange(publicUrl);
       showSuccess('Imagen de perfil actualizada');
     } catch (err) {
       console.error('Avatar upload error:', err);
       setError(err instanceof Error ? `Error: ${err.message}` : 'Error al subir la imagen');
     } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
       setUploading(false);
     }
   };

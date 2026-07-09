@@ -17,7 +17,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       {...props}
     >
       {src ? (
-        <img src={src} alt={fallback} className="h-full w-full object-cover" />
+        <img src={src} alt={fallback} className="h-full w-full object-cover" onError={(e) => console.error('Avatar img load error:', e.currentTarget.src)} />
       ) : (
         <span className="flex h-full w-full items-center justify-center text-sm font-medium text-muted-foreground">
           {fallback}
