@@ -63,15 +63,9 @@ function BookingContent() {
   const stepIndex = ['calendar', 'form', 'payment', 'confirmation'];
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{ backgroundColor: bgColor }}>
-      {bgImageUrl && (
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${bgImageUrl})` }}>
-          <div className="absolute inset-0" style={{ backgroundColor: `${bgColor}cc` }} />
-        </div>
-      )}
-      <div className="relative z-10 flex flex-col min-h-screen">
-      {/* Header */}
-      <header style={{ backgroundColor: bgImageUrl ? `${cardBg}99` : cardBg, backdropFilter: bgImageUrl ? 'blur(8px)' : undefined }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: bgColor }}>
+      {/* Header (sin overlay) */}
+      <header style={{ backgroundColor: cardBg }}>
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {logoUrl ? (
@@ -83,53 +77,63 @@ function BookingContent() {
             )}
             <div>
               <span className="text-xl font-bold" style={{ color: textColor }}>{title}</span>
-              {subtitle && <p className="text-sm" style={{ color: mutedColor }}>{subtitle}</p>}
+              {subtitle && <p className="text-sm" style={{ color: textColor, opacity: 0.7 }}>{subtitle}</p>}
             </div>
           </div>
         </div>
       </header>
 
-      {/* Progress Steps */}
-      <div className="max-w-4xl mx-auto px-4 py-6 w-full">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          {['calendar', 'form', 'payment', 'confirmation'].map((s, i) => (
-            <div key={s} className="flex items-center">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
-                style={{
-                  backgroundColor: step === s || stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb',
-                  color: step === s || stepIndex.indexOf(step) > i ? '#fff' : '#6b7280'
-                }}
-              >
-                {i + 1}
-              </div>
-              {i < 3 && (
-                <div className="w-12 h-1 mx-2 rounded"
-                  style={{ backgroundColor: stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb' }}
-                />
-              )}
+      {/* Contenido principal con overlay solo acá */}
+      <div className="flex-1 relative">
+        {bgImageUrl && (
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${bgImageUrl})` }}>
+            <div className="absolute inset-0" style={{ backgroundColor: `${bgColor}cc` }} />
+          </div>
+        )}
+        <div className="relative z-10">
+          {/* Progress Steps */}
+          <div className="max-w-4xl mx-auto px-4 py-6 w-full">
+            <div className="flex items-center justify-center gap-2 mb-8">
+              {['calendar', 'form', 'payment', 'confirmation'].map((s, i) => (
+                <div key={s} className="flex items-center">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
+                    style={{
+                      backgroundColor: step === s || stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb',
+                      color: step === s || stepIndex.indexOf(step) > i ? '#fff' : '#6b7280'
+                    }}
+                  >
+                    {i + 1}
+                  </div>
+                  {i < 3 && (
+                    <div className="w-12 h-1 mx-2 rounded"
+                      style={{ backgroundColor: stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb' }}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="flex justify-center gap-4 text-sm mb-8" style={{ color: mutedColor }}>
-          {['Fecha y hora', 'Tus datos', 'Pago', 'Confirmación'].map((label, i) => (
-            <span key={label} style={{ fontWeight: stepIndex.indexOf(step) === i ? 600 : 400, color: stepIndex.indexOf(step) === i ? primaryColor : mutedColor }}>
-              {label}
-            </span>
-          ))}
+            <div className="flex justify-center gap-4 text-sm mb-8" style={{ color: mutedColor }}>
+              {['Fecha y hora', 'Tus datos', 'Pago', 'Confirmación'].map((label, i) => (
+                <span key={label} style={{ fontWeight: stepIndex.indexOf(step) === i ? 600 : 400, color: stepIndex.indexOf(step) === i ? primaryColor : mutedColor }}>
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <main className="max-w-6xl mx-auto px-4 pb-12 w-full">
+            {step === 'calendar' && <Calendar />}
+            {step === 'form' && <BookingForm />}
+            {step === 'payment' && <Payment />}
+            {step === 'confirmation' && <Confirmation />}
+          </main>
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 pb-12 w-full">
-        {step === 'calendar' && <Calendar />}
-        {step === 'form' && <BookingForm />}
-        {step === 'payment' && <Payment />}
-        {step === 'confirmation' && <Confirmation />}
-      </main>
-
-      {/* Footer */}
-      <footer className="mt-auto py-8" style={{ backgroundColor: bgImageUrl ? 'rgba(0,0,0,0.6)' : cardBg, backdropFilter: bgImageUrl ? 'blur(8px)' : undefined }}>
+      {/* Footer (sin overlay) */}
+      <footer className="py-8" style={{ backgroundColor: cardBg }}>
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-6" style={{ color: textColor }}>
             <div className="flex items-center gap-2">
@@ -142,7 +146,6 @@ function BookingContent() {
           </p>
         </div>
       </footer>
-      </div>
     </div>
   );
 }

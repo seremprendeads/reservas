@@ -1421,7 +1421,7 @@ function AppearanceManager({
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Color de tarjetas (header, footer)</label>
+              <label className="text-sm font-medium">Color de encabezado y pie de página</label>
               <div className="flex items-center gap-3">
                 <input type="color" value={cardBgColor} onChange={(e) => { setCardBgColor(e.target.value); setSelectedPalette(-1); }}
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
