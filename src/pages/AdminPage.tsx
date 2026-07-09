@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import {
   Calendar,
   Clock,
@@ -26,15 +25,32 @@ import {
   CheckCircle,
   ClipboardList,
   EyeOff,
-  UserCircle,
   Menu,
-  X,
+  CalendarDays,
+  Settings2,
+  UserCog,
+  MessageSquareText,
+  Archive,
+  LayoutDashboard,
+  ExternalLink,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings } from '../lib/supabase';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Badge } from '../components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  DialogFooter,
+} from '../components/ui/dialog';
+import { Separator } from '../components/ui/separator';
+import { Avatar } from '../components/ui/avatar';
+import { Skeleton } from '../components/ui/skeleton';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { cn } from '../lib/utils';
 
 type View = 'dashboard' | 'bookings' | 'availability' | 'settings' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface WaitingListItem {
   id: string;
   nombre: string;
@@ -49,7 +65,27 @@ interface WaitingListItem {
   updated_at: string;
 }
 
+function getStatusBadge(status: string) {
+  const map: Record<string, { variant: 'success' | 'warning' | 'destructive' | 'info'; label: string }> = {
+    confirmed: { variant: 'success', label: 'Confirmada' },
+    pending: { variant: 'warning', label: 'Pendiente' },
+    cancelled: { variant: 'destructive', label: 'Cancelada' },
+    completed: { variant: 'info', label: 'Completada' },
+  };
+  return map[status] || { variant: 'warning' as const, label: status };
+}
+
+function getPaymentBadge(status: string) {
+  const map: Record<string, { variant: 'success' | 'warning' | 'destructive'; label: string }> = {
+    approved: { variant: 'success', label: 'Pagado' },
+    pending: { variant: 'warning', label: 'Pendiente' },
+    rejected: { variant: 'destructive', label: 'Rechazado' },
+  };
+  return map[status] || { variant: 'warning' as const, label: status };
+}
+
 // ─── Login ────────────────────────────────────────────────────────────────────
+
 function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) => void }) {
   const [mode, setMode] = useState<'login' | 'forgot'>('login');
   const [email, setEmail] = useState('');
@@ -101,89 +137,960 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) =
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-2xl">
-        <div className="flex items-center justify-center mb-6">
-          <div className="flex items-center justify-center w-14 h-14 bg-emerald-600 rounded-2xl">
-            <Lock className="w-8 h-8 text-white" />
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50 p-4 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
+            <Lock className="h-7 w-7 text-primary-foreground" />
           </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {mode === 'login' ? 'Panel de Administración' : 'Recuperar contraseña'}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {mode === 'login' ? 'Ingresá tus credenciales para continuar' : 'Te enviamos una contraseña temporal por email'}
+          </p>
         </div>
-        <h1 className="mb-1 text-2xl font-bold text-center text-gray-800">
-          {mode === 'login' ? 'Panel Admin' : 'Recuperar contraseña'}
-        </h1>
-        <p className="mb-6 text-sm text-center text-gray-500">
-          {mode === 'login' ? 'Ingresá tus credenciales para continuar' : 'Te enviamos una contraseña temporal por email'}
-        </p>
 
-        {error && (
-          <div className="flex items-center gap-3 p-4 mb-4 border border-red-200 bg-red-50 rounded-xl">
-            <XCircle className="flex-shrink-0 w-5 h-5 text-red-500" />
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        )}
-        {success && (
-          <div className="flex items-center gap-3 p-4 mb-4 border border-green-200 bg-green-50 rounded-xl">
-            <CheckCircle className="flex-shrink-0 w-5 h-5 text-green-500" />
-            <p className="text-sm text-green-700">{success}</p>
-          </div>
-        )}
+        <Card className="border-0 shadow-xl">
+          <CardContent className="p-6">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <XCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {success && (
+              <Alert variant="success" className="mb-4">
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
 
-        <form onSubmit={mode === 'login' ? handleLogin : handleForgot} className="space-y-4">
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-              placeholder="admin@email.com"
-              className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none" />
-          </div>
+            <form onSubmit={mode === 'login' ? handleLogin : handleForgot} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Email</label>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+                  placeholder="admin@email.com" className="h-12 text-base" />
+              </div>
 
-          {mode === 'login' && (
-            <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">Contraseña</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 pr-12 text-base border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none"
-                />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute text-gray-400 -translate-y-1/2 right-4 top-1/2 hover:text-gray-600 transition-colors">
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {mode === 'login' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Contraseña</label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      placeholder="••••••••"
+                      className="h-12 pr-12 text-base"
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                  <div className="text-right">
+                    <button type="button" onClick={() => { setMode('forgot'); setError(''); setSuccess(''); }}
+                      className="text-xs text-primary hover:underline">
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <Button type="submit" disabled={loading} size="lg" className="w-full">
+                {loading
+                  ? (mode === 'login' ? 'Ingresando...' : 'Enviando...')
+                  : (mode === 'login' ? 'Ingresar' : 'Enviar contraseña temporal')}
+              </Button>
+            </form>
+
+            {mode === 'forgot' && (
+              <div className="mt-5 text-center">
+                <button onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
+                  className="text-sm font-medium text-primary hover:underline">
+                  ← Volver al login
                 </button>
               </div>
-              <div className="mt-2 text-right">
-                <button type="button" onClick={() => { setMode('forgot'); setError(''); setSuccess(''); }}
-                  className="text-xs text-emerald-600 hover:underline">
-                  ¿Olvidaste tu contraseña?
-                </button>
-              </div>
-            </div>
-          )}
-
-          <button type="submit" disabled={loading}
-            className="w-full py-4 mt-2 text-lg font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
-            {loading
-              ? (mode === 'login' ? 'Ingresando...' : 'Enviando...')
-              : (mode === 'login' ? 'Ingresar' : 'Enviar contraseña temporal')}
-          </button>
-        </form>
-
-        {mode === 'forgot' && (
-          <div className="mt-5 text-center">
-            <button onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
-              className="text-sm font-medium text-emerald-600 hover:underline">
-              ← Volver al login
-            </button>
-          </div>
-        )}
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
 
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+function NotasAdmin({
+  booking, adminEmail, adminPassword, onSaved
+}: {
+  booking: Booking;
+  adminEmail: string;
+  adminPassword: string;
+  onSaved: () => void;
+}) {
+  const [nota, setNota] = useState((booking as any).notas_admin || '');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const saveNota = async () => {
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-update-booking', {
+        body: {
+          email: adminEmail,
+          password: adminPassword,
+          booking_id: booking.id,
+          notas_admin: nota,
+        },
+      });
+      if (error || !data?.success) throw new Error('Error al guardar');
+      setSaved(true);
+      onSaved();
+      setTimeout(() => setSaved(false), 2000);
+    } catch {
+      alert('Error al guardar la nota');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          📝 Notas internas
+          <span className="text-xs font-normal text-muted-foreground">(solo visible para el admin)</span>
+        </label>
+        {saved && (
+          <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+            <CheckCircle className="h-3 w-3" /> Guardado
+          </span>
+        )}
+      </div>
+      <textarea
+        value={nota}
+        onChange={e => setNota(e.target.value)}
+        rows={3}
+        placeholder="Ej: cliente puntual / siempre llega tarde / requiere preparación especial..."
+        className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-colors duration-200"
+      />
+      <Button onClick={saveNota} disabled={saving} variant="secondary" size="sm">
+        {saving ? 'Guardando...' : 'Guardar nota'}
+      </Button>
+    </div>
+  );
+}
+
+// ─── Availability Manager ─────────────────────────────────────────────────────
+
+function AvailabilityManager({
+  availability, blockedDates, onRefresh, adminEmail, adminPassword, showSuccess
+}: {
+  availability: AvailabilitySetting[];
+  blockedDates: BlockedDate[];
+  onRefresh: () => void;
+  adminEmail: string;
+  adminPassword: string;
+  showSuccess: (msg: string) => void;
+}) {
+  const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const [editingDay, setEditingDay] = useState<number | null>(null);
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [isActive, setIsActive] = useState(false);
+  const [newBlockedDate, setNewBlockedDate] = useState('');
+  const [newBlockedReason, setNewBlockedReason] = useState('');
+
+  const startEditing = (day: AvailabilitySetting) => {
+    setEditingDay(day.day_of_week);
+    setStartTime(day.start_time);
+    setEndTime(day.end_time);
+    setIsActive(day.is_active);
+  };
+
+  const saveDay = async () => {
+    if (editingDay === null) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-update-availability', {
+        body: { email: adminEmail, password: adminPassword, day_of_week: editingDay, start_time: startTime, end_time: endTime, is_active: isActive },
+      });
+      if (error || !data?.success) throw new Error('Error al guardar');
+      setEditingDay(null);
+      onRefresh();
+      showSuccess('Horario actualizado correctamente');
+    } catch {
+      alert('Error al guardar');
+    }
+  };
+
+  const addBlockedDate = async () => {
+    if (!newBlockedDate) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-manage-blocked-dates', {
+        body: { email: adminEmail, password: adminPassword, action: 'add', date: newBlockedDate, reason: newBlockedReason || null },
+      });
+      if (error || !data?.success) throw new Error('Error al agregar');
+      setNewBlockedDate('');
+      setNewBlockedReason('');
+      onRefresh();
+      showSuccess('Fecha bloqueada agregada');
+    } catch { alert('Error al agregar fecha'); }
+  };
+
+  const removeBlockedDate = async (id: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-manage-blocked-dates', {
+        body: { email: adminEmail, password: adminPassword, action: 'remove', id },
+      });
+      if (error || !data?.success) throw new Error('Error al eliminar');
+      onRefresh();
+    } catch { alert('Error al eliminar fecha'); }
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>Días laborables</CardTitle>
+          <CardDescription>Configurá los horarios de atención por día</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {availability.map((day) => (
+            <div key={day.id} className="rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50">
+              {editingDay === day.day_of_week ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{DAYS[day.day_of_week]}</span>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                      Activo
+                    </label>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="w-12 flex-shrink-0 text-sm text-muted-foreground">Desde</span>
+                      <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="flex-1" />
+                    </div>
+                    <span className="hidden self-center sm:inline text-muted-foreground">a</span>
+                    <div className="flex items-center gap-2">
+                      <span className="w-12 flex-shrink-0 text-sm text-muted-foreground">Hasta</span>
+                      <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="flex-1" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={saveDay} size="sm" className="flex-1">Guardar</Button>
+                    <Button onClick={() => setEditingDay(null)} variant="secondary" size="sm" className="flex-1">Cancelar</Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-2.5 w-2.5 rounded-full ${day.is_active ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                    <span className="font-medium">{DAYS[day.day_of_week]}</span>
+                    <span className="text-sm text-muted-foreground">{day.start_time.slice(0, 5)} — {day.end_time.slice(0, 5)}</span>
+                  </div>
+                  <Button onClick={() => startEditing(day)} variant="ghost" size="icon">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Fechas bloqueadas</CardTitle>
+          <CardDescription>Días sin atención (feriados, vacaciones, etc.)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-6 space-y-3">
+            <Input type="date" value={newBlockedDate} onChange={(e) => setNewBlockedDate(e.target.value)}
+              min={new Date().toISOString().split('T')[0]} />
+            <Input type="text" value={newBlockedReason} onChange={(e) => setNewBlockedReason(e.target.value)}
+              placeholder="Razón (opcional)" />
+            <Button onClick={addBlockedDate} disabled={!newBlockedDate} className="w-full">
+              Agregar fecha bloqueada
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {blockedDates.map((blocked) => (
+              <div key={blocked.id} className="flex items-center justify-between rounded-lg border bg-card p-3">
+                <div>
+                  <p className="font-medium">{new Date(blocked.date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                  {blocked.reason && <p className="text-sm text-muted-foreground">{blocked.reason}</p>}
+                </div>
+                <Button onClick={() => removeBlockedDate(blocked.id)} variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                  <Trash2 className="mr-1 h-4 w-4" /> Eliminar
+                </Button>
+              </div>
+            ))}
+            {blockedDates.length === 0 && (
+              <p className="py-8 text-center text-sm text-muted-foreground">No hay fechas bloqueadas</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Settings Manager ─────────────────────────────────────────────────────────
+
+function SettingsManager({
+  settings, onRefresh, adminEmail, adminPassword, showSuccess
+}: {
+  settings: Settings;
+  onRefresh: () => void;
+  adminEmail: string;
+  adminPassword: string;
+  showSuccess: (msg: string) => void;
+}) {
+  const [price, setPrice] = useState(settings.price.toString());
+  const [currency, setCurrency] = useState(settings.currency);
+  const [saving, setSaving] = useState(false);
+
+  const saveSettings = async () => {
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-update-settings', {
+        body: { email: adminEmail, password: adminPassword, price, currency },
+      });
+      if (error || !data?.success) throw new Error('Error al guardar');
+      onRefresh();
+      showSuccess('Configuración guardada correctamente');
+    } catch { alert('Error al guardar'); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div className="mx-auto max-w-xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Configuración general</CardTitle>
+          <CardDescription>Precio y moneda de las reservas</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Precio de la reserva</label>
+            <div className="flex items-center gap-2">
+              <span className="text-lg text-muted-foreground">$</span>
+              <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="text-lg h-12" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Moneda</label>
+            <select value={currency} onChange={(e) => setCurrency(e.target.value)}
+              className="flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors">
+              <option value="ARS">ARS — Peso Argentino</option>
+              <option value="USD">USD — Dólar Americano</option>
+              <option value="MXN">MXN — Peso Mexicano</option>
+            </select>
+          </div>
+          <Button onClick={saveSettings} disabled={saving} size="lg" className="w-full">
+            {saving ? 'Guardando...' : 'Guardar configuración'}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Clients Manager ──────────────────────────────────────────────────────────
+
+interface ClientData {
+  name: string;
+  phone: string;
+  email: string;
+  firstBooking: string;
+  lastBooking: string;
+  totalBookings: number;
+}
+
+function ClientsManager({ bookings }: { bookings: Booking[] }) {
+  const [search, setSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+
+  const clientMap = new Map<string, ClientData>();
+  bookings.forEach((b) => {
+    const key = b.customer_email || b.customer_phone;
+    if (clientMap.has(key)) {
+      const c = clientMap.get(key)!;
+      c.totalBookings += 1;
+      if (b.booking_date > c.lastBooking) c.lastBooking = b.booking_date;
+      if (b.booking_date < c.firstBooking) c.firstBooking = b.booking_date;
+    } else {
+      clientMap.set(key, {
+        name: b.customer_name,
+        phone: b.customer_phone,
+        email: b.customer_email,
+        firstBooking: b.booking_date,
+        lastBooking: b.booking_date,
+        totalBookings: 1,
+      });
+    }
+  });
+
+  let clients = Array.from(clientMap.values());
+
+  if (search) {
+    clients = clients.filter(c =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.phone.includes(search)
+    );
+  }
+  if (dateFrom) clients = clients.filter(c => c.firstBooking >= dateFrom);
+  if (dateTo) clients = clients.filter(c => c.firstBooking <= dateTo);
+
+  const formatDate = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('es-AR');
+
+  const exportCSV = () => {
+    const headers = ['Nombre', 'WhatsApp', 'Email', 'Primera reserva', 'Última reserva', 'Total reservas'];
+    const rows = clients.map(c => [
+      c.name, c.phone, c.email,
+      formatDate(c.firstBooking), formatDate(c.lastBooking),
+      c.totalBookings
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'clientes.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPDF = async () => {
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text('Listado de Clientes', 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')}`, 14, 28);
+    let y = 40;
+    const lineH = 8;
+    doc.setFillColor(16, 185, 129);
+    doc.rect(14, y - 5, 182, lineH, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.text('Nombre', 16, y);
+    doc.text('WhatsApp', 70, y);
+    doc.text('Email', 105, y);
+    doc.text('Registro', 148, y);
+    doc.text('Reservas', 178, y);
+    y += lineH;
+    doc.setTextColor(0, 0, 0);
+    clients.forEach((c, i) => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      if (i % 2 === 0) {
+        doc.setFillColor(245, 245, 245);
+        doc.rect(14, y - 5, 182, lineH, 'F');
+      }
+      doc.setFontSize(8);
+      doc.text(c.name.slice(0, 20), 16, y);
+      doc.text(c.phone.slice(0, 15), 70, y);
+      doc.text(c.email.slice(0, 22), 105, y);
+      doc.text(formatDate(c.firstBooking), 148, y);
+      doc.text(String(c.totalBookings), 182, y);
+      y += lineH;
+    });
+    doc.save('clientes.pdf');
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle>Clientes</CardTitle>
+            <CardDescription>{clients.length} clientes encontrados</CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={exportCSV} variant="secondary" size="sm">
+              <Download className="mr-1 h-4 w-4" /> CSV
+            </Button>
+            <Button onClick={exportPDF} variant="destructive" size="sm">
+              <FileText className="mr-1 h-4 w-4" /> PDF
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input type="text" placeholder="Buscar por nombre o teléfono..." value={search}
+              onChange={(e) => setSearch(e.target.value)} className="h-10 pl-9" />
+          </div>
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-10 w-auto" />
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-10 w-auto" />
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                {['Nombre', 'WhatsApp', 'Email', 'Primera reserva', 'Última reserva', 'Total'].map(h => (
+                  <th key={h} className="px-3 py-4 text-left text-sm font-medium text-muted-foreground">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {clients.map((c, i) => (
+                <tr key={i} className="hover:bg-muted/50 transition-colors">
+                  <td className="px-3 py-4 font-medium">{c.name}</td>
+                  <td className="px-3 py-4">
+                    <div className="flex items-center gap-1 text-sm"><Phone className="h-3 w-3" />{c.phone}</div>
+                  </td>
+                  <td className="px-3 py-4 text-sm">
+                    <div className="flex items-center gap-1"><Mail className="h-3 w-3" />{c.email}</div>
+                  </td>
+                  <td className="px-3 py-4 text-sm">{formatDate(c.firstBooking)}</td>
+                  <td className="px-3 py-4 text-sm">{formatDate(c.lastBooking)}</td>
+                  <td className="px-3 py-4">
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{c.totalBookings}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {clients.length === 0 && (
+            <p className="py-12 text-center text-sm text-muted-foreground">No se encontraron clientes</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── WhatsApp Manager ─────────────────────────────────────────────────────────
+
+function WhatsAppManager({ bookings }: { bookings: Booking[] }) {
+  const DEFAULT_TEMPLATE = 'Hola {nombre} 👋 Tu reserva fue aprobada. Te esperamos el día {fecha} a las {hora}. ¡Gracias!';
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [message, setMessage] = useState(DEFAULT_TEMPLATE);
+  const [search, setSearch] = useState('');
+
+  const pendingBookings = bookings.filter(b =>
+    b.booking_status === 'pending' || b.booking_status === 'confirmed'
+  );
+
+  const filtered = pendingBookings.filter(b =>
+    b.customer_name.toLowerCase().includes(search.toLowerCase()) ||
+    b.customer_phone.includes(search)
+  );
+
+  const buildMessage = (booking: Booking) => {
+    const fecha = new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', {
+      weekday: 'long', day: 'numeric', month: 'long'
+    });
+    const hora = booking.booking_time.slice(0, 5);
+    return message
+      .replace('{nombre}', booking.customer_name)
+      .replace('{fecha}', fecha)
+      .replace('{hora}', hora);
+  };
+
+  const sendWhatsApp = (booking: Booking) => {
+    const phone = booking.customer_phone.replace(/\D/g, '');
+    const text = encodeURIComponent(buildMessage(booking));
+    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+  };
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-6">
+      <Card className="border-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-900">
+              Plan Pro
+            </span>
+            <div>
+              <p className="text-lg font-bold">Automatizá mensajes</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Con el Plan Pro el cliente recibe la confirmación por WhatsApp{' '}
+                <span className="font-semibold text-foreground">AUTOMÁTICAMENTE AL PAGAR</span>
+                {' '}sin intervención manual,{' '}
+                <span className="font-semibold text-foreground">24 hs, 7 días, feriados incluidos.</span>
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Plantilla del mensaje</CardTitle>
+          <CardDescription>Personalizá el mensaje que se enviará por WhatsApp</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3}
+            className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none transition-colors duration-200" />
+          <p className="text-xs text-muted-foreground">
+            Variables: <code className="rounded bg-muted px-1 py-0.5">{'{nombre}'}</code>{' '}
+            <code className="rounded bg-muted px-1 py-0.5">{'{fecha}'}</code>{' '}
+            <code className="rounded bg-muted px-1 py-0.5">{'{hora}'}</code>
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Seleccionar reserva</CardTitle>
+          <CardDescription>Elegí una reserva para enviar el mensaje</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input type="text" placeholder="Buscar por nombre o teléfono..." value={search} onChange={(e) => setSearch(e.target.value)}
+              className="h-10 pl-9" />
+          </div>
+          <div className="space-y-2">
+            {filtered.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">No hay reservas disponibles</p>}
+            {filtered.map((booking) => (
+              <div key={booking.id}
+                className={cn(
+                  'rounded-lg border p-4 transition-all cursor-pointer',
+                  selectedBooking?.id === booking.id
+                    ? 'border-primary bg-primary/5'
+                    : 'hover:bg-accent/50'
+                )}
+                onClick={() => setSelectedBooking(booking === selectedBooking ? null : booking)}>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium truncate">{booking.customer_name}</p>
+                      <Badge variant={booking.booking_status === 'confirmed' ? 'success' : 'warning'}>
+                        {booking.booking_status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      <Phone className="mr-1 inline h-3 w-3" />
+                      {booking.customer_phone} — {new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} {booking.booking_time.slice(0, 5)} hs
+                    </p>
+                  </div>
+                  <Button onClick={(e) => { e.stopPropagation(); sendWhatsApp(booking); }} size="sm" className="shrink-0">
+                    <MessageSquare className="mr-1 h-4 w-4" /> Enviar
+                  </Button>
+                </div>
+                {selectedBooking?.id === booking.id && (
+                  <div className="mt-3 border-t pt-3">
+                    <p className="mb-1 text-xs font-medium text-primary">Vista previa:</p>
+                    <p className="rounded-lg border bg-card p-3 text-sm">{buildMessage(booking)}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── WaitingList Manager ──────────────────────────────────────────────────────
+
+function WaitingListManager({
+  waitingList, onRefresh, adminEmail, adminPassword
+}: {
+  waitingList: WaitingListItem[];
+  onRefresh: () => void;
+  adminEmail: string;
+  adminPassword: string;
+}) {
+  const [search, setSearch] = useState('');
+  const [filterEstado, setFilterEstado] = useState('all');
+  const [saving, setSaving] = useState<string | null>(null);
+
+  const updateItem = async (id: string, estado?: string, action?: string) => {
+    setSaving(id);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-update-waiting-list', {
+        body: { email: adminEmail, password: adminPassword, id, estado, action },
+      });
+      if (error || !data?.success) throw new Error('Error');
+      onRefresh();
+    } catch {
+      alert('Error al actualizar');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const estadoBadge: Record<string, 'warning' | 'info' | 'success' | 'destructive'> = {
+    pendiente: 'warning',
+    contactado: 'info',
+    convertido: 'success',
+    cancelado: 'destructive',
+  };
+
+  const estadoLabel: Record<string, string> = {
+    pendiente: 'Pendiente',
+    contactado: 'Contactado',
+    convertido: 'Convertido',
+    cancelado: 'Cancelado',
+  };
+
+  const filtered = waitingList.filter(w => {
+    const matchesSearch = w.nombre.toLowerCase().includes(search.toLowerCase()) ||
+      w.telefono.includes(search) || w.email.toLowerCase().includes(search.toLowerCase());
+    const matchesEstado = filterEstado === 'all' || w.estado === filterEstado;
+    return matchesSearch && matchesEstado;
+  });
+
+  const formatDate = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('es-AR', {
+    weekday: 'short', day: 'numeric', month: 'short'
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle>Lista de espera</CardTitle>
+            <CardDescription>
+              {waitingList.filter(w => w.estado === 'pendiente').length} pendientes de {waitingList.length} total
+            </CardDescription>
+          </div>
+          <Button onClick={onRefresh} variant="outline" size="icon">
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input type="text" placeholder="Buscar por nombre, teléfono o email..." value={search}
+              onChange={e => setSearch(e.target.value)} className="h-10 pl-9" />
+          </div>
+          <select value={filterEstado} onChange={e => setFilterEstado(e.target.value)}
+            className="flex h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors">
+            <option value="all">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="contactado">Contactado</option>
+            <option value="convertido">Convertido</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="py-16 text-center">
+            <ClipboardList className="mx-auto mb-4 h-16 w-16 text-muted-foreground/30" />
+            <p className="text-muted-foreground">No hay registros en la lista de espera</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filtered.map(item => (
+              <div key={item.id} className="rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50">
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium">{item.nombre}</p>
+                      <Badge variant={estadoBadge[item.estado] || 'secondary'}>
+                        {estadoLabel[item.estado]}
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      <Phone className="mr-1 inline h-3 w-3" />{item.telefono}
+                      <span className="mx-2">·</span>
+                      <Mail className="mr-1 inline h-3 w-3" />{item.email}
+                      <span className="mx-2">·</span>
+                      <Calendar className="mr-1 inline h-3 w-3" />{formatDate(item.fecha_deseada)}
+                      {item.horario_deseado && <span className="ml-2">{item.horario_deseado.slice(0, 5)} hs</span>}
+                      {item.servicio && <span className="ml-2">· {item.servicio}</span>}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {item.estado === 'pendiente' && (
+                      <Button onClick={() => updateItem(item.id, 'contactado')} disabled={saving === item.id}
+                        variant="secondary" size="sm">
+                        Contactar
+                      </Button>
+                    )}
+                    {(item.estado === 'pendiente' || item.estado === 'contactado') && (
+                      <Button onClick={() => updateItem(item.id, 'convertido')} disabled={saving === item.id}
+                        size="sm">
+                        Convertido
+                      </Button>
+                    )}
+                    {item.estado !== 'cancelado' && item.estado !== 'convertido' && (
+                      <Button onClick={() => updateItem(item.id, 'cancelado')} disabled={saving === item.id}
+                        variant="outline" size="sm" className="text-destructive">
+                        Cancelar
+                      </Button>
+                    )}
+                    <Button onClick={() => updateItem(item.id, undefined, 'delete')} disabled={saving === item.id}
+                      variant="ghost" size="sm" className="text-destructive">
+                      <Trash2 className="mr-1 h-4 w-4" /> Eliminar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Profile Manager ───────────────────────────────────────────────────────────
+
+function ProfileManager({
+  adminEmail, adminPassword, adminName, onRefresh, showSuccess, onProfileUpdated
+}: {
+  adminEmail: string;
+  adminPassword: string;
+  adminName: string;
+  onRefresh: () => void;
+  showSuccess: (msg: string) => void;
+  onProfileUpdated: (name: string, email: string, password: string) => void;
+}) {
+  const [name, setName] = useState(adminName);
+  const [email, setEmail] = useState(adminEmail);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSave = async () => {
+    setError('');
+
+    if (!name.trim()) {
+      setError('El nombre es obligatorio');
+      return;
+    }
+    if (!email.trim() || !email.includes('@')) {
+      setError('Ingresá un email válido');
+      return;
+    }
+    if (newPassword && newPassword.length < 6) {
+      setError('La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    if (newPassword && newPassword !== confirmPassword) {
+      setError('Las contraseñas nuevas no coinciden');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('admin-update-profile', {
+        body: {
+          email: adminEmail,
+          password: adminPassword,
+          name: name.trim(),
+          newEmail: email.trim() !== adminEmail ? email.trim() : null,
+          newPassword: newPassword || null,
+        },
+      });
+
+      if (fnError || !data?.success) {
+        setError(data?.error || 'Error al guardar el perfil');
+        return;
+      }
+
+      sessionStorage.setItem('admin_email', email.trim());
+      sessionStorage.setItem('admin_name', name.trim());
+      if (newPassword) {
+        sessionStorage.setItem('admin_password', newPassword);
+      }
+
+      onProfileUpdated(name.trim(), email.trim(), newPassword || adminPassword);
+      onRefresh();
+      showSuccess('Perfil actualizado correctamente');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch {
+      setError('Error al conectar con el servidor');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="mx-auto max-w-xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Mi Perfil</CardTitle>
+          <CardDescription>Actualizá tus datos de administrador</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <XCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nombre</label>
+              <Input type="text" value={name} onChange={(e) => setName(e.target.value)} className="h-12" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Email</label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12" />
+            </div>
+
+            <Separator />
+            <p className="text-sm text-muted-foreground">
+              Dejá los campos en blanco si no querés cambiar la contraseña.
+            </p>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nueva contraseña</label>
+              <div className="relative">
+                <Input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••" className="h-12 pr-12" />
+                <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Confirmar nueva contraseña</label>
+              <div className="relative">
+                <Input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••" className="h-12 pr-12" />
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            <Button onClick={handleSave} disabled={saving} size="lg" className="w-full">
+              {saving ? 'Guardando...' : 'Guardar cambios'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Sidebar Navigation ──────────────────────────────────────────────────────
+
+interface NavItem {
+  id: View;
+  label: string;
+  icon: React.ReactNode;
+  badge?: number;
+}
+
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
+
 export function AdminPage() {
   const [loggedIn, setLoggedIn] = useState(!!sessionStorage.getItem('admin_logged_in'));
   const [adminEmail, setAdminEmail] = useState(sessionStorage.getItem('admin_email') || '');
@@ -202,11 +1109,18 @@ export function AdminPage() {
   const [waitingList, setWaitingList] = useState<WaitingListItem[]>([]);
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void }>({ open: false, message: '', onConfirm: () => {} });
   const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('admin_dark') === '1');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [darkMode, setDarkMode] = useState(() => {
+    const stored = localStorage.getItem('admin_dark');
+    const isDark = stored !== null ? stored === '1' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.classList.toggle('dark', isDark);
+    return isDark;
+  });
 
   useEffect(() => {
     localStorage.setItem('admin_dark', darkMode ? '1' : '0');
+    document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
   useEffect(() => {
@@ -232,7 +1146,6 @@ export function AdminPage() {
       if (blockedRes.data) setBlockedDates(blockedRes.data);
       if (settingsRes.data) setSettings(settingsRes.data);
 
-      // Cargar lista de espera
       const { data: wlData } = await supabase.functions.invoke('admin-get-waiting-list', {
         body: { email: adminEmail, password: adminPassword },
       });
@@ -265,7 +1178,7 @@ export function AdminPage() {
       });
       if (error || !data?.success) throw new Error('Error al actualizar');
       loadData();
-    } catch (error) {
+    } catch {
       alert('Error al actualizar la reserva');
     }
   };
@@ -346,1329 +1259,637 @@ export function AdminPage() {
   const paidBookings = bookings.filter((b) => b.payment_status === 'approved');
   const pendingPayments = bookings.filter((b) => b.payment_status === 'pending');
 
+  const navItems: NavItem[] = [
+    { id: 'dashboard', label: 'Principal', icon: <LayoutDashboard className="h-5 w-5" /> },
+    { id: 'bookings', label: 'Reservas', icon: <CalendarDays className="h-5 w-5" /> },
+    { id: 'clients', label: 'Clientes', icon: <Users className="h-5 w-5" /> },
+    {
+      id: 'waiting', label: 'Lista de espera', icon: <ClipboardList className="h-5 w-5" />,
+      badge: waitingList.filter(w => w.estado === 'pendiente').length || undefined,
+    },
+    { id: 'availability', label: 'Disponibilidad', icon: <Clock className="h-5 w-5" /> },
+    { id: 'settings', label: 'Configuración', icon: <Settings2 className="h-5 w-5" /> },
+    { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
+    { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquareText className="h-5 w-5" /> },
+    {
+      id: 'trash', label: 'Papelera', icon: <Archive className="h-5 w-5" />,
+      badge: deletedBookings.length || undefined,
+    },
+  ];
+
+  const viewTitles: Record<View, string> = {
+    dashboard: 'Panel Principal',
+    bookings: 'Reservas',
+    clients: 'Clientes',
+    waiting: 'Lista de Espera',
+    availability: 'Disponibilidad',
+    settings: 'Configuración',
+    profile: 'Perfil',
+    whatsapp: 'WhatsApp',
+    trash: 'Papelera',
+    detail: 'Detalle de Reserva',
+  };
+
   if (!loggedIn) return <LoginScreen onLogin={handleLogin} />;
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-12 h-12 border-b-2 rounded-full animate-spin border-emerald-600" />
+      <div className="flex min-h-screen items-center justify-center p-8">
+        <div className="w-full max-w-md space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </div>
       </div>
     );
   }
 
+  const currentViewTitle = viewTitles[view];
+
   return (
-    <div className={`min-h-screen relative ${darkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
-      <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} shadow-sm sticky top-0 z-40`}>
-        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-10 h-10 bg-emerald-600 rounded-xl">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className={`text-dm font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Administración</h1>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>CRM de Reservas</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <a href="/" className="flex items-center gap-2 px-4 py-2 text-gray-500 transition-colors rounded-lg hover:text-emerald-600 hover:bg-emerald-50">
-                <ArrowLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Pagina de Reservas</span>
-              </a>
-              <button onClick={() => setDarkMode(!darkMode)}
-                className={`p-2 rounded-lg transition-colors ${darkMode ? 'text-yellow-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}
-                title={darkMode ? 'Modo claro' : 'Modo oscuro'}>
-                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-              <button onClick={handleLogout} className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${darkMode ? 'text-gray-300 hover:text-red-400 hover:bg-gray-700' : 'text-gray-600 hover:text-red-600 hover:bg-red-50'}`}>
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Salir</span>
-              </button>
-            </div>
+    <div className="flex min-h-screen bg-background">
+      {/* Sidebar backdrop (mobile) */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r bg-card transition-transform duration-300 ease-in-out lg:static lg:translate-x-0',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        )}>
+        {/* Sidebar header */}
+        <div className="flex h-16 items-center gap-3 border-b px-6">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
+            <Calendar className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-base font-bold leading-tight">Reserva Única</span>
+            <span className="text-xs text-muted-foreground">Panel de Administración</span>
           </div>
         </div>
-      </header>
 
-      <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        {(() => {
-          const tabs = [
-            { id: 'dashboard' as View, label: 'Principal', icon: null as React.ReactNode },
-            { id: 'bookings' as View, label: 'Reservas', icon: null },
-            { id: 'clients' as View, label: 'Clientes', icon: <FileText className="w-5 h-5" /> },
-            { id: 'waiting' as View, label: `Lista de espera${waitingList.filter(w => w.estado === 'pendiente').length > 0 ? ` (${waitingList.filter(w => w.estado === 'pendiente').length})` : ''}`, icon: <ClipboardList className="w-5 h-5" /> },
-            { id: 'availability' as View, label: 'Disponibilidad', icon: null },
-            { id: 'settings' as View, label: 'Configuracion', icon: <DollarSign className="w-5 h-5" /> },
-            { id: 'profile' as View, label: 'Perfil', icon: null },
-            { id: 'whatsapp' as View, label: 'WhatsApp', icon: null },
-            { id: 'trash' as View, label: `Papelera${deletedBookings.length > 0 ? ` (${deletedBookings.length})` : ''}`, icon: <Trash2 className="w-5 h-5" /> },
-          ];
-          const currentTab = tabs.find(t => t.id === view);
-          return (
-            <>
-              {/* Mobile hamburger menu */}
-              <div className="mb-6 sm:hidden">
-                <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-dm font-medium shadow-sm ${darkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-700'}`}>
-                  <span className="flex items-center gap-2">
-                    {currentTab?.icon}
-                    {currentTab?.label}
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto p-3">
+          {navItems.map((item) => {
+            const isActive = view === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => { setView(item.id); setSidebarOpen(false); }}
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                )}>
+                {item.icon}
+                <span className="flex-1 text-left">{item.label}</span>
+                {item.badge !== undefined && (
+                  <span className={cn(
+                    'inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium min-w-[20px]',
+                    isActive
+                      ? 'bg-primary-foreground/20 text-primary-foreground'
+                      : 'bg-primary/10 text-primary'
+                  )}>
+                    {item.badge}
                   </span>
-                  {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                </button>
-                {mobileMenuOpen && (
-                  <div className={`mt-2 space-y-1 rounded-xl shadow-sm p-2 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                    {tabs.map(tab => (
-                      <button key={tab.id} onClick={() => { setView(tab.id); setMobileMenuOpen(false); }}
-                        className={`w-full flex items-center gap-2 px-4 py-3 rounded-lg text-dm font-medium transition-all ${view === tab.id ? 'bg-emerald-600 text-white' : darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}>
-                        {tab.icon}{tab.label}
-                      </button>
-                    ))}
-                  </div>
                 )}
-              </div>
-              {/* Desktop horizontal nav */}
-              <div className="hidden sm:flex flex-wrap justify-center gap-2 mb-6 text-center">
-                {tabs.map(tab => (
-                  <button key={tab.id} onClick={() => setView(tab.id)}
-                   className={`px-4 py-2 rounded-lg text-dm font-medium transition-all flex items-center gap-2 ${view === tab.id ? 'bg-emerald-600 text-white shadow-lg' : darkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
-                    {tab.icon}{tab.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          );
-        })()}
-
-        {/* Dashboard */}
-        {view === 'dashboard' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { label: 'Reservas hoy', value: todaysBookings.length, color: 'blue', icon: <Calendar className="w-6 h-6 text-blue-600" /> },
-                { label: 'Reservas futuras', value: upcomingBookings.length, color: 'emerald', icon: <Users className="w-6 h-6 text-emerald-600" /> },
-                { label: 'Reservas pagadas', value: paidBookings.length, color: 'green', icon: <DollarSign className="w-6 h-6 text-green-600" /> },
-                { label: 'Pagos pendientes', value: pendingPayments.length, color: 'yellow', icon: <AlertCircle className="w-6 h-6 text-yellow-600" /> },
-              ].map((stat) => (
-                <button key={stat.label} onClick={() => setView('bookings')}
-                  className={`w-full text-left ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6 cursor-pointer transition-transform active:scale-[0.98] hover:shadow-md`}>
-                  <div className={`w-12 h-12 bg-${stat.color}-100 rounded-xl flex items-center justify-center mb-4`}>{stat.icon}</div>
-                  <p className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{stat.value}</p>
-                  <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>{stat.label}</p>
-                </button>
-              ))}
-            </div>
-            <div className={`${darkMode ? 'bg-gray-200' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
-              <h2 className={`text-xl font-bold mb-4 ${darkMode ? 'text-gray-800' : 'text-gray-800'}`}>Reservas de hoy</h2>
-              {todaysBookings.length > 0 ? (
-                <div className="space-y-3">
-                  {todaysBookings.map((booking) => (
-                    <div key={booking.id} className={`flex items-center justify-between p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl`}>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center w-12 h-12 bg-emerald-100 rounded-xl">
-                          <span className="font-bold text-emerald-600">{booking.booking_time.slice(0, 5)}</span>
-                        </div>
-                        <div>
-                          <p className={`font-medium text-lg ${darkMode ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
-                          <p className={`flex items-center gap-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}><Phone className="w-4 h-4" />{booking.customer_phone}</p>
-                        </div>
-                      </div>
-                      <button onClick={() => { setSelectedBooking(booking); setView('detail'); }} className={`p-2 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded-lg`}>
-                        <Eye className={`w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : <p className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No hay reservas para hoy</p>}
-            </div>
-            <div className={`${darkMode ? 'bg-gray-100' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
-              <h2 className={`text-xl font-bold mb-4 ${darkMode ? 'text-gray-800' : 'text-gray-800'}`}>Proximas reservas</h2>
-              {upcomingBookings.length > 0 ? (
-                <div className="space-y-3">
-                  {upcomingBookings.slice(0, 5).map((booking) => (
-                    <div key={booking.id} className={`flex items-center justify-between p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl`}>
-                      <div className="flex items-center gap-4">
-                        <div className="text-center">
-                          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { month: 'short' })}</p>
-                          <p className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{new Date(booking.booking_date + 'T12:00:00').getDate()}</p>
-                        </div>
-                        <div>
-                          <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
-                          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{booking.booking_time} hs</p>
-                        </div>
-                      </div>
-                      <button onClick={() => { setSelectedBooking(booking); setView('detail'); }} className={`p-2 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded-lg`}>
-                        <Eye className={`w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : <p className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No hay reservas futuras</p>}
-            </div>
-          </div>
-        )}
-
-        {/* Bookings */}
-        {view === 'bookings' && (
-          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
-            <div className="flex flex-col gap-4 mb-6 sm:flex-row">
-              <div className="relative flex-1">
-                <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
-                <input type="text" placeholder="Buscar por nombre, telefono, email o codigo..." value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`w-full pl-12 pr-4 py-3 border rounded-xl text-lg focus:border-emerald-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
-              </div>
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={`px-4 py-3 border rounded-xl text-lg focus:border-emerald-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}>
-                <option value="all">Todos los estados</option>
-                <option value="confirmed">Confirmadas</option>
-                <option value="pending">Pendientes</option>
-                <option value="completed">Completadas</option>
-                <option value="cancelled">Canceladas</option>
-              </select>
-              <button onClick={loadData} className={`flex items-center gap-2 px-4 py-3 rounded-xl ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200'}`}>
-                <RefreshCw className="w-5 h-5" />
               </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Codigo</th>
-                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Cliente</th>
-                    <th className={`text-left py-4 px-3 font-medium hidden md:table-cell ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Contacto</th>
-                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Fecha</th>
-                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Hora</th>
-                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Pago</th>
-                    <th className={`text-left py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Estado</th>
-                    <th className={`text-center py-4 px-3 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
-                  {filteredBookings.map((booking) => (
-                    <tr key={booking.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
-                      <td className={`py-4 px-3 font-mono text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{booking.booking_code}</td>
-                      <td className={`py-4 px-3 font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</td>
-                      <td className="hidden px-3 py-4 md:table-cell">
-                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          <div className="flex items-center gap-1"><Phone className="w-3 h-3" />{booking.customer_phone}</div>
-                          <div className="flex items-center gap-1"><Mail className="w-3 h-3" />{booking.customer_email}</div>
-                        </div>
-                      </td>
-                      <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')}</td>
-                      <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{booking.booking_time}</td>
-                      <td className="px-3 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.payment_status === 'approved' ? 'bg-green-100 text-green-700' : booking.payment_status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                          {booking.payment_status === 'approved' ? 'Pagado' : booking.payment_status === 'rejected' ? 'Rechazado' : 'Pendiente'}
-                        </span>
-                      </td>
-                      <td className="px-3 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.booking_status === 'confirmed' ? 'bg-green-100 text-green-700' : booking.booking_status === 'completed' ? 'bg-blue-100 text-blue-700' : booking.booking_status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                          {booking.booking_status === 'confirmed' ? 'Confirmada' : booking.booking_status === 'completed' ? 'Completada' : booking.booking_status === 'cancelled' ? 'Cancelada' : 'Pendiente'}
-                        </span>
-                      </td>
-                      <td className="px-3 py-4">
-                        <div className="flex items-center justify-center gap-1">
-                          <button onClick={() => { setSelectedBooking(booking); setView('detail'); }} className={`p-2 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded-lg`} title="Ver detalle"><Eye className={`w-4 h-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} /></button>
-                          {booking.booking_status === 'pending' && (
-                            <button onClick={() => updateBookingStatus(booking.id, 'confirmed')} className="p-2 rounded-lg hover:bg-green-100" title="Confirmar"><Calendar className="w-4 h-4 text-green-600" /></button>
-                          )}
-                          {booking.booking_status === 'confirmed' && (
-                            <button onClick={() => updateBookingStatus(booking.id, 'completed')} className="p-2 rounded-lg hover:bg-blue-100" title="Completar"><Clock className="w-4 h-4 text-blue-600" /></button>
-                          )}
-                          {(booking.booking_status === 'pending' || booking.booking_status === 'confirmed') && (
-                            <button onClick={() => updateBookingStatus(booking.id, 'cancelled')} className="p-2 rounded-lg hover:bg-red-100" title="Cancelar"><XCircle className="w-4 h-4 text-red-600" /></button>
-                          )}
-                          {(booking.booking_status === 'cancelled' || booking.booking_status === 'completed') && (
-                            <button onClick={() => deleteBooking(booking.id)} className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200" title="Eliminar"><Trash2 className="w-4 h-4" /> Eliminar</button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filteredBookings.length === 0 && <p className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No se encontraron reservas</p>}
+            );
+          })}
+        </nav>
+
+        {/* Sidebar footer */}
+        <div className="border-t p-3 space-y-1">
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            <span>{darkMode ? 'Modo claro' : 'Modo oscuro'}</span>
+          </button>
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
+            <LogOut className="h-5 w-5" />
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main content area */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Header */}
+        <header className="flex h-16 items-center gap-4 border-b bg-card px-4 lg:px-6">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+            <Menu className="h-5 w-5" />
+          </button>
+
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold">{currentViewTitle}</h1>
+          </div>
+
+          <div className="ml-auto flex items-center gap-3">
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+              <ExternalLink className="h-4 w-4" />
+              <span>Página de Reservas</span>
+            </a>
+
+            <Separator orientation="vertical" className="h-8 hidden sm:block" />
+
+            <div className="flex items-center gap-2">
+              <Avatar fallback={adminName.charAt(0).toUpperCase() || 'A'} className="h-8 w-8" />
+              <span className="hidden text-sm font-medium sm:block">{adminName || 'Admin'}</span>
             </div>
           </div>
-        )}
+        </header>
 
-        {/* Detail */}
-        {view === 'detail' && selectedBooking && (
-          <div className="max-w-2xl mx-auto">
-            <button onClick={() => setView('bookings')} className="flex items-center gap-2 mb-6 text-gray-500 hover:text-emerald-600">
-              <ArrowLeft className="w-5 h-5" /> Volver
-            </button>
-            <div className="p-8 bg-white shadow-sm rounded-2xl">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Detalle de reserva</h2>
-                <span className="font-mono text-gray-500">{selectedBooking.booking_code}</span>
+        {/* Content */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          {/* ─── Dashboard ──────────────────────────────────────── */}
+          {view === 'dashboard' && (
+            <div className="mx-auto max-w-7xl space-y-6">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
+                  onClick={() => setView('bookings')}>
+                  <CardContent className="p-6">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-950/50">
+                      <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <p className="text-3xl font-bold">{todaysBookings.length}</p>
+                    <p className="text-sm text-muted-foreground">Reservas hoy</p>
+                  </CardContent>
+                </Card>
+                <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
+                  onClick={() => setView('bookings')}>
+                  <CardContent className="p-6">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/50">
+                      <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <p className="text-3xl font-bold">{upcomingBookings.length}</p>
+                    <p className="text-sm text-muted-foreground">Reservas futuras</p>
+                  </CardContent>
+                </Card>
+                <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
+                  onClick={() => setView('bookings')}>
+                  <CardContent className="p-6">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-950/50">
+                      <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    </div>
+                    <p className="text-3xl font-bold">{paidBookings.length}</p>
+                    <p className="text-sm text-muted-foreground">Reservas pagadas</p>
+                  </CardContent>
+                </Card>
+                <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
+                  onClick={() => setView('bookings')}>
+                  <CardContent className="p-6">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/50">
+                      <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <p className="text-3xl font-bold">{pendingPayments.length}</p>
+                    <p className="text-sm text-muted-foreground">Pagos pendientes</p>
+                  </CardContent>
+                </Card>
               </div>
-              <div className="grid gap-6 mb-6 md:grid-cols-2">
-                <div className="space-y-3">
-                  <p className="text-lg font-bold text-gray-800">{selectedBooking.customer_name}</p>
-                  <div className="flex items-center gap-2 text-gray-700"><Phone className="w-5 h-5" />{selectedBooking.customer_phone}</div>
-                  <div className="flex items-center gap-2 text-gray-700"><Mail className="w-5 h-5" />{selectedBooking.customer_email}</div>
-                </div>
-                <div className="space-y-3">
-                  <div className="p-4 bg-emerald-50 rounded-xl">
-                    <p className="text-sm text-gray-500">Fecha</p>
-                    <p className="font-medium text-gray-800">{new Date(selectedBooking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                  </div>
-                  <div className="p-4 bg-emerald-50 rounded-xl">
-                    <p className="text-sm text-gray-500">Hora</p>
-                    <p className="font-medium text-gray-800">{selectedBooking.booking_time} hs</p>
-                  </div>
-                </div>
-              </div>
-              <hr className="my-6" />
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <p className="mb-1 text-sm text-gray-500">Estado del pago</p>
-                  <span className={`px-3 py-2 rounded-lg font-medium ${selectedBooking.payment_status === 'approved' ? 'bg-green-100 text-green-700' : selectedBooking.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
-                    {selectedBooking.payment_status === 'approved' ? 'Pagado' : selectedBooking.payment_status === 'pending' ? 'Pendiente' : 'Rechazado'}
-                  </span>
-                </div>
-                <div>
-                  <p className="mb-1 text-sm text-gray-500">Monto</p>
-                  <p className="text-2xl font-bold text-gray-800">${selectedBooking.amount.toLocaleString('es-AR')} ARS</p>
-                </div>
-              </div>
 
-              {/* Notas internas del admin */}
-              <hr className="my-6" />
-              <NotasAdmin
-                booking={selectedBooking}
-                adminEmail={adminEmail}
-                adminPassword={adminPassword}
-                onSaved={() => loadData()}
-              />
-
-              <div className="flex gap-3 mt-8">
-                {selectedBooking.booking_status === 'pending' && (
-                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'confirmed'); setView('bookings'); }} className="flex-1 py-3 font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700">Confirmar</button>
-                )}
-                {selectedBooking.booking_status === 'confirmed' && (
-                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'completed'); setView('bookings'); }} className="flex-1 py-3 font-semibold text-blue-700 bg-blue-100 rounded-xl hover:bg-blue-200">Completar</button>
-                )}
-                {(selectedBooking.booking_status === 'pending' || selectedBooking.booking_status === 'confirmed') && (
-                  <button onClick={() => { updateBookingStatus(selectedBooking.id, 'cancelled'); setView('bookings'); }} className="flex-1 py-3 font-semibold text-red-700 bg-red-100 rounded-xl hover:bg-red-200">Cancelar</button>
-                )}
-                {(selectedBooking.booking_status === 'cancelled' || selectedBooking.booking_status === 'completed') && (
-                  <button onClick={() => { deleteBooking(selectedBooking.id); setView('bookings'); }} className="flex-1 py-3 font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700">Eliminar</button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Availability */}
-        {view === 'availability' && (
-          <AvailabilityManager
-            availability={availability}
-            blockedDates={blockedDates}
-            onRefresh={loadData}
-            adminEmail={adminEmail}
-            adminPassword={adminPassword}
-            showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
-          />
-        )}
-
-        {/* Settings */}
-        {view === 'settings' && settings && (
-          <SettingsManager
-            settings={settings}
-            onRefresh={loadData}
-            adminEmail={adminEmail}
-            adminPassword={adminPassword}
-            showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
-          />
-        )}
-
-        {/* Waiting List */}
-        {view === 'waiting' && (
-          <WaitingListManager
-            waitingList={waitingList}
-            onRefresh={loadData}
-            adminEmail={adminEmail}
-            adminPassword={adminPassword}
-            darkMode={darkMode}
-          />
-        )}
-
-        {/* Clients */}
-        {view === 'clients' && (
-          <ClientsManager bookings={bookings} darkMode={darkMode} />
-        )}
-
-        {/* WhatsApp */}
-        {view === 'whatsapp' && (
-          <WhatsAppManager bookings={bookings} darkMode={darkMode} />
-        )}
-
-        {/* Profile */}
-        {view === 'profile' && (
-          <ProfileManager
-            adminEmail={adminEmail}
-            adminPassword={adminPassword}
-            adminName={adminName}
-            darkMode={darkMode}
-            onRefresh={loadData}
-            showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
-            onProfileUpdated={(name, email, password) => {
-              setAdminName(name);
-              setAdminEmail(email);
-              setAdminPassword(password);
-            }}
-          />
-        )}
-
-        {/* Trash */}
-        {view === 'trash' && (
-          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Papelera</h2>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Las reservas se eliminan definitivamente a los 21 días</p>
-              </div>
-            </div>
-            {deletedBookings.length === 0 ? (
-              <div className="py-16 text-center">
-                <Trash2 className={`w-16 h-16 mx-auto mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
-                <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>La papelera está vacía</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {deletedBookings.map((booking) => {
-                  const days = daysUntilPurge((booking as any).deleted_at);
-                  return (
-                    <div key={booking.id} className={`flex items-center justify-between p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl`}>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
-                          <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
-                          <span className="font-mono text-xs text-gray-400">{booking.booking_code}</span>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Reservas de hoy</CardTitle>
+                  <CardDescription>
+                    {today.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {todaysBookings.length > 0 ? (
+                    <div className="space-y-2">
+                      {todaysBookings.map((booking) => (
+                        <div key={booking.id}
+                          className="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50 cursor-pointer"
+                          onClick={() => { setSelectedBooking(booking); setView('detail'); }}>
+                          <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                              <span className="font-bold text-primary">{booking.booking_time.slice(0, 5)}</span>
+                            </div>
+                            <div>
+                              <p className="font-medium">{booking.customer_name}</p>
+                              <p className="flex items-center gap-1 text-sm text-muted-foreground">
+                                <Phone className="h-3 w-3" />{booking.customer_phone}
+                              </p>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="icon" className="shrink-0">
+                            <Eye className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} flex items-center gap-3`}>
-                          <span>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} {booking.booking_time}</span>
-                          <span className={`px-2 py-0.5 rounded-full text-xs ${days <= 3 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                            Se elimina en {days} días
-                          </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-12 text-center">
+                      <CalendarDays className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
+                      <p className="text-muted-foreground">No hay reservas para hoy</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Próximas reservas</CardTitle>
+                  <CardDescription>Las próximas 5 reservas agendadas</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {upcomingBookings.length > 0 ? (
+                    <div className="space-y-2">
+                      {upcomingBookings.slice(0, 5).map((booking) => (
+                        <div key={booking.id}
+                          className="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50 cursor-pointer"
+                          onClick={() => { setSelectedBooking(booking); setView('detail'); }}>
+                          <div className="flex items-center gap-4">
+                            <div className="text-center">
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { month: 'short' })}
+                              </p>
+                              <p className="text-xl font-bold">{new Date(booking.booking_date + 'T12:00:00').getDate()}</p>
+                            </div>
+                            <div>
+                              <p className="font-medium">{booking.customer_name}</p>
+                              <p className="text-sm text-muted-foreground">{booking.booking_time} hs</p>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="icon" className="shrink-0">
+                            <Eye className="h-4 w-4" />
+                          </Button>
                         </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-12 text-center">
+                      <CalendarDays className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
+                      <p className="text-muted-foreground">No hay reservas futuras</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* ─── Bookings ──────────────────────────────────────── */}
+          {view === 'bookings' && (
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col gap-4 sm:flex-row">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input type="text" placeholder="Buscar por nombre, teléfono, email o código..." value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)} className="h-10 pl-9" />
+                  </div>
+                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                    className="flex h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors">
+                    <option value="all">Todos los estados</option>
+                    <option value="confirmed">Confirmadas</option>
+                    <option value="pending">Pendientes</option>
+                    <option value="completed">Completadas</option>
+                    <option value="cancelled">Canceladas</option>
+                  </select>
+                  <Button onClick={loadData} variant="outline" size="icon">
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Código</th>
+                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Cliente</th>
+                        <th className="hidden px-4 py-4 text-left text-sm font-medium text-muted-foreground md:table-cell">Contacto</th>
+                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Fecha</th>
+                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Hora</th>
+                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Pago</th>
+                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Estado</th>
+                        <th className="px-4 py-4 text-center text-sm font-medium text-muted-foreground">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {filteredBookings.map((booking) => (
+                        <tr key={booking.id} className="hover:bg-muted/50 transition-colors">
+                          <td className="px-4 py-4 font-mono text-xs text-muted-foreground">{booking.booking_code}</td>
+                          <td className="px-4 py-4 font-medium">{booking.customer_name}</td>
+                          <td className="hidden px-4 py-4 md:table-cell">
+                            <div className="text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1"><Phone className="h-3 w-3" />{booking.customer_phone}</div>
+                              <div className="flex items-center gap-1"><Mail className="h-3 w-3" />{booking.customer_email}</div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-sm">{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')}</td>
+                          <td className="px-4 py-4 text-sm">{booking.booking_time}</td>
+                          <td className="px-4 py-4">
+                            <Badge variant={getPaymentBadge(booking.payment_status).variant}>
+                              {getPaymentBadge(booking.payment_status).label}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-4">
+                            <Badge variant={getStatusBadge(booking.booking_status).variant}>
+                              {getStatusBadge(booking.booking_status).label}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center justify-center gap-1">
+                              <Button onClick={() => { setSelectedBooking(booking); setView('detail'); }}
+                                variant="ghost" size="icon" title="Ver detalle">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              {booking.booking_status === 'pending' && (
+                                <Button onClick={() => updateBookingStatus(booking.id, 'confirmed')}
+                                  variant="ghost" size="icon" title="Confirmar" className="text-emerald-600">
+                                  <Calendar className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {booking.booking_status === 'confirmed' && (
+                                <Button onClick={() => updateBookingStatus(booking.id, 'completed')}
+                                  variant="ghost" size="icon" title="Completar" className="text-blue-600">
+                                  <Clock className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {(booking.booking_status === 'pending' || booking.booking_status === 'confirmed') && (
+                                <Button onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                                  variant="ghost" size="icon" title="Cancelar" className="text-destructive">
+                                  <XCircle className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {(booking.booking_status === 'cancelled' || booking.booking_status === 'completed') && (
+                                <Button onClick={() => deleteBooking(booking.id)}
+                                  variant="ghost" size="sm" className="text-destructive" title="Eliminar">
+                                  <Trash2 className="mr-1 h-4 w-4" /> Eliminar
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {filteredBookings.length === 0 && (
+                    <p className="py-12 text-center text-sm text-muted-foreground">No se encontraron reservas</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ─── Detail ─────────────────────────────────────────── */}
+          {view === 'detail' && selectedBooking && (
+            <div className="mx-auto max-w-2xl space-y-6">
+              <Button onClick={() => setView('bookings')} variant="ghost" size="sm">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Volver
+              </Button>
+
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Detalle de reserva</CardTitle>
+                    <span className="font-mono text-sm text-muted-foreground">{selectedBooking.booking_code}</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-3">
+                      <p className="text-lg font-semibold">{selectedBooking.customer_name}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Phone className="h-4 w-4" />{selectedBooking.customer_phone}
                       </div>
-                      <div className="flex items-center gap-2 ml-4">
-                        <button
-                          onClick={() => restoreBooking(booking.id)}
-                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                          title="Restaurar"
-                        >
-                          <RotateCcw className="w-4 h-4" />
-                          Restaurar
-                        </button>
-                        <button
-                          onClick={() => purgeBooking(booking.id)}
-                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200"
-                          title="Eliminar definitivamente"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Eliminar
-                        </button>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Mail className="h-4 w-4" />{selectedBooking.customer_email}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
+                    <div className="space-y-3">
+                      <div className="rounded-lg bg-accent p-4">
+                        <p className="text-xs text-muted-foreground">Fecha</p>
+                        <p className="font-medium">{new Date(selectedBooking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      </div>
+                      <div className="rounded-lg bg-accent p-4">
+                        <p className="text-xs text-muted-foreground">Hora</p>
+                        <p className="font-medium">{selectedBooking.booking_time} hs</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div>
+                      <p className="mb-1 text-sm text-muted-foreground">Estado del pago</p>
+                      <Badge variant={getPaymentBadge(selectedBooking.payment_status).variant}>
+                        {getPaymentBadge(selectedBooking.payment_status).label}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="mb-1 text-sm text-muted-foreground">Monto</p>
+                      <p className="text-2xl font-bold">${selectedBooking.amount.toLocaleString('es-AR')} ARS</p>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <NotasAdmin
+                    booking={selectedBooking}
+                    adminEmail={adminEmail}
+                    adminPassword={adminPassword}
+                    onSaved={() => loadData()}
+                  />
+
+                  <div className="flex gap-3 pt-4">
+                    {selectedBooking.booking_status === 'pending' && (
+                      <Button onClick={() => { updateBookingStatus(selectedBooking.id, 'confirmed'); setView('bookings'); }} className="flex-1">
+                        Confirmar
+                      </Button>
+                    )}
+                    {selectedBooking.booking_status === 'confirmed' && (
+                      <Button onClick={() => { updateBookingStatus(selectedBooking.id, 'completed'); setView('bookings'); }} variant="secondary" className="flex-1">
+                        Completar
+                      </Button>
+                    )}
+                    {(selectedBooking.booking_status === 'pending' || selectedBooking.booking_status === 'confirmed') && (
+                      <Button onClick={() => { updateBookingStatus(selectedBooking.id, 'cancelled'); setView('bookings'); }} variant="destructive" className="flex-1">
+                        Cancelar
+                      </Button>
+                    )}
+                    {(selectedBooking.booking_status === 'cancelled' || selectedBooking.booking_status === 'completed') && (
+                      <Button onClick={() => { deleteBooking(selectedBooking.id); setView('bookings'); }} variant="destructive" className="flex-1">
+                        Eliminar
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* ─── Availability ───────────────────────────────────── */}
+          {view === 'availability' && (
+            <AvailabilityManager
+              availability={availability}
+              blockedDates={blockedDates}
+              onRefresh={loadData}
+              adminEmail={adminEmail}
+              adminPassword={adminPassword}
+              showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
+            />
+          )}
+
+          {/* ─── Settings ───────────────────────────────────────── */}
+          {view === 'settings' && settings && (
+            <SettingsManager
+              settings={settings}
+              onRefresh={loadData}
+              adminEmail={adminEmail}
+              adminPassword={adminPassword}
+              showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
+            />
+          )}
+
+          {/* ─── Waiting List ───────────────────────────────────── */}
+          {view === 'waiting' && (
+            <WaitingListManager
+              waitingList={waitingList}
+              onRefresh={loadData}
+              adminEmail={adminEmail}
+              adminPassword={adminPassword}
+            />
+          )}
+
+          {/* ─── Clients ────────────────────────────────────────── */}
+          {view === 'clients' && (
+            <ClientsManager bookings={bookings} />
+          )}
+
+          {/* ─── WhatsApp ───────────────────────────────────────── */}
+          {view === 'whatsapp' && (
+            <WhatsAppManager bookings={bookings} />
+          )}
+
+          {/* ─── Profile ────────────────────────────────────────── */}
+          {view === 'profile' && (
+            <ProfileManager
+              adminEmail={adminEmail}
+              adminPassword={adminPassword}
+              adminName={adminName}
+              onRefresh={loadData}
+              showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
+              onProfileUpdated={(name, email, password) => {
+                setAdminName(name);
+                setAdminEmail(email);
+                setAdminPassword(password);
+              }}
+            />
+          )}
+
+          {/* ─── Trash ──────────────────────────────────────────── */}
+          {view === 'trash' && (
+            <div className="mx-auto max-w-3xl">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle>Papelera</CardTitle>
+                      <CardDescription>Las reservas se eliminan definitivamente a los 21 días</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {deletedBookings.length === 0 ? (
+                    <div className="py-16 text-center">
+                      <Archive className="mx-auto mb-4 h-16 w-16 text-muted-foreground/30" />
+                      <p className="text-muted-foreground">La papelera está vacía</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {deletedBookings.map((booking) => {
+                        const days = daysUntilPurge((booking as any).deleted_at);
+                        return (
+                          <div key={booking.id} className="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3">
+                                <p className="font-medium">{booking.customer_name}</p>
+                                <span className="font-mono text-xs text-muted-foreground">{booking.booking_code}</span>
+                              </div>
+                              <p className="mt-1 text-sm text-muted-foreground">
+                                {new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} {booking.booking_time}
+                                <Badge variant={days <= 3 ? 'destructive' : 'warning'} className="ml-2">
+                                  Se elimina en {days} días
+                                </Badge>
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 ml-4 shrink-0">
+                              <Button onClick={() => restoreBooking(booking.id)} variant="secondary" size="sm">
+                                <RotateCcw className="mr-1 h-4 w-4" /> Restaurar
+                              </Button>
+                              <Button onClick={() => purgeBooking(booking.id)} variant="destructive" size="sm">
+                                <Trash2 className="mr-1 h-4 w-4" /> Eliminar
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </main>
       </div>
 
       {/* Success Modal */}
-      {successModal.open && createPortal(
-        <div className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4">
-          <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-2xl">
-            <div className="flex items-center justify-center mx-auto mb-4 bg-green-100 rounded-full w-14 h-14">
-              <CheckCircle className="text-green-600 w-7 h-7" />
+      <Dialog open={successModal.open} onOpenChange={(open) => !open && setSuccessModal({ open: false, message: '' })}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+              <CheckCircle className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h3 className="mb-2 text-xl font-bold text-center text-gray-800">¡Listo!</h3>
-            <p className="mb-8 text-center text-gray-500">{successModal.message}</p>
-            <button
-              onClick={() => setSuccessModal({ open: false, message: '' })}
-              className="w-full py-3 font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700"
-            >
+            <DialogTitle className="text-center pt-4">¡Listo!</DialogTitle>
+            <DialogDescription className="text-center">{successModal.message}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
+            <Button onClick={() => setSuccessModal({ open: false, message: '' })} className="w-full sm:w-auto">
               Aceptar
-            </button>
-          </div>
-        </div>,
-        document.body
-      )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Confirm Modal */}
-      {confirmModal.open && createPortal(
-        <div className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4">
-          <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-2xl">
-            <div className="flex items-center justify-center mx-auto mb-4 bg-red-100 rounded-full w-14 h-14">
-              <Trash2 className="text-red-600 w-7 h-7" />
+      <Dialog open={confirmModal.open} onOpenChange={(open) => !open && setConfirmModal(prev => ({ ...prev, open: false }))}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+              <Trash2 className="h-7 w-7 text-destructive" />
             </div>
-            <h3 className="mb-2 text-xl font-bold text-center text-gray-800">Eliminar reserva</h3>
-            <p className="mb-8 text-center text-gray-500">{confirmModal.message}</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))}
-                className="flex-1 py-3 font-semibold text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmModal.onConfirm}
-                className="flex-1 py-3 font-semibold text-white transition-colors bg-red-600 rounded-xl hover:bg-red-700"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-    </div>
-  );
-}
-
-// ─── Availability Manager ─────────────────────────────────────────────────────
-function AvailabilityManager({
-  availability, blockedDates, onRefresh, adminEmail, adminPassword, showSuccess
-}: {
-  availability: AvailabilitySetting[];
-  blockedDates: BlockedDate[];
-  onRefresh: () => void;
-  adminEmail: string;
-  adminPassword: string;
-  showSuccess: (msg: string) => void;
-}) {
-  const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  const [editingDay, setEditingDay] = useState<number | null>(null);
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [isActive, setIsActive] = useState(false);
-  const [newBlockedDate, setNewBlockedDate] = useState('');
-  const [newBlockedReason, setNewBlockedReason] = useState('');
-
-  const startEditing = (day: AvailabilitySetting) => {
-    setEditingDay(day.day_of_week);
-    setStartTime(day.start_time);
-    setEndTime(day.end_time);
-    setIsActive(day.is_active);
-  };
-
-  const saveDay = async () => {
-    if (editingDay === null) return;
-    try {
-      const { data, error } = await supabase.functions.invoke('admin-update-availability', {
-        body: { email: adminEmail, password: adminPassword, day_of_week: editingDay, start_time: startTime, end_time: endTime, is_active: isActive },
-      });
-      if (error || !data?.success) throw new Error('Error al guardar');
-      setEditingDay(null);
-      onRefresh();
-      showSuccess('Horario actualizado correctamente');
-    } catch {
-      alert('Error al guardar');
-    }
-  };
-
-  const addBlockedDate = async () => {
-    if (!newBlockedDate) return;
-    try {
-      const { data, error } = await supabase.functions.invoke('admin-manage-blocked-dates', {
-        body: { email: adminEmail, password: adminPassword, action: 'add', date: newBlockedDate, reason: newBlockedReason || null },
-      });
-      if (error || !data?.success) throw new Error('Error al agregar');
-      setNewBlockedDate('');
-      setNewBlockedReason('');
-      onRefresh();
-      showSuccess('Fecha bloqueada agregada');
-    } catch { alert('Error al agregar fecha'); }
-  };
-
-  const removeBlockedDate = async (id: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('admin-manage-blocked-dates', {
-        body: { email: adminEmail, password: adminPassword, action: 'remove', id },
-      });
-      if (error || !data?.success) throw new Error('Error al eliminar');
-      onRefresh();
-    } catch { alert('Error al eliminar fecha'); }
-  };
-
-  return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <div className="p-6 bg-gray-800 shadow-sm rounded-2xl">
-        <h2 className="mb-6 text-xl font-bold text-gray-300">Dias laborables</h2>
-        <div className="space-y-3">
-          {availability.map((day) => (
-            <div key={day.id} className="p-4 bg-gray-50 rounded-xl">
-              {editingDay === day.day_of_week ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-800">{DAYS[day.day_of_week]}</span>
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="w-5 h-5 border-gray-300 rounded text-emerald-600" />
-                      <span>Activo</span>
-                    </label>
-                  </div>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm text-gray-600 w-12 flex-shrink-0">Desde</label>
-                      <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" />
-                    </div>
-                    <span className="hidden sm:inline flex-shrink-0 self-center">a</span>
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm text-gray-600 w-12 flex-shrink-0">Hasta</label>
-                      <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" />
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={saveDay} className="flex-1 py-2 text-white rounded-lg bg-emerald-600 hover:bg-emerald-700">Guardar</button>
-                    <button onClick={() => setEditingDay(null)} className="flex-1 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between gap-1">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className={`flex-shrink-0 w-3 h-3 rounded-full ${day.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="font-medium text-gray-800 whitespace-nowrap">{DAYS[day.day_of_week]}</span>
-                    <span className="text-gray-600 truncate">{day.start_time.slice(0, 5)} - {day.end_time.slice(0, 5)}</span>
-                  </div>
-                  <button onClick={() => startEditing(day)} className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-200">
-                    <Edit className="w-4 h-4 text-gray-600" />
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="p-6 bg-gray-800 shadow-sm rounded-2xl">
-        <h2 className="mb-6 text-xl font-bold text-gray-300">Fechas bloqueadas</h2>
-        <div className="mb-6 space-y-3">
-          <input type="date" value={newBlockedDate} onChange={(e) => setNewBlockedDate(e.target.value)} min={new Date().toISOString().split('T')[0]} className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
-          <input type="text" value={newBlockedReason} onChange={(e) => setNewBlockedReason(e.target.value)} placeholder="Razon (opcional)" className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
-          <button onClick={addBlockedDate} disabled={!newBlockedDate} className="w-full py-3 font-medium text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">Agregar fecha bloqueada</button>
-        </div>
-        <div className="space-y-2">
-          {blockedDates.map((blocked) => (
-            <div key={blocked.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-              <div>
-                <p className="font-medium text-gray-800">{new Date(blocked.date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
-                {blocked.reason && <p className="text-sm text-gray-500">{blocked.reason}</p>}
-              </div>
-              <button onClick={() => removeBlockedDate(blocked.id)} className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200">
-                <Trash2 className="w-4 h-4" /> Eliminar
-              </button>
-            </div>
-          ))}
-          {blockedDates.length === 0 && <p className="py-4 text-center text-gray-500">No hay fechas bloqueadas</p>}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Settings Manager ─────────────────────────────────────────────────────────
-function SettingsManager({
-  settings, onRefresh, adminEmail, adminPassword, showSuccess
-}: {
-  settings: Settings;
-  onRefresh: () => void;
-  adminEmail: string;
-  adminPassword: string;
-  showSuccess: (msg: string) => void;
-}) {
-  const [price, setPrice] = useState(settings.price.toString());
-  const [currency, setCurrency] = useState(settings.currency);
-  const [saving, setSaving] = useState(false);
-
-  const saveSettings = async () => {
-    setSaving(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('admin-update-settings', {
-        body: { email: adminEmail, password: adminPassword, price, currency },
-      });
-      if (error || !data?.success) throw new Error('Error al guardar');
-      onRefresh();
-      showSuccess('Configuración guardada correctamente');
-    } catch { alert('Error al guardar'); }
-    finally { setSaving(false); }
-  };
-
-  return (
-    <div className="max-w-xl mx-auto">
-      <div className="p-6 bg-white shadow-sm rounded-2xl">
-        <h2 className="mb-6 text-xl font-bold text-gray-800">Configuracion general</h2>
-        <div className="space-y-6">
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Precio de la reserva</label>
-            <div className="flex items-center gap-2">
-              <span className="text-lg text-gray-500 sm:text-xl">$</span>
-              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="flex-1 min-w-0 px-4 py-3 text-base border border-gray-200 outline-none rounded-xl focus:border-emerald-500 sm:text-xl" />
-            </div>
-          </div>
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Moneda</label>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full px-4 py-3 border border-gray-200 outline-none rounded-xl focus:border-emerald-500">
-              <option value="ARS">ARS - Peso Argentino</option>
-              <option value="USD">USD - Dolar Americano</option>
-              <option value="MXN">MXN - Peso Mexicano</option>
-            </select>
-          </div>
-          <button onClick={saveSettings} disabled={saving} className="w-full py-4 text-lg font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
-            {saving ? 'Guardando...' : 'Guardar configuracion'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Clients Manager ──────────────────────────────────────────────────────────
-interface ClientData {
-  name: string;
-  phone: string;
-  email: string;
-  firstBooking: string;
-  lastBooking: string;
-  totalBookings: number;
-}
-
-function ClientsManager({ bookings, darkMode }: { bookings: Booking[]; darkMode: boolean }) {
-  const [search, setSearch] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-
-  // Agrupar reservas por email (cliente único)
-  const clientMap = new Map<string, ClientData>();
-  bookings.forEach((b) => {
-    const key = b.customer_email || b.customer_phone;
-    if (clientMap.has(key)) {
-      const c = clientMap.get(key)!;
-      c.totalBookings += 1;
-      if (b.booking_date > c.lastBooking) c.lastBooking = b.booking_date;
-      if (b.booking_date < c.firstBooking) c.firstBooking = b.booking_date;
-    } else {
-      clientMap.set(key, {
-        name: b.customer_name,
-        phone: b.customer_phone,
-        email: b.customer_email,
-        firstBooking: b.booking_date,
-        lastBooking: b.booking_date,
-        totalBookings: 1,
-      });
-    }
-  });
-
-  let clients = Array.from(clientMap.values());
-
-  // Filtros
-  if (search) {
-    clients = clients.filter(c =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.phone.includes(search)
-    );
-  }
-  if (dateFrom) clients = clients.filter(c => c.firstBooking >= dateFrom);
-  if (dateTo) clients = clients.filter(c => c.firstBooking <= dateTo);
-
-  const formatDate = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('es-AR');
-
-  const exportCSV = () => {
-    const headers = ['Nombre', 'WhatsApp', 'Email', 'Primera reserva', 'Última reserva', 'Total reservas'];
-    const rows = clients.map(c => [
-      c.name, c.phone, c.email,
-      formatDate(c.firstBooking), formatDate(c.lastBooking),
-      c.totalBookings
-    ]);
-    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'clientes.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const exportPDF = async () => {
-    const { jsPDF } = await import('jspdf');
-    const doc = new jsPDF();
-
-    doc.setFontSize(18);
-    doc.text('Listado de Clientes', 14, 20);
-    doc.setFontSize(10);
-    doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')}`, 14, 28);
-
-    let y = 40;
-    const lineH = 8;
-
-    // Headers
-    doc.setFillColor(16, 185, 129);
-    doc.rect(14, y - 5, 182, lineH, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(9);
-    doc.text('Nombre', 16, y);
-    doc.text('WhatsApp', 70, y);
-    doc.text('Email', 105, y);
-    doc.text('Registro', 148, y);
-    doc.text('Reservas', 178, y);
-    y += lineH;
-
-    doc.setTextColor(0, 0, 0);
-    clients.forEach((c, i) => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      if (i % 2 === 0) {
-        doc.setFillColor(245, 245, 245);
-        doc.rect(14, y - 5, 182, lineH, 'F');
-      }
-      doc.setFontSize(8);
-      doc.text(c.name.slice(0, 20), 16, y);
-      doc.text(c.phone.slice(0, 15), 70, y);
-      doc.text(c.email.slice(0, 22), 105, y);
-      doc.text(formatDate(c.firstBooking), 148, y);
-      doc.text(String(c.totalBookings), 182, y);
-      y += lineH;
-    });
-
-    doc.save('clientes.pdf');
-  };
-
-  return (
-    <div className={`rounded-2xl shadow-sm p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Clientes</h2>
-          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{clients.length} clientes encontrados</p>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200">
-            <Download className="w-4 h-4" /> CSV
-          </button>
-          <button onClick={exportPDF} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-xl hover:bg-red-200">
-            <FileText className="w-4 h-4" /> PDF
-          </button>
-        </div>
-      </div>
-
-      {/* Filtros */}
-      <div className="flex flex-col gap-3 mb-6 sm:flex-row">
-        <div className="relative flex-1">
-          <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
-          <input type="text" placeholder="Buscar por nombre o teléfono..." value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
-        </div>
-        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-          className={`px-4 py-3 border rounded-xl focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`} />
-        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-          className={`px-4 py-3 border rounded-xl focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`} />
-      </div>
-
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-              {['Nombre', 'WhatsApp', 'Email', 'Primera reserva', 'Última reserva', 'Total'].map(h => (
-                <th key={h} className={`text-left py-4 px-3 font-medium text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
-            {clients.map((c, i) => (
-              <tr key={i} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
-                <td className={`py-4 px-3 font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{c.name}</td>
-                <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <div className="flex items-center gap-1"><Phone className="w-3 h-3" />{c.phone}</div>
-                </td>
-                <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <div className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</div>
-                </td>
-                <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatDate(c.firstBooking)}</td>
-                <td className={`py-4 px-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatDate(c.lastBooking)}</td>
-                <td className="px-3 py-4">
-                  <span className="px-2 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-700">{c.totalBookings}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {clients.length === 0 && (
-          <p className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No se encontraron clientes</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── WhatsApp Manager ─────────────────────────────────────────────────────────
-function WhatsAppManager({ bookings, darkMode }: { bookings: Booking[]; darkMode: boolean }) {
-  const DEFAULT_TEMPLATE = 'Hola {nombre} 👋 Tu reserva fue aprobada. Te esperamos el día {fecha} a las {hora}. ¡Gracias!';
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [message, setMessage] = useState(DEFAULT_TEMPLATE);
-  const [search, setSearch] = useState('');
-
-  const pendingBookings = bookings.filter(b =>
-    b.booking_status === 'pending' || b.booking_status === 'confirmed'
-  );
-
-  const filtered = pendingBookings.filter(b =>
-    b.customer_name.toLowerCase().includes(search.toLowerCase()) ||
-    b.customer_phone.includes(search)
-  );
-
-  const buildMessage = (booking: Booking) => {
-    const fecha = new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', {
-      weekday: 'long', day: 'numeric', month: 'long'
-    });
-    const hora = booking.booking_time.slice(0, 5);
-    return message
-      .replace('{nombre}', booking.customer_name)
-      .replace('{fecha}', fecha)
-      .replace('{hora}', hora);
-  };
-
-  const sendWhatsApp = (booking: Booking) => {
-    const phone = booking.customer_phone.replace(/\D/g, '');
-    const text = encodeURIComponent(buildMessage(booking));
-    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
-  };
-
-  return (
-    <div className={`rounded-2xl shadow-sm p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-      <div className="mb-6">
-        <h2 className={`text-xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Enviar mensaje de aprobación</h2>
-        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Seleccioná una reserva y enviá el mensaje por WhatsApp</p>
-      </div>
-      <div className="mb-6">
-        <div className="relative p-6 mb-5 overflow-hidden shadow-lg rounded-2xl bg-gradient-to-r from-purple-600 to-violet-600">
-          <div className="absolute top-0 right-0 w-32 h-32 translate-x-8 -translate-y-8 bg-white rounded-full opacity-5" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 -translate-x-6 translate-y-6 bg-white rounded-full opacity-5" />
-        <div className="relative flex flex-col items-center gap-4 text-center">
-
-  <span className="px-3 py-1 text-sm font-bold tracking-wide text-yellow-900 uppercase bg-yellow-400 rounded-full">
-    Plan Pro
-  </span>
-
-  <div className="flex-1">
-    <p className="mb-2 text-base font-bold text-white">
-      Automatizá mensajes
-    </p>
-
-    <p className="text-sm leading-relaxed text-purple-100">
-      Con el Plan Pro el cliente recibe la confirmación por WhatsApp{" "}
-      <span className="font-semibold text-white">
-        <br />
-        AUTOMÁTICAMENTE AL PAGAR
-      </span>
-      <br />
-      sin intervención manual,{" "}
-      <span className="font-semibold text-white">
-        24 hs, 7 días, feriados incluidos.
-      </span>
-    </p>
-  </div>
-
-</div>
-        </div>
-        <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Plantilla del mensaje</label>
-        <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3}
-          className={`w-full px-4 py-3 border rounded-xl text-base resize-none focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-200 border-gray-600 text-gray-800 placeholder-gray-400' : 'border-gray-200'}`} />
-        <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-          Variables: <code className="px-1 bg-gray-100 rounded">{'{nombre}'}</code> <code className="px-1 bg-gray-100 rounded">{'{fecha}'}</code> <code className="px-1 bg-gray-100 rounded">{'{hora}'}</code>
-        </p>
-      </div>
-      <div className="relative mb-4">
-        <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
-        <input type="text" placeholder="Buscar por nombre o teléfono..." value={search} onChange={(e) => setSearch(e.target.value)}
-          className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
-      </div>
-      <div className="space-y-3">
-        {filtered.length === 0 && <p className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No hay reservas disponibles</p>}
-        {filtered.map((booking) => (
-          <div key={booking.id} className={`rounded-xl p-4 border ${selectedBooking?.id === booking.id ? 'border-emerald-500 bg-emerald-50' : darkMode ? 'border-gray-700 bg-gray-700' : 'border-gray-200 bg-gray-50'}`}>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setSelectedBooking(booking === selectedBooking ? null : booking)}>
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <p className={`font-medium truncate ${darkMode && selectedBooking?.id !== booking.id ? 'text-white' : 'text-gray-800'}`}>{booking.customer_name}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${booking.booking_status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                    {booking.booking_status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
-                  </span>
-                </div>
-                <div className={`text-sm flex flex-wrap items-center gap-2 ${darkMode && selectedBooking?.id !== booking.id ? 'text-gray-400' : 'text-gray-500'}`}>
-                  <span className="flex items-center gap-1"><Phone className="flex-shrink-0 w-3 h-3" />{booking.customer_phone}</span>
-                  <span>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} — {booking.booking_time.slice(0, 5)} hs</span>
-                </div>
-              </div>
-              <button onClick={() => sendWhatsApp(booking)}
-                className="flex items-center justify-center flex-shrink-0 w-full gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-green-500 rounded-xl hover:bg-green-600 sm:w-auto">
-                <MessageSquare className="w-4 h-4" /> Enviar
-              </button>
-            </div>
-            {selectedBooking?.id === booking.id && (
-              <div className="pt-3 mt-3 border-t border-emerald-200">
-                <p className="mb-1 text-xs font-medium text-emerald-600">Vista previa:</p>
-                <p className="p-3 text-sm text-gray-700 bg-white border rounded-lg border-emerald-200">{buildMessage(booking)}</p>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── WaitingList Manager ──────────────────────────────────────────────────────
-function WaitingListManager({
-  waitingList, onRefresh, adminEmail, adminPassword, darkMode
-}: {
-  waitingList: WaitingListItem[];
-  onRefresh: () => void;
-  adminEmail: string;
-  adminPassword: string;
-  darkMode: boolean;
-}) {
-  const [search, setSearch] = useState('');
-  const [filterEstado, setFilterEstado] = useState('all');
-  const [saving, setSaving] = useState<string | null>(null);
-
-  const updateItem = async (id: string, estado?: string, action?: string) => {
-    setSaving(id);
-    try {
-      const { data, error } = await supabase.functions.invoke('admin-update-waiting-list', {
-        body: { email: adminEmail, password: adminPassword, id, estado, action },
-      });
-      if (error || !data?.success) throw new Error('Error');
-      onRefresh();
-    } catch {
-      alert('Error al actualizar');
-    } finally {
-      setSaving(null);
-    }
-  };
-
-  const estadoColors: Record<string, string> = {
-    pendiente: 'bg-yellow-100 text-yellow-700',
-    contactado: 'bg-blue-100 text-blue-700',
-    convertido: 'bg-green-100 text-green-700',
-    cancelado: 'bg-red-100 text-red-700',
-  };
-
-  const estadoLabel: Record<string, string> = {
-    pendiente: 'Pendiente',
-    contactado: 'Contactado',
-    convertido: 'Convertido',
-    cancelado: 'Cancelado',
-  };
-
-  const filtered = waitingList.filter(w => {
-    const matchesSearch = w.nombre.toLowerCase().includes(search.toLowerCase()) ||
-      w.telefono.includes(search) || w.email.toLowerCase().includes(search.toLowerCase());
-    const matchesEstado = filterEstado === 'all' || w.estado === filterEstado;
-    return matchesSearch && matchesEstado;
-  });
-
-  const formatDate = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('es-AR', {
-    weekday: 'short', day: 'numeric', month: 'short'
-  });
-
-  return (
-    <div className={`rounded-2xl shadow-sm p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Lista de espera</h2>
-          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            {waitingList.filter(w => w.estado === 'pendiente').length} pendientes de {waitingList.length} total
-          </p>
-        </div>
-        <button onClick={onRefresh} className={`p-2 rounded-xl ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}>
-          <RefreshCw className={`w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
-        </button>
-      </div>
-
-      {/* Filtros */}
-      <div className="flex flex-col gap-3 mb-6 sm:flex-row">
-        <div className="relative flex-1">
-          <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
-          <input type="text" placeholder="Buscar por nombre, teléfono o email..." value={search}
-            onChange={e => setSearch(e.target.value)}
-            className={`w-full pl-12 pr-4 py-3 border rounded-xl text-base focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
-        </div>
-        <select value={filterEstado} onChange={e => setFilterEstado(e.target.value)}
-          className={`px-4 py-3 border rounded-xl focus:outline-none focus:border-emerald-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}>
-          <option value="all">Todos los estados</option>
-          <option value="pendiente">Pendiente</option>
-          <option value="contactado">Contactado</option>
-          <option value="convertido">Convertido</option>
-          <option value="cancelado">Cancelado</option>
-        </select>
-      </div>
-
-      {/* Lista */}
-      {filtered.length === 0 ? (
-        <div className="py-16 text-center">
-          <ClipboardList className={`w-16 h-16 mx-auto mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
-          <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>No hay registros en la lista de espera</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filtered.map(item => (
-            <div key={item.id} className={`rounded-xl p-4 border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
-              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-3 mb-1">
-                    <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{item.nombre}</p>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${estadoColors[item.estado]}`}>
-                      {estadoLabel[item.estado]}
-                    </span>
-                  </div>
-                  <div className={`text-sm flex flex-wrap gap-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{item.telefono}</span>
-                    <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{item.email}</span>
-                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{formatDate(item.fecha_deseada)}</span>
-                    {item.horario_deseado && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{item.horario_deseado.slice(0, 5)} hs</span>}
-                    {item.servicio && <span>• {item.servicio}</span>}
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {item.estado === 'pendiente' && (
-                    <button onClick={() => updateItem(item.id, 'contactado')} disabled={saving === item.id}
-                      className="px-3 py-2 text-sm font-medium text-blue-700 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200 disabled:opacity-50">
-                      Contactar
-                    </button>
-                  )}
-                  {(item.estado === 'pendiente' || item.estado === 'contactado') && (
-                    <button onClick={() => updateItem(item.id, 'convertido')} disabled={saving === item.id}
-                      className="px-3 py-2 text-sm font-medium text-green-700 transition-colors bg-green-100 rounded-lg hover:bg-green-200 disabled:opacity-50">
-                      Convertido
-                    </button>
-                  )}
-                  {item.estado !== 'cancelado' && item.estado !== 'convertido' && (
-                    <button onClick={() => updateItem(item.id, 'cancelado')} disabled={saving === item.id}
-                      className="px-3 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200 disabled:opacity-50">
-                      Cancelar
-                    </button>
-                  )}
-                  <button onClick={() => updateItem(item.id, undefined, 'delete')} disabled={saving === item.id}
-                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200 disabled:opacity-50">
-                    <Trash2 className="w-4 h-4" /> Eliminar
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Profile Manager ───────────────────────────────────────────────────────────
-function ProfileManager({
-  adminEmail, adminPassword, adminName, darkMode, onRefresh, showSuccess, onProfileUpdated
-}: {
-  adminEmail: string;
-  adminPassword: string;
-  adminName: string;
-  darkMode: boolean;
-  onRefresh: () => void;
-  showSuccess: (msg: string) => void;
-  onProfileUpdated: (name: string, email: string, password: string) => void;
-}) {
-  const [name, setName] = useState(adminName);
-  const [email, setEmail] = useState(adminEmail);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSave = async () => {
-    setError('');
-
-    if (!name.trim()) {
-      setError('El nombre es obligatorio');
-      return;
-    }
-    if (!email.trim() || !email.includes('@')) {
-      setError('Ingresá un email válido');
-      return;
-    }
-    if (newPassword && newPassword.length < 6) {
-      setError('La nueva contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-    if (newPassword && newPassword !== confirmPassword) {
-      setError('Las contraseñas nuevas no coinciden');
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke('admin-update-profile', {
-        body: {
-          email: adminEmail,
-          password: adminPassword,
-          name: name.trim(),
-          newEmail: email.trim() !== adminEmail ? email.trim() : null,
-          newPassword: newPassword || null,
-        },
-      });
-
-      if (fnError || !data?.success) {
-        setError(data?.error || 'Error al guardar el perfil');
-        return;
-      }
-
-      sessionStorage.setItem('admin_email', email.trim());
-      sessionStorage.setItem('admin_name', name.trim());
-      if (newPassword) {
-        sessionStorage.setItem('admin_password', newPassword);
-      }
-
-      onProfileUpdated(name.trim(), email.trim(), newPassword || adminPassword);
-      onRefresh();
-      showSuccess('Perfil actualizado correctamente');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch {
-      setError('Error al conectar con el servidor');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="max-w-xl mx-auto">
-      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-6`}>
-        <h2 className={`text-xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Mi Perfil</h2>
-
-        {error && (
-          <div className="flex items-center gap-3 p-4 mb-4 border border-red-200 bg-red-50 rounded-xl">
-            <XCircle className="flex-shrink-0 w-5 h-5 text-red-500" />
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        )}
-
-        <div className="space-y-6">
-          <div>
-            <label className={`block mb-2 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nombre</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-              className={`w-full px-4 py-3 text-base border-2 rounded-xl focus:border-emerald-500 focus:outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`} />
-          </div>
-          <div>
-            <label className={`block mb-2 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              className={`w-full px-4 py-3 text-base border-2 rounded-xl focus:border-emerald-500 focus:outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`} />
-          </div>
-
-          <hr className={`${darkMode ? 'border-gray-700' : 'border-gray-200'}`} />
-          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            Dejá los campos en blanco si no querés cambiar la contraseña.
-          </p>
-
-          <div>
-            <label className={`block mb-2 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nueva contraseña</label>
-            <div className="relative">
-              <input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••••"
-                className={`w-full px-4 py-3 pr-12 text-base border-2 rounded-xl focus:border-emerald-500 focus:outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
-              <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute text-gray-400 -translate-y-1/2 right-4 top-1/2 hover:text-gray-600 transition-colors">
-                {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-          <div>
-            <label className={`block mb-2 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Confirmar nueva contraseña</label>
-            <div className="relative">
-              <input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                className={`w-full px-4 py-3 pr-12 text-base border-2 rounded-xl focus:border-emerald-500 focus:outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`} />
-              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute text-gray-400 -translate-y-1/2 right-4 top-1/2 hover:text-gray-600 transition-colors">
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-
-          <button onClick={handleSave} disabled={saving}
-            className="w-full py-4 text-lg font-semibold text-white transition-colors bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
-            {saving ? 'Guardando...' : 'Guardar cambios'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Notas internas del admin ─────────────────────────────────────────────────
-function NotasAdmin({
-  booking, adminEmail, adminPassword, onSaved
-}: {
-  booking: Booking;
-  adminEmail: string;
-  adminPassword: string;
-  onSaved: () => void;
-}) {
-  const [nota, setNota] = useState((booking as any).notas_admin || '');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  const saveNota = async () => {
-    setSaving(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('admin-update-booking', {
-        body: {
-          email: adminEmail,
-          password: adminPassword,
-          booking_id: booking.id,
-          notas_admin: nota,
-        },
-      });
-      if (error || !data?.success) throw new Error('Error al guardar');
-      setSaved(true);
-      onSaved();
-      setTimeout(() => setSaved(false), 2000);
-    } catch {
-      alert('Error al guardar la nota');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-          📝 Notas internas
-          <span className="text-xs font-normal text-gray-400">(solo visible para el admin)</span>
-        </label>
-        {saved && (
-          <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-            <CheckCircle className="w-3 h-3" /> Guardado
-          </span>
-        )}
-      </div>
-      <textarea
-        value={nota}
-        onChange={e => setNota(e.target.value)}
-        rows={3}
-        placeholder="Ej: cliente puntual / siempre llega tarde / requiere preparación especial..."
-        className="w-full px-4 py-3 text-sm text-gray-700 transition-colors border-2 border-gray-200 resize-none rounded-xl focus:outline-none focus:border-emerald-500"
-      />
-      <button
-        onClick={saveNota}
-        disabled={saving}
-        className="px-4 py-2 mt-2 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50"
-      >
-        {saving ? 'Guardando...' : 'Guardar nota'}
-      </button>
+            <DialogTitle className="text-center pt-4">Eliminar reserva</DialogTitle>
+            <DialogDescription className="text-center">{confirmModal.message}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center gap-2">
+            <Button onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))} variant="outline">
+              Cancelar
+            </Button>
+            <Button onClick={confirmModal.onConfirm} variant="destructive">
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
