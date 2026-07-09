@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Calendar,
   Clock,
@@ -33,6 +33,7 @@ import {
   Archive,
   LayoutDashboard,
   ExternalLink,
+  Camera,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings } from '../lib/supabase';
 import { Button } from '../components/ui/button';
@@ -944,14 +945,16 @@ function WaitingListManager({
 // ─── Profile Manager ───────────────────────────────────────────────────────────
 
 function ProfileManager({
-  adminEmail, adminPassword, adminName, onRefresh, showSuccess, onProfileUpdated
+  adminEmail, adminPassword, adminName, avatarUrl, onRefresh, showSuccess, onProfileUpdated, onAvatarChange
 }: {
   adminEmail: string;
   adminPassword: string;
   adminName: string;
+  avatarUrl: string;
   onRefresh: () => void;
   showSuccess: (msg: string) => void;
   onProfileUpdated: (name: string, email: string, password: string) => void;
+  onAvatarChange: (url: string) => void;
 }) {
   const [name, setName] = useState(adminName);
   const [email, setEmail] = useState(adminEmail);
@@ -961,6 +964,54 @@ function ProfileManager({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError('La imagen no puede superar los 2MB');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setError('Solo se permiten imágenes');
+      return;
+    }
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const fileExt = file.name.split('.').pop() || 'jpg';
+      const fileName = `avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      const publicUrl = urlData?.publicUrl || '';
+      onAvatarChange(publicUrl);
+      showSuccess('Imagen de perfil actualizada');
+    } catch {
+      setError('Error al subir la imagen. Verificá que exista el bucket "avatars" en Supabase Storage.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeAvatar = () => {
+    onAvatarChange('');
+    showSuccess('Imagen de perfil eliminada');
+  };
 
   const handleSave = async () => {
     setError('');
@@ -1033,6 +1084,49 @@ function ProfileManager({
           )}
 
           <div className="space-y-6">
+            {/* Avatar */}
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative group">
+                <Avatar
+                  fallback={name.charAt(0).toUpperCase() || 'A'}
+                  src={avatarUrl || null}
+                  className="h-24 w-24 rounded-full ring-4 ring-background shadow-xl"
+                />
+                <label className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/40">
+                  <Camera className="h-8 w-8 text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium">{name || 'Admin'}</p>
+                <p className="text-xs text-muted-foreground">200×200px recomendado · Máx 2MB</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  variant="outline"
+                  size="sm"
+                >
+                  {uploading ? 'Subiendo...' : avatarUrl ? 'Cambiar foto' : 'Subir foto'}
+                </Button>
+                {avatarUrl && (
+                  <Button onClick={removeAvatar} variant="ghost" size="sm" className="text-destructive">
+                    Eliminar
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <Separator />
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Nombre</label>
               <Input type="text" value={name} onChange={(e) => setName(e.target.value)} className="h-12" />
@@ -1096,6 +1190,7 @@ export function AdminPage() {
   const [adminEmail, setAdminEmail] = useState(sessionStorage.getItem('admin_email') || '');
   const [adminPassword, setAdminPassword] = useState(sessionStorage.getItem('admin_password') || '');
   const [adminName, setAdminName] = useState(sessionStorage.getItem('admin_name') || '');
+  const [adminAvatar, setAdminAvatar] = useState(sessionStorage.getItem('admin_avatar') || '');
   const [view, setView] = useState<View>('dashboard');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [availability, setAvailability] = useState<AvailabilitySetting[]>([]);
@@ -1161,6 +1256,7 @@ export function AdminPage() {
     setAdminEmail(email);
     setAdminPassword(password);
     setAdminName(sessionStorage.getItem('admin_name') || '');
+    setAdminAvatar(sessionStorage.getItem('admin_avatar') || '');
     setLoggedIn(true);
   };
 
@@ -1168,6 +1264,7 @@ export function AdminPage() {
     sessionStorage.removeItem('admin_logged_in');
     sessionStorage.removeItem('admin_email');
     sessionStorage.removeItem('admin_password');
+    sessionStorage.removeItem('admin_avatar');
     setLoggedIn(false);
   };
 
@@ -1325,9 +1422,11 @@ export function AdminPage() {
         )}>
         {/* Sidebar header */}
         <div className="flex h-16 items-center gap-3 border-b px-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
-            <Calendar className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <Avatar
+            fallback={adminName.charAt(0).toUpperCase() || 'A'}
+            src={adminAvatar || null}
+            className="h-10 w-10 rounded-xl"
+          />
           <div className="flex flex-col">
             <span className="text-base font-bold leading-tight">Reserva Única</span>
             <span className="text-xs text-muted-foreground">Panel de Administración</span>
@@ -1409,7 +1508,7 @@ export function AdminPage() {
             <Separator orientation="vertical" className="h-8 hidden sm:block" />
 
             <div className="flex items-center gap-2">
-              <Avatar fallback={adminName.charAt(0).toUpperCase() || 'A'} className="h-8 w-8" />
+              <Avatar fallback={adminName.charAt(0).toUpperCase() || 'A'} src={adminAvatar || null} className="h-8 w-8" />
               <span className="hidden text-sm font-medium sm:block">{adminName || 'Admin'}</span>
             </div>
           </div>
@@ -1786,12 +1885,17 @@ export function AdminPage() {
               adminEmail={adminEmail}
               adminPassword={adminPassword}
               adminName={adminName}
+              avatarUrl={adminAvatar}
               onRefresh={loadData}
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
               onProfileUpdated={(name, email, password) => {
                 setAdminName(name);
                 setAdminEmail(email);
                 setAdminPassword(password);
+              }}
+              onAvatarChange={(url) => {
+                setAdminAvatar(url);
+                sessionStorage.setItem('admin_avatar', url);
               }}
             />
           )}

@@ -3,10 +3,11 @@ import { cn } from '../../lib/utils';
 
 interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   fallback: string;
+  src?: string | null;
 }
 
 const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
-  ({ className, fallback, ...props }, ref) => (
+  ({ className, fallback, src, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
@@ -15,9 +16,13 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       )}
       {...props}
     >
-      <span className="flex h-full w-full items-center justify-center text-sm font-medium text-muted-foreground">
-        {fallback}
-      </span>
+      {src ? (
+        <img src={src} alt={fallback} className="h-full w-full object-cover" />
+      ) : (
+        <span className="flex h-full w-full items-center justify-center text-sm font-medium text-muted-foreground">
+          {fallback}
+        </span>
+      )}
     </div>
   )
 );
