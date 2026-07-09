@@ -63,9 +63,15 @@ function BookingContent() {
   const stepIndex = ['calendar', 'form', 'payment', 'confirmation'];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: bgColor, backgroundImage: bgImageUrl ? `url(${bgImageUrl})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    <div className="min-h-screen flex flex-col relative" style={{ backgroundColor: bgColor }}>
+      {bgImageUrl && (
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${bgImageUrl})` }}>
+          <div className="absolute inset-0" style={{ backgroundColor: `${bgColor}cc` }} />
+        </div>
+      )}
+      <div className="relative z-10 flex flex-col min-h-screen">
       {/* Header */}
-      <header style={{ backgroundColor: bgImageUrl ? 'rgba(0,0,0,0.6)' : cardBg, backdropFilter: bgImageUrl ? 'blur(8px)' : undefined }}>
+      <header style={{ backgroundColor: bgImageUrl ? `${cardBg}99` : cardBg, backdropFilter: bgImageUrl ? 'blur(8px)' : undefined }}>
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {logoUrl ? (
@@ -136,6 +142,7 @@ function BookingContent() {
           </p>
         </div>
       </footer>
+      </div>
     </div>
   );
 }
