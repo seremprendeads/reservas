@@ -1597,6 +1597,7 @@ function ServicesManager() {
   const [currency, setCurrency] = useState('ARS');
   const [imageUrl, setImageUrl] = useState('');
   const [uploadingImg, setUploadingImg] = useState(false);
+  const [imgError, setImgError] = useState('');
   const imgInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { loadServices(); }, []);
@@ -1608,6 +1609,11 @@ function ServicesManager() {
 
   const uploadServiceImage = async (file: File) => {
     if (!file) return;
+    setImgError('');
+    if (file.size > 5 * 1024 * 1024) {
+      setImgError('La imagen supera el tamaño máximo. Usá una imagen de menos de 5MB.');
+      return;
+    }
     setUploadingImg(true);
     try {
       let blob: Blob = file;
@@ -1769,6 +1775,10 @@ function ServicesManager() {
                 {imageUrl && <Button type="button" variant="ghost" size="sm" onClick={() => setImageUrl('')}>Quitar</Button>}
                 <input ref={imgInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadServiceImage(f); }} />
               </div>
+              <p className="text-xs text-muted-foreground">Recomendado: imagen cuadrada, fondo claro, menos de 1MB</p>
+              {imgError && (
+                <p className="text-xs text-destructive mt-1">{imgError}</p>
+              )}
               {imageUrl && (
                 <img src={imageUrl} alt="Preview" className="mt-2 h-20 w-32 rounded-lg object-cover border" />
               )}
