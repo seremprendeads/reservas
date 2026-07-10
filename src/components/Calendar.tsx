@@ -293,7 +293,7 @@ export function Calendar() {
   }
 
   return (
-    <div className="max-w-4xl px-2 mx-auto sm:px-0">
+    <div className="max-w-4xl px-2 mx-auto sm:px-0 overflow-hidden">
       <div className="mb-6 text-center">
         <h2 className="mb-2 text-2xl font-bold text-booking-text sm:text-3xl">Selecciona fecha y hora</h2>
         <p className="text-sm text-booking-caption sm:text-base">Elige un día disponible y luego selecciona el horario</p>
@@ -347,7 +347,7 @@ export function Calendar() {
 
               {selectedDate ? (
                 availableTimeSlots.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-3 mb-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-6">
                     {availableTimeSlots.map((time) => {
                       const isSelected = bookingData.time === time;
                       return (

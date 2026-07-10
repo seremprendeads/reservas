@@ -160,10 +160,10 @@ function BookingContent() {
           {/* Progress Steps - solos si hay servicio seleccionado */}
           {bookingData.service && (
             <div className="max-w-4xl mx-auto px-4 py-6 w-full">
-              <div className="flex items-center justify-center gap-2 mb-8">
+              <div className="flex items-center justify-center gap-1 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto px-2">
                 {['services', 'calendar', 'form', 'payment', 'confirmation'].map((s, i) => (
                   <div key={s} className="flex items-center">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-sm font-medium shrink-0"
                       style={{
                         backgroundColor: step === s || stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb',
                         color: step === s || stepIndex.indexOf(step) > i ? '#fff' : '#6b7280'
@@ -172,7 +172,7 @@ function BookingContent() {
                       {i + 1}
                     </div>
                     {i < 4 && (
-                      <div className="w-12 h-1 mx-2 rounded"
+                      <div className="w-4 sm:w-12 h-0.5 sm:h-1 mx-1 sm:mx-2 rounded"
                         style={{ backgroundColor: stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb' }}
                       />
                     )}
@@ -180,9 +180,9 @@ function BookingContent() {
                 ))}
               </div>
 
-              <div className="flex justify-center gap-4 text-sm mb-8" style={{ color: captionColor }}>
+              <div className="flex justify-center gap-2 sm:gap-4 text-[10px] sm:text-sm mb-6 sm:mb-8 flex-wrap px-2 text-center" style={{ color: captionColor }}>
                 {stepLabels.map((label, i) => (
-                  <span key={label} style={{ fontWeight: stepIndex.indexOf(step) === i ? 600 : 400, color: stepIndex.indexOf(step) === i ? primaryColor : captionColor }}>
+                  <span key={label} className="whitespace-nowrap" style={{ fontWeight: stepIndex.indexOf(step) === i ? 600 : 400, color: stepIndex.indexOf(step) === i ? primaryColor : captionColor }}>
                     {label}
                   </span>
                 ))}
@@ -191,7 +191,7 @@ function BookingContent() {
           )}
 
           {/* Main Content */}
-          <main className="max-w-6xl mx-auto px-4 pb-12 w-full">
+          <main className="max-w-6xl mx-auto px-4 pb-12 w-full overflow-hidden">
             {step === 'services' && (
               <ServiceCards services={services} onSelect={handleSelectService} />
             )}
