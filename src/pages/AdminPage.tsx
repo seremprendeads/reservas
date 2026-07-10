@@ -1220,6 +1220,7 @@ function AppearanceManager({
   const [mutedColor, setMutedColor] = useState(branding?.muted_color || '#9ca3af');
   const [bgImageUrl, setBgImageUrl] = useState(branding?.background_image_url || '');
   const [bgOpacity, setBgOpacity] = useState(branding?.bg_opacity ?? 80);
+  const [overlayColor, setOverlayColor] = useState(branding?.overlay_color || branding?.background_color || '#111827');
   const [saving, setSaving] = useState(false);
   const [selectedPalette, setSelectedPalette] = useState<number>(-1);
   const [uploading, setUploading] = useState({ logo: false, bg: false });
@@ -1283,6 +1284,7 @@ function AppearanceManager({
         muted_color: mutedColor,
         background_image_url: bgImageUrl,
         bg_opacity: bgOpacity,
+        overlay_color: overlayColor,
       };
 
       const { data: res, error } = await supabase.functions.invoke('admin-update-branding', {
@@ -1478,16 +1480,30 @@ function AppearanceManager({
             <input ref={bgFileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, 'bg'); }} />
           </div>
 
-          {/* Background Opacity */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Opacidad del overlay ({bgOpacity}%)</label>
-            <input type="range" min="0" max="100" value={bgOpacity}
-              onChange={(e) => setBgOpacity(Number(e.target.value))}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer"
-              style={{ accentColor: primaryColor }} />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Transparente</span>
-              <span>Opaco</span>
+          {/* Overlay Color & Opacity */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Capa de superposición (overlay)</label>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground">Color</label>
+                <div className="flex items-center gap-3">
+                  <input type="color" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)}
+                    className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
+                  <Input type="text" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)}
+                    className="h-12 font-mono" placeholder="#111827" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground">Opacidad ({bgOpacity}%)</label>
+                <input type="range" min="0" max="100" value={bgOpacity}
+                  onChange={(e) => setBgOpacity(Number(e.target.value))}
+                  className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                  style={{ accentColor: primaryColor }} />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Transparente</span>
+                  <span>Opaco</span>
+                </div>
+              </div>
             </div>
           </div>
 

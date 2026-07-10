@@ -49,6 +49,7 @@ function BookingContent() {
   const subtitle = b?.subtitle || 'Sistema de Reserva';
   const bgImageUrl = b?.background_image_url || '';
   const bgOpacity = b?.bg_opacity ?? 80;
+  const overlayColor = b?.overlay_color || b?.background_color || '#111827';
 
   useEffect(() => {
     if (b) {
@@ -89,7 +90,7 @@ function BookingContent() {
       <div className="flex-1 relative">
         {bgImageUrl && (
           <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${bgImageUrl})` }}>
-            <div className="absolute inset-0" style={{ backgroundColor: `${bgColor}${Math.round((bgOpacity / 100) * 255).toString(16).padStart(2, '0')}` }} />
+            <div className="absolute inset-0" style={{ backgroundColor: `${overlayColor}${Math.round((bgOpacity / 100) * 255).toString(16).padStart(2, '0')}` }} />
           </div>
         )}
         <div className="relative z-10">
