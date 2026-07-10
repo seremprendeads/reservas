@@ -109,6 +109,12 @@ export function Payment() {
           preferenceId: bookingData.preferenceId,
           redirectMode: 'blank'
         },
+        customization: {
+          visual: {
+            borderRadius: '12px',
+            buttonHeight: '56px',
+          },
+        },
         callbacks: {
           onReady: () => {
             setLoading(false);
