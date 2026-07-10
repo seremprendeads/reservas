@@ -52,7 +52,7 @@ import { Skeleton } from '../components/ui/skeleton';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { cn } from '../lib/utils';
 
-type View = 'dashboard' | 'bookings' | 'availability' | 'settings' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services';
+type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services';
 
 interface WaitingListItem {
   id: string;
@@ -437,67 +437,6 @@ function AvailabilityManager({
               <p className="py-8 text-center text-sm text-muted-foreground">No hay fechas bloqueadas</p>
             )}
           </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-// ─── Settings Manager ─────────────────────────────────────────────────────────
-
-function SettingsManager({
-  settings, onRefresh, adminEmail, adminPassword, showSuccess
-}: {
-  settings: Settings;
-  onRefresh: () => void;
-  adminEmail: string;
-  adminPassword: string;
-  showSuccess: (msg: string) => void;
-}) {
-  const [price, setPrice] = useState(settings.price.toString());
-  const [currency, setCurrency] = useState(settings.currency);
-  const [saving, setSaving] = useState(false);
-
-  const saveSettings = async () => {
-    setSaving(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('admin-update-settings', {
-        body: { email: adminEmail, password: adminPassword, price, currency },
-      });
-      if (error || !data?.success) throw new Error('Error al guardar');
-      onRefresh();
-      showSuccess('Configuración guardada correctamente');
-    } catch { alert('Error al guardar'); }
-    finally { setSaving(false); }
-  };
-
-  return (
-    <div className="mx-auto max-w-xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Configuración general</CardTitle>
-          <CardDescription>Precio y moneda de las reservas</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Precio de la reserva</label>
-            <div className="flex items-center gap-2">
-              <span className="text-lg text-muted-foreground">$</span>
-              <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="text-lg h-12" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Moneda</label>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)}
-              className="flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors">
-              <option value="ARS">ARS — Peso Argentino</option>
-              <option value="USD">USD — Dólar Americano</option>
-              <option value="MXN">MXN — Peso Mexicano</option>
-            </select>
-          </div>
-          <Button onClick={saveSettings} disabled={saving} size="lg" className="w-full">
-            {saving ? 'Guardando...' : 'Guardar configuración'}
-          </Button>
         </CardContent>
       </Card>
     </div>
