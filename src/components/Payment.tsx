@@ -229,7 +229,7 @@ export function Payment() {
           <button
             onClick={checkPaymentStatus}
             disabled={checking}
-            className="flex items-center justify-center w-full gap-2 py-3 mt-6 font-medium text-booking-text transition-colors bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50"
+            className="flex items-center justify-center w-full gap-2 py-3 mt-6 font-medium text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50"
           >
             {checking ? (
               <>

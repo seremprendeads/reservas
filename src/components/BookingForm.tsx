@@ -160,11 +160,11 @@ export function BookingForm() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-booking-text mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Nombre completo
             </label>
             <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-booking-muted" />
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
                 value={name}
@@ -183,11 +183,11 @@ export function BookingForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-booking-text mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Celular
             </label>
             <div className="relative">
-              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-booking-muted" />
+              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="tel"
                 value={phone}
@@ -206,11 +206,11 @@ export function BookingForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-booking-text mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-booking-muted" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="email"
                 value={email}
@@ -230,7 +230,7 @@ export function BookingForm() {
 
           {settings && (
             <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
-              <span className="text-booking-text font-medium">Total a pagar:</span>
+              <span className="text-gray-700 font-medium">Total a pagar:</span>
               <span className="text-2xl font-bold text-booking-primary">
                 ${settings.price.toLocaleString('es-AR')} {settings.currency}
               </span>
