@@ -14,16 +14,19 @@ function formatPrice(amount: number, currency: string) {
 
 function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (s: Service) => void }) {
   const { bookingData } = useBooking();
+  const isSingle = services.length === 1;
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 w-full">
       <h2 className="text-2xl font-bold text-booking-text mb-2 text-center">Elegí tu servicio</h2>
       <p className="text-sm text-booking-caption mb-6 text-center">Seleccioná el servicio que querés reservar</p>
-      <div className="flex flex-wrap justify-center gap-4">
+      <div className={`${isSingle ? 'flex flex-wrap justify-center' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'} gap-4`}>
         {services.map((s) => {
           const isSelected = bookingData.service?.id === s.id;
           return (
             <div key={s.id}
-              className={`relative text-left p-5 rounded-xl border-2 transition-all duration-200 w-full sm:max-w-md flex flex-col ${
+              className={`relative text-left p-4 rounded-xl border-2 transition-all duration-200 flex flex-col ${
+                isSingle ? 'w-full sm:max-w-md' : 'w-full'
+              } ${
                 isSelected
                   ? 'border-booking-primary bg-booking-primary-light shadow-lg'
                   : 'border-booking-card bg-booking-card hover:border-booking-primary/50'
@@ -34,8 +37,8 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
                 </div>
               )}
               <div className="flex items-center gap-2 mb-2">
-                <Tag className="w-5 h-5" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text-muted)' }} />
-                <h3 className="font-bold text-lg" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text)' }}>{s.name}</h3>
+                <Tag className="w-5 h-5 shrink-0" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text-muted)' }} />
+                <h3 className="font-bold text-lg leading-tight" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text)' }}>{s.name}</h3>
               </div>
               {s.description && (
                 <p className="text-sm mb-3" style={{ color: 'var(--booking-text-muted)' }}>{s.description}</p>
