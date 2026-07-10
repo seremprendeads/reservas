@@ -58,6 +58,7 @@ export type Branding = {
   card_bg_color: string;
   text_color: string;
   muted_color: string;
+  caption_color: string;
   background_image_url: string;
   bg_opacity: number;
   overlay_color: string;

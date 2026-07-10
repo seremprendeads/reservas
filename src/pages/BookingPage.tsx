@@ -44,6 +44,7 @@ function BookingContent() {
   const cardBg = b?.card_bg_color || '#1f2937';
   const textColor = b?.text_color || '#f3f4f6';
   const mutedColor = b?.muted_color || '#9ca3af';
+  const captionColor = b?.caption_color || '#9ca3af';
   const logoUrl = b?.logo_url || '';
   const title = b?.title || 'Reserva tu Turno';
   const subtitle = b?.subtitle || 'Sistema de Reserva';
@@ -60,6 +61,7 @@ function BookingContent() {
       root.style.setProperty('--booking-card-bg', cardBg);
       root.style.setProperty('--booking-text', textColor);
       root.style.setProperty('--booking-text-muted', mutedColor);
+      root.style.setProperty('--booking-caption', captionColor);
     }
   }, [b]);
 
@@ -116,9 +118,9 @@ function BookingContent() {
               ))}
             </div>
 
-            <div className="flex justify-center gap-4 text-sm mb-8" style={{ color: mutedColor }}>
+            <div className="flex justify-center gap-4 text-sm mb-8" style={{ color: captionColor }}>
               {['Fecha y hora', 'Tus datos', 'Pago', 'Confirmación'].map((label, i) => (
-                <span key={label} style={{ fontWeight: stepIndex.indexOf(step) === i ? 600 : 400, color: stepIndex.indexOf(step) === i ? primaryColor : mutedColor }}>
+                <span key={label} style={{ fontWeight: stepIndex.indexOf(step) === i ? 600 : 400, color: stepIndex.indexOf(step) === i ? primaryColor : captionColor }}>
                   {label}
                 </span>
               ))}

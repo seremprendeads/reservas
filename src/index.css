@@ -80,6 +80,7 @@
   --booking-card-border: #374151;
   --booking-text: #f3f4f6;
   --booking-text-muted: #9ca3af;
+  --booking-caption: #9ca3af;
 }
 
 .bg-booking-primary { background-color: var(--booking-primary); }
@@ -96,3 +97,4 @@
 .border-booking-card { border-color: var(--booking-card-border); }
 .text-booking-text { color: var(--booking-text); }
 .text-booking-muted { color: var(--booking-text-muted); }
+.text-booking-caption { color: var(--booking-caption); }

@@ -1218,6 +1218,7 @@ function AppearanceManager({
   const [cardBgColor, setCardBgColor] = useState(branding?.card_bg_color || '#1f2937');
   const [textColor, setTextColor] = useState(branding?.text_color || '#f3f4f6');
   const [mutedColor, setMutedColor] = useState(branding?.muted_color || '#9ca3af');
+  const [captionColor, setCaptionColor] = useState(branding?.caption_color || '#9ca3af');
   const [bgImageUrl, setBgImageUrl] = useState(branding?.background_image_url || '');
   const [bgOpacity, setBgOpacity] = useState(branding?.bg_opacity ?? 80);
   const [overlayColor, setOverlayColor] = useState(branding?.overlay_color || branding?.background_color || '#111827');
@@ -1282,6 +1283,7 @@ function AppearanceManager({
         card_bg_color: cardBgColor,
         text_color: textColor,
         muted_color: mutedColor,
+        caption_color: captionColor,
         background_image_url: bgImageUrl,
         bg_opacity: bgOpacity,
         overlay_color: overlayColor,
@@ -1452,6 +1454,15 @@ function AppearanceManager({
                 <input type="color" value={mutedColor} onChange={(e) => { setMutedColor(e.target.value); setSelectedPalette(-1); }}
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
                 <Input type="text" value={mutedColor} onChange={(e) => { setMutedColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-12 font-mono" placeholder="#9ca3af" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold">Color de pasos y textos informativos</label>
+              <div className="flex items-center gap-3">
+                <input type="color" value={captionColor} onChange={(e) => { setCaptionColor(e.target.value); setSelectedPalette(-1); }}
+                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
+                <Input type="text" value={captionColor} onChange={(e) => { setCaptionColor(e.target.value); setSelectedPalette(-1); }}
                   className="h-12 font-mono" placeholder="#9ca3af" />
               </div>
             </div>
