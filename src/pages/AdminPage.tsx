@@ -1239,16 +1239,54 @@ function AppearanceManager({
     setMutedColor(p.muted);
   };
 
+  const compressImage = (file: File, type: 'logo' | 'bg'): Promise<Blob> => {
+    const maxWidth = type === 'logo' ? 400 : 1920;
+    const maxHeight = type === 'logo' ? 400 : 1080;
+    const maxSize = type === 'logo' ? 500 * 1024 : 2 * 1024 * 1024;
+    const quality = type === 'logo' ? 0.8 : 0.85;
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        if (file.size <= maxSize && img.width <= maxWidth && img.height <= maxHeight && file.type !== 'image/gif') {
+          resolve(file);
+          return;
+        }
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+        if (h > maxHeight) { w = w * maxHeight / h; h = maxHeight; }
+        canvas.width = Math.round(w);
+        canvas.height = Math.round(h);
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const fmt = canvas.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error('Compresión fallida')), fmt, quality);
+      };
+      img.onerror = () => reject(new Error('Error al leer imagen'));
+      img.src = url;
+    });
+  };
+
   const uploadFile = async (file: File, type: 'logo' | 'bg') => {
     const bucket = 'branding';
-    const ext = file.name.split('.').pop() || 'jpg';
-    const fileName = `${type}-${Date.now()}.${ext}`;
+    let blob: Blob;
+    try {
+      blob = await compressImage(file, type);
+    } catch {
+      showSuccess('Error al comprimir la imagen. Intentá con otra.');
+      return;
+    }
+
+    const fileName = `${type}-${Date.now()}.webp`;
 
     setUploading(prev => ({ ...prev, [type]: true }));
     try {
       const { error: uploadError } = await supabase.storage
         .from(bucket)
-        .upload(fileName, file, { upsert: false });
+        .upload(fileName, blob, { upsert: false, contentType: 'image/webp' });
 
       if (uploadError) throw new Error(uploadError.message);
 

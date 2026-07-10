@@ -30,7 +30,7 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
               } ${
                 isSelected
                   ? 'border-booking-primary bg-booking-primary-light shadow-lg'
-                  : 'border-white/30 bg-booking-card hover:border-white/60'
+                  : 'border-white bg-booking-card hover:border-white/70'
               }`}>
               {isSelected && (
                 <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-booking-primary flex items-center justify-center">
