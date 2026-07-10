@@ -27,7 +27,6 @@ import {
   EyeOff,
   Menu,
   CalendarDays,
-  Settings2,
   UserCog,
   MessageSquareText,
   Archive,
@@ -1939,7 +1938,6 @@ export function AdminPage() {
       badge: waitingList.filter(w => w.estado === 'pendiente').length || undefined,
     },
     { id: 'availability', label: 'Disponibilidad', icon: <Clock className="h-5 w-5" /> },
-    { id: 'settings', label: 'Configuración', icon: <Settings2 className="h-5 w-5" /> },
     { id: 'services', label: 'Servicios', icon: <Package className="h-5 w-5" /> },
     { id: 'appearance', label: 'Apariencia', icon: <Palette className="h-5 w-5" /> },
     { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
@@ -1956,7 +1954,6 @@ export function AdminPage() {
     clients: 'Clientes',
     waiting: 'Lista de Espera',
     availability: 'Disponibilidad',
-    settings: 'Configuración',
     services: 'Servicios',
     appearance: 'Apariencia',
     profile: 'Perfil',
@@ -2433,17 +2430,6 @@ export function AdminPage() {
             <AvailabilityManager
               availability={availability}
               blockedDates={blockedDates}
-              onRefresh={loadData}
-              adminEmail={adminEmail}
-              adminPassword={adminPassword}
-              showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
-            />
-          )}
-
-          {/* ─── Settings ───────────────────────────────────────── */}
-          {view === 'settings' && settings && (
-            <SettingsManager
-              settings={settings}
               onRefresh={loadData}
               adminEmail={adminEmail}
               adminPassword={adminPassword}
