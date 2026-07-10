@@ -613,7 +613,7 @@ function ClientsManager({ bookings }: { bookings: Booking[] }) {
 // ─── WhatsApp Manager ─────────────────────────────────────────────────────────
 
 function WhatsAppManager({ bookings }: { bookings: Booking[] }) {
-  const DEFAULT_TEMPLATE = 'Hola {nombre} 👋 Tu reserva fue aprobada. Te esperamos el día {fecha} a las {hora}. ¡Gracias!';
+  const DEFAULT_TEMPLATE = 'Hola {nombre} Tu reserva fue aprobada. Te esperamos el día {fecha} a las {hora}. Muy pronto nuestra recepcionista Alicia Méndez se contactará contigo para darte información más detallada de la orden de llegada en estos días hábiles. ¡Muchas Gracias! Saludos.';
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [message, setMessage] = useState(DEFAULT_TEMPLATE);
   const [search, setSearch] = useState('');
