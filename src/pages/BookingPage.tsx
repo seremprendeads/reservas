@@ -48,7 +48,7 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
               {s.description && (
                 <p className="text-sm mb-3" style={{ color: 'var(--booking-text-muted)' }}>{s.description}</p>
               )}
-              <p className="text-xl font-bold mb-4" style={{ color: 'var(--booking-primary)' }}>
+              <p className="text-xl font-bold mb-4 text-white">
                 {formatPrice(s.price, s.currency)}
               </p>
               <button onClick={() => onSelect(s)} className={`mt-auto w-full py-2.5 rounded-lg font-semibold transition-colors duration-200 ${
