@@ -15,11 +15,12 @@ function formatPrice(amount: number, currency: string) {
 function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (s: Service) => void }) {
   const { bookingData } = useBooking();
   const isSingle = services.length === 1;
+  const gridCols = services.length <= 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 w-full">
       <h2 className="text-2xl font-bold text-booking-text mb-2 text-center">Elegí tu servicio</h2>
       <p className="text-sm text-booking-caption mb-6 text-center">Seleccioná el servicio que querés reservar</p>
-      <div className={`${isSingle ? 'flex flex-wrap justify-center' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'} gap-4`}>
+      <div className={`${isSingle ? 'flex flex-wrap justify-center' : `grid ${gridCols}`} gap-4`}>
         {services.map((s) => {
           const isSelected = bookingData.service?.id === s.id;
           return (
