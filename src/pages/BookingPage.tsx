@@ -18,12 +18,12 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
     <div className="max-w-4xl mx-auto px-4 py-8 w-full">
       <h2 className="text-2xl font-bold text-booking-text mb-2">Elegí tu servicio</h2>
       <p className="text-sm text-booking-caption mb-6">Seleccioná el servicio que querés reservar</p>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-wrap justify-center gap-4">
         {services.map((s) => {
           const isSelected = bookingData.service?.id === s.id;
           return (
             <button key={s.id} onClick={() => onSelect(s)}
-              className={`relative text-left p-5 rounded-xl border-2 transition-all duration-200 ${
+              className={`relative text-left p-5 rounded-xl border-2 transition-all duration-200 w-full sm:w-72 ${
                 isSelected
                   ? 'border-booking-primary bg-booking-primary-light shadow-lg'
                   : 'border-booking-card bg-booking-card hover:border-booking-primary/50'
