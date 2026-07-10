@@ -1005,7 +1005,18 @@ function ProfileManager({
 
       const cacheBuster = `?t=${Date.now()}`;
       const publicUrl = (urlData?.publicUrl || '') + cacheBuster;
-      console.log('Avatar public URL:', publicUrl);
+
+      // Persistir avatar en la base de datos
+      const { error: saveError } = await supabase.functions.invoke('admin-update-profile', {
+        body: {
+          email: adminEmail,
+          password: adminPassword,
+          avatar_url: publicUrl,
+        },
+      });
+
+      if (saveError) throw new Error(saveError.message || 'Error al guardar avatar');
+
       onAvatarChange(publicUrl);
       showSuccess('Imagen de perfil actualizada');
     } catch (err) {
@@ -1767,13 +1778,25 @@ export function AdminPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [bookingsRes, availRes, blockedRes, settingsRes, brandingRes] = await Promise.all([
+      const [bookingsRes, availRes, blockedRes, settingsRes, brandingRes, adminProfileRes] = await Promise.all([
         supabase.from('bookings').select('*').order('booking_date', { ascending: true }),
         supabase.from('availability_settings').select('*').order('day_of_week'),
         supabase.from('blocked_dates').select('*').order('date'),
         supabase.from('settings').select('*').maybeSingle(),
         supabase.from('branding').select('*').maybeSingle(),
+        supabase.from('admin_users').select('name, avatar_url').eq('email', adminEmail).maybeSingle(),
       ]);
+      if (adminProfileRes.data) {
+        const profile = adminProfileRes.data as { name: string; avatar_url: string | null };
+        if (profile.name) {
+          setAdminName(profile.name);
+          sessionStorage.setItem('admin_name', profile.name);
+        }
+        if (profile.avatar_url) {
+          setAdminAvatar(profile.avatar_url);
+          sessionStorage.setItem('admin_avatar', profile.avatar_url);
+        }
+      }
       if (bookingsRes.data) {
         const active = bookingsRes.data.filter((b: any) => !b.deleted_at);
         const deleted = bookingsRes.data.filter((b: any) => !!b.deleted_at);

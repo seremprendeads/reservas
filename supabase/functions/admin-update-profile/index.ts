@@ -13,7 +13,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { email, password, name: newName, newEmail, newPassword } = await req.json();
+    const { email, password, name: newName, newEmail, newPassword, avatar_url } = await req.json();
 
     if (!email || !password) {
       return new Response(
@@ -87,6 +87,11 @@ Deno.serve(async (req: Request) => {
         );
       }
       updates.email = newEmail.trim();
+    }
+
+    // Avatar URL
+    if (avatar_url !== undefined && avatar_url !== null) {
+      updates.avatar_url = avatar_url;
     }
 
     // Actualizar nombre y/o email
