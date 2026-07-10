@@ -3,13 +3,58 @@ import { Calendar } from '../components/Calendar';
 import { BookingForm } from '../components/BookingForm';
 import { Payment } from '../components/Payment';
 import { Confirmation } from '../components/Confirmation';
+import { Button } from '../components/ui/button';
 import { BookingProvider, useBooking } from '../contexts/BookingContext';
-import { Phone, MapPin } from 'lucide-react';
-import { supabase, Branding } from '../lib/supabase';
+import { Phone, MapPin, Check, Clock, Tag } from 'lucide-react';
+import { supabase, Branding, Service } from '../lib/supabase';
+
+function formatPrice(amount: number, currency: string) {
+  return `$${amount.toLocaleString('es-AR')} ${currency}`;
+}
+
+function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (s: Service) => void }) {
+  const { bookingData } = useBooking();
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8 w-full">
+      <h2 className="text-2xl font-bold text-booking-text mb-2">Elegí tu servicio</h2>
+      <p className="text-sm text-booking-caption mb-6">Seleccioná el servicio que querés reservar</p>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {services.map((s) => {
+          const isSelected = bookingData.service?.id === s.id;
+          return (
+            <button key={s.id} onClick={() => onSelect(s)}
+              className={`relative text-left p-5 rounded-xl border-2 transition-all duration-200 ${
+                isSelected
+                  ? 'border-booking-primary bg-booking-primary-light shadow-lg'
+                  : 'border-booking-card bg-booking-card hover:border-booking-primary/50'
+              }`}>
+              {isSelected && (
+                <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-booking-primary flex items-center justify-center">
+                  <Check className="w-4 h-4 text-white" />
+                </div>
+              )}
+              <div className="flex items-center gap-2 mb-2">
+                <Tag className="w-5 h-5" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text-muted)' }} />
+                <h3 className="font-bold text-lg" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text)' }}>{s.name}</h3>
+              </div>
+              {s.description && (
+                <p className="text-sm mb-3" style={{ color: 'var(--booking-text-muted)' }}>{s.description}</p>
+              )}
+              <p className="text-xl font-bold" style={{ color: 'var(--booking-primary)' }}>
+                {formatPrice(s.price, s.currency)}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function BookingContent() {
-  const { step } = useBooking();
+  const { step, setStep, bookingData, setSelectedService } = useBooking();
   const [branding, setBranding] = useState<Branding | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
 
   useEffect(() => {
     if (!document.getElementById('mp-sdk')) {
@@ -21,14 +66,13 @@ function BookingContent() {
   }, []);
 
   useEffect(() => {
-    supabase
-      .from('branding')
-      .select('*')
-      .maybeSingle()
-      .then(({ data, error }) => {
-        console.log('Branding data:', data, 'Error:', error);
-        if (data) setBranding(data as Branding);
-      });
+    Promise.all([
+      supabase.from('branding').select('*').maybeSingle(),
+      supabase.from('services').select('*').eq('is_active', true).order('sort_order'),
+    ]).then(([brandingRes, servicesRes]) => {
+      if (brandingRes.data) setBranding(brandingRes.data as Branding);
+      if (servicesRes.data) setServices(servicesRes.data);
+    });
   }, []);
 
   const b = branding;
@@ -65,7 +109,13 @@ function BookingContent() {
     }
   }, [b]);
 
-  const stepIndex = ['calendar', 'form', 'payment', 'confirmation'];
+  const stepIndex = ['services', 'calendar', 'form', 'payment', 'confirmation'];
+  const stepLabels = ['Servicio', 'Fecha y hora', 'Tus datos', 'Pago', 'Confirmación'];
+
+  const handleSelectService = (service: Service) => {
+    setSelectedService(service);
+    setStep('calendar');
+  };
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: bgColor }}>
@@ -96,39 +146,44 @@ function BookingContent() {
           </div>
         )}
         <div className="relative z-10">
-          {/* Progress Steps */}
-          <div className="max-w-4xl mx-auto px-4 py-6 w-full">
-            <div className="flex items-center justify-center gap-2 mb-8">
-              {['calendar', 'form', 'payment', 'confirmation'].map((s, i) => (
-                <div key={s} className="flex items-center">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
-                    style={{
-                      backgroundColor: step === s || stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb',
-                      color: step === s || stepIndex.indexOf(step) > i ? '#fff' : '#6b7280'
-                    }}
-                  >
-                    {i + 1}
+          {/* Progress Steps - solos si hay servicio seleccionado */}
+          {bookingData.service && (
+            <div className="max-w-4xl mx-auto px-4 py-6 w-full">
+              <div className="flex items-center justify-center gap-2 mb-8">
+                {['services', 'calendar', 'form', 'payment', 'confirmation'].map((s, i) => (
+                  <div key={s} className="flex items-center">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
+                      style={{
+                        backgroundColor: step === s || stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb',
+                        color: step === s || stepIndex.indexOf(step) > i ? '#fff' : '#6b7280'
+                      }}
+                    >
+                      {i + 1}
+                    </div>
+                    {i < 4 && (
+                      <div className="w-12 h-1 mx-2 rounded"
+                        style={{ backgroundColor: stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb' }}
+                      />
+                    )}
                   </div>
-                  {i < 3 && (
-                    <div className="w-12 h-1 mx-2 rounded"
-                      style={{ backgroundColor: stepIndex.indexOf(step) > i ? primaryColor : '#e5e7eb' }}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <div className="flex justify-center gap-4 text-sm mb-8" style={{ color: captionColor }}>
-              {['Fecha y hora', 'Tus datos', 'Pago', 'Confirmación'].map((label, i) => (
-                <span key={label} style={{ fontWeight: stepIndex.indexOf(step) === i ? 600 : 400, color: stepIndex.indexOf(step) === i ? primaryColor : captionColor }}>
-                  {label}
-                </span>
-              ))}
+              <div className="flex justify-center gap-4 text-sm mb-8" style={{ color: captionColor }}>
+                {stepLabels.map((label, i) => (
+                  <span key={label} style={{ fontWeight: stepIndex.indexOf(step) === i ? 600 : 400, color: stepIndex.indexOf(step) === i ? primaryColor : captionColor }}>
+                    {label}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Main Content */}
           <main className="max-w-6xl mx-auto px-4 pb-12 w-full">
+            {step === 'services' && (
+              <ServiceCards services={services} onSelect={handleSelectService} />
+            )}
             {step === 'calendar' && <Calendar />}
             {step === 'form' && <BookingForm />}
             {step === 'payment' && <Payment />}

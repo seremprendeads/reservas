@@ -41,6 +41,17 @@ export type BlockedDate = {
   reason: string | null;
 };
 
+export type Service = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+};
+
 export type Settings = {
   id: string;
   price: number;

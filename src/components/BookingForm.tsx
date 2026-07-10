@@ -80,7 +80,7 @@ export function BookingForm() {
           booking_time: bookingData.time,
           payment_status: 'pending',
           booking_status: 'pending',
-          amount: settings.price,
+          amount: bookingData.amount,
         });
 
       if (insertError) {
@@ -90,7 +90,7 @@ export function BookingForm() {
       const { data: preference, error: prefError } = await supabase.functions.invoke('create-payment', {
         body: {
           bookingCode,
-          amount: settings.price,
+          amount: bookingData.amount,
           email,
           name,
         },
@@ -105,7 +105,7 @@ export function BookingForm() {
         .update({ preference_id: preference.id })
         .eq('booking_code', bookingCode);
 
-      setPaymentInfo(preference.id, bookingCode, settings.price, settings.currency);
+      setPaymentInfo(preference.id, bookingCode, bookingData.amount, bookingData.currency);
       setStep('payment');
     } catch (error) {
       console.error('Error:', error);
@@ -228,11 +228,11 @@ export function BookingForm() {
             )}
           </div>
 
-          {settings && (
+          {bookingData.amount > 0 && (
             <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
               <span className="text-gray-700 font-medium">Total a pagar:</span>
               <span className="text-2xl font-bold text-booking-primary">
-                ${settings.price.toLocaleString('es-AR')} {settings.currency}
+                ${bookingData.amount.toLocaleString('es-AR')} {bookingData.currency}
               </span>
             </div>
           )}

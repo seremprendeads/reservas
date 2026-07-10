@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { Service } from '../lib/supabase';
 
-type Step = 'calendar' | 'form' | 'payment' | 'confirmation';
+type Step = 'services' | 'calendar' | 'form' | 'payment' | 'confirmation';
 type PaymentStatus = 'approved' | 'pending' | 'rejected' | null;
 
 interface BookingData {
@@ -14,6 +15,7 @@ interface BookingData {
   paymentStatus: PaymentStatus;
   amount: number;
   currency: string;
+  service: Service | null;
 }
 
 interface BookingContextType {
@@ -25,24 +27,29 @@ interface BookingContextType {
   setCustomerInfo: (name: string, phone: string, email: string) => void;
   setPaymentInfo: (preferenceId: string, bookingCode: string, amount: number, currency: string) => void;
   setPaymentStatus: (status: PaymentStatus) => void;
+  setSelectedService: (service: Service) => void;
+  resetBooking: () => void;
 }
 
 const BookingContext = createContext<BookingContextType | null>(null);
 
+const INITIAL_BOOKING_DATA: BookingData = {
+  date: null,
+  time: '',
+  name: '',
+  phone: '',
+  email: '',
+  preferenceId: '',
+  bookingCode: '',
+  paymentStatus: null,
+  amount: 0,
+  currency: 'ARS',
+  service: null,
+};
+
 export function BookingProvider({ children }: { children: ReactNode }) {
-  const [step, setStep] = useState<Step>('calendar');
-  const [bookingData, setBookingData] = useState<BookingData>({
-    date: null,
-    time: '',
-    name: '',
-    phone: '',
-    email: '',
-    preferenceId: '',
-    bookingCode: '',
-    paymentStatus: null,
-    amount: 0,
-    currency: 'ARS',
-  });
+  const [step, setStep] = useState<Step>('services');
+  const [bookingData, setBookingData] = useState<BookingData>(INITIAL_BOOKING_DATA);
 
   const setDate = (date: Date) =>
     setBookingData((prev) => ({ ...prev, date }));
@@ -59,9 +66,17 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   const setPaymentStatus = (paymentStatus: PaymentStatus) =>
     setBookingData((prev) => ({ ...prev, paymentStatus }));
 
+  const setSelectedService = (service: Service) =>
+    setBookingData((prev) => ({ ...prev, service, amount: service.price, currency: service.currency }));
+
+  const resetBooking = () => {
+    setBookingData(INITIAL_BOOKING_DATA);
+    setStep('services');
+  };
+
   return (
     <BookingContext.Provider
-      value={{ step, bookingData, setStep, setDate, setTime, setCustomerInfo, setPaymentInfo, setPaymentStatus }}
+      value={{ step, bookingData, setStep, setDate, setTime, setCustomerInfo, setPaymentInfo, setPaymentStatus, setSelectedService, resetBooking }}
     >
       {children}
     </BookingContext.Provider>

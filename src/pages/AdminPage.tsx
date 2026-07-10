@@ -35,8 +35,9 @@ import {
   ExternalLink,
   Camera,
   Palette,
+  Package,
 } from 'lucide-react';
-import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings, Branding } from '../lib/supabase';
+import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings, Branding, Service } from '../lib/supabase';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
@@ -51,7 +52,7 @@ import { Skeleton } from '../components/ui/skeleton';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { cn } from '../lib/utils';
 
-type View = 'dashboard' | 'bookings' | 'availability' | 'settings' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance';
+type View = 'dashboard' | 'bookings' | 'availability' | 'settings' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services';
 
 interface WaitingListItem {
   id: string;
@@ -1529,6 +1530,147 @@ function AppearanceManager({
   );
 }
 
+// ─── Services Manager ─────────────────────────────────────────────────────────
+
+function ServicesManager() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [showDialog, setShowDialog] = useState(false);
+  const [editing, setEditing] = useState<Service | null>(null);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [currency, setCurrency] = useState('ARS');
+
+  useEffect(() => { loadServices(); }, []);
+
+  const loadServices = async () => {
+    const { data } = await supabase.from('services').select('*').order('sort_order');
+    if (data) setServices(data);
+  };
+
+  const openNew = () => {
+    setEditing(null);
+    setName('');
+    setDescription('');
+    setPrice('');
+    setCurrency('ARS');
+    setShowDialog(true);
+  };
+
+  const openEdit = (s: Service) => {
+    setEditing(s);
+    setName(s.name);
+    setDescription(s.description || '');
+    setPrice(String(s.price));
+    setCurrency(s.currency);
+    setShowDialog(true);
+  };
+
+  const save = async () => {
+    if (!name.trim() || !price) return;
+    const payload = {
+      name: name.trim(),
+      description: description.trim(),
+      price: parseFloat(price),
+      currency,
+    };
+    if (editing) {
+      await supabase.from('services').update(payload).eq('id', editing.id);
+    } else {
+      await supabase.from('services').insert(payload);
+    }
+    setShowDialog(false);
+    loadServices();
+  };
+
+  const toggleActive = async (s: Service) => {
+    await supabase.from('services').update({ is_active: !s.is_active }).eq('id', s.id);
+    loadServices();
+  };
+
+  const remove = async (id: string) => {
+    await supabase.from('services').delete().eq('id', id);
+    loadServices();
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Servicios</h2>
+          <p className="text-sm text-muted-foreground">Administrá los servicios que ofrecés</p>
+        </div>
+        <Button onClick={openNew} size="sm">+ Nuevo servicio</Button>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          {services.length === 0 ? (
+            <p className="py-12 text-center text-sm text-muted-foreground">No hay servicios creados</p>
+          ) : (
+            <div className="divide-y">
+              {services.map((s) => (
+                <div key={s.id} className="flex items-center justify-between px-6 py-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{s.name}</span>
+                      {!s.is_active && <Badge variant="secondary">Inactivo</Badge>}
+                    </div>
+                    {s.description && <p className="text-sm text-muted-foreground">{s.description}</p>}
+                    <p className="text-sm font-medium text-primary">
+                      ${s.price.toLocaleString('es-AR')} {s.currency}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => toggleActive(s)}>
+                      {s.is_active ? 'Desactivar' : 'Activar'}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => openEdit(s)}>Editar</Button>
+                    <Button variant="destructive" size="sm" onClick={() => remove(s.id)}>Eliminar</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editing ? 'Editar servicio' : 'Nuevo servicio'}</DialogTitle>
+            <DialogDescription>Completá los datos del servicio</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nombre</label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Corte de cabello" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Descripción (opcional)</label>
+              <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ej: Corte y peinado completo" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Precio</label>
+                <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="1500" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Moneda</label>
+                <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="ARS" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDialog(false)}>Cancelar</Button>
+            <Button onClick={save} disabled={!name.trim() || !price}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 // ─── Sidebar Navigation ──────────────────────────────────────────────────────
 
 interface NavItem {
@@ -1724,6 +1866,7 @@ export function AdminPage() {
     },
     { id: 'availability', label: 'Disponibilidad', icon: <Clock className="h-5 w-5" /> },
     { id: 'settings', label: 'Configuración', icon: <Settings2 className="h-5 w-5" /> },
+    { id: 'services', label: 'Servicios', icon: <Package className="h-5 w-5" /> },
     { id: 'appearance', label: 'Apariencia', icon: <Palette className="h-5 w-5" /> },
     { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
     { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquareText className="h-5 w-5" /> },
@@ -1740,6 +1883,7 @@ export function AdminPage() {
     waiting: 'Lista de Espera',
     availability: 'Disponibilidad',
     settings: 'Configuración',
+    services: 'Servicios',
     appearance: 'Apariencia',
     profile: 'Perfil',
     whatsapp: 'WhatsApp',
@@ -2218,6 +2362,9 @@ export function AdminPage() {
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
             />
           )}
+
+          {/* ─── Services ──────────────────────────────────────── */}
+          {view === 'services' && <ServicesManager />}
 
           {/* ─── Appearances ────────────────────────────────── */}
           {view === 'appearance' && (
