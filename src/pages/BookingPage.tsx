@@ -16,8 +16,8 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
   const { bookingData } = useBooking();
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 w-full">
-      <h2 className="text-2xl font-bold text-booking-text mb-2">Elegí tu servicio</h2>
-      <p className="text-sm text-booking-caption mb-6">Seleccioná el servicio que querés reservar</p>
+      <h2 className="text-2xl font-bold text-booking-text mb-2 text-center">Elegí tu servicio</h2>
+      <p className="text-sm text-booking-caption mb-6 text-center">Seleccioná el servicio que querés reservar</p>
       <div className="flex flex-wrap justify-center gap-4">
         {services.map((s) => {
           const isSelected = bookingData.service?.id === s.id;
