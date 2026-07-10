@@ -2035,6 +2035,20 @@ export function AdminPage() {
           })}
         </nav>
 
+        {/* Link a Booking Page */}
+        <div className="border-t px-3 py-2">
+          <a
+            href="/booking"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-accent-foreground"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <ExternalLink className="h-5 w-5" />
+            <span>Página de reserva</span>
+          </a>
+        </div>
+
         {/* Sidebar footer */}
         <div className="border-t p-3 space-y-1">
           <button
