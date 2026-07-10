@@ -181,14 +181,14 @@ export function Payment() {
             <CreditCard className="w-8 h-8 text-booking-primary" />
           </div>
           <h2 className="mb-2 text-2xl font-bold text-gray-800">Confirmar tu reserva</h2>
-          <p className="text-booking-muted">
+          <p className="text-gray-600">
             Para confirmar tu turno debes completar el pago
           </p>
         </div>
 
         <div className="p-4 mb-6 bg-booking-primary-light rounded-xl">
           <div className="flex items-center justify-between">
-            <span className="text-booking-text">Fecha:</span>
+            <span className="text-gray-700">Fecha:</span>
             <span className="font-medium">
               {bookingData.date?.toLocaleDateString('es-AR', {
                 weekday: 'long',
@@ -198,11 +198,11 @@ export function Payment() {
             </span>
           </div>
           <div className="flex items-center justify-between mt-2">
-            <span className="text-booking-text">Hora:</span>
+            <span className="text-gray-700">Hora:</span>
             <span className="font-medium">{bookingData.time} hs</span>
           </div>
           <div className="flex items-center justify-between pt-2 mt-2 border-t border-booking-card">
-            <span className="font-medium text-booking-text">Total:</span>
+            <span className="font-medium text-gray-700">Total:</span>
             <span className="text-xl font-bold text-booking-primary">
               ${bookingData.amount.toLocaleString('es-AR')} {bookingData.currency}
             </span>
@@ -220,7 +220,7 @@ export function Payment() {
           {!mpLoaded && (
             <div className="py-8 text-center">
               <Loader2 className="w-8 h-8 mx-auto mb-2 text-booking-primary animate-spin" />
-              <p className="text-booking-muted">Cargando opciones de pago...</p>
+              <p className="text-gray-500">Cargando opciones de pago...</p>
             </div>
           )}
         </div>

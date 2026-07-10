@@ -127,7 +127,7 @@ export function BookingForm() {
 
       <div className="bg-white rounded-2xl shadow-lg p-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Tus datos</h2>
-        <p className="text-booking-muted mb-8">
+        <p className="text-gray-600 mb-8">
           Completa tu informacion para confirmar la reserva
         </p>
 
@@ -139,14 +139,14 @@ export function BookingForm() {
               </span>
             </div>
             <div>
-              <p className="font-medium text-booking-text">
+              <p className="font-medium text-gray-800">
                 {bookingData.date?.toLocaleDateString('es-AR', {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
                 })}
               </p>
-              <p className="text-sm text-booking-muted">{bookingData.time} hs</p>
+              <p className="text-sm text-gray-600">{bookingData.time} hs</p>
             </div>
           </div>
         </div>
