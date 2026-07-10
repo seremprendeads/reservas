@@ -23,7 +23,7 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
           const isSelected = bookingData.service?.id === s.id;
           return (
             <button key={s.id} onClick={() => onSelect(s)}
-              className={`relative text-left p-5 rounded-xl border-2 transition-all duration-200 w-full sm:w-72 ${
+              className={`relative text-left p-5 rounded-xl border-2 transition-all duration-200 w-full sm:max-w-md ${
                 isSelected
                   ? 'border-booking-primary bg-booking-primary-light shadow-lg'
                   : 'border-booking-card bg-booking-card hover:border-booking-primary/50'
