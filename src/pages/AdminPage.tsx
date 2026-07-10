@@ -1366,9 +1366,9 @@ function AppearanceManager({
             <CardTitle>Vista previa</CardTitle>
             <CardDescription>Así se ve la página de reservas actualmente</CardDescription>
           </div>
-          <a href="/booking" target="_blank" className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 transition-opacity">
+          <a href="https://reservas-two-sigma.vercel.app/" target="_blank" className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 transition-opacity">
             <ExternalLink className="w-3.5 h-3.5" />
-            Ver booking
+            Ver
           </a>
         </CardHeader>
         <CardContent className="p-0">
