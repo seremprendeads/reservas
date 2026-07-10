@@ -59,5 +59,6 @@ export type Branding = {
   text_color: string;
   muted_color: string;
   background_image_url: string;
+  bg_opacity: number;
   updated_at: string;
 };

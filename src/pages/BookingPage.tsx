@@ -48,6 +48,7 @@ function BookingContent() {
   const title = b?.title || 'Reserva tu Turno';
   const subtitle = b?.subtitle || 'Sistema de Reserva';
   const bgImageUrl = b?.background_image_url || '';
+  const bgOpacity = b?.bg_opacity ?? 80;
 
   useEffect(() => {
     if (b) {
@@ -88,7 +89,7 @@ function BookingContent() {
       <div className="flex-1 relative">
         {bgImageUrl && (
           <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${bgImageUrl})` }}>
-            <div className="absolute inset-0" style={{ backgroundColor: `${bgColor}cc` }} />
+            <div className="absolute inset-0" style={{ backgroundColor: `${bgColor}${Math.round((bgOpacity / 100) * 255).toString(16).padStart(2, '0')}` }} />
           </div>
         )}
         <div className="relative z-10">

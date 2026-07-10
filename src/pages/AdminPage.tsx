@@ -1219,6 +1219,7 @@ function AppearanceManager({
   const [textColor, setTextColor] = useState(branding?.text_color || '#f3f4f6');
   const [mutedColor, setMutedColor] = useState(branding?.muted_color || '#9ca3af');
   const [bgImageUrl, setBgImageUrl] = useState(branding?.background_image_url || '');
+  const [bgOpacity, setBgOpacity] = useState(branding?.bg_opacity ?? 80);
   const [saving, setSaving] = useState(false);
   const [selectedPalette, setSelectedPalette] = useState<number>(-1);
   const [uploading, setUploading] = useState({ logo: false, bg: false });
@@ -1281,6 +1282,7 @@ function AppearanceManager({
         text_color: textColor,
         muted_color: mutedColor,
         background_image_url: bgImageUrl,
+        bg_opacity: bgOpacity,
       };
 
       const { data: res, error } = await supabase.functions.invoke('admin-update-branding', {
@@ -1474,6 +1476,19 @@ function AppearanceManager({
               <span className="text-xs text-muted-foreground self-center">1920×1080 recomendado · Máx 5MB</span>
             </div>
             <input ref={bgFileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, 'bg'); }} />
+          </div>
+
+          {/* Background Opacity */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Opacidad del overlay ({bgOpacity}%)</label>
+            <input type="range" min="0" max="100" value={bgOpacity}
+              onChange={(e) => setBgOpacity(Number(e.target.value))}
+              className="w-full h-2 rounded-full appearance-none cursor-pointer"
+              style={{ accentColor: primaryColor }} />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Transparente</span>
+              <span>Opaco</span>
+            </div>
           </div>
 
           <Separator />
