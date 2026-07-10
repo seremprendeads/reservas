@@ -22,8 +22,8 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
         {services.map((s) => {
           const isSelected = bookingData.service?.id === s.id;
           return (
-            <button key={s.id} onClick={() => onSelect(s)}
-              className={`relative text-left p-5 rounded-xl border-2 transition-all duration-200 w-full sm:max-w-md ${
+            <div key={s.id}
+              className={`relative text-left p-5 rounded-xl border-2 transition-all duration-200 w-full sm:max-w-md flex flex-col ${
                 isSelected
                   ? 'border-booking-primary bg-booking-primary-light shadow-lg'
                   : 'border-booking-card bg-booking-card hover:border-booking-primary/50'
@@ -40,10 +40,17 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
               {s.description && (
                 <p className="text-sm mb-3" style={{ color: 'var(--booking-text-muted)' }}>{s.description}</p>
               )}
-              <p className="text-xl font-bold" style={{ color: 'var(--booking-primary)' }}>
+              <p className="text-xl font-bold mb-4" style={{ color: 'var(--booking-primary)' }}>
                 {formatPrice(s.price, s.currency)}
               </p>
-            </button>
+              <button onClick={() => onSelect(s)} className={`mt-auto w-full py-2.5 rounded-lg font-semibold transition-colors duration-200 ${
+                isSelected
+                  ? 'bg-booking-primary text-white cursor-default'
+                  : 'bg-booking-primary text-white hover:opacity-90'
+              }`}>
+                {isSelected ? 'Seleccionado' : 'Elegir'}
+              </button>
+            </div>
           );
         })}
       </div>
