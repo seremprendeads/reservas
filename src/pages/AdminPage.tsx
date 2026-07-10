@@ -1595,6 +1595,9 @@ function ServicesManager() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [currency, setCurrency] = useState('ARS');
+  const [imageUrl, setImageUrl] = useState('');
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const imgInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { loadServices(); }, []);
 
@@ -1603,12 +1606,31 @@ function ServicesManager() {
     if (data) setServices(data);
   };
 
+  const uploadServiceImage = async (file: File) => {
+    if (!file) return;
+    setUploadingImg(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = `service-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('branding').upload(fileName, file, { upsert: false });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('branding').getPublicUrl(fileName);
+      setImageUrl((urlData?.publicUrl || '') + `?t=${Date.now()}`);
+    } catch (err) {
+      console.error('Upload service image error:', err);
+    } finally {
+      if (imgInputRef.current) imgInputRef.current.value = '';
+      setUploadingImg(false);
+    }
+  };
+
   const openNew = () => {
     setEditing(null);
     setName('');
     setDescription('');
     setPrice('');
     setCurrency('ARS');
+    setImageUrl('');
     setShowDialog(true);
   };
 
@@ -1618,6 +1640,7 @@ function ServicesManager() {
     setDescription(s.description || '');
     setPrice(String(s.price));
     setCurrency(s.currency);
+    setImageUrl(s.image_url || '');
     setShowDialog(true);
   };
 
@@ -1628,6 +1651,7 @@ function ServicesManager() {
       description: description.trim(),
       price: parseFloat(price),
       currency,
+      image_url: imageUrl || null,
     };
     if (editing) {
       await supabase.from('services').update(payload).eq('id', editing.id);
@@ -1714,6 +1738,19 @@ function ServicesManager() {
                 <label className="text-sm font-medium">Moneda</label>
                 <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="ARS" />
               </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Imagen (opcional)</label>
+              <div className="flex items-center gap-3">
+                <Button type="button" variant="outline" size="sm" onClick={() => imgInputRef.current?.click()} disabled={uploadingImg}>
+                  {uploadingImg ? 'Subiendo...' : imageUrl ? 'Cambiar' : 'Subir imagen'}
+                </Button>
+                {imageUrl && <Button type="button" variant="ghost" size="sm" onClick={() => setImageUrl('')}>Quitar</Button>}
+                <input ref={imgInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadServiceImage(f); }} />
+              </div>
+              {imageUrl && (
+                <img src={imageUrl} alt="Preview" className="mt-2 h-20 w-32 rounded-lg object-cover border" />
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -2038,7 +2075,7 @@ export function AdminPage() {
         {/* Link a Booking Page */}
         <div className="border-t px-3 py-2">
           <a
-            href="/"
+            href="https://reservas-two-sigma.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-accent-foreground"

@@ -25,7 +25,7 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
           const isSelected = bookingData.service?.id === s.id;
           return (
             <div key={s.id}
-              className={`relative text-left p-4 rounded-xl transition-all duration-200 flex flex-col ${
+              className={`relative text-left rounded-xl transition-all duration-200 flex flex-col overflow-hidden ${
                 isSingle ? 'w-full sm:max-w-md' : 'w-full'
               } ${
                 isSelected
@@ -33,10 +33,14 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
                   : 'bg-booking-card'
               }`}>
               {isSelected && (
-                <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-booking-primary flex items-center justify-center">
+                <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-booking-primary flex items-center justify-center z-10">
                   <Check className="w-4 h-4 text-white" />
                 </div>
               )}
+              {s.image_url && (
+                <img src={s.image_url} alt={s.name} className="w-full h-36 object-cover" />
+              )}
+              <div className="p-4 flex flex-col flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <Tag className="w-5 h-5 shrink-0" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text-muted)' }} />
                 <h3 className="font-bold text-lg leading-tight" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text)' }}>{s.name}</h3>
@@ -54,6 +58,7 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
               }`}>
                 {isSelected ? 'Seleccionado' : 'Elegir'}
               </button>
+            </div>
             </div>
           );
         })}
