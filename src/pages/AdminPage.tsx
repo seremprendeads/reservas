@@ -1610,9 +1610,30 @@ function ServicesManager() {
     if (!file) return;
     setUploadingImg(true);
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const fileName = `service-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('branding').upload(fileName, file, { upsert: false });
+      let blob: Blob = file;
+      if (file.size > 500 * 1024 || file.type !== 'image/gif') {
+        blob = await new Promise<Blob>((resolve, reject) => {
+          const img = new Image();
+          const url = URL.createObjectURL(file);
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            const maxW = 800, maxH = 800;
+            if (w > maxW) { h = h * maxW / w; w = maxW; }
+            if (h > maxH) { w = w * maxH / h; h = maxH; }
+            canvas.width = Math.round(w);
+            canvas.height = Math.round(h);
+            canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const fmt = canvas.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+            canvas.toBlob(b => b ? resolve(b) : reject(new Error('Compresión fallida')), fmt, 0.8);
+          };
+          img.onerror = () => reject(new Error('Error al leer imagen'));
+          img.src = url;
+        });
+      }
+      const fileName = `service-${Date.now()}.webp`;
+      const { error } = await supabase.storage.from('branding').upload(fileName, blob, { upsert: false, contentType: 'image/webp' });
       if (error) throw error;
       const { data: urlData } = supabase.storage.from('branding').getPublicUrl(fileName);
       setImageUrl((urlData?.publicUrl || '') + `?t=${Date.now()}`);
