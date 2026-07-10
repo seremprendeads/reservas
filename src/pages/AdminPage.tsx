@@ -2038,7 +2038,7 @@ export function AdminPage() {
         {/* Link a Booking Page */}
         <div className="border-t px-3 py-2">
           <a
-            href="/booking"
+            href="/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-accent-foreground"
