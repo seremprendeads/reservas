@@ -2110,9 +2110,6 @@ export function AdminPage() {
                 <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
                   onClick={() => setView('bookings')}>
                   <CardContent className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-950/50">
-                      <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                    </div>
                     <p className="text-3xl font-bold">{todaysBookings.length}</p>
                     <p className="text-sm text-muted-foreground">Reservas hoy</p>
                   </CardContent>
@@ -2120,9 +2117,6 @@ export function AdminPage() {
                 <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
                   onClick={() => setView('bookings')}>
                   <CardContent className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/50">
-                      <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                    </div>
                     <p className="text-3xl font-bold">{upcomingBookings.length}</p>
                     <p className="text-sm text-muted-foreground">Reservas futuras</p>
                   </CardContent>
@@ -2130,9 +2124,6 @@ export function AdminPage() {
                 <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
                   onClick={() => setView('bookings')}>
                   <CardContent className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-950/50">
-                      <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
-                    </div>
                     <p className="text-3xl font-bold">{paidBookings.length}</p>
                     <p className="text-sm text-muted-foreground">Reservas pagadas</p>
                   </CardContent>
@@ -2140,9 +2131,6 @@ export function AdminPage() {
                 <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
                   onClick={() => setView('bookings')}>
                   <CardContent className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/50">
-                      <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-                    </div>
                     <p className="text-3xl font-bold">{pendingPayments.length}</p>
                     <p className="text-sm text-muted-foreground">Pagos pendientes</p>
                   </CardContent>
