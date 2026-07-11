@@ -49,6 +49,8 @@ import { Separator } from '../components/ui/separator';
 import { Avatar } from '../components/ui/avatar';
 import { Skeleton } from '../components/ui/skeleton';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import { useTheme } from '../contexts/ThemeContext';
+import { allThemes } from '../themes';
 import { cn } from '../lib/utils';
 
 type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services';
@@ -1134,23 +1136,6 @@ function ProfileManager({
 
 // ─── Appearance (Branding) Manager ─────────────────────────────────────────────
 
-const COLOR_PALETTES = [
-  { name: 'Verde Esmeralda', primary: '#059669', bg: '#111827', card: '#1f2937', text: '#f3f4f6', muted: '#9ca3af' },
-  { name: 'Azul Cobalto', primary: '#2563eb', bg: '#0f172a', card: '#1e293b', text: '#f1f5f9', muted: '#94a3b8' },
-  { name: 'Violeta Real', primary: '#7c3aed', bg: '#1e1b4b', card: '#2e1065', text: '#f3f4f6', muted: '#9ca3af' },
-  { name: 'Rosa Elegante', primary: '#be185d', bg: '#1a0f14', card: '#2d1b24', text: '#fce7f3', muted: '#d4a3b3' },
-  { name: 'Terracota', primary: '#c2410c', bg: '#1c1109', card: '#2d1a0f', text: '#f3f4f6', muted: '#b89a8a' },
-  { name: 'Gris Pizarra', primary: '#475569', bg: '#0f172a', card: '#1e293b', text: '#f1f5f9', muted: '#64748b' },
-];
-
-function hexToHover(hex: string): string {
-  const num = parseInt(hex.replace('#', ''), 16);
-  const r = Math.max(0, (num >> 16) - 30);
-  const g = Math.max(0, ((num >> 8) & 0xFF) - 30);
-  const b = Math.max(0, (num & 0xFF) - 30);
-  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
-}
-
 function AppearanceManager({
   branding, onRefresh, adminEmail, adminPassword, showSuccess
 }: {
@@ -1173,19 +1158,23 @@ function AppearanceManager({
   const [bgOpacity, setBgOpacity] = useState(branding?.bg_opacity ?? 80);
   const [overlayColor, setOverlayColor] = useState(branding?.overlay_color || branding?.background_color || '#111827');
   const [saving, setSaving] = useState(false);
-  const [selectedPalette, setSelectedPalette] = useState<number>(-1);
+  const [selectedThemeId, setSelectedThemeId] = useState<string>('');
   const [uploading, setUploading] = useState({ logo: false, bg: false });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bgFileInputRef = useRef<HTMLInputElement>(null);
+  const { setTheme } = useTheme();
 
-  const applyPalette = (index: number) => {
-    const p = COLOR_PALETTES[index];
-    setSelectedPalette(index);
-    setPrimaryColor(p.primary);
-    setBgColor(p.bg);
-    setCardBgColor(p.card);
-    setTextColor(p.text);
-    setMutedColor(p.muted);
+  const applyTheme = (themeId: string) => {
+    const t = allThemes.find(t => t.id === themeId);
+    if (!t) return;
+    setSelectedThemeId(themeId);
+    setTheme(t);
+    setPrimaryColor(t.tokens.primary);
+    setBgColor(t.tokens.background);
+    setCardBgColor(t.tokens.cardBg);
+    setTextColor(t.tokens.text);
+    setMutedColor(t.tokens.textMuted);
+    setCaptionColor(t.tokens.caption);
   };
 
   const compressImage = (file: File, type: 'logo' | 'bg'): Promise<Blob> => {
@@ -1379,26 +1368,31 @@ function AppearanceManager({
 
           <Separator />
 
-          {/* Color Palettes */}
+          {/* Industry Themes */}
           <div className="space-y-3">
-            <label className="text-sm font-medium">Paletas de colores</label>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
-              {COLOR_PALETTES.map((p, i) => (
+            <label className="text-sm font-medium">Temas por rubro</label>
+            <p className="text-xs text-muted-foreground">Elegí un tema prediseñado para tu negocio</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {allThemes.map((t) => (
                 <button
-                  key={p.name}
-                  onClick={() => applyPalette(i)}
-                  className={`relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all duration-200 hover:shadow-md ${
-                    selectedPalette === i ? 'border-primary ring-2 ring-primary/20' : 'border-transparent'
+                  key={t.id}
+                  onClick={() => applyTheme(t.id)}
+                  className={`relative flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all duration-200 hover:shadow-md ${
+                    selectedThemeId === t.id ? 'border-primary ring-2 ring-primary/20' : 'border-border'
                   }`}
-                  style={{ backgroundColor: p.bg }}
+                  style={{ backgroundColor: t.tokens.cardBg, color: t.tokens.text }}
                 >
-                  <div className="flex gap-1">
-                    <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.primary }} />
-                    <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.muted }} />
-                    <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.card }} />
-                    <div className="h-6 w-6 rounded-full" style={{ backgroundColor: p.bg }} />
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{t.icon}</span>
+                    <span className="text-sm font-semibold">{t.name}</span>
                   </div>
-                  <span className="text-xs font-medium" style={{ color: '#e5e7eb' }}>{p.name}</span>
+                  <p className="text-xs" style={{ color: t.tokens.textMuted }}>{t.description}</p>
+                  <div className="flex gap-1.5 mt-1">
+                    <div className="h-4 w-4 rounded-full" style={{ backgroundColor: t.tokens.primary }} />
+                    <div className="h-4 w-4 rounded-full" style={{ backgroundColor: t.tokens.background }} />
+                    <div className="h-4 w-4 rounded-full ring-1 ring-inset ring-border" style={{ backgroundColor: t.tokens.cardBg }} />
+                    <div className="h-4 w-4 rounded-full" style={{ backgroundColor: t.tokens.text }} />
+                  </div>
                 </button>
               ))}
             </div>
@@ -1409,54 +1403,54 @@ function AppearanceManager({
             <div className="space-y-2">
               <label className="text-sm font-medium">Color principal (botones, acentos)</label>
               <div className="flex items-center gap-3">
-                <input type="color" value={primaryColor} onChange={(e) => { setPrimaryColor(e.target.value); setSelectedPalette(-1); }}
+                <input type="color" value={primaryColor} onChange={(e) => { setPrimaryColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={primaryColor} onChange={(e) => { setPrimaryColor(e.target.value); setSelectedPalette(-1); }}
+                <Input type="text" value={primaryColor} onChange={(e) => { setPrimaryColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-12 font-mono" placeholder="#059669" />
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Color de fondo (página)</label>
               <div className="flex items-center gap-3">
-                <input type="color" value={bgColor} onChange={(e) => { setBgColor(e.target.value); setSelectedPalette(-1); }}
+                <input type="color" value={bgColor} onChange={(e) => { setBgColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={bgColor} onChange={(e) => { setBgColor(e.target.value); setSelectedPalette(-1); }}
+                <Input type="text" value={bgColor} onChange={(e) => { setBgColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-12 font-mono" placeholder="#111827" />
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Color de encabezado y pie de página</label>
               <div className="flex items-center gap-3">
-                <input type="color" value={cardBgColor} onChange={(e) => { setCardBgColor(e.target.value); setSelectedPalette(-1); }}
+                <input type="color" value={cardBgColor} onChange={(e) => { setCardBgColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={cardBgColor} onChange={(e) => { setCardBgColor(e.target.value); setSelectedPalette(-1); }}
+                <Input type="text" value={cardBgColor} onChange={(e) => { setCardBgColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-12 font-mono" placeholder="#1f2937" />
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Color de título</label>
               <div className="flex items-center gap-3">
-                <input type="color" value={textColor} onChange={(e) => { setTextColor(e.target.value); setSelectedPalette(-1); }}
+                <input type="color" value={textColor} onChange={(e) => { setTextColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={textColor} onChange={(e) => { setTextColor(e.target.value); setSelectedPalette(-1); }}
+                <Input type="text" value={textColor} onChange={(e) => { setTextColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-12 font-mono" placeholder="#f3f4f6" />
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold">Color de subtítulos y textos secundarios</label>
               <div className="flex items-center gap-3">
-                <input type="color" value={mutedColor} onChange={(e) => { setMutedColor(e.target.value); setSelectedPalette(-1); }}
+                <input type="color" value={mutedColor} onChange={(e) => { setMutedColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={mutedColor} onChange={(e) => { setMutedColor(e.target.value); setSelectedPalette(-1); }}
+                <Input type="text" value={mutedColor} onChange={(e) => { setMutedColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-12 font-mono" placeholder="#9ca3af" />
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold">Color de pasos y textos informativos</label>
               <div className="flex items-center gap-3">
-                <input type="color" value={captionColor} onChange={(e) => { setCaptionColor(e.target.value); setSelectedPalette(-1); }}
+                <input type="color" value={captionColor} onChange={(e) => { setCaptionColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={captionColor} onChange={(e) => { setCaptionColor(e.target.value); setSelectedPalette(-1); }}
+                <Input type="text" value={captionColor} onChange={(e) => { setCaptionColor(e.target.value); setSelectedThemeId(''); }}
                   className="h-12 font-mono" placeholder="#9ca3af" />
               </div>
             </div>

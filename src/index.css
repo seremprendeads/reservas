@@ -69,32 +69,40 @@
   }
 }
 
-/* Booking page dynamic theme variables (set via JS at runtime) */
+/* Booking page dynamic theme variables (set via ThemeProvider at runtime) */
 :root {
   --booking-primary: #059669;
   --booking-primary-hover: #047857;
   --booking-primary-light: #d1fae5;
-  --booking-primary-dark: #065f46;
-  --booking-bg: #111827;
-  --booking-card-bg: #1f2937;
-  --booking-card-border: #374151;
-  --booking-text: #f3f4f6;
-  --booking-text-muted: #9ca3af;
+  --booking-bg: #f0fdf4;
+  --booking-card-bg: #ffffff;
+  --booking-text: #111827;
+  --booking-text-muted: #6b7280;
   --booking-caption: #9ca3af;
+  --booking-border: #d1d5db;
+  --booking-ring: #059669;
+  --booking-input-bg: #ffffff;
+  --booking-success: #059669;
+  --booking-warning: #d97706;
+  --booking-error: #dc2626;
 }
 
 .bg-booking-primary { background-color: var(--booking-primary); }
 .hover\:bg-booking-primary-hover:hover { background-color: var(--booking-primary-hover); }
 .bg-booking-primary-light { background-color: var(--booking-primary-light); }
 .text-booking-primary { color: var(--booking-primary); }
-.text-booking-primary-dark { color: var(--booking-primary-dark); }
 .ring-booking-primary { --tw-ring-color: var(--booking-primary); }
 .border-booking-primary { border-color: var(--booking-primary); }
 .from-booking-primary { --tw-gradient-from: var(--booking-primary); }
 .to-booking-primary-hover { --tw-gradient-to: var(--booking-primary-hover); }
 .bg-booking-bg { background-color: var(--booking-bg); }
 .bg-booking-card { background-color: var(--booking-card-bg); }
-.border-booking-card { border-color: var(--booking-card-border); }
 .text-booking-text { color: var(--booking-text); }
 .text-booking-muted { color: var(--booking-text-muted); }
 .text-booking-caption { color: var(--booking-caption); }
+.border-booking-border { border-color: var(--booking-border); }
+.ring-booking-ring { --tw-ring-color: var(--booking-ring); }
+.bg-booking-input { background-color: var(--booking-input-bg); }
+.text-booking-success { color: var(--booking-success); }
+.text-booking-warning { color: var(--booking-warning); }
+.text-booking-error { color: var(--booking-error); }
