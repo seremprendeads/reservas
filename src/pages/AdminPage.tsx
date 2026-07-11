@@ -36,6 +36,9 @@ import {
   Palette,
   Package,
   ShoppingCart,
+  TrendingUp,
+  Zap,
+  Sparkles,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings, Branding, Service } from '../lib/supabase';
 import { Button } from '../components/ui/button';
@@ -88,6 +91,12 @@ function getPaymentBadge(status: string) {
     rejected: { variant: 'destructive', label: 'Rechazado' },
   };
   return map[status] || { variant: 'warning' as const, label: status };
+}
+
+function getGreeting(name: string) {
+  const h = new Date().getHours();
+  const saludo = h < 12 ? 'Buenos días' : h < 20 ? 'Buenas tardes' : 'Buenas noches';
+  return `${saludo}, ${name.split(' ')[0]}`;
 }
 
 // ─── Login ────────────────────────────────────────────────────────────────────
@@ -1964,12 +1973,21 @@ export function AdminPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="w-full max-w-md space-y-4">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-20 w-full" />
+    <div className="flex min-h-screen bg-background/80">
+        <div className="hidden lg:flex w-72 flex-col border-r border-border/50 bg-card/80 p-5 space-y-4">
+          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-10 w-3/4 rounded-xl" />
+          <div className="space-y-2 pt-4">
+            {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-10 w-full rounded-xl" />)}
+          </div>
+        </div>
+        <div className="flex-1 p-8 space-y-6">
+          <Skeleton className="h-8 w-64 rounded-xl" />
+          <div className="grid grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+          </div>
+          <Skeleton className="h-64 rounded-2xl" />
+          <Skeleton className="h-48 rounded-2xl" />
         </div>
       </div>
     );
@@ -1990,24 +2008,32 @@ export function AdminPage() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r bg-card transition-transform duration-300 ease-in-out lg:static lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-border/50 bg-card/80 backdrop-blur-xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}>
         {/* Sidebar header */}
-        <div className="flex h-16 items-center gap-3 border-b px-6">
-          <Avatar
-            fallback={adminName.charAt(0).toUpperCase() || 'A'}
-            src={adminAvatar || null}
-            className="h-10 w-10 rounded-xl"
-          />
-          <div className="flex flex-col">
-            <span className="text-base font-bold leading-tight">Reserva Única</span>
-            <span className="text-xs text-muted-foreground">Panel de Administración</span>
+        <div className="flex items-center gap-3.5 px-5 py-5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-bold tracking-tight truncate">Reserva Única</span>
+            <span className="text-[11px] text-muted-foreground">Panel de administración</span>
+          </div>
+        </div>
+
+        {/* Plan badge */}
+        <div className="mx-4 mb-4">
+          <div className="rounded-xl bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 px-3.5 py-2.5 border border-primary/10">
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs font-semibold text-primary">Plan Profesional</span>
+            </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-3">
+        <nav className="flex-1 overflow-y-auto px-3 space-y-0.5">
           {navItems.map((item) => {
             const isActive = view === item.id;
             return (
@@ -2015,19 +2041,24 @@ export function AdminPage() {
                 key={item.id}
                 onClick={() => { setView(item.id); setSidebarOpen(false); }}
                 className={cn(
-                  'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                  'admin-nav-item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150',
                   isActive
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    ? 'active bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
                 )}>
-                {item.icon}
+                <span className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-150',
+                  isActive ? 'bg-primary/15' : 'bg-transparent'
+                )}>
+                  {item.icon}
+                </span>
                 <span className="flex-1 text-left">{item.label}</span>
                 {item.badge !== undefined && (
                   <span className={cn(
-                    'inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium min-w-[20px]',
+                    'inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-semibold min-w-[20px]',
                     isActive
-                      ? 'bg-primary-foreground/20 text-primary-foreground'
-                      : 'bg-primary/10 text-primary'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground'
                   )}>
                     {item.badge}
                   </span>
@@ -2038,31 +2069,37 @@ export function AdminPage() {
         </nav>
 
         {/* Link a Booking Page */}
-        <div className="border-t px-3 py-2">
+        <div className="px-3 py-2">
           <a
             href="https://reservas-two-sigma.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-accent-foreground"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-150 hover:bg-accent/60 hover:text-foreground"
             onClick={() => setSidebarOpen(false)}
           >
-            <ExternalLink className="h-5 w-5" />
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg">
+              <ExternalLink className="h-4 w-4" />
+            </span>
             <span>Página de reserva</span>
           </a>
         </div>
 
         {/* Sidebar footer */}
-        <div className="border-t p-3 space-y-1">
+        <div className="border-t border-border/50 px-3 py-3 space-y-0.5">
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
-            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-150 hover:bg-accent/60 hover:text-foreground">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg">
+              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </span>
             <span>{darkMode ? 'Modo claro' : 'Modo oscuro'}</span>
           </button>
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
-            <LogOut className="h-5 w-5" />
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-150 hover:bg-destructive/10 hover:text-destructive">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg">
+              <LogOut className="h-4 w-4" />
+            </span>
             <span>Cerrar sesión</span>
           </button>
         </div>
@@ -2071,15 +2108,22 @@ export function AdminPage() {
       {/* Main content area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-16 items-center gap-4 border-b bg-card px-4 lg:px-6">
+        <header className="flex h-16 items-center gap-4 border-b border-border/50 bg-card/50 backdrop-blur-sm px-4 lg:px-8">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+            className="lg:hidden rounded-xl p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
             <Menu className="h-5 w-5" />
           </button>
 
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold">{currentViewTitle}</h1>
+            {view === 'dashboard' ? (
+              <div>
+                <h1 className="text-xl font-bold tracking-tight">{getGreeting(adminName)} 👋</h1>
+                <p className="text-sm text-muted-foreground">Estos son los números de tu negocio hoy.</p>
+              </div>
+            ) : (
+              <h1 className="text-xl font-bold tracking-tight">{currentViewTitle}</h1>
+            )}
           </div>
 
           <div className="ml-auto flex items-center gap-3">
@@ -2087,307 +2131,386 @@ export function AdminPage() {
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+              className="hidden sm:inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
               <ExternalLink className="h-4 w-4" />
-              <span>Página de Reservas</span>
+              <span>Ver tienda</span>
             </a>
 
-            <Separator orientation="vertical" className="h-8 hidden sm:block" />
+            <div className="h-6 w-px bg-border/50 hidden sm:block" />
 
-            <div className="flex items-center gap-2">
-              <Avatar fallback={adminName.charAt(0).toUpperCase() || 'A'} src={adminAvatar || null} className="h-8 w-8" />
+            <div className="flex items-center gap-2.5">
+              <Avatar fallback={adminName.charAt(0).toUpperCase() || 'A'} src={adminAvatar || null} className="h-8 w-8 rounded-xl" />
               <span className="hidden text-sm font-medium sm:block">{adminName || 'Admin'}</span>
             </div>
           </div>
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
           {/* ─── Dashboard ──────────────────────────────────────── */}
           {view === 'dashboard' && (
-            <div className="mx-auto max-w-7xl space-y-6">
+            <div className="mx-auto max-w-7xl space-y-8 admin-fade-in">
+              {/* Stat cards */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
-                  onClick={() => setView('bookings')}>
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-950/50">
-                      <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="admin-stat-card cursor-pointer text-blue-600 dark:text-blue-400" onClick={() => setView('bookings')}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Reservas hoy</p>
+                      <p className="mt-2 text-3xl font-bold tracking-tight">{todaysBookings.length}</p>
                     </div>
-                    <p className="text-3xl font-bold">{todaysBookings.length}</p>
-                    <p className="text-sm text-muted-foreground">Reservas hoy</p>
-                  </CardContent>
-                </Card>
-                <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
-                  onClick={() => setView('bookings')}>
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/50">
-                      <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/50">
+                      <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <p className="text-3xl font-bold">{upcomingBookings.length}</p>
-                    <p className="text-sm text-muted-foreground">Reservas futuras</p>
-                  </CardContent>
-                </Card>
-                <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
-                  onClick={() => setView('bookings')}>
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-950/50">
-                      <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  </div>
+                </div>
+
+                <div className="admin-stat-card cursor-pointer text-emerald-600 dark:text-emerald-400" onClick={() => setView('bookings')}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Próximas reservas</p>
+                      <p className="mt-2 text-3xl font-bold tracking-tight">{upcomingBookings.length}</p>
                     </div>
-                    <p className="text-3xl font-bold">{paidBookings.length}</p>
-                    <p className="text-sm text-muted-foreground">Reservas pagadas</p>
-                  </CardContent>
-                </Card>
-                <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
-                  onClick={() => setView('bookings')}>
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/50">
-                      <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/50">
+                      <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <p className="text-3xl font-bold">{pendingPayments.length}</p>
-                    <p className="text-sm text-muted-foreground">Pagos pendientes</p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
+
+                <div className="admin-stat-card cursor-pointer text-green-600 dark:text-green-400" onClick={() => setView('bookings')}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Pagadas</p>
+                      <p className="mt-2 text-3xl font-bold tracking-tight">{paidBookings.length}</p>
+                    </div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 dark:bg-green-950/50">
+                      <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="admin-stat-card cursor-pointer text-amber-600 dark:text-amber-400" onClick={() => setView('bookings')}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Pagos pendientes</p>
+                      <p className="mt-2 text-3xl font-bold tracking-tight">{pendingPayments.length}</p>
+                    </div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/50">
+                      <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reservas de hoy</CardTitle>
-                  <CardDescription>
-                    {today.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {todaysBookings.length > 0 ? (
-                    <div className="space-y-2">
-                      {todaysBookings.map((booking) => (
-                        <div key={booking.id}
-                          className="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50 cursor-pointer"
-                          onClick={() => { setSelectedBooking(booking); setView('detail'); }}>
-                          <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                              <span className="font-bold text-primary">{booking.booking_time.slice(0, 5)}</span>
-                            </div>
-                            <div>
-                              <p className="font-medium">{booking.customer_name}</p>
-                              <p className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <Phone className="h-3 w-3" />{booking.customer_phone}
-                              </p>
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="icon" className="shrink-0">
-                            <Eye className="h-4 w-4" />
-                          </Button>
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                {/* Today's bookings - left column */}
+                <div className="lg:col-span-3">
+                  <Card className="border-border/50">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-base font-semibold">Reservas de hoy</CardTitle>
+                          <CardDescription className="text-xs">
+                            {today.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                          </CardDescription>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-12 text-center">
-                      <CalendarDays className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
-                      <p className="text-muted-foreground">No hay reservas para hoy</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        <Button variant="ghost" size="sm" onClick={() => setView('bookings')} className="text-xs text-muted-foreground">
+                          Ver todas <ArrowLeft className="ml-1 h-3 w-3 rotate-180" />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {todaysBookings.length > 0 ? (
+                        <div className="space-y-2">
+                          {todaysBookings.map((booking) => {
+                            const status = getStatusBadge(booking.booking_status);
+                            return (
+                              <div key={booking.id}
+                                className="group flex items-center gap-4 rounded-xl border border-border/50 bg-background/50 p-3.5 transition-all duration-150 hover:border-border hover:bg-accent/30 cursor-pointer"
+                                onClick={() => { setSelectedBooking(booking); setView('detail'); }}>
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 text-primary shrink-0">
+                                  <span className="text-sm font-bold">{booking.booking_time.slice(0, 5)}</span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-semibold text-sm truncate">{booking.customer_name}</p>
+                                    <Badge variant={status.variant} className="text-[10px] px-1.5 py-0">{status.label}</Badge>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    {booking.customer_phone}
+                                  </p>
+                                </div>
+                                <Button variant="ghost" size="icon" className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center">
+                          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50">
+                            <CalendarDays className="h-7 w-7 text-muted-foreground/40" />
+                          </div>
+                          <p className="text-sm font-medium text-muted-foreground">Sin reservas por hoy</p>
+                          <p className="mt-1 text-xs text-muted-foreground/70">Aprovechá el día libre</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Próximas reservas</CardTitle>
-                  <CardDescription>Las próximas 5 reservas agendadas</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {upcomingBookings.length > 0 ? (
-                    <div className="space-y-2">
-                      {upcomingBookings.slice(0, 5).map((booking) => (
-                        <div key={booking.id}
-                          className="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50 cursor-pointer"
-                          onClick={() => { setSelectedBooking(booking); setView('detail'); }}>
-                          <div className="flex items-center gap-4">
-                            <div className="text-center">
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { month: 'short' })}
-                              </p>
-                              <p className="text-xl font-bold">{new Date(booking.booking_date + 'T12:00:00').getDate()}</p>
-                            </div>
+                {/* Right column - Upcoming + Activity */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Next booking highlight */}
+                  {upcomingBookings.length > 0 && (() => {
+                    const next = upcomingBookings[0];
+                    const status = getStatusBadge(next.booking_status);
+                    const date = new Date(next.booking_date + 'T12:00:00');
+                    const isTomorrow = date.toISOString().slice(0, 10) === new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+                    return (
+                      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent">
+                        <CardContent className="p-5">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Zap className="h-4 w-4 text-primary" />
+                            <span className="text-xs font-semibold text-primary uppercase tracking-wider">Próxima reserva</span>
+                          </div>
+                          <div className="space-y-3">
                             <div>
-                              <p className="font-medium">{booking.customer_name}</p>
-                              <p className="text-sm text-muted-foreground">{booking.booking_time} hs</p>
+                              <p className="text-lg font-bold">{next.customer_name}</p>
+                              <p className="text-sm text-muted-foreground">{next.customer_phone}</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-1.5 text-sm">
+                                <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span>{isTomorrow ? 'Mañana' : date.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-sm">
+                                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span>{next.booking_time} hs</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between pt-1">
+                              <Badge variant={status.variant}>{status.label}</Badge>
+                              <Button variant="ghost" size="sm" className="text-xs h-8"
+                                onClick={() => { setSelectedBooking(next); setView('detail'); }}>
+                                Ver detalle <ArrowLeft className="ml-1 h-3 w-3 rotate-180" />
+                              </Button>
                             </div>
                           </div>
-                          <Button variant="ghost" size="icon" className="shrink-0">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-12 text-center">
-                      <CalendarDays className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
-                      <p className="text-muted-foreground">No hay reservas futuras</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        </CardContent>
+                      </Card>
+                    );
+                  })()}
+
+                  {/* Recent activity */}
+                  <Card className="border-border/50">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base font-semibold">Actividad reciente</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-0">
+                        {bookings.slice(0, 6).map((b, i) => {
+                          const payment = getPaymentBadge(b.payment_status);
+                          return (
+                            <div key={b.id} className="flex items-start gap-3 py-2.5 relative">
+                              {i < bookings.slice(0, 6).length - 1 && (
+                                <div className="absolute left-[7px] top-8 h-full w-px bg-border/50" />
+                              )}
+                              <div className={cn(
+                                'mt-0.5 h-[15px] w-[15px] rounded-full border-2 shrink-0 z-10',
+                                b.payment_status === 'approved' ? 'border-emerald-400 bg-emerald-50 dark:border-emerald-600 dark:bg-emerald-950/50' :
+                                b.payment_status === 'pending' ? 'border-amber-400 bg-amber-50 dark:border-amber-600 dark:bg-amber-950/50' :
+                                'border-red-400 bg-red-50 dark:border-red-600 dark:bg-red-950/50'
+                              )} />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{b.customer_name}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-xs text-muted-foreground">{new Date(b.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}</span>
+                                  <span className="text-xs text-muted-foreground">·</span>
+                                  <Badge variant={payment.variant} className="text-[10px] px-1.5 py-0">{payment.label}</Badge>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {bookings.length === 0 && (
+                          <div className="py-6 text-center">
+                            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-muted/50">
+                              <ClipboardList className="h-5 w-5 text-muted-foreground/40" />
+                            </div>
+                            <p className="text-sm text-muted-foreground">Sin actividad aún</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             </div>
           )}
 
           {/* ─── Bookings ──────────────────────────────────────── */}
           {view === 'bookings' && (
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col gap-4 sm:flex-row">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input type="text" placeholder="Buscar por nombre, teléfono, email o código..." value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)} className="h-10 pl-9" />
-                  </div>
+            <div className="mx-auto max-w-5xl space-y-6 admin-fade-in">
+              {/* Filters */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input type="text" placeholder="Buscar por nombre, teléfono, email o código..." value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)} className="h-10 pl-9 rounded-xl border-border/50 bg-card/50" />
+                </div>
+                <div className="flex items-center gap-2">
                   <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                    className="flex h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors">
-                    <option value="all">Todos los estados</option>
+                    className="flex h-10 rounded-xl border border-border/50 bg-card/50 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors">
+                    <option value="all">Todos</option>
                     <option value="confirmed">Confirmadas</option>
                     <option value="pending">Pendientes</option>
                     <option value="completed">Completadas</option>
                     <option value="cancelled">Canceladas</option>
                   </select>
-                  <Button onClick={loadData} variant="outline" size="icon">
+                  <Button onClick={loadData} variant="outline" size="icon" className="rounded-xl border-border/50 h-10 w-10">
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Código</th>
-                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Cliente</th>
-                        <th className="hidden px-4 py-4 text-left text-sm font-medium text-muted-foreground md:table-cell">Contacto</th>
-                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Fecha</th>
-                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Hora</th>
-                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Pago</th>
-                        <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Estado</th>
-                        <th className="px-4 py-4 text-center text-sm font-medium text-muted-foreground">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {filteredBookings.map((booking) => (
-                        <tr key={booking.id} className="hover:bg-muted/50 transition-colors">
-                          <td className="px-4 py-4 font-mono text-xs text-muted-foreground">{booking.booking_code}</td>
-                          <td className="px-4 py-4 font-medium">{booking.customer_name}</td>
-                          <td className="hidden px-4 py-4 md:table-cell">
-                            <div className="text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1"><Phone className="h-3 w-3" />{booking.customer_phone}</div>
-                              <div className="flex items-center gap-1"><Mail className="h-3 w-3" />{booking.customer_email}</div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-sm">{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')}</td>
-                          <td className="px-4 py-4 text-sm">{booking.booking_time}</td>
-                          <td className="px-4 py-4">
-                            <Badge variant={getPaymentBadge(booking.payment_status).variant}>
-                              {getPaymentBadge(booking.payment_status).label}
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-4">
-                            <Badge variant={getStatusBadge(booking.booking_status).variant}>
-                              {getStatusBadge(booking.booking_status).label}
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex items-center justify-center gap-1">
-                              <Button onClick={() => { setSelectedBooking(booking); setView('detail'); }}
-                                variant="ghost" size="icon" title="Ver detalle">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {booking.booking_status === 'pending' && (
-                                <Button onClick={() => updateBookingStatus(booking.id, 'confirmed')}
-                                  variant="ghost" size="icon" title="Confirmar" className="text-emerald-600">
-                                  <Calendar className="h-4 w-4" />
-                                </Button>
-                              )}
-                              {booking.booking_status === 'confirmed' && (
-                                <Button onClick={() => updateBookingStatus(booking.id, 'completed')}
-                                  variant="ghost" size="icon" title="Completar" className="text-blue-600">
-                                  <Clock className="h-4 w-4" />
-                                </Button>
-                              )}
-                              {(booking.booking_status === 'pending' || booking.booking_status === 'confirmed') && (
-                                <Button onClick={() => updateBookingStatus(booking.id, 'cancelled')}
-                                  variant="ghost" size="icon" title="Cancelar" className="text-destructive">
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                              )}
-                              {(booking.booking_status === 'cancelled' || booking.booking_status === 'completed') && (
-                                <Button onClick={() => deleteBooking(booking.id)}
-                                  variant="ghost" size="sm" className="text-destructive" title="Eliminar">
-                                  <Trash2 className="mr-1 h-4 w-4" /> Eliminar
-                                </Button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {filteredBookings.length === 0 && (
-                    <p className="py-12 text-center text-sm text-muted-foreground">No se encontraron reservas</p>
-                  )}
+              </div>
+
+              {/* Results count */}
+              <p className="text-sm text-muted-foreground">
+                {filteredBookings.length} reserva{filteredBookings.length !== 1 ? 's' : ''}
+              </p>
+
+              {/* Booking cards */}
+              {filteredBookings.length > 0 ? (
+                <div className="space-y-2">
+                  {filteredBookings.map((booking) => {
+                    const status = getStatusBadge(booking.booking_status);
+                    const payment = getPaymentBadge(booking.payment_status);
+                    const date = new Date(booking.booking_date + 'T12:00:00');
+                    return (
+                      <div key={booking.id}
+                        className="group flex items-center gap-4 rounded-xl border border-border/50 bg-card/50 p-4 transition-all duration-150 hover:border-border hover:bg-accent/30 hover:shadow-sm cursor-pointer"
+                        onClick={() => { setSelectedBooking(booking); setView('detail'); }}>
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/5 text-primary shrink-0">
+                          <span className="text-sm font-bold">{booking.booking_time.slice(0, 5)}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-sm">{booking.customer_name}</p>
+                            <span className="text-xs text-muted-foreground font-mono">{booking.booking_code}</span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{booking.customer_phone}</span>
+                            <span className="hidden sm:flex items-center gap-1"><Mail className="h-3 w-3" />{booking.customer_email}</span>
+                          </div>
+                        </div>
+                        <div className="hidden md:flex flex-col items-end gap-1.5 shrink-0">
+                          <p className="text-xs text-muted-foreground">
+                            {date.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
+                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <Badge variant={payment.variant} className="text-[10px] px-1.5 py-0">{payment.label}</Badge>
+                            <Badge variant={status.variant} className="text-[10px] px-1.5 py-0">{status.label}</Badge>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                          <Button onClick={() => { setSelectedBooking(booking); setView('detail'); }}
+                            variant="ghost" size="icon" className="h-8 w-8" title="Ver detalle">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          {booking.booking_status === 'pending' && (
+                            <Button onClick={() => updateBookingStatus(booking.id, 'confirmed')}
+                              variant="ghost" size="icon" className="h-8 w-8 text-emerald-600" title="Confirmar">
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {booking.booking_status === 'confirmed' && (
+                            <Button onClick={() => updateBookingStatus(booking.id, 'completed')}
+                              variant="ghost" size="icon" className="h-8 w-8 text-blue-600" title="Completar">
+                              <Clock className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {(booking.booking_status === 'pending' || booking.booking_status === 'confirmed') && (
+                            <Button onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                              variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Cancelar">
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </CardContent>
-            </Card>
+              ) : (
+                <div className="py-16 text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50">
+                    <CalendarDays className="h-7 w-7 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground">No se encontraron reservas</p>
+                  <p className="mt-1 text-xs text-muted-foreground/70">
+                    {searchTerm ? 'Probá con otro término de búsqueda' : 'Las reservas aparecerán cuando los clientes agenden'}
+                  </p>
+                </div>
+              )}
+            </div>
           )}
 
           {/* ─── Detail ─────────────────────────────────────────── */}
           {view === 'detail' && selectedBooking && (
-            <div className="mx-auto max-w-2xl space-y-6">
-              <Button onClick={() => setView('bookings')} variant="ghost" size="sm">
+            <div className="mx-auto max-w-2xl space-y-6 admin-fade-in">
+              <Button onClick={() => setView('bookings')} variant="ghost" size="sm" className="text-muted-foreground">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Volver
               </Button>
 
-              <Card>
-                <CardHeader>
+              <Card className="border-border/50">
+                <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle>Detalle de reserva</CardTitle>
-                    <span className="font-mono text-sm text-muted-foreground">{selectedBooking.booking_code}</span>
+                    <div>
+                      <CardTitle className="text-lg font-semibold">Detalle de reserva</CardTitle>
+                      <p className="text-sm text-muted-foreground font-mono mt-0.5">{selectedBooking.booking_code}</p>
+                    </div>
+                    <Badge variant={getStatusBadge(selectedBooking.booking_status).variant} className="text-xs">
+                      {getStatusBadge(selectedBooking.booking_status).label}
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <div className="space-y-3">
-                      <p className="text-lg font-semibold">{selectedBooking.customer_name}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Phone className="h-4 w-4" />{selectedBooking.customer_phone}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Mail className="h-4 w-4" />{selectedBooking.customer_email}
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="rounded-lg bg-accent p-4">
-                        <p className="text-xs text-muted-foreground">Fecha</p>
-                        <p className="font-medium">{new Date(selectedBooking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                      </div>
-                      <div className="rounded-lg bg-accent p-4">
-                        <p className="text-xs text-muted-foreground">Hora</p>
-                        <p className="font-medium">{selectedBooking.booking_time} hs</p>
-                      </div>
+                  {/* Customer info */}
+                  <div className="rounded-xl bg-muted/30 p-5 space-y-3">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cliente</p>
+                    <p className="text-lg font-bold">{selectedBooking.customer_name}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />{selectedBooking.customer_phone}</span>
+                      <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" />{selectedBooking.customer_email}</span>
                     </div>
                   </div>
 
-                  <Separator />
+                  {/* Date & time */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-muted/30 p-4">
+                      <p className="text-xs text-muted-foreground mb-1">Fecha</p>
+                      <p className="font-semibold text-sm">{new Date(selectedBooking.booking_date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                    </div>
+                    <div className="rounded-xl bg-muted/30 p-4">
+                      <p className="text-xs text-muted-foreground mb-1">Hora</p>
+                      <p className="font-semibold text-sm">{selectedBooking.booking_time} hs</p>
+                    </div>
+                  </div>
 
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <div>
-                      <p className="mb-1 text-sm text-muted-foreground">Estado del pago</p>
+                  {/* Payment */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-muted/30 p-4">
+                      <p className="text-xs text-muted-foreground mb-1">Estado del pago</p>
                       <Badge variant={getPaymentBadge(selectedBooking.payment_status).variant}>
                         {getPaymentBadge(selectedBooking.payment_status).label}
                       </Badge>
                     </div>
-                    <div>
-                      <p className="mb-1 text-sm text-muted-foreground">Monto</p>
-                      <p className="text-2xl font-bold">${selectedBooking.amount.toLocaleString('es-AR')} ARS</p>
+                    <div className="rounded-xl bg-muted/30 p-4">
+                      <p className="text-xs text-muted-foreground mb-1">Monto</p>
+                      <p className="text-2xl font-bold">${selectedBooking.amount.toLocaleString('es-AR')}</p>
                     </div>
                   </div>
 
-                  <Separator />
+                  <div className="h-px bg-border/50" />
 
                   <NotasAdmin
                     booking={selectedBooking}
@@ -2396,24 +2519,24 @@ export function AdminPage() {
                     onSaved={() => loadData()}
                   />
 
-                  <div className="flex gap-3 pt-4">
+                  <div className="flex gap-3 pt-2">
                     {selectedBooking.booking_status === 'pending' && (
-                      <Button onClick={() => { updateBookingStatus(selectedBooking.id, 'confirmed'); setView('bookings'); }} className="flex-1">
+                      <Button onClick={() => { updateBookingStatus(selectedBooking.id, 'confirmed'); setView('bookings'); }} className="flex-1 rounded-xl">
                         Confirmar
                       </Button>
                     )}
                     {selectedBooking.booking_status === 'confirmed' && (
-                      <Button onClick={() => { updateBookingStatus(selectedBooking.id, 'completed'); setView('bookings'); }} variant="secondary" className="flex-1">
+                      <Button onClick={() => { updateBookingStatus(selectedBooking.id, 'completed'); setView('bookings'); }} variant="secondary" className="flex-1 rounded-xl">
                         Completar
                       </Button>
                     )}
                     {(selectedBooking.booking_status === 'pending' || selectedBooking.booking_status === 'confirmed') && (
-                      <Button onClick={() => { updateBookingStatus(selectedBooking.id, 'cancelled'); setView('bookings'); }} variant="destructive" className="flex-1">
+                      <Button onClick={() => { updateBookingStatus(selectedBooking.id, 'cancelled'); setView('bookings'); }} variant="destructive" className="flex-1 rounded-xl">
                         Cancelar
                       </Button>
                     )}
                     {(selectedBooking.booking_status === 'cancelled' || selectedBooking.booking_status === 'completed') && (
-                      <Button onClick={() => { deleteBooking(selectedBooking.id); setView('bookings'); }} variant="destructive" className="flex-1">
+                      <Button onClick={() => { deleteBooking(selectedBooking.id); setView('bookings'); }} variant="destructive" className="flex-1 rounded-xl">
                         Eliminar
                       </Button>
                     )}
@@ -2495,46 +2618,51 @@ export function AdminPage() {
 
           {/* ─── Trash ──────────────────────────────────────────── */}
           {view === 'trash' && (
-            <div className="mx-auto max-w-3xl">
-              <Card>
+            <div className="mx-auto max-w-3xl admin-fade-in">
+              <Card className="border-border/50">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle>Papelera</CardTitle>
-                      <CardDescription>Las reservas se eliminan definitivamente a los 21 días</CardDescription>
+                      <CardTitle className="text-base font-semibold">Papelera</CardTitle>
+                      <CardDescription className="text-xs">Las reservas se eliminan definitivamente a los 21 días</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   {deletedBookings.length === 0 ? (
                     <div className="py-16 text-center">
-                      <Archive className="mx-auto mb-4 h-16 w-16 text-muted-foreground/30" />
-                      <p className="text-muted-foreground">La papelera está vacía</p>
+                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50">
+                        <Archive className="h-7 w-7 text-muted-foreground/40" />
+                      </div>
+                      <p className="text-sm font-medium text-muted-foreground">La papelera está vacía</p>
+                      <p className="mt-1 text-xs text-muted-foreground/70">Las reservas eliminadas aparecen aquí</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {deletedBookings.map((booking) => {
                         const days = daysUntilPurge((booking as any).deleted_at);
                         return (
-                          <div key={booking.id} className="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50">
-                            <div className="flex-1">
+                          <div key={booking.id} className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 p-4 transition-all duration-150 hover:border-border hover:bg-accent/30">
+                            <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-3">
-                                <p className="font-medium">{booking.customer_name}</p>
+                                <p className="font-semibold text-sm truncate">{booking.customer_name}</p>
                                 <span className="font-mono text-xs text-muted-foreground">{booking.booking_code}</span>
                               </div>
-                              <p className="mt-1 text-sm text-muted-foreground">
-                                {new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} {booking.booking_time}
-                                <Badge variant={days <= 3 ? 'destructive' : 'warning'} className="ml-2">
-                                  Se elimina en {days} días
+                              <div className="flex items-center gap-2 mt-1.5">
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} {booking.booking_time}
+                                </p>
+                                <Badge variant={days <= 3 ? 'destructive' : 'warning'} className="text-[10px] px-1.5 py-0">
+                                  {days} días
                                 </Badge>
-                              </p>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 ml-4 shrink-0">
-                              <Button onClick={() => restoreBooking(booking.id)} variant="secondary" size="sm">
-                                <RotateCcw className="mr-1 h-4 w-4" /> Restaurar
+                            <div className="flex items-center gap-1.5 ml-4 shrink-0">
+                              <Button onClick={() => restoreBooking(booking.id)} variant="outline" size="sm" className="rounded-xl h-8 text-xs">
+                                <RotateCcw className="mr-1 h-3 w-3" /> Restaurar
                               </Button>
-                              <Button onClick={() => purgeBooking(booking.id)} variant="destructive" size="sm">
-                                <Trash2 className="mr-1 h-4 w-4" /> Eliminar
+                              <Button onClick={() => purgeBooking(booking.id)} variant="destructive" size="sm" className="rounded-xl h-8 text-xs">
+                                <Trash2 className="mr-1 h-3 w-3" /> Eliminar
                               </Button>
                             </div>
                           </div>
@@ -2551,16 +2679,16 @@ export function AdminPage() {
 
       {/* Success Modal */}
       <Dialog open={successModal.open} onOpenChange={(open) => !open && setSuccessModal({ open: false, message: '' })}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/50">
               <CheckCircle className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <DialogTitle className="text-center pt-4">¡Listo!</DialogTitle>
-            <DialogDescription className="text-center">{successModal.message}</DialogDescription>
+            <DialogTitle className="text-center pt-3 text-lg">¡Listo!</DialogTitle>
+            <DialogDescription className="text-center text-sm">{successModal.message}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-center">
-            <Button onClick={() => setSuccessModal({ open: false, message: '' })} className="w-full sm:w-auto">
+            <Button onClick={() => setSuccessModal({ open: false, message: '' })} className="w-full sm:w-auto rounded-xl">
               Aceptar
             </Button>
           </DialogFooter>
@@ -2569,19 +2697,19 @@ export function AdminPage() {
 
       {/* Confirm Modal */}
       <Dialog open={confirmModal.open} onOpenChange={(open) => !open && setConfirmModal(prev => ({ ...prev, open: false }))}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10">
               <Trash2 className="h-7 w-7 text-destructive" />
             </div>
-            <DialogTitle className="text-center pt-4">Eliminar reserva</DialogTitle>
-            <DialogDescription className="text-center">{confirmModal.message}</DialogDescription>
+            <DialogTitle className="text-center pt-3 text-lg">Eliminar reserva</DialogTitle>
+            <DialogDescription className="text-center text-sm">{confirmModal.message}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-center gap-2">
-            <Button onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))} variant="outline">
+            <Button onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))} variant="outline" className="rounded-xl">
               Cancelar
             </Button>
-            <Button onClick={confirmModal.onConfirm} variant="destructive">
+            <Button onClick={confirmModal.onConfirm} variant="destructive" className="rounded-xl">
               Eliminar
             </Button>
           </DialogFooter>
