@@ -151,6 +151,9 @@ function BookingContent() {
               {subtitle && <p className="text-sm" style={{ color: mutedColor }}>{subtitle}</p>}
             </div>
           </div>
+          <a href="/tienda" className="text-sm font-medium transition-opacity hover:opacity-80" style={{ color: mutedColor }}>
+            Tienda
+          </a>
         </div>
       </header>
 

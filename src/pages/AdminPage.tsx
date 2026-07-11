@@ -35,6 +35,7 @@ import {
   Camera,
   Palette,
   Package,
+  ShoppingCart,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings, Branding, Service } from '../lib/supabase';
 import { Button } from '../components/ui/button';
@@ -52,8 +53,9 @@ import { Alert, AlertDescription } from '../components/ui/alert';
 import { useTheme } from '../contexts/ThemeContext';
 import { allThemes } from '../themes';
 import { cn } from '../lib/utils';
+import { ShopAdmin } from '../modules/shop/admin/ShopAdmin';
 
-type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services';
+type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop';
 
 interface WaitingListItem {
   id: string;
@@ -1933,6 +1935,7 @@ export function AdminPage() {
     },
     { id: 'availability', label: 'Disponibilidad', icon: <Clock className="h-5 w-5" /> },
     { id: 'services', label: 'Servicios', icon: <Package className="h-5 w-5" /> },
+    { id: 'shop', label: 'Tienda', icon: <ShoppingCart className="h-5 w-5" /> },
     { id: 'appearance', label: 'Apariencia', icon: <Palette className="h-5 w-5" /> },
     { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
     { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquareText className="h-5 w-5" /> },
@@ -1949,6 +1952,7 @@ export function AdminPage() {
     waiting: 'Lista de Espera',
     availability: 'Disponibilidad',
     services: 'Servicios',
+    shop: 'Tienda',
     appearance: 'Apariencia',
     profile: 'Perfil',
     whatsapp: 'WhatsApp',
@@ -2433,6 +2437,9 @@ export function AdminPage() {
 
           {/* ─── Services ──────────────────────────────────────── */}
           {view === 'services' && <ServicesManager />}
+
+          {/* ─── Shop ──────────────────────────────────────────── */}
+          {view === 'shop' && <ShopAdmin />}
 
           {/* ─── Appearances ────────────────────────────────── */}
           {view === 'appearance' && (
