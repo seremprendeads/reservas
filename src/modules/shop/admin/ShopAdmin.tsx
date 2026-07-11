@@ -256,38 +256,38 @@ function ProductsManager() {
       </Card>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? 'Editar producto' : 'Nuevo producto'}</DialogTitle>
             <DialogDescription>Completá los datos del producto</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 space-y-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2 space-y-1.5">
               <label className="text-sm font-medium">Nombre</label>
               <Input value={name} onChange={e => setName(e.target.value)} placeholder="Nombre del producto" />
             </div>
-            <div className="col-span-2 space-y-2">
+            <div className="col-span-2 space-y-1.5">
               <label className="text-sm font-medium">Descripción</label>
-              <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
+              <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2}
                 className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder="Descripción del producto" />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Precio</label>
               <Input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="1500" />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Moneda</label>
               <Input value={currency} onChange={e => setCurrency(e.target.value)} placeholder="ARS" />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Stock</label>
               <Input type="number" value={stock} onChange={e => setStock(e.target.value)} placeholder="10" />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">SKU (opcional)</label>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">SKU</label>
               <Input value={sku} onChange={e => setSku(e.target.value)} placeholder="PROD-001" />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Categoría</label>
               <select value={categoryId} onChange={e => setCategoryId(e.target.value)}
                 className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
@@ -295,14 +295,14 @@ function ProductsManager() {
                 {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
-            <div className="flex items-end pb-2">
+            <div className="flex items-end pb-0.5">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={featured} onChange={e => setFeatured(e.target.checked)} className="rounded" />
                 <span className="text-sm">Destacado</span>
               </label>
             </div>
-            <div className="col-span-2 space-y-2">
-              <label className="text-sm font-medium">Imagen del producto</label>
+            <div className="col-span-2 space-y-1.5">
+              <label className="text-sm font-medium">Imagen</label>
               <ImageUploader
                 currentImageUrl={imageUrl}
                 onUploadComplete={setImageUrl}

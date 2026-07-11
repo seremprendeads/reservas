@@ -199,7 +199,7 @@ export function ImageUploader({
           <img
             src={preview}
             alt="Vista previa"
-            className="w-full h-40 object-cover rounded-lg border"
+            className="w-full h-28 object-cover rounded-lg border"
           />
           {!isActive && (
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
@@ -230,14 +230,14 @@ export function ImageUploader({
           onDrop={handleDrop}
           onClick={() => !disabled && inputRef.current?.click()}
           className={cn(
-            'flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed cursor-pointer transition-colors',
+            'flex flex-col items-center justify-center h-28 rounded-lg border-2 border-dashed cursor-pointer transition-colors',
             dragOver
               ? 'border-primary bg-primary/5'
               : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-accent/50',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
         >
-          <ImageIcon className="w-8 h-8 mb-2 text-muted-foreground" />
+          <ImageIcon className="w-6 h-6 mb-1 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
             Click o arrastrá una imagen
           </p>
@@ -248,7 +248,7 @@ export function ImageUploader({
       )}
 
       {isActive && (
-        <div className="space-y-2">
+    <div className="space-y-1.5">
           <Progress value={progress} className="h-2" />
           <div className="flex items-center gap-2 text-sm">
             <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
