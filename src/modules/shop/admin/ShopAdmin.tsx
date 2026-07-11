@@ -2,14 +2,18 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { Product, Category, Order } from '../types';
+import { PLAN_LIMITS, SHOP_STORAGE_BUCKET } from '../config';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
+import { Progress } from '../../../components/ui/progress';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
   DialogFooter,
 } from '../../../components/ui/dialog';
+import { ImageUploader } from './ImageUploader';
+import { deleteStorageFile } from './storage-utils';
 
 export function ShopAdmin() {
   const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders'>('dashboard');
@@ -75,6 +79,43 @@ function ShopDashboard() {
   );
 }
 
+function ProductUsageIndicator({ count }: { count: number }) {
+  const limit = PLAN_LIMITS.products;
+  const remaining = limit - count;
+  const percentage = Math.round((count / limit) * 100);
+  const isNearLimit = remaining <= 2 && remaining > 0;
+  const isAtLimit = remaining <= 0;
+
+  return (
+    <Card>
+      <CardContent className="py-4">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Productos</span>
+            <span className="text-sm text-muted-foreground">
+              {count} / {limit} utilizados
+            </span>
+          </div>
+          <Progress value={percentage} className="h-2" />
+          <div className="flex items-center justify-between">
+            {isAtLimit ? (
+              <Badge variant="destructive">Límite alcanzado</Badge>
+            ) : isNearLimit ? (
+              <p className="text-xs text-amber-600 dark:text-amber-400">
+                Te quedan {remaining} producto{remaining !== 1 ? 's' : ''} disponible{remaining !== 1 ? 's' : ''}.
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Te quedan {remaining} producto{remaining !== 1 ? 's' : ''} disponible{remaining !== 1 ? 's' : ''}.
+              </p>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function ProductsManager() {
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
@@ -90,13 +131,26 @@ function ProductsManager() {
   const [categoryId, setCategoryId] = useState('');
   const [featured, setFeatured] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
+
+  const activeCount = products.filter(p => p.is_active).length;
+  const isAtLimit = activeCount >= PLAN_LIMITS.products;
+
+  const reload = () => {
+    supabase.from('shop_products').select('*').order('sort_order').then(r => { if (r.data) setProducts(r.data); });
+  };
 
   useEffect(() => {
-    supabase.from('shop_products').select('*').order('sort_order').then(r => { if (r.data) setProducts(r.data); });
+    reload();
     supabase.from('shop_categories').select('*').order('sort_order').then(r => { if (r.data) setCategories(r.data); });
   }, []);
 
   const openNew = () => {
+    if (isAtLimit) {
+      setShowLimitDialog(true);
+      return;
+    }
     setEditing(null); setName(''); setDescription(''); setPrice(''); setStock(''); setSku(''); setImageUrl(''); setCategoryId(''); setFeatured(false); setShowDialog(true);
   };
 
@@ -106,6 +160,7 @@ function ProductsManager() {
 
   const save = async () => {
     if (!name.trim() || !price) return;
+    setSaving(true);
     const payload = { name: name.trim(), description: description.trim(), price: parseFloat(price), currency, stock: parseInt(stock) || 0, sku: sku.trim() || null, image: imageUrl || null, category_id: categoryId || null, featured };
     if (editing) {
       await supabase.from('shop_products').update(payload).eq('id', editing.id);
@@ -113,36 +168,56 @@ function ProductsManager() {
       await supabase.from('shop_products').insert(payload);
     }
     setShowDialog(false);
-    supabase.from('shop_products').select('*').order('sort_order').then(r => { if (r.data) setProducts(r.data); });
+    setSaving(false);
+    reload();
   };
 
   const toggleActive = async (p: Product) => {
+    if (!p.is_active && isAtLimit) {
+      setShowLimitDialog(true);
+      return;
+    }
     await supabase.from('shop_products').update({ is_active: !p.is_active }).eq('id', p.id);
     setProducts(prev => prev.map(x => x.id === p.id ? { ...x, is_active: !x.is_active } : x));
   };
 
-  const remove = async (id: string) => {
-    await supabase.from('shop_products').delete().eq('id', id);
-    setProducts(prev => prev.filter(x => x.id !== id));
+  const remove = async (p: Product) => {
+    if (p.image) {
+      await deleteStorageFile(p.image, SHOP_STORAGE_BUCKET);
+    }
+    await supabase.from('shop_products').delete().eq('id', p.id);
+    setProducts(prev => prev.filter(x => x.id !== p.id));
   };
 
   const duplicate = async (p: Product) => {
+    if (isAtLimit) {
+      setShowLimitDialog(true);
+      return;
+    }
     const { data } = await supabase.from('shop_products').insert({
       name: `${p.name} (copia)`, description: p.description, price: p.price, currency: p.currency, stock: 0, image: p.image, category_id: p.category_id,
     }).select().single();
     if (data) setProducts(prev => [...prev, data]);
   };
 
+  const handleOldImageDelete = (oldUrl: string) => {
+    deleteStorageFile(oldUrl, SHOP_STORAGE_BUCKET);
+  };
+
   const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="space-y-4">
+      <ProductUsageIndicator count={activeCount} />
+
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar productos..." className="pl-10" />
         </div>
-        <Button onClick={openNew} size="sm"><Plus className="w-4 h-4 mr-1" />Nuevo producto</Button>
+        <Button onClick={openNew} size="sm" disabled={isAtLimit}>
+          <Plus className="w-4 h-4 mr-1" />Nuevo producto
+        </Button>
       </div>
 
       <Card>
@@ -171,7 +246,7 @@ function ProductsManager() {
                     <Button variant="outline" size="sm" onClick={() => toggleActive(p)}>{p.is_active ? 'Desactivar' : 'Activar'}</Button>
                     <Button variant="outline" size="sm" onClick={() => duplicate(p)}>Duplicar</Button>
                     <Button variant="outline" size="sm" onClick={() => openEdit(p)}><Edit className="w-4 h-4" /></Button>
-                    <Button variant="destructive" size="sm" onClick={() => remove(p.id)}><Trash2 className="w-4 h-4" /></Button>
+                    <Button variant="destructive" size="sm" onClick={() => remove(p)}><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </div>
               ))}
@@ -227,16 +302,36 @@ function ProductsManager() {
               </label>
             </div>
             <div className="col-span-2 space-y-2">
-              <label className="text-sm font-medium">Imagen principal (URL)</label>
-              <div className="flex gap-2">
-                <Input value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://..." />
-              </div>
-              {imageUrl && <img src={imageUrl} alt="Preview" className="h-20 rounded-lg object-cover" />}
+              <label className="text-sm font-medium">Imagen del producto</label>
+              <ImageUploader
+                currentImageUrl={imageUrl}
+                onUploadComplete={setImageUrl}
+                onOldImageDelete={handleOldImageDelete}
+              />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)}>Cancelar</Button>
-            <Button onClick={save} disabled={!name.trim() || !price}>Guardar</Button>
+            <Button onClick={save} disabled={!name.trim() || !price || saving}>
+              {saving ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" />Guardando...</> : 'Guardar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Límite de productos alcanzado</DialogTitle>
+            <DialogDescription>
+              Tu plan actual permite publicar hasta {PLAN_LIMITS.products} productos activos.
+              <br /><br />
+              Para agregar más productos podés ampliar tu plan y desbloquear una capacidad mayor.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLimitDialog(false)}>Cancelar</Button>
+            <Button onClick={() => { setShowLimitDialog(false); }}>Conocer planes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
