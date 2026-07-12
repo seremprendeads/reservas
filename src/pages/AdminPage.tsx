@@ -616,29 +616,6 @@ function ClientsManager({
     doc.save('clientes.pdf');
   };
 
-  const purgeAllDeleted = () => {
-    if (deletedBookings.length === 0) return;
-    const count = deletedBookings.length;
-    setConfirmModal({
-      open: true,
-      message: `Se eliminarán definitivamente ${count} reserva(s). Esta acción no se puede deshacer.`,
-      onConfirm: async () => {
-        setConfirmModal({ open: false, message: '', onConfirm: () => {} });
-        try {
-          for (const b of deletedBookings) {
-            await supabase.functions.invoke('admin-purge-bookings', {
-              body: { email: adminEmail, password: adminPassword, booking_id: b.id },
-            });
-          }
-          onRefresh();
-          showSuccess(`${count} reserva(s) eliminada(s) definitivamente`);
-        } catch {
-          showSuccess('Error al vaciar la papelera');
-        }
-      },
-    });
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -678,14 +655,6 @@ function ClientsManager({
             Papelera ({deletedClients.length})
           </button>
         </div>
-
-        {tab === 'trash' && deletedClients.length > 0 && (
-          <div className="mb-4 flex justify-end">
-            <Button onClick={purgeAllDeleted} variant="destructive" size="sm">
-              <Trash2 className="mr-1 h-3.5 w-3.5" /> Vaciar papelera ({deletedBookings.length} reservas)
-            </Button>
-          </div>
-        )}
 
         {/* Search + Filters */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row">
@@ -2697,6 +2666,30 @@ export function AdminPage() {
                       <CardTitle>Papelera</CardTitle>
                       <CardDescription>Las reservas se eliminan definitivamente a los 21 días</CardDescription>
                     </div>
+                    {deletedBookings.length > 0 && (
+                      <Button onClick={() => {
+                        setConfirmModal({
+                          open: true,
+                          message: `Se eliminarán definitivamente ${deletedBookings.length} reserva(s). Esta acción no se puede deshacer.`,
+                          onConfirm: async () => {
+                            setConfirmModal({ open: false, message: '', onConfirm: () => {} });
+                            try {
+                              for (const b of deletedBookings) {
+                                await supabase.functions.invoke('admin-purge-bookings', {
+                                  body: { email: adminEmail, password: adminPassword, booking_id: b.id },
+                                });
+                              }
+                              loadData();
+                              setSuccessModal({ open: true, message: `${deletedBookings.length} reserva(s) eliminada(s) definitivamente` });
+                            } catch {
+                              setSuccessModal({ open: true, message: 'Error al vaciar la papelera' });
+                            }
+                          },
+                        });
+                      }} variant="destructive" size="sm">
+                        <Trash2 className="mr-1 h-3.5 w-3.5" /> Vaciar papelera ({deletedBookings.length})
+                      </Button>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
