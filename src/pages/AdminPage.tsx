@@ -1288,235 +1288,299 @@ function AppearanceManager({
     }
   };
 
+  const previewHasOverlay = bgImageUrl && bgOpacity > 0;
+
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      {/* Preview */}
-      <Card className="overflow-hidden">
-        <CardHeader className="flex-row items-center justify-between">
-          <div>
-            <CardTitle>Vista previa</CardTitle>
-            <CardDescription>Así se ve la página de reservas actualmente</CardDescription>
-          </div>
-          <a href="https://reservas-two-sigma.vercel.app/" target="_blank" className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 transition-opacity">
-            <ExternalLink className="w-3.5 h-3.5" />
-            Ver
-          </a>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div
-            className="min-h-[120px] px-6 py-4 flex items-center"
-            style={{ backgroundColor: bgColor, backgroundImage: bgImageUrl ? `url(${bgImageUrl})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}
-          >
-            <div className="flex items-center gap-3" style={{ backgroundColor: bgImageUrl ? 'rgba(0,0,0,0.5)' : cardBgColor, padding: '12px 16px', borderRadius: '12px' }}>
-              {logoUrl ? (
-                <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-cover" />
-              ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: primaryColor }}>
-                  <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* ── Left: Controls ──────────────────────────────────────────── */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Temas */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Temas por rubro</CardTitle>
+              <CardDescription>Elegí un tema prediseñado para tu negocio</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {allThemes.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => applyTheme(t.id)}
+                    className={`relative flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all duration-200 hover:shadow-md ${
+                      selectedThemeId === t.id ? 'border-primary ring-2 ring-primary/20' : 'border-border'
+                    }`}
+                    style={{ backgroundColor: t.tokens.cardBg, color: t.tokens.text }}
+                  >
+                    <span className="text-xl shrink-0">{t.icon}</span>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-sm font-semibold block">{t.name}</span>
+                      <p className="text-xs truncate" style={{ color: t.tokens.textMuted }}>{t.description}</p>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <div className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: t.tokens.primary }} />
+                      <div className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: t.tokens.background }} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Logo + Textos */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Logo y textos</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Logo</label>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl overflow-hidden border shrink-0" style={{ backgroundColor: primaryColor }}>
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Logo" className="h-full w-full object-cover" />
+                    ) : (
+                      <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={() => fileInputRef.current?.click()} disabled={uploading.logo} variant="outline" size="sm">
+                      {uploading.logo ? 'Subiendo...' : logoUrl ? 'Cambiar' : 'Subir logo'}
+                    </Button>
+                    {logoUrl && (
+                      <Button onClick={() => setLogoUrl('')} variant="ghost" size="sm" className="text-destructive">
+                        Eliminar
+                      </Button>
+                    )}
+                  </div>
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, 'logo'); }} />
+                </div>
+              </div>
+              <Separator />
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Título principal</label>
+                  <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="h-11" placeholder="Reserva tu Turno" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Subtítulo</label>
+                  <Input type="text" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="h-11" placeholder="Sistema de Reserva" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Colores */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Colores</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[
+                { label: 'Principal (botones, acentos)', value: primaryColor, set: setPrimaryColor },
+                { label: 'Fondo de página', value: bgColor, set: setBgColor },
+                { label: 'Encabezado y pie', value: cardBgColor, set: setCardBgColor },
+                { label: 'Títulos', value: textColor, set: setTextColor },
+                { label: 'Subtítulos', value: mutedColor, set: setMutedColor },
+                { label: 'Pasos e informativos', value: captionColor, set: setCaptionColor },
+              ].map(c => (
+                <div key={c.label} className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">{c.label}</label>
+                  <div className="flex items-center gap-2.5">
+                    <input type="color" value={c.value}
+                      onChange={(e) => { c.set(e.target.value); setSelectedThemeId(''); }}
+                      className="h-8 w-8 cursor-pointer rounded-lg border bg-transparent p-0.5 shrink-0" />
+                    <Input type="text" value={c.value}
+                      onChange={(e) => { c.set(e.target.value); setSelectedThemeId(''); }}
+                      className="h-9 font-mono text-xs" />
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Fondo */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Imagen de fondo</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {bgImageUrl && (
+                <div className="relative h-24 w-full overflow-hidden rounded-xl">
+                  <img src={bgImageUrl} alt="Fondo" className="h-full w-full object-cover" />
+                  <button onClick={() => setBgImageUrl('')}
+                    className="absolute right-2 top-2 rounded-lg bg-black/50 p-1.5 text-white backdrop-blur-sm hover:bg-black/70 transition-colors">
+                    <XCircle className="h-4 w-4" />
+                  </button>
                 </div>
               )}
-              <div>
-                <span className="text-xl font-bold" style={{ color: textColor }}>{title || 'Reserva tu Turno'}</span>
-                <p className="text-sm" style={{ color: mutedColor }}>{subtitle || 'Sistema de Reserva'}</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Personalizar apariencia</CardTitle>
-          <CardDescription>Logo, colores y fondo de la página pública de reservas</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Logo */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Logo</label>
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-xl overflow-hidden border" style={{ backgroundColor: primaryColor }}>
-                {logoUrl ? (
-                  <img src={logoUrl} alt="Logo" className="h-full w-full object-cover" />
-                ) : (
-                  <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                )}
-              </div>
               <div className="flex gap-2">
-                <Button onClick={() => fileInputRef.current?.click()} disabled={uploading.logo} variant="outline" size="sm">
-                  {uploading.logo ? 'Subiendo...' : logoUrl ? 'Cambiar' : 'Subir logo'}
+                <Button onClick={() => bgFileInputRef.current?.click()} disabled={uploading.bg} variant="outline" size="sm">
+                  {uploading.bg ? 'Subiendo...' : bgImageUrl ? 'Cambiar fondo' : 'Subir fondo'}
                 </Button>
-                {logoUrl && (
-                  <Button onClick={() => setLogoUrl('')} variant="ghost" size="sm" className="text-destructive">
-                    Eliminar
-                  </Button>
-                )}
+                <span className="text-xs text-muted-foreground self-center">1920×1080 · Máx 5MB</span>
               </div>
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, 'logo'); }} />
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Texts */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Título principal</label>
-              <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="h-12" placeholder="Reserva tu Turno" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Subtítulo</label>
-              <Input type="text" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="h-12" placeholder="Sistema de Reserva" />
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Industry Themes */}
-          <div className="space-y-3">
-            <label className="text-sm font-medium">Temas por rubro</label>
-            <p className="text-xs text-muted-foreground">Elegí un tema prediseñado para tu negocio</p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {allThemes.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => applyTheme(t.id)}
-                  className={`relative flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all duration-200 hover:shadow-md ${
-                    selectedThemeId === t.id ? 'border-primary ring-2 ring-primary/20' : 'border-border'
-                  }`}
-                  style={{ backgroundColor: t.tokens.cardBg, color: t.tokens.text }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{t.icon}</span>
-                    <span className="text-sm font-semibold">{t.name}</span>
+              <input ref={bgFileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, 'bg'); }} />
+              {bgImageUrl && (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Overlay — color</label>
+                    <div className="flex items-center gap-2.5">
+                      <input type="color" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)}
+                        className="h-8 w-8 cursor-pointer rounded-lg border bg-transparent p-0.5 shrink-0" />
+                      <Input type="text" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)}
+                        className="h-9 font-mono text-xs" />
+                    </div>
                   </div>
-                  <p className="text-xs" style={{ color: t.tokens.textMuted }}>{t.description}</p>
-                  <div className="flex gap-1.5 mt-1">
-                    <div className="h-4 w-4 rounded-full" style={{ backgroundColor: t.tokens.primary }} />
-                    <div className="h-4 w-4 rounded-full" style={{ backgroundColor: t.tokens.background }} />
-                    <div className="h-4 w-4 rounded-full ring-1 ring-inset ring-border" style={{ backgroundColor: t.tokens.cardBg }} />
-                    <div className="h-4 w-4 rounded-full" style={{ backgroundColor: t.tokens.text }} />
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Opacidad — {bgOpacity}%</label>
+                    <input type="range" min="0" max="100" value={bgOpacity}
+                      onChange={(e) => setBgOpacity(Number(e.target.value))}
+                      className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                      style={{ accentColor: primaryColor }} />
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>Transparente</span><span>Opaco</span>
+                    </div>
                   </div>
-                </button>
-              ))}
-            </div>
-          </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* Custom Colors */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Color principal (botones, acentos)</label>
-              <div className="flex items-center gap-3">
-                <input type="color" value={primaryColor} onChange={(e) => { setPrimaryColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={primaryColor} onChange={(e) => { setPrimaryColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-12 font-mono" placeholder="#059669" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Color de fondo (página)</label>
-              <div className="flex items-center gap-3">
-                <input type="color" value={bgColor} onChange={(e) => { setBgColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={bgColor} onChange={(e) => { setBgColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-12 font-mono" placeholder="#111827" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Color de encabezado y pie de página</label>
-              <div className="flex items-center gap-3">
-                <input type="color" value={cardBgColor} onChange={(e) => { setCardBgColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={cardBgColor} onChange={(e) => { setCardBgColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-12 font-mono" placeholder="#1f2937" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Color de título</label>
-              <div className="flex items-center gap-3">
-                <input type="color" value={textColor} onChange={(e) => { setTextColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={textColor} onChange={(e) => { setTextColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-12 font-mono" placeholder="#f3f4f6" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold">Color de subtítulos y textos secundarios</label>
-              <div className="flex items-center gap-3">
-                <input type="color" value={mutedColor} onChange={(e) => { setMutedColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={mutedColor} onChange={(e) => { setMutedColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-12 font-mono" placeholder="#9ca3af" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold">Color de pasos y textos informativos</label>
-              <div className="flex items-center gap-3">
-                <input type="color" value={captionColor} onChange={(e) => { setCaptionColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                <Input type="text" value={captionColor} onChange={(e) => { setCaptionColor(e.target.value); setSelectedThemeId(''); }}
-                  className="h-12 font-mono" placeholder="#9ca3af" />
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Background Image */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Imagen de fondo (opcional)</label>
-            {bgImageUrl && (
-              <div className="relative mb-3 h-32 w-full overflow-hidden rounded-xl">
-                <img src={bgImageUrl} alt="Fondo" className="h-full w-full object-cover" />
-                <button onClick={() => setBgImageUrl('')}
-                  className="absolute right-2 top-2 rounded-lg bg-black/50 p-1.5 text-white backdrop-blur-sm hover:bg-black/70 transition-colors">
-                  <XCircle className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-            <div className="flex gap-2">
-              <Button onClick={() => bgFileInputRef.current?.click()} disabled={uploading.bg} variant="outline" size="sm">
-                {uploading.bg ? 'Subiendo...' : bgImageUrl ? 'Cambiar fondo' : 'Subir fondo'}
-              </Button>
-              <span className="text-xs text-muted-foreground self-center">1920×1080 recomendado · Máx 5MB</span>
-            </div>
-            <input ref={bgFileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, 'bg'); }} />
-          </div>
-
-          {/* Overlay Color & Opacity */}
-          <div className="space-y-3">
-            <label className="text-sm font-medium">Capa de superposición (overlay)</label>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground">Color</label>
-                <div className="flex items-center gap-3">
-                  <input type="color" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)}
-                    className="h-10 w-10 cursor-pointer rounded-lg border bg-transparent p-0.5" />
-                  <Input type="text" value={overlayColor} onChange={(e) => setOverlayColor(e.target.value)}
-                    className="h-12 font-mono" placeholder="#111827" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground">Opacidad ({bgOpacity}%)</label>
-                <input type="range" min="0" max="100" value={bgOpacity}
-                  onChange={(e) => setBgOpacity(Number(e.target.value))}
-                  className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                  style={{ accentColor: primaryColor }} />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Transparente</span>
-                  <span>Opaco</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
+          {/* Guardar */}
           <Button onClick={saveBranding} disabled={saving} size="lg" className="w-full">
             {saving ? 'Guardando...' : 'Guardar apariencia'}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* ── Right: Phone Preview ─────────────────────────────────────── */}
+        <div className="lg:col-span-2">
+          <div className="sticky top-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Vista previa</p>
+              <a href="/" target="_blank" className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline">
+                <ExternalLink className="w-3 h-3" /> Abrir
+              </a>
+            </div>
+
+            {/* Phone frame */}
+            <div className="mx-auto max-w-[270px]">
+              <div className="rounded-[2.5rem] border-[6px] border-gray-900 bg-gray-900 overflow-hidden shadow-2xl">
+                <div className="rounded-[2rem] overflow-hidden" style={{ background: bgColor }}>
+
+                  {/* Status bar */}
+                  <div className="h-6 flex items-center justify-center">
+                    <div className="w-16 h-4 rounded-b-2xl bg-gray-900" />
+                  </div>
+
+                  {/* Header */}
+                  <div style={{ backgroundColor: cardBgColor }}>
+                    <div className="px-4 py-3 flex items-center gap-2.5">
+                      {logoUrl ? (
+                        <img src={logoUrl} alt="" className="h-8 w-8 rounded-lg object-cover shrink-0" />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0" style={{ backgroundColor: primaryColor }}>
+                          <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <span className="text-xs font-bold block truncate" style={{ color: textColor }}>{title || 'Reserva tu Turno'}</span>
+                        {subtitle && <span className="text-[10px] block truncate" style={{ color: mutedColor }}>{subtitle}</span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Background + Overlay */}
+                  <div className="relative">
+                    {previewHasOverlay && (
+                      <div className="absolute inset-0 bg-cover bg-center z-0"
+                        style={{ backgroundImage: `url(${bgImageUrl})` }}>
+                        <div className="absolute inset-0"
+                          style={{ backgroundColor: `${overlayColor}${Math.round((bgOpacity / 100) * 255).toString(16).padStart(2, '0')}` }} />
+                      </div>
+                    )}
+
+                    <div className="relative z-10 px-4 py-5 space-y-4">
+                      {/* Progress steps */}
+                      <div className="flex items-center justify-center gap-1">
+                        {[1, 2, 3, 4, 5].map(n => (
+                          <div key={n} className="flex items-center">
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-medium"
+                              style={{
+                                backgroundColor: n <= 2 ? primaryColor : '#e5e7eb',
+                                color: n <= 2 ? '#fff' : '#9ca3af',
+                              }}>{n}</div>
+                            {n < 5 && <div className="w-2 h-0.5 mx-0.5 rounded" style={{ backgroundColor: n < 2 ? primaryColor : '#e5e7eb' }} />}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Step label */}
+                      <div className="text-center">
+                        <span className="text-[10px] font-semibold" style={{ color: primaryColor }}>Fecha y hora</span>
+                      </div>
+
+                      {/* Mock calendar */}
+                      <div className="rounded-xl p-3" style={{ backgroundColor: cardBgColor }}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-bold" style={{ color: textColor }}>Julio 2026</span>
+                        </div>
+                        <div className="grid grid-cols-7 gap-1 text-center">
+                          {['L','M','X','J','V','S','D'].map(d => (
+                            <span key={d} className="text-[7px] font-medium" style={{ color: mutedColor }}>{d}</span>
+                          ))}
+                          {Array.from({ length: 14 }).map((_, i) => (
+                            <div key={i} className="aspect-square rounded-md flex items-center justify-center"
+                              style={{
+                                backgroundColor: i === 9 ? primaryColor : 'transparent',
+                                color: i === 9 ? '#fff' : textColor,
+                                fontSize: '8px',
+                              }}>
+                              {i + 1}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Mock service card */}
+                      <div className="rounded-xl overflow-hidden" style={{ backgroundColor: cardBgColor }}>
+                        <div className="h-16 w-full" style={{ background: `linear-gradient(135deg, ${primaryColor}33, ${primaryColor}11)` }} />
+                        <div className="p-3 space-y-2">
+                          <p className="text-[11px] font-bold" style={{ color: textColor }}>Corte de pelo</p>
+                          <p className="text-[9px]" style={{ color: mutedColor }}>30 min</p>
+                          <p className="text-sm font-bold" style={{ color: primaryColor }}>$3.500</p>
+                          <button className="w-full py-1.5 rounded-lg text-[9px] font-semibold text-white"
+                            style={{ backgroundColor: primaryColor }}>Elegir</button>
+                        </div>
+                      </div>
+
+                      {/* Mock form fields */}
+                      <div className="rounded-xl p-3 space-y-2" style={{ backgroundColor: cardBgColor }}>
+                        <div className="h-2.5 w-20 rounded" style={{ backgroundColor: `${textColor}22` }} />
+                        <div className="h-6 w-full rounded-lg" style={{ backgroundColor: `${textColor}11`, border: `1px solid ${textColor}15` }} />
+                        <div className="h-2.5 w-16 rounded mt-1" style={{ backgroundColor: `${textColor}22` }} />
+                        <div className="h-6 w-full rounded-lg" style={{ backgroundColor: `${textColor}11`, border: `1px solid ${textColor}15` }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="px-4 py-3 text-center" style={{ backgroundColor: cardBgColor }}>
+                    <p className="text-[8px]" style={{ color: mutedColor }}>Pagos seguros con Mercado Pago</p>
+                  </div>
+
+                  {/* Home indicator */}
+                  <div className="h-4 flex items-center justify-center" style={{ backgroundColor: bgColor }}>
+                    <div className="w-20 h-1 rounded-full" style={{ backgroundColor: `${textColor}30` }} />
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
