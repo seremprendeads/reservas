@@ -460,10 +460,9 @@ interface ClientData {
 }
 
 function ClientsManager({
-  bookings, deletedBookings, adminEmail, adminPassword, onRefresh, setConfirmModal, showSuccess,
+  bookings, adminEmail, adminPassword, onRefresh, setConfirmModal, showSuccess,
 }: {
   bookings: Booking[];
-  deletedBookings: Booking[];
   adminEmail: string;
   adminPassword: string;
   onRefresh: () => void;
@@ -473,49 +472,38 @@ function ClientsManager({
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [tab, setTab] = useState<'active' | 'trash'>('active');
 
-  const buildClientMap = (list: Booking[]) => {
-    const map = new Map<string, ClientData>();
-    list.forEach((b) => {
-      const key = b.customer_email || b.customer_phone;
-      if (map.has(key)) {
-        const c = map.get(key)!;
-        c.totalBookings += 1;
-        if (b.booking_date > c.lastBooking) c.lastBooking = b.booking_date;
-        if (b.booking_date < c.firstBooking) c.firstBooking = b.booking_date;
-      } else {
-        map.set(key, {
-          name: b.customer_name,
-          phone: b.customer_phone,
-          email: b.customer_email,
-          firstBooking: b.booking_date,
-          lastBooking: b.booking_date,
-          totalBookings: 1,
-        });
-      }
-    });
-    return map;
-  };
-
-  const activeClients = Array.from(buildClientMap(bookings).values());
-  const deletedClients = Array.from(buildClientMap(deletedBookings).values());
-
-  const filterClients = (list: ClientData[]) => {
-    let result = list;
-    if (search) {
-      result = result.filter(c =>
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.phone.includes(search) ||
-        c.email.toLowerCase().includes(search.toLowerCase())
-      );
+  const clientMap = new Map<string, ClientData>();
+  bookings.forEach((b) => {
+    const key = b.customer_email || b.customer_phone;
+    if (clientMap.has(key)) {
+      const c = clientMap.get(key)!;
+      c.totalBookings += 1;
+      if (b.booking_date > c.lastBooking) c.lastBooking = b.booking_date;
+      if (b.booking_date < c.firstBooking) c.firstBooking = b.booking_date;
+    } else {
+      clientMap.set(key, {
+        name: b.customer_name,
+        phone: b.customer_phone,
+        email: b.customer_email,
+        firstBooking: b.booking_date,
+        lastBooking: b.booking_date,
+        totalBookings: 1,
+      });
     }
-    if (dateFrom) result = result.filter(c => c.firstBooking >= dateFrom);
-    if (dateTo) result = result.filter(c => c.lastBooking <= dateTo);
-    return result;
-  };
+  });
 
-  const clients = filterClients(tab === 'active' ? activeClients : deletedClients);
+  let clients = Array.from(clientMap.values());
+
+  if (search) {
+    clients = clients.filter(c =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.phone.includes(search) ||
+      c.email.toLowerCase().includes(search.toLowerCase())
+    );
+  }
+  if (dateFrom) clients = clients.filter(c => c.firstBooking >= dateFrom);
+  if (dateTo) clients = clients.filter(c => c.lastBooking <= dateTo);
 
   const formatDate = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('es-AR');
 
@@ -542,24 +530,6 @@ function ClientsManager({
         }
       },
     });
-  };
-
-  const restoreClient = async (email: string, phone: string) => {
-    const key = email || phone;
-    const relatedBookings = deletedBookings.filter(b => (b.customer_email || b.customer_phone) === key);
-    if (relatedBookings.length === 0) return;
-
-    try {
-      for (const b of relatedBookings) {
-        await supabase.functions.invoke('admin-restore-booking', {
-          body: { email: adminEmail, password: adminPassword, booking_id: b.id },
-        });
-      }
-      onRefresh();
-      showSuccess('Cliente restaurado correctamente');
-    } catch {
-      showSuccess('Error al restaurar el cliente');
-    }
   };
 
   const exportCSV = () => {
@@ -610,7 +580,6 @@ function ClientsManager({
       doc.text(c.phone.slice(0, 15), 70, y);
       doc.text(c.email.slice(0, 22), 105, y);
       doc.text(formatDate(c.firstBooking), 148, y);
-      doc.text(String(c.totalBookings), 182, y);
       y += lineH;
     });
     doc.save('clientes.pdf');
@@ -622,41 +591,19 @@ function ClientsManager({
         <div className="flex items-start justify-between">
           <div>
             <CardTitle>Clientes</CardTitle>
-            <CardDescription>{activeClients.length} activos · {deletedClients.length} en papelera</CardDescription>
+            <CardDescription>{clients.length} clientes encontrados</CardDescription>
           </div>
-          {tab === 'active' && (
-            <div className="flex gap-2">
-              <Button onClick={exportCSV} variant="secondary" size="sm">
-                <Download className="mr-1 h-4 w-4" /> CSV
-              </Button>
-              <Button onClick={exportPDF} variant="destructive" size="sm">
-                <FileText className="mr-1 h-4 w-4" /> PDF
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-2">
+            <Button onClick={exportCSV} variant="secondary" size="sm">
+              <Download className="mr-1 h-4 w-4" /> CSV
+            </Button>
+            <Button onClick={exportPDF} variant="destructive" size="sm">
+              <FileText className="mr-1 h-4 w-4" /> PDF
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        {/* Tabs */}
-        <div className="mb-4 flex gap-1 rounded-lg bg-muted p-1">
-          <button
-            onClick={() => setTab('active')}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              tab === 'active' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-            }`}>
-            Activos ({activeClients.length})
-          </button>
-          <button
-            onClick={() => setTab('trash')}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              tab === 'trash' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-            }`}>
-            <Trash2 className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
-            Papelera ({deletedClients.length})
-          </button>
-        </div>
-
-        {/* Search + Filters */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -673,13 +620,13 @@ function ClientsManager({
             <thead>
               <tr className="border-b">
                 {['Nombre', 'WhatsApp', 'Email', 'Primera reserva', 'Última reserva', ''].map(h => (
-                  <th key={h + tab} className="px-3 py-4 text-left text-sm font-medium text-muted-foreground">{h}</th>
+                  <th key={h} className="px-3 py-4 text-left text-sm font-medium text-muted-foreground">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y">
               {clients.map((c) => (
-                <tr key={c.email || c.phone + tab} className="hover:bg-muted/50 transition-colors">
+                <tr key={c.email || c.phone} className="hover:bg-muted/50 transition-colors">
                   <td className="px-3 py-4 font-medium">{c.name}</td>
                   <td className="px-3 py-4">
                     <div className="flex items-center gap-1 text-sm"><Phone className="h-3 w-3" />{c.phone}</div>
@@ -690,28 +637,18 @@ function ClientsManager({
                   <td className="px-3 py-4 text-sm">{formatDate(c.firstBooking)}</td>
                   <td className="px-3 py-4 text-sm">{formatDate(c.lastBooking)}</td>
                   <td className="px-3 py-4 text-right">
-                    {tab === 'active' ? (
-                      <button
-                        onClick={() => deleteClient(c.email, c.phone)}
-                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-destructive hover:bg-destructive/10 transition-colors">
-                        <Trash2 className="h-3.5 w-3.5" /> Eliminar
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => restoreClient(c.email, c.phone)}
-                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-primary hover:bg-primary/10 transition-colors">
-                        <RotateCcw className="h-3.5 w-3.5" /> Restaurar
-                      </button>
-                    )}
+                    <button
+                      onClick={() => deleteClient(c.email, c.phone)}
+                      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-destructive hover:bg-destructive/10 transition-colors">
+                      <Trash2 className="h-3.5 w-3.5" /> Eliminar
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
           {clients.length === 0 && (
-            <p className="py-12 text-center text-sm text-muted-foreground">
-              {tab === 'active' ? 'No se encontraron clientes' : 'La papelera está vacía'}
-            </p>
+            <p className="py-12 text-center text-sm text-muted-foreground">No se encontraron clientes</p>
           )}
         </div>
       </CardContent>
@@ -2621,7 +2558,6 @@ export function AdminPage() {
           {view === 'clients' && (
             <ClientsManager
               bookings={bookings}
-              deletedBookings={deletedBookings}
               adminEmail={adminEmail}
               adminPassword={adminPassword}
               onRefresh={loadData}
