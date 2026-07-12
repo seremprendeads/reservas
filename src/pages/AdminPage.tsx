@@ -1297,11 +1297,7 @@ function AppearanceManager({
         <div className="lg:col-span-3 space-y-6">
           {/* Temas */}
           <Card>
-            <CardHeader>
-              <CardTitle>Temas por rubro</CardTitle>
-              <CardDescription>Elegí un tema prediseñado para tu negocio</CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {allThemes.map((t) => (
                   <button
@@ -1313,11 +1309,8 @@ function AppearanceManager({
                     style={{ backgroundColor: t.tokens.cardBg, color: t.tokens.text }}
                   >
                     <span className="text-xl shrink-0">{t.icon}</span>
-                    <div className="min-w-0 flex-1">
-                      <span className="text-sm font-semibold block">{t.name}</span>
-                      <p className="text-xs truncate" style={{ color: t.tokens.textMuted }}>{t.description}</p>
-                    </div>
-                    <div className="flex gap-1 shrink-0">
+                    <span className="text-sm font-semibold">{t.name}</span>
+                    <div className="flex gap-1 shrink-0 ml-auto">
                       <div className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: t.tokens.primary }} />
                       <div className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: t.tokens.background }} />
                     </div>
