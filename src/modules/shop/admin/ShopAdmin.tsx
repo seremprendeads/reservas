@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { Product, Category, Order } from '../types';
 import { PLAN_LIMITS, SHOP_STORAGE_BUCKET } from '../config';
@@ -16,10 +16,10 @@ import { ImageUploader } from './ImageUploader';
 import { deleteStorageFile } from './storage-utils';
 
 export function ShopAdmin() {
-  const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'trash'>('dashboard');
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 border-b pb-4 mb-6">
+      <div className="flex items-center gap-3 border-b pb-4 mb-6 flex-wrap">
         <button onClick={() => setView('dashboard')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'dashboard' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <BarChart3 className="w-4 h-4 inline mr-1.5" />Dashboard
         </button>
@@ -32,11 +32,15 @@ export function ShopAdmin() {
         <button onClick={() => setView('orders')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'orders' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <ShoppingCart className="w-4 h-4 inline mr-1.5" />Ventas
         </button>
+        <button onClick={() => setView('trash')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'trash' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <Archive className="w-4 h-4 inline mr-1.5" />Papelera
+        </button>
       </div>
       {view === 'dashboard' && <ShopDashboard />}
       {view === 'products' && <ProductsManager />}
       {view === 'categories' && <CategoriesManager />}
       {view === 'orders' && <OrdersList />}
+      {view === 'trash' && <ProductsTrash />}
     </div>
   );
 }
@@ -138,7 +142,7 @@ function ProductsManager() {
   const isAtLimit = activeCount >= PLAN_LIMITS.products;
 
   const reload = () => {
-    supabase.from('shop_products').select('*').order('sort_order').then(r => { if (r.data) setProducts(r.data); });
+    supabase.from('shop_products').select('*').is('deleted_at', null).order('sort_order').then(r => { if (r.data) setProducts(r.data); });
   };
 
   useEffect(() => {
@@ -182,10 +186,7 @@ function ProductsManager() {
   };
 
   const remove = async (p: Product) => {
-    if (p.image) {
-      await deleteStorageFile(p.image, SHOP_STORAGE_BUCKET);
-    }
-    await supabase.from('shop_products').delete().eq('id', p.id);
+    await supabase.from('shop_products').update({ deleted_at: new Date().toISOString() }).eq('id', p.id);
     setProducts(prev => prev.filter(x => x.id !== p.id));
   };
 
@@ -440,5 +441,81 @@ function OrdersList() {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function ProductsTrash() {
+  const [deleted, setDeleted] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = () => {
+    setLoading(true);
+    supabase.from('shop_products').select('*').not('deleted_at', 'is', null).order('deleted_at', { ascending: false })
+      .then(r => { setDeleted(r.data || []); setLoading(false); });
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const restore = async (p: Product) => {
+    await supabase.from('shop_products').update({ deleted_at: null }).eq('id', p.id);
+    setDeleted(prev => prev.filter(x => x.id !== p.id));
+  };
+
+  const purge = async (p: Product) => {
+    if (p.image) await deleteStorageFile(p.image, SHOP_STORAGE_BUCKET);
+    await supabase.from('shop_products').delete().eq('id', p.id);
+    setDeleted(prev => prev.filter(x => x.id !== p.id));
+  };
+
+  const purgeAll = async () => {
+    for (const p of deleted) {
+      if (p.image) await deleteStorageFile(p.image, SHOP_STORAGE_BUCKET);
+      await supabase.from('shop_products').delete().eq('id', p.id);
+    }
+    setDeleted([]);
+  };
+
+  if (loading) return <div className="text-center py-10"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Papelera ({deleted.length})</h2>
+        {deleted.length > 0 && (
+          <Button variant="destructive" size="sm" onClick={purgeAll}>
+            <Trash2 className="w-4 h-4 mr-1" />Vaciar papelera
+          </Button>
+        )}
+      </div>
+      <Card>
+        <CardContent className="p-0">
+          {deleted.length === 0 ? (
+            <p className="py-12 text-center text-sm text-muted-foreground">La papelera está vacía</p>
+          ) : (
+            <div className="divide-y">
+              {deleted.map(p => (
+                <div key={p.id} className="flex items-center gap-4 px-6 py-3">
+                  <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
+                    {p.image ? <img src={p.image} alt={p.name} className="w-full h-full object-cover" /> : <Package className="w-6 h-6 m-3 text-muted-foreground" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-medium truncate block">{p.name}</span>
+                    <span className="text-sm text-muted-foreground">${p.price.toLocaleString('es-AR')} {p.currency}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => restore(p)}>
+                      <RotateCcw className="w-4 h-4 mr-1" />Restaurar
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => purge(p)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

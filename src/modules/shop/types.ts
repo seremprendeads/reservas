@@ -13,6 +13,7 @@ export type Product = {
   featured: boolean;
   sort_order: number;
   created_at: string;
+  deleted_at: string | null;
 };
 
 export type Category = {
