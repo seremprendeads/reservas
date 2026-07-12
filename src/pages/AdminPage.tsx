@@ -672,7 +672,7 @@ function ClientsManager({
           <table className="w-full">
             <thead>
               <tr className="border-b">
-                {['Nombre', 'WhatsApp', 'Email', 'Primera reserva', 'Última reserva', 'Total', ''].map(h => (
+                {['Nombre', 'WhatsApp', 'Email', 'Primera reserva', 'Última reserva', ''].map(h => (
                   <th key={h + tab} className="px-3 py-4 text-left text-sm font-medium text-muted-foreground">{h}</th>
                 ))}
               </tr>
@@ -689,9 +689,6 @@ function ClientsManager({
                   </td>
                   <td className="px-3 py-4 text-sm">{formatDate(c.firstBooking)}</td>
                   <td className="px-3 py-4 text-sm">{formatDate(c.lastBooking)}</td>
-                  <td className="px-3 py-4">
-                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{c.totalBookings}</span>
-                  </td>
                   <td className="px-3 py-4 text-right">
                     {tab === 'active' ? (
                       <button
