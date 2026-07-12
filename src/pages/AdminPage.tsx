@@ -36,6 +36,7 @@ import {
   Palette,
   Package,
   ShoppingCart,
+  Link,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings, Branding, Service } from '../lib/supabase';
 import { Button } from '../components/ui/button';
@@ -54,8 +55,9 @@ import { useTheme } from '../contexts/ThemeContext';
 import { allThemes } from '../themes';
 import { cn } from '../lib/utils';
 import { ShopAdmin } from '../modules/shop/admin/ShopAdmin';
+import { BioAdmin } from '../modules/bio/admin/BioAdmin';
 
-type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop';
+type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop' | 'bio';
 
 interface WaitingListItem {
   id: string;
@@ -1936,6 +1938,7 @@ export function AdminPage() {
     { id: 'availability', label: 'Disponibilidad', icon: <Clock className="h-5 w-5" /> },
     { id: 'services', label: 'Servicios', icon: <Package className="h-5 w-5" /> },
     { id: 'shop', label: 'Tienda', icon: <ShoppingCart className="h-5 w-5" /> },
+    { id: 'bio', label: 'Mi Bio', icon: <Link className="h-5 w-5" /> },
     { id: 'appearance', label: 'Apariencia', icon: <Palette className="h-5 w-5" /> },
     { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
     { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquareText className="h-5 w-5" /> },
@@ -1953,6 +1956,7 @@ export function AdminPage() {
     availability: 'Disponibilidad',
     services: 'Servicios',
     shop: 'Tienda',
+    bio: 'Mi Bio',
     appearance: 'Apariencia',
     profile: 'Perfil',
     whatsapp: 'WhatsApp',
@@ -2428,6 +2432,9 @@ export function AdminPage() {
 
           {/* ─── Shop ──────────────────────────────────────────── */}
           {view === 'shop' && <ShopAdmin />}
+
+          {/* ─── Mi Bio ──────────────────────────────────────── */}
+          {view === 'bio' && <BioAdmin adminEmail={adminEmail} />}
 
           {/* ─── Appearances ────────────────────────────────── */}
           {view === 'appearance' && (

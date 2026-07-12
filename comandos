@@ -18,8 +18,19 @@ git push
 
 ---------------------------------------
 git add .
-git commit -m "Tienda"
+git commit -m "estilo css"
+git push
+
+git add .
+git commit -m "estilo css"
+git push
+
+git add .
+git commit -m "estilo css"
 git push
 
 
 
+git add .
+git commit -m "biolink"
+git push
