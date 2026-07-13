@@ -13,7 +13,7 @@ const ICON_MAP: Record<string, string> = {
 
 function getButtonRadius(style: string) {
   if (style === 'pill') return '9999px';
-  if (style === 'square') return '12px';
+  if (style === 'square') return '4px';
   return '16px';
 }
 

@@ -25,7 +25,7 @@ const ICON_MAP: Record<string, string> = {
 
 function getButtonRadius(style: string) {
   if (style === 'pill') return 'rounded-full';
-  if (style === 'square') return 'rounded-lg';
+  if (style === 'square') return 'rounded-sm';
   return 'rounded-xl';
 }
 
@@ -681,7 +681,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     <p className="text-sm font-medium">Sombra en botones</p>
                     <p className="text-xs text-muted-foreground">Efecto de elevación sutil</p>
                   </div>
-                  <button onClick={() => { handleFieldChange('button_shadow', String(!profile?.button_shadow)); saveDraft(); }}
+                  <button onClick={() => { handleFieldChange('button_shadow', !profile?.button_shadow); saveDraft(); }}
                     className={`relative w-11 h-6 rounded-full transition-colors ${profile?.button_shadow ? 'bg-primary' : 'bg-muted'}`}>
                     <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${profile?.button_shadow ? 'translate-x-5' : ''}`} />
                   </button>
