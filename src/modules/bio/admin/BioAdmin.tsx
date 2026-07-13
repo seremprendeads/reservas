@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   User, Link as LinkIcon, Palette, BarChart3, QrCode, Plus, Trash2,
   GripVertical, ExternalLink, Copy, Check, Loader2, Eye, EyeOff,
@@ -40,11 +40,14 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const [showAddLink, setShowAddLink] = useState(false);
   const [editingLink, setEditingLink] = useState<BioLink | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const profileRef = useRef<BioProfile | null>(null);
 
   const loadProfile = useCallback(async () => {
     const { data } = await supabase.from('bio_profiles').select('*').eq('admin_email', adminEmail).maybeSingle();
     if (data) {
       setProfile(data);
+      profileRef.current = data;
       setSlug(data.slug);
       const { data: linkData } = await supabase.from('bio_links').select('*').eq('profile_id', data.id).order('sort_order');
       if (linkData) setLinks(linkData);
@@ -53,6 +56,12 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   }, [adminEmail]);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
 
   const ensureProfile = async (): Promise<BioProfile> => {
     if (profile) return profile;
@@ -66,10 +75,18 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     return data!;
   };
 
-  const updateProfile = async (fields: Partial<BioProfile>) => {
-    const p = await ensureProfile();
-    await supabase.from('bio_profiles').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', p.id);
-    setProfile(prev => prev ? { ...prev, ...fields } as BioProfile : prev);
+  const updateProfile = (fields: Partial<BioProfile>) => {
+    setProfile(prev => {
+      const next = prev ? { ...prev, ...fields } as BioProfile : prev;
+      profileRef.current = next;
+      return next;
+    });
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      const p = profileRef.current;
+      if (!p) return;
+      await supabase.from('bio_profiles').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', p.id);
+    }, 600);
   };
 
   const loadStats = useCallback(async () => {
