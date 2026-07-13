@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   User, Link as LinkIcon, Palette, BarChart3, QrCode, Plus, Trash2,
   GripVertical, ExternalLink, Copy, Check, Loader2, Eye, EyeOff,
-  Download,
+  Download, Upload, X,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { BioProfile, BioLink, BioStats } from '../types';
@@ -41,6 +41,8 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const [editingLink, setEditingLink] = useState<BioLink | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const profileRef = useRef<BioProfile | null>(null);
 
@@ -137,6 +139,48 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const debouncedSave = () => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(saveDraft, 800);
+  };
+
+  const uploadLogo = async (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    setUploading(true);
+    try {
+      let blob: Blob = file;
+      if (file.size > 200 * 1024 && file.type !== 'image/gif') {
+        blob = await new Promise<Blob>((resolve, reject) => {
+          const img = new Image();
+          const url = URL.createObjectURL(file);
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            const canvas = document.createElement('canvas');
+            const maxS = 400;
+            let w = img.width, h = img.height;
+            if (w > maxS) { h = h * maxS / w; w = maxS; }
+            if (h > maxS) { w = w * maxS / h; h = maxS; }
+            canvas.width = Math.round(w);
+            canvas.height = Math.round(h);
+            canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const fmt = canvas.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+            canvas.toBlob(b => b ? resolve(b) : reject(new Error('Compresión fallida')), fmt, 0.8);
+          };
+          img.onerror = () => reject(new Error('Error al leer imagen'));
+          img.src = url;
+        });
+      }
+      const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+      const fileName = `bio-avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('branding').upload(fileName, blob, { upsert: false });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('branding').getPublicUrl(fileName);
+      const publicUrl = (urlData?.publicUrl || '') + `?t=${Date.now()}`;
+      handleFieldChange('avatar_url', publicUrl);
+      saveDraft();
+    } catch (err) {
+      console.error('Logo upload error:', err);
+    } finally {
+      if (logoInputRef.current) logoInputRef.current.value = '';
+      setUploading(false);
+    }
   };
 
   const loadStats = useCallback(async () => {
@@ -284,6 +328,35 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     <span className="text-sm text-muted-foreground whitespace-nowrap">{window.location.origin}/bio/</span>
                     <Input value={slug} onChange={e => setSlug(e.target.value)} onBlur={saveSlug}
                       className="flex-1" placeholder="mi-negocio" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Logo / Avatar</label>
+                  <input ref={logoInputRef} type="file" accept="image/*" className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f); }} />
+                  <div className="flex items-center gap-3">
+                    {profile?.avatar_url ? (
+                      <div className="relative group">
+                        <img src={profile.avatar_url} alt="Logo" className="w-16 h-16 rounded-full object-cover border" />
+                        <button onClick={() => logoInputRef.current?.click()} disabled={uploading}
+                          className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {uploading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Upload className="w-4 h-4 text-white" />}
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => logoInputRef.current?.click()} disabled={uploading}
+                        className="w-16 h-16 rounded-full border-2 border-dashed border-muted-foreground/25 flex items-center justify-center hover:border-primary/50 transition-colors">
+                        {uploading ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /> : <Upload className="w-5 h-5 text-muted-foreground" />}
+                      </button>
+                    )}
+                    <div className="text-xs text-muted-foreground">
+                      <p>Subí el logo de tu negocio</p>
+                      <p>JPG, PNG o WebP (máx 2MB)</p>
+                      {profile?.avatar_url && (
+                        <button onClick={() => { handleFieldChange('avatar_url', null); saveDraft(); }}
+                          className="text-destructive hover:underline mt-1">Eliminar</button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-2">
