@@ -74,5 +74,7 @@ export type Branding = {
   background_image_url: string;
   bg_opacity: number;
   overlay_color: string;
+  header_color: string;
+  header_opacity: number;
   updated_at: string;
 };

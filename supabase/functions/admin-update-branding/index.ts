@@ -13,7 +13,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { email, password, logo_url, title, subtitle, primary_color, background_color, card_bg_color, text_color, muted_color, caption_color, background_image_url, bg_opacity, overlay_color } = await req.json();
+    const { email, password, logo_url, title, subtitle, primary_color, background_color, card_bg_color, text_color, muted_color, caption_color, background_image_url, bg_opacity, overlay_color, header_color, header_opacity } = await req.json();
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -59,6 +59,8 @@ Deno.serve(async (req: Request) => {
         background_image_url: background_image_url || "",
         bg_opacity: bg_opacity ?? 80,
         overlay_color: overlay_color || background_color || "#111827",
+        header_color: header_color || card_bg_color || "#1f2937",
+        header_opacity: header_opacity ?? 100,
         updated_at: new Date().toISOString(),
       }, { onConflict: "id" });
 

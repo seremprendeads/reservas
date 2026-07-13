@@ -1203,6 +1203,8 @@ function AppearanceManager({
   const [bgImageUrl, setBgImageUrl] = useState(branding?.background_image_url || '');
   const [bgOpacity, setBgOpacity] = useState(branding?.bg_opacity ?? 80);
   const [overlayColor, setOverlayColor] = useState(branding?.overlay_color || branding?.background_color || '#111827');
+  const [headerColor, setHeaderColor] = useState(branding?.header_color || branding?.card_bg_color || '#1f2937');
+  const [headerOpacity, setHeaderOpacity] = useState(branding?.header_opacity ?? 100);
   const [saving, setSaving] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
   const [uploading, setUploading] = useState({ logo: false, bg: false });
@@ -1310,6 +1312,8 @@ function AppearanceManager({
         background_image_url: bgImageUrl,
         bg_opacity: bgOpacity,
         overlay_color: overlayColor,
+        header_color: headerColor,
+        header_opacity: headerOpacity,
       };
 
       const { data: res, error } = await supabase.functions.invoke('admin-update-branding', {
@@ -1434,6 +1438,54 @@ function AppearanceManager({
             </CardContent>
           </Card>
 
+          {/* Color cabecera */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Color cabecera</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Color de la cabecera</label>
+                <div className="flex items-center gap-2.5">
+                  <input type="color" value={headerColor}
+                    onChange={(e) => setHeaderColor(e.target.value)}
+                    className="h-8 w-8 cursor-pointer rounded-lg border bg-transparent p-0.5 shrink-0" />
+                  <Input type="text" value={headerColor}
+                    onChange={(e) => setHeaderColor(e.target.value)}
+                    className="h-9 font-mono text-xs" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground">Transparencia</label>
+                  <span className="text-xs font-mono text-muted-foreground">{headerOpacity}%</span>
+                </div>
+                <input type="range" min="0" max="100" value={headerOpacity}
+                  onChange={(e) => setHeaderOpacity(Number(e.target.value))}
+                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-primary" />
+                <div className="flex justify-between text-[10px] text-muted-foreground">
+                  <span>Transparente</span>
+                  <span>Sólido</span>
+                </div>
+              </div>
+              {/* Mini preview */}
+              <div className="rounded-xl overflow-hidden border" style={{ background: bgColor }}>
+                <div className="px-3 py-2 flex items-center gap-2"
+                  style={{
+                    backgroundColor: headerColor,
+                    opacity: headerOpacity / 100,
+                  }}>
+                  <div className="w-5 h-5 rounded" style={{ backgroundColor: primaryColor }} />
+                  <span className="text-[10px] font-bold" style={{ color: textColor }}>Preview cabecera</span>
+                </div>
+                <div className="px-3 py-3">
+                  <div className="h-2 w-16 rounded" style={{ backgroundColor: textColor, opacity: 0.3 }} />
+                  <div className="h-1.5 w-24 rounded mt-1.5" style={{ backgroundColor: mutedColor, opacity: 0.3 }} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Fondo */}
           <Card>
             <CardHeader>
@@ -1510,7 +1562,10 @@ function AppearanceManager({
                   </div>
 
                   {/* Header */}
-                  <div style={{ backgroundColor: cardBgColor }}>
+                  <div style={{
+                    backgroundColor: headerColor,
+                    opacity: headerOpacity / 100,
+                  }}>
                     <div className="px-4 py-3 flex items-center gap-2.5">
                       {logoUrl ? (
                         <img src={logoUrl} alt="" className="h-8 w-8 rounded-lg object-cover shrink-0" />

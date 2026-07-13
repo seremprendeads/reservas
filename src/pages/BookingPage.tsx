@@ -102,6 +102,8 @@ function BookingContent() {
   })() : '#047857';
   const bgColor = b?.background_color || '#111827';
   const cardBg = b?.card_bg_color || '#1f2937';
+  const headerColor = b?.header_color || cardBg;
+  const headerOpacity = b?.header_opacity ?? 100;
   const textColor = b?.text_color || '#f3f4f6';
   const mutedColor = b?.muted_color || '#9ca3af';
   const captionColor = b?.caption_color || '#9ca3af';
@@ -136,7 +138,10 @@ function BookingContent() {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: bgColor }}>
       {/* Header fijo con blur */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-black/5" style={{ backgroundColor: `${cardBg}cc` }}>
+      <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-black/5" style={{
+        backgroundColor: headerColor,
+        opacity: headerOpacity / 100,
+      }}>
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {logoUrl ? (
