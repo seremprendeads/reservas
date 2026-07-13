@@ -40,6 +40,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const [showAddLink, setShowAddLink] = useState(false);
   const [editingLink, setEditingLink] = useState<BioLink | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const profileRef = useRef<BioProfile | null>(null);
 
@@ -92,7 +93,21 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const handleFieldChange = (key: keyof BioProfile, value: string | boolean | null) => {
     (draftRef.current as Record<string, unknown>)[key] = value;
     setProfile(prev => {
-      if (!prev) return prev;
+      if (!prev) {
+        const base: BioProfile = {
+          id: '', admin_email: adminEmail, slug: slug || adminEmail.split('@')[0],
+          name: '', description: '', avatar_url: null, city: null, whatsapp: null,
+          email: null, website: null, social_instagram: null, social_tiktok: null,
+          social_facebook: null, social_youtube: null, social_twitter: null, social_linkedin: null,
+          primary_color: '#059669', bg_type: 'solid', bg_solid_color: '#ffffff',
+          bg_gradient_from: '#f0fdf4', bg_gradient_to: '#dcfce7', bg_image_url: null,
+          button_style: 'rounded', button_shadow: true, is_active: true,
+          created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+        };
+        const next = { ...base, [key]: value } as BioProfile;
+        profileRef.current = next;
+        return next;
+      }
       const next = { ...prev, [key]: value } as BioProfile;
       profileRef.current = next;
       return next;
@@ -104,7 +119,19 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     draftRef.current = {};
     const p = profileRef.current;
     if (!p || Object.keys(fields).length === 0) return;
-    await supabase.from('bio_profiles').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', p.id);
+    if (p.id) {
+      await supabase.from('bio_profiles').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', p.id);
+    } else {
+      const { data } = await supabase.from('bio_profiles').insert({
+        ...fields, admin_email: adminEmail, slug: p.slug, name: p.name,
+      }).select().single();
+      if (data) {
+        profileRef.current = data;
+        setProfile(data);
+      }
+    }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const debouncedSave = () => {
@@ -338,6 +365,10 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                       placeholder="https://linkedin.com/..." />
                   </div>
                 </div>
+                <div className="h-px bg-border/50" />
+                <Button onClick={saveDraft} className="w-full gap-1.5">
+                  {saved ? <><Check className="w-4 h-4" />Guardado</> : 'Guardar cambios'}
+                </Button>
               </CardContent>
             </Card>
           )}
