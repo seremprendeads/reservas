@@ -83,27 +83,33 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
       slug: defaultSlug,
       name: '',
     }).select().single();
-    if (data) { setProfile(data); setSlug(data.slug); }
+    if (data) { setProfile(data); profileRef.current = data; setSlug(data.slug); }
     return data!;
   };
 
-  const pendingSaveRef = useRef<Partial<BioProfile> | null>(null);
+  const draftRef = useRef<Partial<BioProfile>>({});
 
-  const updateProfile = (fields: Partial<BioProfile>) => {
+  const handleFieldChange = (key: keyof BioProfile, value: string | boolean | null) => {
+    (draftRef.current as Record<string, unknown>)[key] = value;
     setProfile(prev => {
-      const next = prev ? { ...prev, ...fields } as BioProfile : prev;
+      if (!prev) return prev;
+      const next = { ...prev, [key]: value } as BioProfile;
       profileRef.current = next;
       return next;
     });
+  };
+
+  const saveDraft = async () => {
+    const fields = { ...draftRef.current };
+    draftRef.current = {};
+    const p = profileRef.current;
+    if (!p || Object.keys(fields).length === 0) return;
+    await supabase.from('bio_profiles').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', p.id);
+  };
+
+  const debouncedSave = () => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    pendingSaveRef.current = { ...(pendingSaveRef.current || {}), ...fields };
-    saveTimerRef.current = setTimeout(async () => {
-      const p = profileRef.current;
-      const toSave = pendingSaveRef.current;
-      if (!p || !toSave) return;
-      pendingSaveRef.current = null;
-      await supabase.from('bio_profiles').update({ ...toSave, updated_at: new Date().toISOString() }).eq('id', p.id);
-    }, 800);
+    saveTimerRef.current = setTimeout(saveDraft, 800);
   };
 
   const loadStats = useCallback(async () => {
@@ -255,35 +261,41 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Nombre del negocio</label>
-                  <Input value={profile?.name || ''} onChange={e => updateProfile({ name: e.target.value })}
+                  <Input defaultValue={profile?.name || ''} key={profile?.id || 'new-name'}
+                    onChange={e => handleFieldChange('name', e.target.value)} onBlur={saveDraft}
                     placeholder="Spa Relax" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Descripción</label>
-                  <textarea value={profile?.description || ''} onChange={e => updateProfile({ description: e.target.value })}
+                  <textarea defaultValue={profile?.description || ''} key={profile?.id || 'new-desc'}
+                    onChange={e => handleFieldChange('description', e.target.value)} onBlur={saveDraft}
                     rows={2} placeholder="Tu descripción corta..."
                     className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Ciudad</label>
-                  <Input value={profile?.city || ''} onChange={e => updateProfile({ city: e.target.value || null })}
+                  <Input defaultValue={profile?.city || ''} key={profile?.id || 'new-city'}
+                    onChange={e => handleFieldChange('city', e.target.value || null)} onBlur={saveDraft}
                     placeholder="Buenos Aires" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">WhatsApp</label>
-                    <Input value={profile?.whatsapp || ''} onChange={e => updateProfile({ whatsapp: e.target.value || null })}
+                    <Input defaultValue={profile?.whatsapp || ''} key={profile?.id || 'new-wa'}
+                      onChange={e => handleFieldChange('whatsapp', e.target.value || null)} onBlur={saveDraft}
                       placeholder="+54 9 11 1234-5678" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Email</label>
-                    <Input value={profile?.email || ''} onChange={e => updateProfile({ email: e.target.value || null })}
+                    <Input defaultValue={profile?.email || ''} key={profile?.id || 'new-email'}
+                      onChange={e => handleFieldChange('email', e.target.value || null)} onBlur={saveDraft}
                       placeholder="info@spa.com" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Sitio web</label>
-                  <Input value={profile?.website || ''} onChange={e => updateProfile({ website: e.target.value || null })}
+                  <Input defaultValue={profile?.website || ''} key={profile?.id || 'new-web'}
+                    onChange={e => handleFieldChange('website', e.target.value || null)} onBlur={saveDraft}
                     placeholder="https://..." />
                 </div>
                 <div className="h-px bg-border/50" />
@@ -291,32 +303,38 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Instagram</label>
-                    <Input value={profile?.social_instagram || ''} onChange={e => updateProfile({ social_instagram: e.target.value || null })}
+                    <Input defaultValue={profile?.social_instagram || ''} key={profile?.id || 'new-ig'}
+                      onChange={e => handleFieldChange('social_instagram', e.target.value || null)} onBlur={saveDraft}
                       placeholder="https://instagram.com/..." />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">TikTok</label>
-                    <Input value={profile?.social_tiktok || ''} onChange={e => updateProfile({ social_tiktok: e.target.value || null })}
+                    <Input defaultValue={profile?.social_tiktok || ''} key={profile?.id || 'new-tt'}
+                      onChange={e => handleFieldChange('social_tiktok', e.target.value || null)} onBlur={saveDraft}
                       placeholder="https://tiktok.com/..." />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Facebook</label>
-                    <Input value={profile?.social_facebook || ''} onChange={e => updateProfile({ social_facebook: e.target.value || null })}
+                    <Input defaultValue={profile?.social_facebook || ''} key={profile?.id || 'new-fb'}
+                      onChange={e => handleFieldChange('social_facebook', e.target.value || null)} onBlur={saveDraft}
                       placeholder="https://facebook.com/..." />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">YouTube</label>
-                    <Input value={profile?.social_youtube || ''} onChange={e => updateProfile({ social_youtube: e.target.value || null })}
+                    <Input defaultValue={profile?.social_youtube || ''} key={profile?.id || 'new-yt'}
+                      onChange={e => handleFieldChange('social_youtube', e.target.value || null)} onBlur={saveDraft}
                       placeholder="https://youtube.com/..." />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Twitter / X</label>
-                    <Input value={profile?.social_twitter || ''} onChange={e => updateProfile({ social_twitter: e.target.value || null })}
+                    <Input defaultValue={profile?.social_twitter || ''} key={profile?.id || 'new-tw'}
+                      onChange={e => handleFieldChange('social_twitter', e.target.value || null)} onBlur={saveDraft}
                       placeholder="https://x.com/..." />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">LinkedIn</label>
-                    <Input value={profile?.social_linkedin || ''} onChange={e => updateProfile({ social_linkedin: e.target.value || null })}
+                    <Input defaultValue={profile?.social_linkedin || ''} key={profile?.id || 'new-li'}
+                      onChange={e => handleFieldChange('social_linkedin', e.target.value || null)} onBlur={saveDraft}
                       placeholder="https://linkedin.com/..." />
                   </div>
                 </div>
@@ -384,10 +402,10 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                   <label className="text-sm font-medium">Color principal</label>
                   <div className="flex items-center gap-3">
                     <input type="color" value={profile?.primary_color || '#059669'}
-                      onChange={e => updateProfile({ primary_color: e.target.value })}
+                      onChange={e => { handleFieldChange('primary_color', e.target.value); debouncedSave(); }}
                       className="h-10 w-10 rounded-lg border cursor-pointer" />
                     <Input value={profile?.primary_color || '#059669'}
-                      onChange={e => updateProfile({ primary_color: e.target.value })}
+                      onChange={e => { handleFieldChange('primary_color', e.target.value); debouncedSave(); }}
                       className="w-32 font-mono text-sm" />
                   </div>
                 </div>
@@ -395,7 +413,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                   <label className="text-sm font-medium">Fondo</label>
                   <div className="grid grid-cols-3 gap-2">
                     {(['solid', 'gradient', 'image'] as const).map(type => (
-                      <button key={type} onClick={() => updateProfile({ bg_type: type })}
+                      <button key={type} onClick={() => { handleFieldChange('bg_type', type); saveDraft(); }}
                         className={`p-3 rounded-xl border text-sm font-medium transition-all ${
                           profile?.bg_type === type ? 'border-primary ring-2 ring-primary/20' : 'border-border/50 hover:border-border'
                         }`}>
@@ -409,10 +427,10 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     <label className="text-sm font-medium">Color de fondo</label>
                     <div className="flex items-center gap-3">
                       <input type="color" value={profile.bg_solid_color}
-                        onChange={e => updateProfile({ bg_solid_color: e.target.value })}
+                        onChange={e => { handleFieldChange('bg_solid_color', e.target.value); debouncedSave(); }}
                         className="h-10 w-10 rounded-lg border cursor-pointer" />
                       <Input value={profile.bg_solid_color}
-                        onChange={e => updateProfile({ bg_solid_color: e.target.value })}
+                        onChange={e => { handleFieldChange('bg_solid_color', e.target.value); debouncedSave(); }}
                         className="w-32 font-mono text-sm" />
                     </div>
                   </div>
@@ -422,7 +440,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     <label className="text-sm font-medium">Degradado</label>
                     <div className="grid grid-cols-3 gap-2">
                       {BIO_BG_PRESETS.map(preset => (
-                        <button key={preset.label} onClick={() => updateProfile({ bg_gradient_from: preset.from, bg_gradient_to: preset.to })}
+                        <button key={preset.label} onClick={() => { handleFieldChange('bg_gradient_from', preset.from); handleFieldChange('bg_gradient_to', preset.to); saveDraft(); }}
                           className={`h-12 rounded-xl border-2 transition-all ${
                             profile.bg_gradient_from === preset.from ? 'border-primary ring-2 ring-primary/20' : 'border-border/50'
                           }`}
@@ -434,9 +452,9 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                         <label className="text-xs text-muted-foreground">Desde</label>
                         <div className="flex items-center gap-2">
                           <input type="color" value={profile.bg_gradient_from}
-                            onChange={e => updateProfile({ bg_gradient_from: e.target.value })}
+                            onChange={e => { handleFieldChange('bg_gradient_from', e.target.value); debouncedSave(); }}
                             className="h-8 w-8 rounded border cursor-pointer" />
-                          <Input value={profile.bg_gradient_from} onChange={e => updateProfile({ bg_gradient_from: e.target.value })}
+                          <Input value={profile.bg_gradient_from} onChange={e => { handleFieldChange('bg_gradient_from', e.target.value); debouncedSave(); }}
                             className="text-xs font-mono" />
                         </div>
                       </div>
@@ -444,9 +462,9 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                         <label className="text-xs text-muted-foreground">Hasta</label>
                         <div className="flex items-center gap-2">
                           <input type="color" value={profile.bg_gradient_to}
-                            onChange={e => updateProfile({ bg_gradient_to: e.target.value })}
+                            onChange={e => { handleFieldChange('bg_gradient_to', e.target.value); debouncedSave(); }}
                             className="h-8 w-8 rounded border cursor-pointer" />
-                          <Input value={profile.bg_gradient_to} onChange={e => updateProfile({ bg_gradient_to: e.target.value })}
+                          <Input value={profile.bg_gradient_to} onChange={e => { handleFieldChange('bg_gradient_to', e.target.value); debouncedSave(); }}
                             className="text-xs font-mono" />
                         </div>
                       </div>
@@ -457,7 +475,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                   <label className="text-sm font-medium">Estilo de botones</label>
                   <div className="grid grid-cols-3 gap-2">
                     {BIO_BUTTON_STYLES.map(s => (
-                      <button key={s.value} onClick={() => updateProfile({ button_style: s.value })}
+                      <button key={s.value} onClick={() => { handleFieldChange('button_style', s.value); saveDraft(); }}
                         className={`p-3 border text-sm font-medium transition-all ${
                           profile?.button_style === s.value ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-border/50 hover:border-border'
                         }`}
@@ -472,7 +490,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     <p className="text-sm font-medium">Sombra en botones</p>
                     <p className="text-xs text-muted-foreground">Efecto de elevación sutil</p>
                   </div>
-                  <button onClick={() => updateProfile({ button_shadow: !profile?.button_shadow })}
+                  <button onClick={() => { handleFieldChange('button_shadow', String(!profile?.button_shadow)); saveDraft(); }}
                     className={`relative w-11 h-6 rounded-full transition-colors ${profile?.button_shadow ? 'bg-primary' : 'bg-muted'}`}>
                     <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${profile?.button_shadow ? 'translate-x-5' : ''}`} />
                   </button>
