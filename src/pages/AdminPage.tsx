@@ -37,6 +37,7 @@ import {
   Package,
   ShoppingCart,
   Link,
+  CreditCard,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings, Branding, Service } from '../lib/supabase';
 import { Button } from '../components/ui/button';
@@ -56,8 +57,9 @@ import { allThemes } from '../themes';
 import { cn } from '../lib/utils';
 import { ShopAdmin } from '../modules/shop/admin/ShopAdmin';
 import { BioAdmin } from '../modules/bio/admin/BioAdmin';
+import { PaymentsAdmin } from '../modules/payments/admin/PaymentsAdmin';
 
-type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop' | 'bio';
+type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop' | 'bio' | 'payments';
 
 interface WaitingListItem {
   id: string;
@@ -2037,6 +2039,7 @@ export function AdminPage() {
     { id: 'shop', label: 'Tienda', icon: <ShoppingCart className="h-5 w-5" /> },
     { id: 'bio', label: 'Mi Bio', icon: <Link className="h-5 w-5" /> },
     { id: 'appearance', label: 'Apariencia', icon: <Palette className="h-5 w-5" /> },
+    { id: 'payments', label: 'Pagos', icon: <CreditCard className="h-5 w-5" /> },
     { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
     { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquareText className="h-5 w-5" /> },
     {
@@ -2055,6 +2058,7 @@ export function AdminPage() {
     shop: 'Tienda',
     bio: 'Mi Bio',
     appearance: 'Apariencia',
+    payments: 'Pagos',
     profile: 'Perfil',
     whatsapp: 'WhatsApp',
     trash: 'Papelera',
@@ -2543,6 +2547,9 @@ export function AdminPage() {
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
             />
           )}
+
+          {/* ─── Pagos ──────────────────────────────────────── */}
+          {view === 'payments' && <PaymentsAdmin />}
 
           {/* ─── Waiting List ───────────────────────────────────── */}
           {view === 'waiting' && (
