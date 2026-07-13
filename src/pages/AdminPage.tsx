@@ -1212,6 +1212,12 @@ function AppearanceManager({
   const bgFileInputRef = useRef<HTMLInputElement>(null);
   const { setTheme } = useTheme();
 
+  useEffect(() => {
+    if (!branding) return;
+    setHeaderColor(branding.header_color || branding.card_bg_color || '#1f2937');
+    setHeaderOpacity(branding.header_opacity ?? 100);
+  }, [branding]);
+
   const applyTheme = (themeId: string) => {
     const t = allThemes.find(t => t.id === themeId);
     if (!t) return;
