@@ -5,7 +5,7 @@ import { Payment } from '../components/Payment';
 import { Confirmation } from '../components/Confirmation';
 import { Button } from '../components/ui/button';
 import { BookingProvider, useBooking } from '../contexts/BookingContext';
-import { Phone, MapPin, Check, Clock, Tag } from 'lucide-react';
+import { Phone, MapPin, Check, Clock, Tag, Store } from 'lucide-react';
 import { supabase, Branding, Service } from '../lib/supabase';
 
 function formatPrice(amount: number, currency: string) {
@@ -151,7 +151,16 @@ function BookingContent() {
               {subtitle && <p className="text-sm" style={{ color: mutedColor }}>{subtitle}</p>}
             </div>
           </div>
-          <a href="/tienda" className="text-sm font-medium transition-opacity hover:opacity-80" style={{ color: mutedColor }}>
+          <a
+            href="/tienda"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
+            style={{
+              backgroundColor: primaryColor,
+              color: '#ffffff',
+              boxShadow: `0 2px 8px ${primaryColor}40`,
+            }}
+          >
+            <Store className="w-4 h-4" />
             Tienda
           </a>
         </div>
