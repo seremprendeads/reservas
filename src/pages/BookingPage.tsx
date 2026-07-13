@@ -162,6 +162,7 @@ function BookingContent() {
               {subtitle && <p className="text-sm" style={{ color: mutedColor }}>{subtitle}</p>}
             </div>
           </div>
+           Tienda
           <a
             href="/tienda"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
@@ -172,8 +173,7 @@ function BookingContent() {
             }}
           >
             <Store className="w-4 h-4" />
-            Tienda
-          </a>
+            </a>
         </div>
       </header>
 

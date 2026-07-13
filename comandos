@@ -41,4 +41,3 @@ Lo que sí consume recursos reales:
 - Autenticación de admin → trivial
 - Edge Functions de pagos (Mercado Pago) → solo cuando hay compra real
 En resumen: 50-100 apps corriendo con estos features están muy por debajo de los límites gratuitos de Supabase y Vercel. No te preocupes por eso.
-▣  Build · Big Pickle · 8.1s
