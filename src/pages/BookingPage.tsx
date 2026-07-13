@@ -227,7 +227,7 @@ function BookingContent() {
       </div>
 
       {/* Footer (sin overlay) */}
-      <footer className="py-8" style={{ backgroundColor: cardBg }}>
+      <footer className="relative z-10 py-8" style={{ backgroundColor: cardBg }}>
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-6" style={{ color: textColor }}>
             <div className="flex items-center gap-2">
