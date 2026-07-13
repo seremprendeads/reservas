@@ -41,6 +41,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const [editingLink, setEditingLink] = useState<BioLink | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bgInputRef = useRef<HTMLInputElement>(null);
@@ -121,20 +122,34 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     const fields = { ...draftRef.current };
     draftRef.current = {};
     const p = profileRef.current;
-    if (!p || Object.keys(fields).length === 0) return;
-    if (p.id) {
-      await supabase.from('bio_profiles').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', p.id);
-    } else {
-      const { data } = await supabase.from('bio_profiles').insert({
-        ...fields, admin_email: adminEmail, slug: p.slug, name: p.name,
-      }).select().single();
-      if (data) {
-        profileRef.current = data;
-        setProfile(data);
+    if (!p) return;
+    const toSave = Object.keys(fields).length > 0 ? fields : {
+      slug: p.slug, name: p.name, description: p.description, primary_color: p.primary_color,
+      bg_type: p.bg_type, bg_solid_color: p.bg_solid_color, bg_gradient_from: p.bg_gradient_from,
+      bg_gradient_to: p.bg_gradient_to, bg_image_url: p.bg_image_url, button_style: p.button_style,
+      button_shadow: p.button_shadow, avatar_url: p.avatar_url, whatsapp: p.whatsapp,
+      email: p.email, city: p.city, social_instagram: p.social_instagram,
+      social_tiktok: p.social_tiktok, social_youtube: p.social_youtube,
+      social_facebook: p.social_facebook, social_linkedin: p.social_linkedin,
+    };
+    setSaving(true);
+    try {
+      if (p.id) {
+        await supabase.from('bio_profiles').update({ ...toSave, updated_at: new Date().toISOString() }).eq('id', p.id);
+      } else {
+        const { data } = await supabase.from('bio_profiles').insert({
+          ...toSave, admin_email: adminEmail, slug: p.slug, name: p.name,
+        }).select().single();
+        if (data) {
+          profileRef.current = data;
+          setProfile(data);
+        }
       }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } finally {
+      setSaving(false);
     }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
   };
 
   const debouncedSave = () => {
@@ -482,8 +497,10 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                   </div>
                 </div>
                 <div className="h-px bg-border/50" />
-                <Button onClick={saveDraft} className="w-full gap-1.5">
-                  {saved ? <><Check className="w-4 h-4" />Guardado</> : 'Guardar cambios'}
+                <Button onClick={saveDraft} disabled={saving} className="w-full gap-1.5">
+                  {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Guardando...</>
+                    : saved ? <><Check className="w-4 h-4" />Guardado</>
+                    : 'Guardar cambios'}
                 </Button>
               </CardContent>
             </Card>
