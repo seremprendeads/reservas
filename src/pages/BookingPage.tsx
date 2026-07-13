@@ -136,7 +136,14 @@ function BookingContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: bgColor }}>
+    <div className="relative min-h-screen flex flex-col" style={{ backgroundColor: bgColor }}>
+      {/* Fondo global detrás de todo */}
+      {bgImageUrl && (
+        <div className="fixed inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${bgImageUrl})` }}>
+          <div className="absolute inset-0" style={{ backgroundColor: `${overlayColor}${Math.round((bgOpacity / 100) * 255).toString(16).padStart(2, '0')}` }} />
+        </div>
+      )}
+
       {/* Header fijo con blur */}
       <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-black/5" style={{
         backgroundColor: `${headerColor}${Math.round((headerOpacity / 100) * 255).toString(16).padStart(2, '0')}`,
@@ -170,13 +177,8 @@ function BookingContent() {
         </div>
       </header>
 
-      {/* Contenido principal con overlay solo acá */}
+      {/* Contenido principal */}
       <div className="flex-1 relative">
-        {bgImageUrl && (
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${bgImageUrl})` }}>
-            <div className="absolute inset-0" style={{ backgroundColor: `${overlayColor}${Math.round((bgOpacity / 100) * 255).toString(16).padStart(2, '0')}` }} />
-          </div>
-        )}
         <div className="relative z-10">
           {/* Progress Steps - solos si hay servicio seleccionado */}
           {bookingData.service && (
