@@ -139,8 +139,7 @@ function BookingContent() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: bgColor }}>
       {/* Header fijo con blur */}
       <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-black/5" style={{
-        backgroundColor: headerColor,
-        opacity: headerOpacity / 100,
+        backgroundColor: `${headerColor}${Math.round((headerOpacity / 100) * 255).toString(16).padStart(2, '0')}`,
       }}>
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">

@@ -1478,8 +1478,7 @@ function AppearanceManager({
               <div className="rounded-xl overflow-hidden border" style={{ background: bgColor }}>
                 <div className="px-3 py-2 flex items-center gap-2"
                   style={{
-                    backgroundColor: headerColor,
-                    opacity: headerOpacity / 100,
+                    backgroundColor: `${headerColor}${Math.round((headerOpacity / 100) * 255).toString(16).padStart(2, '0')}`,
                   }}>
                   <div className="w-5 h-5 rounded" style={{ backgroundColor: primaryColor }} />
                   <span className="text-[10px] font-bold" style={{ color: textColor }}>Preview cabecera</span>
@@ -1569,8 +1568,7 @@ function AppearanceManager({
 
                   {/* Header */}
                   <div style={{
-                    backgroundColor: headerColor,
-                    opacity: headerOpacity / 100,
+                    backgroundColor: `${headerColor}${Math.round((headerOpacity / 100) * 255).toString(16).padStart(2, '0')}`,
                   }}>
                     <div className="px-4 py-3 flex items-center gap-2.5">
                       {logoUrl ? (
