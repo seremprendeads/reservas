@@ -43,6 +43,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const bgInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const profileRef = useRef<BioProfile | null>(null);
 
@@ -179,6 +180,48 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
       console.error('Logo upload error:', err);
     } finally {
       if (logoInputRef.current) logoInputRef.current.value = '';
+      setUploading(false);
+    }
+  };
+
+  const uploadBgImage = async (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    setUploading(true);
+    try {
+      let blob: Blob = file;
+      if (file.size > 500 * 1024 && file.type !== 'image/gif') {
+        blob = await new Promise<Blob>((resolve, reject) => {
+          const img = new Image();
+          const url = URL.createObjectURL(file);
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            const canvas = document.createElement('canvas');
+            const maxW = 1200, maxH = 800;
+            let w = img.width, h = img.height;
+            if (w > maxW) { h = h * maxW / w; w = maxW; }
+            if (h > maxH) { w = w * maxH / h; h = maxH; }
+            canvas.width = Math.round(w);
+            canvas.height = Math.round(h);
+            canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const fmt = canvas.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+            canvas.toBlob(b => b ? resolve(b) : reject(new Error('Compresión fallida')), fmt, 0.8);
+          };
+          img.onerror = () => reject(new Error('Error al leer imagen'));
+          img.src = url;
+        });
+      }
+      const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+      const fileName = `bio-bg-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('branding').upload(fileName, blob, { upsert: false });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('branding').getPublicUrl(fileName);
+      const publicUrl = (urlData?.publicUrl || '') + `?t=${Date.now()}`;
+      handleFieldChange('bg_image_url', publicUrl);
+      saveDraft();
+    } catch (err) {
+      console.error('BG upload error:', err);
+    } finally {
+      if (bgInputRef.current) bgInputRef.current.value = '';
       setUploading(false);
     }
   };
@@ -573,6 +616,33 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                         </div>
                       </div>
                     </div>
+                  </div>
+                )}
+                {profile?.bg_type === 'image' && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Imagen de fondo</label>
+                    <input ref={bgInputRef} type="file" accept="image/*" className="hidden"
+                      onChange={e => { const f = e.target.files?.[0]; if (f) uploadBgImage(f); }} />
+                    {profile.bg_image_url ? (
+                      <div className="relative group rounded-xl overflow-hidden">
+                        <img src={profile.bg_image_url} alt="Fondo" className="w-full h-32 object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <Button variant="secondary" size="sm" onClick={() => bgInputRef.current?.click()} disabled={uploading} className="gap-1">
+                            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} Cambiar
+                          </Button>
+                          <Button variant="destructive" size="sm" onClick={() => { handleFieldChange('bg_image_url', null); saveDraft(); }} className="gap-1">
+                            <X className="w-3.5 h-3.5" /> Quitar
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => bgInputRef.current?.click()} disabled={uploading}
+                        className="w-full h-32 rounded-xl border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center hover:border-primary/50 hover:bg-accent/50 transition-colors">
+                        {uploading ? <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /> : <Upload className="w-6 h-6 text-muted-foreground" />}
+                        <p className="text-sm text-muted-foreground mt-1">Subir imagen de fondo</p>
+                        <p className="text-xs text-muted-foreground/70">JPG, PNG o WebP</p>
+                      </button>
+                    )}
                   </div>
                 )}
                 <div className="space-y-2">
