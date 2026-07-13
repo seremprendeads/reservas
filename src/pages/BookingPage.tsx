@@ -25,7 +25,7 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
           const isSelected = bookingData.service?.id === s.id;
           return (
             <div key={s.id}
-              className={`relative text-left rounded-xl transition-all duration-200 flex flex-col overflow-hidden ${
+              className={`relative text-center rounded-xl transition-all duration-200 flex flex-col overflow-hidden ${
                 isSingle ? 'w-full sm:max-w-md' : 'w-full'
               } ${
                 isSelected
@@ -40,25 +40,25 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
               {s.image_url && (
                 <img src={s.image_url} alt={s.name} className="w-full h-36 object-cover" />
               )}
-              <div className="p-4 flex flex-col flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Tag className="w-5 h-5 shrink-0" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text-muted)' }} />
-                <h3 className="font-bold text-lg leading-tight" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text)' }}>{s.name}</h3>
+              <div className="p-5 flex flex-col flex-1 items-center">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: isSelected ? 'var(--booking-primary)' : 'var(--booking-primary)20' }}>
+                  <Tag className="w-6 h-6" style={{ color: isSelected ? '#fff' : 'var(--booking-primary)' }} />
+                </div>
+                <h3 className="font-bold text-lg leading-tight mb-1" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text)' }}>{s.name}</h3>
+                {s.description && (
+                  <p className="text-sm mb-4" style={{ color: 'var(--booking-text-muted)' }}>{s.description}</p>
+                )}
+                <p className="text-xl font-bold mb-4" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text)' }}>
+                  {formatPrice(s.price, s.currency)}
+                </p>
+                <button onClick={() => onSelect(s)} className={`mt-auto w-full py-2.5 rounded-lg font-semibold transition-colors duration-200 ${
+                  isSelected
+                    ? 'bg-booking-primary text-white cursor-default'
+                    : 'bg-booking-primary text-white hover:opacity-90'
+                }`}>
+                  {isSelected ? 'Seleccionado' : 'Elegir'}
+                </button>
               </div>
-              {s.description && (
-                <p className="text-sm mb-3" style={{ color: 'var(--booking-text-muted)' }}>{s.description}</p>
-              )}
-              <p className="text-xl font-bold mb-4 text-white">
-                {formatPrice(s.price, s.currency)}
-              </p>
-              <button onClick={() => onSelect(s)} className={`mt-auto w-full py-2.5 rounded-lg font-semibold transition-colors duration-200 ${
-                isSelected
-                  ? 'bg-booking-primary text-white cursor-default'
-                  : 'bg-booking-primary text-white hover:opacity-90'
-              }`}>
-                {isSelected ? 'Seleccionado' : 'Elegir'}
-              </button>
-            </div>
             </div>
           );
         })}
