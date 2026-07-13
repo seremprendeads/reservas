@@ -51,6 +51,18 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
       setSlug(data.slug);
       const { data: linkData } = await supabase.from('bio_links').select('*').eq('profile_id', data.id).order('sort_order');
       if (linkData) setLinks(linkData);
+    } else {
+      const defaultSlug = adminEmail.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 30);
+      const { data: newProfile } = await supabase.from('bio_profiles').insert({
+        admin_email: adminEmail,
+        slug: defaultSlug,
+        name: '',
+      }).select().single();
+      if (newProfile) {
+        setProfile(newProfile);
+        profileRef.current = newProfile;
+        setSlug(newProfile.slug);
+      }
     }
     setLoading(false);
   }, [adminEmail]);
@@ -75,6 +87,8 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     return data!;
   };
 
+  const pendingSaveRef = useRef<Partial<BioProfile> | null>(null);
+
   const updateProfile = (fields: Partial<BioProfile>) => {
     setProfile(prev => {
       const next = prev ? { ...prev, ...fields } as BioProfile : prev;
@@ -82,11 +96,14 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
       return next;
     });
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    pendingSaveRef.current = { ...(pendingSaveRef.current || {}), ...fields };
     saveTimerRef.current = setTimeout(async () => {
       const p = profileRef.current;
-      if (!p) return;
-      await supabase.from('bio_profiles').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', p.id);
-    }, 600);
+      const toSave = pendingSaveRef.current;
+      if (!p || !toSave) return;
+      pendingSaveRef.current = null;
+      await supabase.from('bio_profiles').update({ ...toSave, updated_at: new Date().toISOString() }).eq('id', p.id);
+    }, 800);
   };
 
   const loadStats = useCallback(async () => {
