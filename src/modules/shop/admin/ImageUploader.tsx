@@ -63,36 +63,26 @@ function compressImageForProduct(file: File): Promise<Blob> {
   });
 }
 
-function uploadWithProgress(
+async function uploadToStorage(
   bucket: string,
   fileName: string,
   blob: Blob,
   onProgress: (pct: number) => void
 ): Promise<void> {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  const url = `${supabaseUrl}/storage/v1/upload/${bucket}/${fileName}`;
+  onProgress(0);
 
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', url);
-    xhr.setRequestHeader('Authorization', `Bearer ${supabaseAnonKey}`);
-    xhr.setRequestHeader('x-upsert', 'false');
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        onProgress(Math.round((e.loaded / e.total) * 100));
-      }
-    };
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve();
-      } else {
-        reject(new Error(`Upload failed: ${xhr.statusText}`));
-      }
-    };
-    xhr.onerror = () => reject(new Error('Error de red al subir imagen'));
-    xhr.send(blob);
-  });
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(fileName, blob, {
+      contentType: 'image/webp',
+      upsert: false,
+    });
+
+  if (error) {
+    throw new Error(error.message || 'Error al subir imagen');
+  }
+
+  onProgress(100);
 }
 
 export function ImageUploader({
@@ -132,10 +122,10 @@ export function ImageUploader({
     setProgress(0);
     const fileName = `product-${Date.now()}.webp`;
     try {
-      await uploadWithProgress(SHOP_STORAGE_BUCKET, fileName, blob, setProgress);
-    } catch {
+      await uploadToStorage(SHOP_STORAGE_BUCKET, fileName, blob, setProgress);
+    } catch (err: any) {
       setStatus('error');
-      setErrorMessage('No se pudo subir la imagen. Verificá tu conexión e intentá nuevamente.');
+      setErrorMessage(err?.message || 'No se pudo subir la imagen. Verificá tu conexión e intentá nuevamente.');
       return;
     }
 
