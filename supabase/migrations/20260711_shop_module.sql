@@ -64,7 +64,7 @@ CREATE POLICY "Admin all shop_orders" ON shop_orders FOR ALL USING (true);
 CREATE TABLE IF NOT EXISTS shop_order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES shop_orders(id) ON DELETE CASCADE,
-  product_id UUID NOT NULL REFERENCES shop_products(id) ON DELETE RESTRICT,
+  product_id UUID NOT NULL REFERENCES shop_products(id) ON DELETE CASCADE,
   product_name TEXT NOT NULL,
   quantity INT NOT NULL,
   unit_price NUMERIC(12,2) NOT NULL,
