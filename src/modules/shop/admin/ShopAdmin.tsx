@@ -166,10 +166,16 @@ function ProductsManager() {
     if (!name.trim() || !price) return;
     setSaving(true);
     const payload = { name: name.trim(), description: description.trim(), price: parseFloat(price), currency, stock: parseInt(stock) || 0, sku: sku.trim() || null, image: imageUrl || null, category_id: categoryId || null, featured };
-    if (editing) {
-      await supabase.from('shop_products').update(payload).eq('id', editing.id);
-    } else {
-      await supabase.from('shop_products').insert(payload);
+    try {
+      if (editing) {
+        const { error } = await supabase.from('shop_products').update(payload).eq('id', editing.id);
+        if (error) console.error('Error updating product:', error);
+      } else {
+        const { error } = await supabase.from('shop_products').insert(payload);
+        if (error) console.error('Error inserting product:', error);
+      }
+    } catch (e) {
+      console.error('Save error:', e);
     }
     setShowDialog(false);
     setSaving(false);
