@@ -419,6 +419,12 @@ function OrdersList() {
     });
   }, []);
 
+  const removeOrder = async (o: Order) => {
+    await supabase.from('shop_order_items').delete().eq('order_id', o.id);
+    await supabase.from('shop_orders').delete().eq('id', o.id);
+    setOrders(prev => prev.filter(x => x.id !== o.id));
+  };
+
   if (loading) return <div className="text-center py-10"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>;
 
   return (
@@ -429,18 +435,21 @@ function OrdersList() {
         ) : (
           <div className="divide-y">
             {orders.map(o => (
-              <div key={o.id} className="flex items-center justify-between px-6 py-3">
-                <div>
+              <div key={o.id} className="flex items-center justify-between px-6 py-3 gap-4">
+                <div className="min-w-0 flex-1">
                   <p className="font-medium">{o.customer_name}</p>
                   <p className="text-sm text-muted-foreground">{o.customer_email} · {o.customer_phone}</p>
                   <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString('es-AR')}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <p className="font-bold">${o.total.toLocaleString('es-AR')} {o.currency}</p>
                   <Badge variant={o.payment_status === 'approved' ? 'default' : o.payment_status === 'pending' ? 'secondary' : 'destructive'}>
                     {o.payment_status === 'approved' ? 'Pagado' : o.payment_status === 'pending' ? 'Pendiente' : 'Rechazado'}
                   </Badge>
                 </div>
+                <Button variant="destructive" size="sm" className="shrink-0" onClick={() => removeOrder(o)}>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             ))}
           </div>
