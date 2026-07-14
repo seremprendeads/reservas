@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { Product, Category, Order } from '../types';
 import { PLAN_LIMITS, SHOP_STORAGE_BUCKET } from '../config';
@@ -35,6 +35,9 @@ export function ShopAdmin() {
         <button onClick={() => setView('trash')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'trash' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <Archive className="w-4 h-4 inline mr-1.5" />Papelera
         </button>
+        <a href="/tienda" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent ml-auto inline-flex items-center">
+          <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
+        </a>
       </div>
       {view === 'dashboard' && <ShopDashboard />}
       {view === 'products' && <ProductsManager />}
