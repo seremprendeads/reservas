@@ -163,7 +163,7 @@ function BookingContent() {
               <span className="text-xl font-bold" style={{ color: textColor }}>{title}</span>
               {subtitle && <p className="text-sm" style={{ color: mutedColor }}>{subtitle}</p>}
             </div>
-          </div>
+          </div>&nbsp;
             <a
             href="/tienda"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
