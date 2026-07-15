@@ -59,17 +59,18 @@ Deno.serve(async (req: Request) => {
       return new Response("No payment ID", { status: 200 });
     }
 
-    // Verify webhook signature if secret is configured
+    // Verify webhook signature — REQUIRED, never accept without it
     const webhookSecret = Deno.env.get("MP_WEBHOOK_SECRET");
-    if (webhookSecret) {
-      const signatureHeader = req.headers.get("x-signature");
-      const isValid = await verifyMpSignature(bodyText, signatureHeader, webhookSecret);
-      if (!isValid) {
-        console.error("Invalid MP webhook signature");
-        return new Response("Invalid signature", { status: 401 });
-      }
-    } else {
-      console.warn("WARNING: MP_WEBHOOK_SECRET not set — webhook signature not verified");
+    if (!webhookSecret) {
+      console.error("MP_WEBHOOK_SECRET not configured — rejecting webhook");
+      return new Response("Webhook secret not configured", { status: 500 });
+    }
+
+    const signatureHeader = req.headers.get("x-signature");
+    const isValid = await verifyMpSignature(bodyText, signatureHeader, webhookSecret);
+    if (!isValid) {
+      console.error("Invalid MP webhook signature");
+      return new Response("Invalid signature", { status: 401 });
     }
 
     const supabase = createClient(
@@ -77,36 +78,72 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Fetch payment details from MP API (this verifies the payment exists)
-    // Use the business's own MP token (no global fallback for security)
-    const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-      headers: { Authorization: `Bearer ${mpConfig?.access_token}` },
-    });
+    // Find the booking to get business_id
+    const bookingCode = body.data?.id ? null : null; // will be set after payment lookup
 
-    if (!mpRes.ok) {
-      console.error("MP API error:", mpRes.status);
-      return new Response("MP API error", { status: 200 });
+    // First: look up the booking from external_reference in the payment
+    // But we need the MP token to fetch the payment first.
+    // We can't look up the booking without the payment details,
+    // so we need to find the business first.
+    // Strategy: fetch payment with each business's token until we find a match,
+    // or use the payment_id to find the booking directly.
+
+    // Actually: the payment external_reference contains the booking code.
+    // We need to fetch the payment to get external_reference.
+    // But we need a valid MP token to do that.
+
+    // Solution: look up all connected MP providers and try each token
+    const { data: providers } = await supabase
+      .from("payment_providers")
+      .select("business_id, access_token")
+      .eq("provider", "mercadopago")
+      .eq("status", "connected");
+
+    if (!providers || providers.length === 0) {
+      console.error("No connected MP providers found");
+      return new Response("No MP providers", { status: 200 });
     }
 
-    const payment = await mpRes.json();
+    let payment: Record<string, unknown> | null = null;
+    let matchedBusinessId: string | null = null;
+
+    for (const prov of providers) {
+      if (!prov.access_token) continue;
+      const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        headers: { Authorization: `Bearer ${prov.access_token}` },
+      });
+      if (res.ok) {
+        payment = await res.json();
+        matchedBusinessId = prov.business_id;
+        break;
+      }
+    }
+
+    if (!payment || !matchedBusinessId) {
+      console.error("Could not fetch payment from MP API");
+      return new Response("Payment fetch failed", { status: 200 });
+    }
 
     if (payment.status !== "approved") {
       return new Response("Payment not approved", { status: 200 });
     }
 
-    const bookingCode = payment.external_reference;
+    const extRef = payment.external_reference as string;
+    if (!extRef) {
+      return new Response("No external reference", { status: 200 });
+    }
 
-    // Find the booking to get business_id
+    // Find the booking
     const { data: existingBooking, error: findError } = await supabase
       .from("bookings")
-      .select("id, business_id, booking_date, booking_time, customer_name, booking_code")
-      .eq("booking_code", bookingCode)
+      .select("id, business_id, booking_date, booking_time, customer_name, booking_code, payment_status")
+      .eq("booking_code", extRef)
       .maybeSingle();
 
     if (findError) throw findError;
 
     if (!existingBooking) {
-      console.error("Booking not found for code:", bookingCode);
+      console.error("Booking not found for code:", extRef);
       return new Response("Booking not found", { status: 200 });
     }
 
@@ -117,26 +154,10 @@ Deno.serve(async (req: Request) => {
       return new Response("Already processed", { status: 200 });
     }
 
-    // Look up the business's own MP access token
-    const { data: mpConfig } = await supabase
-      .from("payment_providers")
-      .select("access_token")
-      .eq("business_id", businessId)
-      .eq("provider", "mercadopago")
-      .eq("status", "connected")
-      .maybeSingle();
-
-    // If business has its own token, re-verify the payment with it
-    if (mpConfig?.access_token && mpConfig.access_token !== globalMpToken) {
-      const verifyRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-        headers: { Authorization: `Bearer ${mpConfig.access_token}` },
-      });
-      if (verifyRes.ok) {
-        const verifiedPayment = await verifyRes.json();
-        if (verifiedPayment.status !== "approved") {
-          return new Response("Payment not approved (business token)", { status: 200 });
-        }
-      }
+    // Verify the payment belongs to this business
+    if (matchedBusinessId !== businessId) {
+      console.error("Payment business mismatch:", matchedBusinessId, "!=", businessId);
+      return new Response("Business mismatch", { status: 200 });
     }
 
     // Update the booking
@@ -148,7 +169,7 @@ Deno.serve(async (req: Request) => {
         booking_status: "confirmed",
         updated_at: new Date().toISOString(),
       })
-      .eq("booking_code", bookingCode)
+      .eq("booking_code", extRef)
       .eq("business_id", businessId)
       .select()
       .maybeSingle();
@@ -170,12 +191,12 @@ Deno.serve(async (req: Request) => {
         await fetch(`https://ntfy.sh/${ntfyTopic}`, {
           method: "POST",
           headers: {
-            "Title": "💰 Nueva reserva confirmada",
+            "Title": "Nueva reserva confirmada",
             "Priority": "high",
             "Tags": "white_check_mark,calendar",
             "Content-Type": "text/plain",
           },
-          body: `Cliente: ${booking.customer_name}\nFecha: ${fecha}\nHora: ${hora} hs\nCódigo: ${bookingCode}`,
+          body: `Cliente: ${booking.customer_name}\nFecha: ${fecha}\nHora: ${hora} hs\nCodigo: ${extRef}`,
         });
       }
     }

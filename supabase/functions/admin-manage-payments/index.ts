@@ -1,11 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { authenticateToken, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
 
-function mask(s: string): string {
-  if (s.length <= 8) return "****";
-  return s.slice(0, 4) + "****" + s.slice(-4);
-}
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
@@ -24,19 +19,13 @@ Deno.serve(async (req: Request) => {
     if (action === "list") {
       const { data, error } = await supabase
         .from("payment_providers")
-        .select("*")
+        .select("id, business_id, provider, status, client_id, public_key, wallet_address, last_tested_at, created_at, updated_at")
         .eq("business_id", auth.businessId)
         .order("provider");
 
       if (error) throw error;
 
-      const masked = (data || []).map((p: Record<string, unknown>) => ({
-        ...p,
-        access_token: p.access_token ? mask(p.access_token as string) : null,
-        client_secret: p.client_secret ? mask(p.client_secret as string) : null,
-      }));
-
-      return jsonSuccess({ success: true, providers: masked });
+      return jsonSuccess({ success: true, providers: data || [] });
     }
 
     if (action === "save") {

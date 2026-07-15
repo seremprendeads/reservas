@@ -4,7 +4,7 @@ import { BookingForm } from '../components/BookingForm';
 import { Payment } from '../components/Payment';
 import { Confirmation } from '../components/Confirmation';
 import { BookingProvider, useBooking } from '../contexts/BookingContext';
-import { MapPin, Check, Store } from 'lucide-react';
+import { MapPin, Check, Store, Tag } from 'lucide-react';
 import { supabase, Branding, Service } from '../lib/supabase';
 import { useBusiness } from '../contexts/BusinessContext';
 

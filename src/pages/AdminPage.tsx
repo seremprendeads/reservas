@@ -1908,6 +1908,9 @@ export function AdminPage() {
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void }>({ open: false, message: '', onConfirm: () => {} });
   const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [trialWarningOpen, setTrialWarningOpen] = useState(false);
+  const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
+  const trialWarningShownRef = useRef(false);
 
   const [darkMode, setDarkMode] = useState(() => {
     const stored = localStorage.getItem('admin_dark');
@@ -1920,6 +1923,37 @@ export function AdminPage() {
     localStorage.setItem('admin_dark', darkMode ? '1' : '0');
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
+
+  // Trial countdown & auto-disconnect
+  useEffect(() => {
+    if (!loggedIn) return;
+
+    const checkTrial = () => {
+      const trialEnds = sessionStorage.getItem('admin_trial_ends_at');
+      if (!trialEnds) return;
+
+      const endDate = new Date(trialEnds);
+      const now = new Date();
+      const diffMs = endDate.getTime() - now.getTime();
+      const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+      setTrialDaysLeft(days > 0 ? days : 0);
+
+      if (days <= 0) {
+        handleLogout();
+        return;
+      }
+
+      if (days <= 2 && !trialWarningShownRef.current) {
+        trialWarningShownRef.current = true;
+        setTrialWarningOpen(true);
+      }
+    };
+
+    checkTrial();
+    const interval = setInterval(checkTrial, 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [loggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (loggedIn && business?.id) loadData();
@@ -1998,7 +2032,7 @@ export function AdminPage() {
 
   const updateBookingStatus = async (id: string, status: Booking['booking_status']) => {
     try {
-          const { data, error } = await authInvoke('admin-update-booking', { booking_id: id, booking_status: status });
+      const { data, error } = await authInvoke('admin-update-booking', { booking_id: id, booking_status: status });
       if (error || !data?.success) throw new Error('Error al actualizar');
       loadData();
     } catch {
@@ -2267,12 +2301,23 @@ export function AdminPage() {
               {(() => {
                 const trialEnds = sessionStorage.getItem('admin_trial_ends_at');
                 if (!trialEnds) return null;
-                const daysLeft = Math.ceil((new Date(trialEnds).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                const daysLeft = trialDaysLeft ?? Math.ceil((new Date(trialEnds).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                 if (daysLeft <= 0) return null;
+
+                const endDate = new Date(trialEnds);
+                const now = new Date();
+                const totalHours = Math.max(0, Math.floor((endDate.getTime() - now.getTime()) / (1000 * 60 * 60)));
+                const hours = totalHours % 24;
+
+                const isUrgent = daysLeft <= 2;
+                const isCritical = daysLeft <= 0;
+
                 return (
-                  <div className={`rounded-lg p-4 text-sm font-medium flex items-center justify-between ${daysLeft <= 3 ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}`}>
-                    <span>Período de prueba: {daysLeft} {daysLeft === 1 ? 'día' : 'días'} restantes</span>
-                    <a href="#prices" target="_blank" className={`ml-4 px-4 py-2 rounded-lg text-sm font-bold text-white transition-colors ${daysLeft <= 3 ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}`}>
+                  <div className={`rounded-lg p-4 text-sm font-medium flex items-center justify-between ${isCritical ? 'bg-red-100 text-red-800 border border-red-200' : isUrgent ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}`}>
+                    <span>
+                      Período de prueba: {daysLeft} {daysLeft === 1 ? 'día' : 'días'}{hours > 0 ? ` y ${hours}hs` : ''} restantes
+                    </span>
+                    <a href="#prices" target="_blank" className={`ml-4 px-4 py-2 rounded-lg text-sm font-bold text-white transition-colors ${isUrgent ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}`}>
                       Actualizar Plan
                     </a>
                   </div>
@@ -2768,6 +2813,31 @@ export function AdminPage() {
             </Button>
             <Button onClick={confirmModal.onConfirm} variant="destructive">
               Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Trial Warning Popup */}
+      <Dialog open={trialWarningOpen} onOpenChange={setTrialWarningOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50">
+              <Clock className="h-7 w-7 text-amber-600 dark:text-amber-400" />
+            </div>
+            <DialogTitle className="text-center pt-4">Tu prueba está por vencer</DialogTitle>
+            <DialogDescription className="text-center">
+              {trialDaysLeft !== null && trialDaysLeft > 0
+                ? `Quedan ${trialDaysLeft} ${trialDaysLeft === 1 ? 'día' : 'días'} de prueba. Actualizá tu plan para no perder acceso.`
+                : 'Tu período de prueba ha expirado.'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center gap-2">
+            <Button variant="outline" onClick={() => setTrialWarningOpen(false)}>
+              Cerrar para continuar hasta el 14
+            </Button>
+            <Button className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
+              <a href="#prices" target="_blank">Actualizar Plan</a>
             </Button>
           </DialogFooter>
         </DialogContent>

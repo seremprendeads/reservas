@@ -30,7 +30,7 @@ git commit -m "estilo css"
 git push
 
 git add .
-git commit -m "apariencia"
+git commit -m "14 dias"
 git push
 
 
