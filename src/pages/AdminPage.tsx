@@ -2549,8 +2549,11 @@ export function AdminPage() {
                 const daysLeft = Math.ceil((new Date(trialEnds).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                 if (daysLeft <= 0) return null;
                 return (
-                  <div className={`rounded-lg p-4 text-sm font-medium ${daysLeft <= 3 ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}`}>
-                    Período de prueba: {daysLeft} {daysLeft === 1 ? 'día' : 'días'} restantes
+                  <div className={`rounded-lg p-4 text-sm font-medium flex items-center justify-between ${daysLeft <= 3 ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}`}>
+                    <span>Período de prueba: {daysLeft} {daysLeft === 1 ? 'día' : 'días'} restantes</span>
+                    <a href="#prices" target="_blank" className={`ml-4 px-4 py-2 rounded-lg text-sm font-bold text-white transition-colors ${daysLeft <= 3 ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}`}>
+                      Actualizar Plan
+                    </a>
                   </div>
                 );
               })()}
