@@ -1,11 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { authenticateAdmin, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
+import { signToken } from "../_shared/jwt.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -16,50 +11,55 @@ Deno.serve(async (req: Request) => {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Email y contraseña requeridos" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonError("Email y contraseña requeridos", 400);
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    const auth = await authenticateAdmin(email, password);
+    if ('error' in auth) {
+      return jsonUnauthorized();
+    }
+
+    // Sign JWT token
+    const jwtSecret = Deno.env.get("JWT_SECRET");
+    if (!jwtSecret) {
+      return jsonError("JWT_SECRET no configurado", 500);
+    }
+
+    const token = await signToken(
+      {
+        sub: auth.admin.id,
+        email: auth.admin.email,
+        business_id: auth.businessId,
+      },
+      jwtSecret,
+      24 // 24 hours
     );
 
-    const { data, error } = await supabase
-      .from("admin_users")
-      .select("id, email, name, password_hash")
-      .eq("email", email)
-      .maybeSingle();
+    // Get all businesses the user is a member of
+    const supabase = createServiceClient();
+    const { data: memberships } = await supabase
+      .from("business_members")
+      .select("business_id, role, businesses(id, name, slug, logo_url)")
+      .eq("user_email", email)
+      .eq("is_active", true);
 
-    if (error || !data) {
-      return new Response(
-        JSON.stringify({ success: false }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const businesses = (memberships || [])
+      .map((m: Record<string, unknown>) => ({
+        id: m.business_id,
+        role: m.role,
+        ...(m.businesses as Record<string, unknown>),
+      }))
+      .filter((b: Record<string, unknown>) => b.id);
 
-    const { data: verified } = await supabase.rpc("verify_admin_password", {
-      input_password: password,
-      stored_hash: data.password_hash,
+    return jsonSuccess({
+      success: true,
+      name: auth.admin.name,
+      business_id: auth.businessId,
+      token,  // JWT token — store this, NOT the password
+      businesses,
     });
-
-    if (!verified) {
-      return new Response(
-        JSON.stringify({ success: false }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({ success: true, name: data.name }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
   } catch (err) {
-    return new Response(
-      JSON.stringify({ success: false, error: "Error interno" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    console.error("admin-login error:", err);
+    return jsonError("Error interno");
   }
 });

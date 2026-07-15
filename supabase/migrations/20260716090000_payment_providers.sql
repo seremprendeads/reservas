@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS payment_providers (
 
 ALTER TABLE payment_providers ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admin all payment_providers" ON payment_providers;
 CREATE POLICY "Admin all payment_providers" ON payment_providers FOR ALL USING (true);
 
 CREATE INDEX IF NOT EXISTS idx_payment_providers_shop ON payment_providers(shop_id);

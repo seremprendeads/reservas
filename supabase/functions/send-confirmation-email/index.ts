@@ -1,10 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { createServiceClient, corsHeaders } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -24,14 +19,23 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // If no Resend API key, just log and return success (for development)
+    // Validate booking code exists in the database (prevents spam/forgery)
+    const supabase = createServiceClient();
+    const { data: booking } = await supabase
+      .from("bookings")
+      .select("id, customer_email, booking_date, booking_time")
+      .eq("booking_code", bookingCode)
+      .maybeSingle();
+
+    if (!booking) {
+      return new Response(
+        JSON.stringify({ error: "Invalid booking code" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (!RESEND_API_KEY) {
-      console.log("Email would be sent to:", email, {
-        name,
-        bookingCode,
-        date,
-        time,
-      });
+      console.log("Email would be sent to:", email, { name, bookingCode, date, time });
       return new Response(
         JSON.stringify({ success: true, message: "Email logged (no API key configured)" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -97,7 +101,10 @@ Deno.serve(async (req: Request) => {
     if (!response.ok) {
       const error = await response.text();
       console.error("Resend error:", error);
-      throw new Error("Failed to send email");
+      throw new Response(
+        JSON.stringify({ error: "Failed to send email" }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     return new Response(
@@ -107,7 +114,7 @@ Deno.serve(async (req: Request) => {
   } catch (err) {
     console.error("Error sending email:", err);
     return new Response(
-      JSON.stringify({ error: err.message || "Internal server error" }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

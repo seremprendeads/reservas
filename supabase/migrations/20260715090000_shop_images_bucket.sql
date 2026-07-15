@@ -6,11 +6,13 @@ VALUES ('shop-images', 'shop-images', true, 2097152,
 ON CONFLICT (id) DO NOTHING;
 
 -- Public read access
+DROP POLICY IF EXISTS "Public read shop-images" ON storage.objects;
 CREATE POLICY "Public read shop-images"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'shop-images');
 
 -- Admin insert
+DROP POLICY IF EXISTS "Admin insert shop-images" ON storage.objects;
 CREATE POLICY "Admin insert shop-images"
 ON storage.objects FOR INSERT
 WITH CHECK (
@@ -19,6 +21,7 @@ WITH CHECK (
 );
 
 -- Admin delete
+DROP POLICY IF EXISTS "Admin delete shop-images" ON storage.objects;
 CREATE POLICY "Admin delete shop-images"
 ON storage.objects FOR DELETE
 USING (

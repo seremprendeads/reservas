@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Calendar } from '../components/Calendar';
 import { BookingForm } from '../components/BookingForm';
 import { Payment } from '../components/Payment';
@@ -7,6 +8,7 @@ import { Button } from '../components/ui/button';
 import { BookingProvider, useBooking } from '../contexts/BookingContext';
 import { Phone, MapPin, Check, Clock, Tag, Store } from 'lucide-react';
 import { supabase, Branding, Service } from '../lib/supabase';
+import { useBusiness } from '../contexts/BusinessContext';
 
 function formatPrice(amount: number, currency: string) {
   return `$${amount.toLocaleString('es-AR')} ${currency}`;
@@ -69,6 +71,8 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
 
 function BookingContent() {
   const { step, setStep, bookingData, setSelectedService } = useBooking();
+  const { business } = useBusiness();
+  const { slug } = useParams<{ slug: string }>();
   const [branding, setBranding] = useState<Branding | null>(null);
   const [services, setServices] = useState<Service[]>([]);
 
@@ -82,14 +86,15 @@ function BookingContent() {
   }, []);
 
   useEffect(() => {
+    if (!business?.id) return;
     Promise.all([
-      supabase.from('branding').select('*').maybeSingle(),
-      supabase.from('services').select('*').eq('is_active', true).order('sort_order'),
+      supabase.from('branding').select('*').eq('business_id', business.id).maybeSingle(),
+      supabase.from('services').select('*').eq('business_id', business.id).eq('is_active', true).order('sort_order'),
     ]).then(([brandingRes, servicesRes]) => {
       if (brandingRes.data) setBranding(brandingRes.data as Branding);
       if (servicesRes.data) setServices(servicesRes.data);
     });
-  }, []);
+  }, [business?.id]);
 
   const b = branding;
   const primaryColor = b?.primary_color || '#059669';

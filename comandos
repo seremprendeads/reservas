@@ -29,8 +29,6 @@ git add .
 git commit -m "estilo css"
 git push
 
-
-
 git add .
 git commit -m "apariencia"
 git push
@@ -41,3 +39,44 @@ Lo que sí consume recursos reales:
 - Autenticación de admin → trivial
 - Edge Functions de pagos (Mercado Pago) → solo cuando hay compra real
 En resumen: 50-100 apps corriendo con estos features están muy por debajo de los límites gratuitos de Supabase y Vercel. No te preocupes por eso.
+
+
+
+# Todos
+[✓] Analizar estructura actual completa (tablas, edge functions, frontend)
+[✓] Crear migración SQL: tabla businesses + business_id en todas las tablas
+[✓] Crear migración RLS: políticas multi-tenant por business_id
+[✓] Actualizar edge functions para trabajar con business_id
+[✓] Crear sistema de autenticación multi-tenant (roles: owner, admin, empleado)
+[✓] Actualizar tipos TypeScript (supabase.ts) con business_id
+[✓] Actualizar frontend: contextos, hooks, servicios para multi-tenant
+[✓] Actualizar Storage: paths por business_id
+[✓] Crear sistema de Feature Flags para planes
+[✓] Actualizar rutas de la aplicación
+[✓] Preparar arquitectura para IA futura
+[✓] Informe final de refactorización
+[✓] Verificar queries Supabase restantes sin business_id
+
+Resumen de la auditoría final
+Se verificó todo el código fuente del frontend. Se encontraron y corrigieron estos problemas:
+Correcciones realizadas en esta pasada:
+1. src/pages/AdminPage.tsx - ServicesManager (1675): Agregado useBusiness() + filtrado por business_id en loadServices() + business_id en payload de inserts de servicios.
+2. src/pages/AdminPage.tsx - AppearanceManager (1175): Agregado useBusiness() + storage paths scoped por business_id para logos y backgrounds.
+3. src/pages/AdminPage.tsx - Service image upload (1728): Path cambiado a ${business?.id}/service-...
+4. src/modules/shop/admin/ShopAdmin.tsx - duplicate (214): Agregado business_id: business.id al duplicar productos.
+5. src/modules/shop/pages/ShopPage.tsx - create-payment (100): Agregado business_slug: business?.slug al crear preferencia de pago.
+6. src/modules/shop/admin/ImageUploader.tsx (123): Storage path cambiado a ${businessId}/product-...
+7. src/modules/bio/admin/BioAdmin.tsx - 3 uploads (avatar, bg, profile insert): Todos con business_id y paths scoped.
+8. src/pages/AdminPage.tsx - avatar upload (966): Path cambiado a ${businessId}/avatar-...
+9. supabase/migrations/...sql (177): Agregado UNIQUE(slug) global en bio_profiles para que la bio pública funcione correctamente.
+Verificación:
+- TypeScript: compila sin errores (tsc --noEmit)
+- Vite build: compila exitosamente
+- 60 queries Supabase en frontend verificadas — todas filtran por business_id
+
+
+
+
+
+
+   .\pg_dump postgresql://postgres.slsgkbepewxlsmzmcpri:Lolo1980CascotE@aws-1-us-east-1.pooler.supabase.com:6543/postgres

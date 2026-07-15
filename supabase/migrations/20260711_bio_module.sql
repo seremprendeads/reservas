@@ -32,7 +32,9 @@ CREATE TABLE IF NOT EXISTS bio_profiles (
 
 ALTER TABLE bio_profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read bio_profiles" ON bio_profiles;
 CREATE POLICY "Public read bio_profiles" ON bio_profiles FOR SELECT USING (is_active = true);
+DROP POLICY IF EXISTS "Admin all bio_profiles" ON bio_profiles;
 CREATE POLICY "Admin all bio_profiles" ON bio_profiles FOR ALL USING (
   EXISTS (SELECT 1 FROM admin_users WHERE email = current_setting('request.jwt.claims', true)::json->>'email')
 );
@@ -51,9 +53,11 @@ CREATE TABLE IF NOT EXISTS bio_links (
 
 ALTER TABLE bio_links ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read bio_links" ON bio_links;
 CREATE POLICY "Public read bio_links" ON bio_links FOR SELECT USING (
   is_active = true AND EXISTS (SELECT 1 FROM bio_profiles WHERE id = profile_id AND is_active = true)
 );
+DROP POLICY IF EXISTS "Admin all bio_links" ON bio_links;
 CREATE POLICY "Admin all bio_links" ON bio_links FOR ALL USING (
   EXISTS (SELECT 1 FROM admin_users WHERE email = current_setting('request.jwt.claims', true)::json->>'email')
 );
@@ -68,7 +72,9 @@ CREATE TABLE IF NOT EXISTS bio_stats (
 
 ALTER TABLE bio_stats ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public insert bio_stats" ON bio_stats;
 CREATE POLICY "Public insert bio_stats" ON bio_stats FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Admin read bio_stats" ON bio_stats;
 CREATE POLICY "Admin read bio_stats" ON bio_stats FOR SELECT USING (
   EXISTS (SELECT 1 FROM admin_users WHERE email = current_setting('request.jwt.claims', true)::json->>'email')
 );

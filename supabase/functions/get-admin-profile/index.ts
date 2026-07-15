@@ -8,24 +8,18 @@ Deno.serve(async (req: Request) => {
 
   try {
     const auth = await authenticateToken(req);
-    if ('error' in auth) {
-      return jsonUnauthorized();
-    }
-
-    const { day_of_week, start_time, end_time, is_active } = await req.json();
+    if ("error" in auth) return jsonUnauthorized();
 
     const supabase = createServiceClient();
-    const { error } = await supabase
-      .from("availability_settings")
-      .update({ start_time, end_time, is_active })
-      .eq("business_id", auth.businessId)
-      .eq("day_of_week", day_of_week);
+    const { data: profile } = await supabase
+      .from("admin_users")
+      .select("name, email, avatar_url")
+      .eq("id", auth.admin.id)
+      .maybeSingle();
 
-    if (error) throw error;
-
-    return jsonSuccess();
+    return jsonSuccess({ success: true, profile: profile || { name: auth.admin.name, email: auth.admin.email, avatar_url: null } });
   } catch (err) {
-    console.error("admin-update-availability error:", err);
+    console.error("get-admin-profile error:", err);
     return jsonError("Error interno");
   }
 });

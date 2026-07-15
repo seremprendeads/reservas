@@ -39,7 +39,7 @@ import {
   Link,
   CreditCard,
 } from 'lucide-react';
-import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings, Branding, Service } from '../lib/supabase';
+import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings, Branding, Service, WaitingListItem } from '../lib/supabase';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
@@ -53,27 +53,14 @@ import { Avatar } from '../components/ui/avatar';
 import { Skeleton } from '../components/ui/skeleton';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { useTheme } from '../contexts/ThemeContext';
+import { useBusiness } from '../contexts/BusinessContext';
 import { allThemes } from '../themes';
 import { cn } from '../lib/utils';
 import { ShopAdmin } from '../modules/shop/admin/ShopAdmin';
 import { BioAdmin } from '../modules/bio/admin/BioAdmin';
 import { PaymentsAdmin } from '../modules/payments/admin/PaymentsAdmin';
 
-type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop' | 'bio' | 'payments';
-
-interface WaitingListItem {
-  id: string;
-  nombre: string;
-  telefono: string;
-  email: string;
-  fecha_deseada: string;
-  horario_deseado: string | null;
-  servicio: string | null;
-  estado: 'pendiente' | 'contactado' | 'convertido' | 'cancelado';
-  notas: string | null;
-  created_at: string;
-  updated_at: string;
-}
+type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop' | 'bio' | 'payments' | 'team';
 
 function getStatusBadge(status: string) {
   const map: Record<string, { variant: 'success' | 'warning' | 'destructive' | 'info'; label: string }> = {
@@ -96,7 +83,7 @@ function getPaymentBadge(status: string) {
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 
-function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) => void }) {
+function LoginScreen({ onLogin }: { onLogin: (email: string, token: string) => void }) {
   const [mode, setMode] = useState<'login' | 'forgot'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -118,9 +105,15 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) =
       } else {
         sessionStorage.setItem('admin_logged_in', '1');
         sessionStorage.setItem('admin_email', email);
-        sessionStorage.setItem('admin_password', password);
+        sessionStorage.setItem('admin_token', data.token);
         sessionStorage.setItem('admin_name', data.name || '');
-        onLogin(email, password);
+        if (data.business_id) {
+          sessionStorage.setItem('admin_business_id', data.business_id);
+        }
+        if (data.businesses) {
+          sessionStorage.setItem('admin_businesses', JSON.stringify(data.businesses));
+        }
+        onLogin(email, data.token);
       }
     } catch {
       setError('Error al conectar con el servidor');
@@ -234,11 +227,11 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, password: string) =
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
 function NotasAdmin({
-  booking, adminEmail, adminPassword, onSaved
+  booking, adminEmail, adminToken, onSaved
 }: {
   booking: Booking;
   adminEmail: string;
-  adminPassword: string;
+  adminToken: string;
   onSaved: () => void;
 }) {
   const [nota, setNota] = useState((booking as any).notas_admin || '');
@@ -248,11 +241,9 @@ function NotasAdmin({
   const saveNota = async () => {
     setSaving(true);
     try {
-      const { data, error } = await supabase.functions.invoke('admin-update-booking', {
+      const { data, error } = await authInvoke('admin-update-booking', {
         body: {
-          email: adminEmail,
-          password: adminPassword,
-          booking_id: booking.id,
+                    booking_id: booking.id,
           notas_admin: nota,
         },
       });
@@ -297,13 +288,13 @@ function NotasAdmin({
 // ─── Availability Manager ─────────────────────────────────────────────────────
 
 function AvailabilityManager({
-  availability, blockedDates, onRefresh, adminEmail, adminPassword, showSuccess
+  availability, blockedDates, onRefresh, adminEmail, adminToken, showSuccess
 }: {
   availability: AvailabilitySetting[];
   blockedDates: BlockedDate[];
   onRefresh: () => void;
   adminEmail: string;
-  adminPassword: string;
+  adminToken: string;
   showSuccess: (msg: string) => void;
 }) {
   const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -324,8 +315,8 @@ function AvailabilityManager({
   const saveDay = async () => {
     if (editingDay === null) return;
     try {
-      const { data, error } = await supabase.functions.invoke('admin-update-availability', {
-        body: { email: adminEmail, password: adminPassword, day_of_week: editingDay, start_time: startTime, end_time: endTime, is_active: isActive },
+      const { data, error } = await authInvoke('admin-update-availability', {
+        body: { day_of_week: editingDay, start_time: startTime, end_time: endTime, is_active: isActive },
       });
       if (error || !data?.success) throw new Error('Error al guardar');
       setEditingDay(null);
@@ -339,8 +330,8 @@ function AvailabilityManager({
   const addBlockedDate = async () => {
     if (!newBlockedDate) return;
     try {
-      const { data, error } = await supabase.functions.invoke('admin-manage-blocked-dates', {
-        body: { email: adminEmail, password: adminPassword, action: 'add', date: newBlockedDate, reason: newBlockedReason || null },
+      const { data, error } = await authInvoke('admin-manage-blocked-dates', {
+        body: { action: 'add', date: newBlockedDate, reason: newBlockedReason || null },
       });
       if (error || !data?.success) throw new Error('Error al agregar');
       setNewBlockedDate('');
@@ -352,8 +343,8 @@ function AvailabilityManager({
 
   const removeBlockedDate = async (id: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('admin-manage-blocked-dates', {
-        body: { email: adminEmail, password: adminPassword, action: 'remove', id },
+      const { data, error } = await authInvoke('admin-manage-blocked-dates', {
+        body: { action: 'remove', id },
       });
       if (error || !data?.success) throw new Error('Error al eliminar');
       onRefresh();
@@ -462,11 +453,11 @@ interface ClientData {
 }
 
 function ClientsManager({
-  bookings, adminEmail, adminPassword, onRefresh, setConfirmModal, showSuccess,
+  bookings, adminEmail, adminToken, onRefresh, setConfirmModal, showSuccess,
 }: {
   bookings: Booking[];
   adminEmail: string;
-  adminPassword: string;
+  adminToken: string;
   onRefresh: () => void;
   setConfirmModal: (modal: { open: boolean; message: string; onConfirm: () => void }) => void;
   showSuccess: (msg: string) => void;
@@ -521,8 +512,8 @@ function ClientsManager({
         setConfirmModal({ open: false, message: '', onConfirm: () => {} });
         try {
           for (const b of relatedBookings) {
-            await supabase.functions.invoke('admin-delete-booking', {
-              body: { email: adminEmail, password: adminPassword, booking_id: b.id },
+            await authInvoke('admin-delete-booking', {
+              body: { booking_id: b.id },
             });
           }
           onRefresh();
@@ -658,7 +649,229 @@ function ClientsManager({
   );
 }
 
-// ─── WhatsApp Manager ─────────────────────────────────────────────────────────
+// ─── Team Manager ────────────────────────────────────────────────────────────
+
+function TeamManager({ adminEmail, adminToken }: { adminEmail: string; adminToken: string }) {
+  const { business } = useBusiness();
+  const [members, setMembers] = useState<Array<{ id: string; user_email: string; role: string; is_active: boolean; created_at: string }>>([]);
+  const [invites, setInvites] = useState<Array<{ id: string; email: string; role: string; invited_by: string; expires_at: string; created_at: string }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('member');
+  const [inviting, setInviting] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const loadData = useCallback(async () => {
+    if (!business?.id) return;
+    setLoading(true);
+    try {
+      const [membersRes, invitesRes] = await Promise.all([
+        supabase.from('business_members').select('*').eq('business_id', business.id).order('created_at'),
+        supabase.from('invite_tokens').select('*').eq('business_id', business.id).is('accepted_at', null).gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }),
+      ]);
+      if (membersRes.data) setMembers(membersRes.data);
+      if (invitesRes.data) setInvites(invitesRes.data);
+    } finally {
+      setLoading(false);
+    }
+  }, [business?.id]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handleInvite = async () => {
+    if (!inviteEmail.trim()) return;
+    setInviting(true);
+    setMessage(null);
+    try {
+      const { data } = await authInvoke('admin-invite-user', {
+        body: { target_email: inviteEmail.trim(), role: inviteRole },
+      });
+      if (data?.success) {
+        setMessage({ type: 'success', text: 'Invitación enviada' });
+        setInviteEmail('');
+        loadData();
+      } else {
+        setMessage({ type: 'error', text: data?.error || 'Error al invitar' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Error de conexión' });
+    } finally {
+      setInviting(false);
+    }
+  };
+
+  const handleRemoveMember = async (email: string) => {
+    if (!business?.id) return;
+    await supabase.from('business_members').delete().eq('business_id', business.id).eq('user_email', email);
+    loadData();
+  };
+
+  const roleLabels: Record<string, string> = { owner: 'Propietario', admin: 'Administrador', member: 'Miembro', viewer: 'Observador' };
+
+  if (loading) return <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Equipo</h2>
+        <p className="text-sm text-muted-foreground">Gestioná los miembros de tu negocio</p>
+      </div>
+
+      {/* Invite form */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Invitar usuario</CardTitle>
+          <CardDescription>Enviá una invitación por email para unirse a tu negocio</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Input
+              type="email"
+              placeholder="email@ejemplo.com"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              className="flex-1"
+            />
+            <select
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value)}
+              className="px-3 py-2 rounded-xl border text-sm bg-background"
+            >
+              <option value="member">Miembro</option>
+              <option value="admin">Administrador</option>
+              <option value="viewer">Observador</option>
+            </select>
+            <Button onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
+              {inviting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Invitar
+            </Button>
+          </div>
+          {message && (
+            <div className={`mt-3 text-sm ${message.type === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>
+              {message.text}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Members list */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Miembros ({members.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {members.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Sin miembros</p>
+          ) : (
+            <div className="divide-y">
+              {members.map((m) => (
+                <div key={m.id} className="flex items-center justify-between py-3">
+                  <div>
+                    <p className="font-medium">{m.user_email}</p>
+                    <p className="text-xs text-muted-foreground">{roleLabels[m.role] || m.role}</p>
+                  </div>
+                  {m.role !== 'owner' && (
+                    <Button variant="destructive" size="sm" onClick={() => handleRemoveMember(m.user_email)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pending invites */}
+      {invites.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Invitaciones pendientes ({invites.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="divide-y">
+              {invites.map((inv) => (
+                <div key={inv.id} className="flex items-center justify-between py-3">
+                  <div>
+                    <p className="font-medium">{inv.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {roleLabels[inv.role] || inv.role} · Invitado por {inv.invited_by}
+                    </p>
+                  </div>
+                  <Badge variant="secondary">Pendiente</Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Danger zone - Delete business */}
+      <Card className="border-red-200 dark:border-red-900">
+        <CardHeader>
+          <CardTitle className="text-base text-red-600 dark:text-red-400">Zona de peligro</CardTitle>
+          <CardDescription>Estas acciones son irreversibles</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DeleteBusinessSection adminEmail={adminEmail} adminToken={adminToken} />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function DeleteBusinessSection({ adminEmail, adminToken }: { adminEmail: string; adminToken: string }) {
+  const { business } = useBusiness();
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleDelete = async () => {
+    if (confirmText !== 'ELIMINAR' || !business?.id) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      const { data } = await authInvoke('delete-business', {
+        body: { business_id: business.id, confirmation: 'ELIMINAR' },
+      });
+      if (data?.success) {
+        sessionStorage.removeItem('admin_business_id');
+        sessionStorage.removeItem('admin_businesses');
+        localStorage.removeItem('reservas_business_id');
+        window.location.href = '/create-business';
+      } else {
+        setError(data?.error || 'Error al eliminar');
+      }
+    } catch {
+      setError('Error de conexión');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">
+        Se eliminará permanentemente <strong>{business?.name}</strong> y todos sus datos (reservas, servicios, tienda, configuración, archivos).
+      </p>
+      <Input
+        placeholder='Escribí "ELIMINAR" para confirmar'
+        value={confirmText}
+        onChange={(e) => setConfirmText(e.target.value)}
+        className="max-w-sm"
+      />
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      <Button
+        variant="destructive"
+        disabled={confirmText !== 'ELIMINAR' || deleting}
+        onClick={handleDelete}
+      >
+        {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+        Eliminar negocio permanentemente
+      </Button>
+    </div>
+  );
+}
 
 function WhatsAppManager({ bookings }: { bookings: Booking[] }) {
   const DEFAULT_TEMPLATE = 'Hola {nombre} Tu reserva fue aprobada. Te esperamos el día {fecha} a las {hora}. Muy pronto la recepcionista a cargo se contactará contigo para darte información más detallada de la orden de llegada en estos días hábiles. ¡Muchas Gracias! Saludos.';
@@ -786,12 +999,12 @@ function WhatsAppManager({ bookings }: { bookings: Booking[] }) {
 // ─── WaitingList Manager ──────────────────────────────────────────────────────
 
 function WaitingListManager({
-  waitingList, onRefresh, adminEmail, adminPassword
+  waitingList, onRefresh, adminEmail, adminToken
 }: {
   waitingList: WaitingListItem[];
   onRefresh: () => void;
   adminEmail: string;
-  adminPassword: string;
+  adminToken: string;
 }) {
   const [search, setSearch] = useState('');
   const [filterEstado, setFilterEstado] = useState('all');
@@ -800,8 +1013,8 @@ function WaitingListManager({
   const updateItem = async (id: string, estado?: string, action?: string) => {
     setSaving(id);
     try {
-      const { data, error } = await supabase.functions.invoke('admin-update-waiting-list', {
-        body: { email: adminEmail, password: adminPassword, id, estado, action },
+      const { data, error } = await authInvoke('admin-update-waiting-list', {
+        body: { id, estado, action },
       });
       if (error || !data?.success) throw new Error('Error');
       onRefresh();
@@ -933,10 +1146,10 @@ function WaitingListManager({
 // ─── Profile Manager ───────────────────────────────────────────────────────────
 
 function ProfileManager({
-  adminEmail, adminPassword, adminName, avatarUrl, onRefresh, showSuccess, onProfileUpdated, onAvatarChange
+  adminEmail, adminToken, adminName, avatarUrl, onRefresh, showSuccess, onProfileUpdated, onAvatarChange
 }: {
   adminEmail: string;
-  adminPassword: string;
+  adminToken: string;
   adminName: string;
   avatarUrl: string;
   onRefresh: () => void;
@@ -944,6 +1157,7 @@ function ProfileManager({
   onProfileUpdated: (name: string, email: string, password: string) => void;
   onAvatarChange: (url: string) => void;
 }) {
+  const { business } = useBusiness();
   const [name, setName] = useState(adminName);
   const [email, setEmail] = useState(adminEmail);
   const [newPassword, setNewPassword] = useState('');
@@ -974,7 +1188,7 @@ function ProfileManager({
 
     try {
       const fileExt = file.name.split('.').pop() || 'jpg';
-      const fileName = `avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${fileExt}`;
+      const fileName = `${business?.id || 'default'}/avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -993,11 +1207,9 @@ function ProfileManager({
       const publicUrl = (urlData?.publicUrl || '') + cacheBuster;
 
       // Persistir avatar en la base de datos
-      const { error: saveError } = await supabase.functions.invoke('admin-update-profile', {
+      const { error: saveError } = await authInvoke('admin-update-profile', {
         body: {
-          email: adminEmail,
-          password: adminPassword,
-          avatar_url: publicUrl,
+                    avatar_url: publicUrl,
         },
       });
 
@@ -1041,11 +1253,9 @@ function ProfileManager({
 
     setSaving(true);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('admin-update-profile', {
+      const { data, error: fnError } = await authInvoke('admin-update-profile', {
         body: {
-          email: adminEmail,
-          password: adminPassword,
-          name: name.trim(),
+                    name: name.trim(),
           newEmail: email.trim() !== adminEmail ? email.trim() : null,
           newPassword: newPassword || null,
         },
@@ -1062,7 +1272,7 @@ function ProfileManager({
         sessionStorage.setItem('admin_password', newPassword);
       }
 
-      onProfileUpdated(name.trim(), email.trim(), newPassword || adminPassword);
+      onProfileUpdated(name.trim(), email.trim(), newPassword || adminToken);
       onRefresh();
       showSuccess('Perfil actualizado correctamente');
       setNewPassword('');
@@ -1183,14 +1393,15 @@ function ProfileManager({
 // ─── Appearance (Branding) Manager ─────────────────────────────────────────────
 
 function AppearanceManager({
-  branding, onRefresh, adminEmail, adminPassword, showSuccess
+  branding, onRefresh, adminEmail, adminToken, showSuccess
 }: {
   branding: Branding | null;
   onRefresh: () => void;
   adminEmail: string;
-  adminPassword: string;
+  adminToken: string;
   showSuccess: (msg: string) => void;
 }) {
+  const { business } = useBusiness();
   const [logoUrl, setLogoUrl] = useState(branding?.logo_url || '');
   const [title, setTitle] = useState(branding?.title || 'Reserva tu Turno');
   const [subtitle, setSubtitle] = useState(branding?.subtitle || 'Sistema de Reserva');
@@ -1272,7 +1483,7 @@ function AppearanceManager({
       return;
     }
 
-    const fileName = `${type}-${Date.now()}.webp`;
+    const fileName = `${business?.id || 'default'}/${type}-${Date.now()}.webp`;
 
     setUploading(prev => ({ ...prev, [type]: true }));
     try {
@@ -1304,9 +1515,7 @@ function AppearanceManager({
     setSaving(true);
     try {
       const data = {
-        email: adminEmail,
-        password: adminPassword,
-        logo_url: logoUrl,
+                logo_url: logoUrl,
         title,
         subtitle,
         primary_color: primaryColor,
@@ -1322,7 +1531,7 @@ function AppearanceManager({
         header_opacity: headerOpacity,
       };
 
-      const { data: res, error } = await supabase.functions.invoke('admin-update-branding', {
+      const { data: res, error } = await authInvoke('admin-update-branding', {
         body: data,
       });
 
@@ -1682,6 +1891,7 @@ function AppearanceManager({
 // ─── Services Manager ─────────────────────────────────────────────────────────
 
 function ServicesManager() {
+  const { business } = useBusiness();
   const [services, setServices] = useState<Service[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
@@ -1694,10 +1904,11 @@ function ServicesManager() {
   const [imgError, setImgError] = useState('');
   const imgInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { loadServices(); }, []);
+  useEffect(() => { if (business?.id) loadServices(); }, [business?.id]);
 
   const loadServices = async () => {
-    const { data } = await supabase.from('services').select('*').order('sort_order');
+    if (!business?.id) return;
+    const { data } = await supabase.from('services').select('*').eq('business_id', business.id).order('sort_order');
     if (data) setServices(data);
   };
 
@@ -1732,7 +1943,7 @@ function ServicesManager() {
           img.src = url;
         });
       }
-      const fileName = `service-${Date.now()}.webp`;
+      const fileName = `${business?.id || 'default'}/service-${Date.now()}.webp`;
       const { error } = await supabase.storage.from('branding').upload(fileName, blob, { upsert: false, contentType: 'image/webp' });
       if (error) throw error;
       const { data: urlData } = supabase.storage.from('branding').getPublicUrl(fileName);
@@ -1766,8 +1977,9 @@ function ServicesManager() {
   };
 
   const save = async () => {
-    if (!name.trim() || !price) return;
+    if (!name.trim() || !price || !business?.id) return;
     const payload = {
+      business_id: business.id,
       name: name.trim(),
       description: description.trim(),
       price: parseFloat(price),
@@ -1775,7 +1987,7 @@ function ServicesManager() {
       image_url: imageUrl || null,
     };
     if (editing) {
-      await supabase.from('services').update(payload).eq('id', editing.id);
+      await supabase.from('services').update({ name: payload.name, description: payload.description, price: payload.price, currency: payload.currency, image_url: payload.image_url }).eq('id', editing.id).eq('business_id', business.id);
     } else {
       await supabase.from('services').insert(payload);
     }
@@ -1784,12 +1996,12 @@ function ServicesManager() {
   };
 
   const toggleActive = async (s: Service) => {
-    await supabase.from('services').update({ is_active: !s.is_active }).eq('id', s.id);
+    await supabase.from('services').update({ is_active: !s.is_active }).eq('id', s.id).eq('business_id', business.id);
     loadServices();
   };
 
   const remove = async (id: string) => {
-    await supabase.from('services').delete().eq('id', id);
+    await supabase.from('services').delete().eq('id', id).eq('business_id', business.id);
     loadServices();
   };
 
@@ -1897,12 +2109,22 @@ interface NavItem {
   badge?: number;
 }
 
+// Helper: authenticated edge function invoke
+function authInvoke(fnName: string, body: Record<string, unknown> = {}) {
+  const token = sessionStorage.getItem('admin_token') || '';
+  return supabase.functions.invoke(fnName, {
+    headers: { Authorization: `Bearer ${token}` },
+    body,
+  });
+}
+
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
 
 export function AdminPage() {
+  const { business, setBusinessById } = useBusiness();
   const [loggedIn, setLoggedIn] = useState(!!sessionStorage.getItem('admin_logged_in'));
   const [adminEmail, setAdminEmail] = useState(sessionStorage.getItem('admin_email') || '');
-  const [adminPassword, setAdminPassword] = useState(sessionStorage.getItem('admin_password') || '');
+  const [adminToken, setAdminToken] = useState(sessionStorage.getItem('admin_token') || '');
   const [adminName, setAdminName] = useState(sessionStorage.getItem('admin_name') || '');
   const [adminAvatar, setAdminAvatar] = useState(sessionStorage.getItem('admin_avatar') || '');
   const [view, setView] = useState<View>('dashboard');
@@ -1920,6 +2142,7 @@ export function AdminPage() {
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void }>({ open: false, message: '', onConfirm: () => {} });
   const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [myBusinesses, setMyBusinesses] = useState<Array<{ id: string; name: string; slug: string; logo_url: string | null; role: string }>>([]);
 
   const [darkMode, setDarkMode] = useState(() => {
     const stored = localStorage.getItem('admin_dark');
@@ -1933,23 +2156,32 @@ export function AdminPage() {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
+  // Load businesses from sessionStorage on mount
   useEffect(() => {
-    if (loggedIn) loadData();
-  }, [loggedIn]);
+    const stored = sessionStorage.getItem('admin_businesses');
+    if (stored) {
+      try { setMyBusinesses(JSON.parse(stored)); } catch { /* ignore */ }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (loggedIn && business?.id) loadData();
+  }, [loggedIn, business?.id]);
 
   const loadData = async () => {
+    if (!business?.id) return;
     setLoading(true);
     try {
-      const [bookingsRes, availRes, blockedRes, settingsRes, brandingRes, adminProfileRes] = await Promise.all([
-        supabase.from('bookings').select('*').order('booking_date', { ascending: true }),
-        supabase.from('availability_settings').select('*').order('day_of_week'),
-        supabase.from('blocked_dates').select('*').order('date'),
-        supabase.from('settings').select('*').maybeSingle(),
-        supabase.from('branding').select('*').maybeSingle(),
-        supabase.from('admin_users').select('name, avatar_url').eq('email', adminEmail).maybeSingle(),
+      const [bookingsRes, availRes, blockedRes, settingsRes, brandingRes, profileRes] = await Promise.all([
+        supabase.from('bookings').select('*').eq('business_id', business.id).order('booking_date', { ascending: true }),
+        supabase.from('availability_settings').select('*').eq('business_id', business.id).order('day_of_week'),
+        supabase.from('blocked_dates').select('*').eq('business_id', business.id).order('date'),
+        supabase.from('settings').select('*').eq('business_id', business.id).maybeSingle(),
+        supabase.from('branding').select('*').eq('business_id', business.id).maybeSingle(),
+        authInvoke('get-admin-profile'),
       ]);
-      if (adminProfileRes.data) {
-        const profile = adminProfileRes.data as { name: string; avatar_url: string | null };
+      if (profileRes.data?.profile) {
+        const profile = profileRes.data.profile;
         if (profile.name) {
           setAdminName(profile.name);
           sessionStorage.setItem('admin_name', profile.name);
@@ -1970,8 +2202,8 @@ export function AdminPage() {
       if (settingsRes.data) setSettings(settingsRes.data);
       if (brandingRes.data) setBranding(brandingRes.data);
 
-      const { data: wlData } = await supabase.functions.invoke('admin-get-waiting-list', {
-        body: { email: adminEmail, password: adminPassword },
+      const { data: wlData } = await authInvoke('admin-get-waiting-list', {
+        body: { email: adminEmail, password: adminToken },
       });
       if (wlData?.success) setWaitingList(wlData.data || []);
     } catch (error) {
@@ -1981,27 +2213,42 @@ export function AdminPage() {
     }
   };
 
-  const handleLogin = (email: string, password: string) => {
+  const handleLogin = async (email: string, token: string) => {
     setAdminEmail(email);
-    setAdminPassword(password);
+    setAdminToken(token);
     setAdminName(sessionStorage.getItem('admin_name') || '');
     setAdminAvatar(sessionStorage.getItem('admin_avatar') || '');
-    setLoggedIn(true);
+
+    // Get businesses from login response stored in sessionStorage
+    const storedBusinesses = sessionStorage.getItem('admin_businesses');
+    if (storedBusinesses) {
+      try { setMyBusinesses(JSON.parse(storedBusinesses)); } catch { /* ignore */ }
+    }
+
+    const storedBusinessId = sessionStorage.getItem('admin_business_id');
+    if (storedBusinessId) {
+      await setBusinessById(storedBusinessId);
+      setLoggedIn(true);
+    } else {
+      window.location.href = '/create-business';
+    }
   };
 
   const handleLogout = () => {
     sessionStorage.removeItem('admin_logged_in');
     sessionStorage.removeItem('admin_email');
-    sessionStorage.removeItem('admin_password');
+    sessionStorage.removeItem('admin_token');
     sessionStorage.removeItem('admin_avatar');
+    sessionStorage.removeItem('admin_business_id');
+    sessionStorage.removeItem('admin_businesses');
+    localStorage.removeItem('reservas_business_id');
+    setMyBusinesses([]);
     setLoggedIn(false);
   };
 
   const updateBookingStatus = async (id: string, status: Booking['booking_status']) => {
     try {
-      const { data, error } = await supabase.functions.invoke('admin-update-booking', {
-        body: { email: adminEmail, password: adminPassword, booking_id: id, booking_status: status },
-      });
+          const { data, error } = await authInvoke('admin-update-booking', { booking_id: id, booking_status: status });
       if (error || !data?.success) throw new Error('Error al actualizar');
       loadData();
     } catch {
@@ -2016,9 +2263,7 @@ export function AdminPage() {
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, open: false }));
         try {
-          const { data, error } = await supabase.functions.invoke('admin-delete-booking', {
-            body: { email: adminEmail, password: adminPassword, booking_id: id },
-          });
+          const { data, error } = await authInvoke('admin-delete-booking', { booking_id: id });
           if (error || !data?.success) throw new Error('Error al eliminar');
           loadData();
         } catch {
@@ -2030,9 +2275,7 @@ export function AdminPage() {
 
   const restoreBooking = async (id: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('admin-restore-booking', {
-        body: { email: adminEmail, password: adminPassword, booking_id: id },
-      });
+      const { data, error } = await authInvoke('admin-restore-booking', { booking_id: id });
       if (error || !data?.success) throw new Error('Error al restaurar');
       loadData();
     } catch {
@@ -2047,9 +2290,7 @@ export function AdminPage() {
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, open: false }));
         try {
-          const { data, error } = await supabase.functions.invoke('admin-purge-bookings', {
-            body: { email: adminEmail, password: adminPassword, booking_id: id },
-          });
+          const { data, error } = await authInvoke('admin-purge-bookings', { booking_id: id });
           if (error || !data?.success) throw new Error('Error al eliminar');
           loadData();
         } catch {
@@ -2101,6 +2342,7 @@ export function AdminPage() {
     { id: 'payments', label: 'Pagos', icon: <CreditCard className="h-5 w-5" /> },
     { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
     { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquareText className="h-5 w-5" /> },
+    { id: 'team', label: 'Equipo', icon: <Users className="h-5 w-5" /> },
     {
       id: 'trash', label: 'Papelera', icon: <Archive className="h-5 w-5" />,
       badge: deletedBookings.length || undefined,
@@ -2120,6 +2362,7 @@ export function AdminPage() {
     payments: 'Pagos',
     profile: 'Perfil',
     whatsapp: 'WhatsApp',
+    team: 'Equipo',
     trash: 'Papelera',
     detail: 'Detalle de Reserva',
   };
@@ -2158,16 +2401,39 @@ export function AdminPage() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}>
         {/* Sidebar header */}
-        <div className="flex h-16 items-center gap-3 border-b px-6">
-          <Avatar
-            fallback={adminName.charAt(0).toUpperCase() || 'A'}
-            src={adminAvatar || null}
-            className="h-10 w-10 rounded-xl"
-          />
-          <div className="flex flex-col">
-            <span className="text-base font-bold leading-tight">Reserva Única</span>
-            <span className="text-xs text-muted-foreground">Panel de Administración</span>
+        <div className="flex flex-col border-b">
+          <div className="flex h-16 items-center gap-3 px-6">
+            <Avatar
+              fallback={adminName.charAt(0).toUpperCase() || 'A'}
+              src={adminAvatar || null}
+              className="h-10 w-10 rounded-xl"
+            />
+            <div className="flex-1 min-w-0">
+              <span className="text-base font-bold leading-tight block truncate">{business?.name || 'Reserva Única'}</span>
+              <span className="text-xs text-muted-foreground">{adminName || adminEmail}</span>
+            </div>
           </div>
+          {myBusinesses.length > 1 && (
+            <div className="px-6 pb-3">
+              <select
+                value={business?.id || ''}
+                onChange={async (e) => {
+                  const newId = e.target.value;
+                  if (newId && newId !== business?.id) {
+                    localStorage.setItem('reservas_business_id', newId);
+                    sessionStorage.setItem('admin_business_id', newId);
+                    await setBusinessById(newId);
+                    loadData();
+                  }
+                }}
+                className="w-full px-3 py-1.5 rounded-lg border text-xs bg-background truncate"
+              >
+                {myBusinesses.map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* Navigation */}
@@ -2544,7 +2810,7 @@ export function AdminPage() {
                   <NotasAdmin
                     booking={selectedBooking}
                     adminEmail={adminEmail}
-                    adminPassword={adminPassword}
+                    adminToken={adminToken}
                     onSaved={() => loadData()}
                   />
 
@@ -2582,7 +2848,7 @@ export function AdminPage() {
               blockedDates={blockedDates}
               onRefresh={loadData}
               adminEmail={adminEmail}
-              adminPassword={adminPassword}
+              adminToken={adminToken}
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
             />
           )}
@@ -2602,7 +2868,7 @@ export function AdminPage() {
               branding={branding}
               onRefresh={() => { loadData(); }}
               adminEmail={adminEmail}
-              adminPassword={adminPassword}
+              adminToken={adminToken}
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
             />
           )}
@@ -2616,7 +2882,7 @@ export function AdminPage() {
               waitingList={waitingList}
               onRefresh={loadData}
               adminEmail={adminEmail}
-              adminPassword={adminPassword}
+              adminToken={adminToken}
             />
           )}
 
@@ -2625,7 +2891,7 @@ export function AdminPage() {
             <ClientsManager
               bookings={bookings}
               adminEmail={adminEmail}
-              adminPassword={adminPassword}
+              adminToken={adminToken}
               onRefresh={loadData}
               setConfirmModal={setConfirmModal}
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
@@ -2637,11 +2903,16 @@ export function AdminPage() {
             <WhatsAppManager bookings={bookings} />
           )}
 
+          {/* ─── Team ──────────────────────────────────────────── */}
+          {view === 'team' && (
+            <TeamManager adminEmail={adminEmail} adminToken={adminToken} />
+          )}
+
           {/* ─── Profile ────────────────────────────────────────── */}
           {view === 'profile' && (
             <ProfileManager
               adminEmail={adminEmail}
-              adminPassword={adminPassword}
+              adminToken={adminToken}
               adminName={adminName}
               avatarUrl={adminAvatar}
               onRefresh={loadData}
@@ -2677,8 +2948,8 @@ export function AdminPage() {
                             setConfirmModal({ open: false, message: '', onConfirm: () => {} });
                             try {
                               for (const b of deletedBookings) {
-                                await supabase.functions.invoke('admin-purge-bookings', {
-                                  body: { email: adminEmail, password: adminPassword, booking_id: b.id },
+                                await authInvoke('admin-purge-bookings', {
+                                  body: { booking_id: b.id },
                                 });
                               }
                               loadData();

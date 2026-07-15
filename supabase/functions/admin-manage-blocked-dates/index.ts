@@ -1,11 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { authenticateToken, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -13,55 +7,32 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { email, password, action, date, reason, id } = await req.json();
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    const { data: admin } = await supabase
-      .from("admin_users")
-      .select("id, password_hash")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (!admin) {
-      return new Response(JSON.stringify({ success: false, error: "No autorizado" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const auth = await authenticateToken(req);
+    if ('error' in auth) {
+      return jsonUnauthorized();
     }
 
-    const { data: verified } = await supabase.rpc("verify_admin_password", {
-      input_password: password,
-      stored_hash: admin.password_hash,
-    });
+    const { action, date, reason, id } = await req.json();
 
-    if (!verified) {
-      return new Response(JSON.stringify({ success: false, error: "No autorizado" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const supabase = createServiceClient();
 
     if (action === "add") {
       const { error } = await supabase
         .from("blocked_dates")
-        .insert({ date, reason: reason || null });
+        .insert({ business_id: auth.businessId, date, reason: reason || null });
       if (error) throw error;
     } else if (action === "remove") {
       const { error } = await supabase
         .from("blocked_dates")
         .delete()
-        .eq("id", id);
+        .eq("id", id)
+        .eq("business_id", auth.businessId);
       if (error) throw error;
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonSuccess();
   } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: "Error interno" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("admin-manage-blocked-dates error:", err);
+    return jsonError("Error interno");
   }
 });

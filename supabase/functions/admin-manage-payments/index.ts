@@ -1,11 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { authenticateToken, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+function mask(s: string): string {
+  if (s.length <= 8) return "****";
+  return s.slice(0, 4) + "****" + s.slice(-4);
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -13,43 +12,20 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { email, password, action, provider, credentials } = await req.json();
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    const { data: admin } = await supabase
-      .from("admin_users")
-      .select("id, password_hash")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (!admin) {
-      return new Response(JSON.stringify({ success: false, error: "No autorizado" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const auth = await authenticateToken(req);
+    if ('error' in auth) {
+      return jsonUnauthorized();
     }
 
-    const { data: verified } = await supabase.rpc("verify_admin_password", {
-      input_password: password,
-      stored_hash: admin.password_hash,
-    });
+    const { action, provider, credentials } = await req.json();
 
-    if (!verified) {
-      return new Response(JSON.stringify({ success: false, error: "No autorizado" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const shopId = "00000000-0000-0000-0000-000000000000";
+    const supabase = createServiceClient();
 
     if (action === "list") {
       const { data, error } = await supabase
         .from("payment_providers")
         .select("*")
-        .eq("shop_id", shopId)
+        .eq("business_id", auth.businessId)
         .order("provider");
 
       if (error) throw error;
@@ -60,9 +36,7 @@ Deno.serve(async (req: Request) => {
         client_secret: p.client_secret ? mask(p.client_secret as string) : null,
       }));
 
-      return new Response(JSON.stringify({ success: true, providers: masked }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonSuccess({ success: true, providers: masked });
     }
 
     if (action === "save") {
@@ -70,7 +44,7 @@ Deno.serve(async (req: Request) => {
         .from("payment_providers")
         .upsert(
           {
-            shop_id: shopId,
+            business_id: auth.businessId,
             provider,
             access_token: credentials?.access_token || null,
             client_id: credentials?.client_id || null,
@@ -79,28 +53,23 @@ Deno.serve(async (req: Request) => {
             public_key: credentials?.public_key || null,
             updated_at: new Date().toISOString(),
           },
-          { onConflict: "shop_id,provider" }
+          { onConflict: "business_id,provider" }
         );
 
       if (error) throw error;
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonSuccess();
     }
 
     if (action === "test") {
       const { data: prov } = await supabase
         .from("payment_providers")
         .select("access_token, client_id, client_secret")
-        .eq("shop_id", shopId)
+        .eq("business_id", auth.businessId)
         .eq("provider", provider)
         .maybeSingle();
 
       if (!prov) {
-        return new Response(JSON.stringify({ success: false, error: "Proveedor no configurado" }), {
-          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonError("Proveedor no configurado", 404);
       }
 
       let testResult = false;
@@ -112,11 +81,8 @@ Deno.serve(async (req: Request) => {
             const res = await fetch("https://api.mercadopago.com/users/me", {
               headers: { Authorization: `Bearer ${prov.access_token}` },
             });
-            if (res.ok) {
-              testResult = true;
-            } else {
-              testError = `HTTP ${res.status}`;
-            }
+            testResult = res.ok;
+            if (!res.ok) testError = `HTTP ${res.status}`;
           } else if (prov.client_id && prov.client_secret) {
             const res = await fetch("https://api.mercadopago.com/oauth/token", {
               method: "POST",
@@ -127,11 +93,8 @@ Deno.serve(async (req: Request) => {
                 grant_type: "client_credentials",
               }),
             });
-            if (res.ok) {
-              testResult = true;
-            } else {
-              testError = `HTTP ${res.status}`;
-            }
+            testResult = res.ok;
+            if (!res.ok) testError = `HTTP ${res.status}`;
           } else {
             testError = "Ingresá el Access Token o las credenciales OAuth";
           }
@@ -141,29 +104,21 @@ Deno.serve(async (req: Request) => {
       } else if (provider === "stripe") {
         try {
           const res = await fetch("https://api.stripe.com/v1/balance", {
-            headers: {
-              Authorization: `Bearer ${prov.access_token}`,
-            },
+            headers: { Authorization: `Bearer ${prov.access_token}` },
           });
-          if (res.ok) {
-            testResult = true;
-          } else {
-            testError = `HTTP ${res.status}`;
-          }
+          testResult = res.ok;
+          if (!res.ok) testError = `HTTP ${res.status}`;
         } catch (e) {
           testError = (e as Error).message;
         }
       } else if (provider === "paypal") {
         try {
-          const auth = btoa(`${prov.client_id}:${prov.client_secret}`);
+          const authStr = btoa(`${prov.client_id}:${prov.client_secret}`);
           const res = await fetch("https://api-m.sandbox.paypal.com/v1/identity/platform/v1/merchant-info", {
-            headers: { Authorization: `Basic ${auth}` },
+            headers: { Authorization: `Basic ${authStr}` },
           });
-          if (res.ok) {
-            testResult = true;
-          } else {
-            testError = `HTTP ${res.status}`;
-          }
+          testResult = res.ok;
+          if (!res.ok) testError = `HTTP ${res.status}`;
         } catch (e) {
           testError = (e as Error).message;
         }
@@ -173,55 +128,38 @@ Deno.serve(async (req: Request) => {
         await supabase
           .from("payment_providers")
           .update({ status: "connected", last_tested_at: new Date().toISOString() })
-          .eq("shop_id", shopId)
+          .eq("business_id", auth.businessId)
           .eq("provider", provider);
       }
 
-      return new Response(JSON.stringify({ success: testResult, error: testError || null }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonSuccess({ success: testResult, error: testError || null });
     }
 
     if (action === "disconnect") {
       const { error } = await supabase
         .from("payment_providers")
         .update({ status: "disconnected" })
-        .eq("shop_id", shopId)
+        .eq("business_id", auth.businessId)
         .eq("provider", provider);
 
       if (error) throw error;
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonSuccess();
     }
 
     if (action === "delete") {
       const { error } = await supabase
         .from("payment_providers")
         .delete()
-        .eq("shop_id", shopId)
+        .eq("business_id", auth.businessId)
         .eq("provider", provider);
 
       if (error) throw error;
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonSuccess();
     }
 
-    return new Response(JSON.stringify({ success: false, error: "Acción no válida" }), {
-      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonError("Acción no válida", 400);
   } catch (err) {
-    console.error("Error:", err);
-    return new Response(JSON.stringify({ success: false, error: "Error interno" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("admin-manage-payments error:", err);
+    return jsonError("Error interno");
   }
 });
-
-function mask(value: string): string {
-  if (value.length <= 8) return "****";
-  return value.slice(0, 4) + "****" + value.slice(-4);
-}

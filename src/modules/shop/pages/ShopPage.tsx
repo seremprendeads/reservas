@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Search, ShoppingCart, X, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Tag, Package, Check } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, CartItem } from '../types';
 import { CartProvider, useCart } from '../contexts/CartContext';
 
@@ -13,6 +14,7 @@ function formatPrice(amount: number, currency: string) {
 }
 
 function ShopPageContent() {
+  const { business } = useBusiness();
   const { items, addItem, removeItem, updateQuantity, clearCart, itemCount, subtotal, currency } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -30,15 +32,16 @@ function ShopPageContent() {
   const [orderSuccess, setOrderSuccess] = useState(false);
 
   useEffect(() => {
+    if (!business?.id) return;
     Promise.all([
-      supabase.from('shop_categories').select('*').order('sort_order'),
-      supabase.from('shop_products').select('*').eq('is_active', true).order('sort_order'),
+      supabase.from('shop_categories').select('*').eq('business_id', business.id).order('sort_order'),
+      supabase.from('shop_products').select('*').eq('business_id', business.id).eq('is_active', true).order('sort_order'),
     ]).then(([catRes, prodRes]) => {
       if (catRes.data) setCategories(catRes.data);
       if (prodRes.data) setProducts(prodRes.data);
       setLoading(false);
     });
-  }, []);
+  }, [business?.id]);
 
   const filtered = useMemo(() => {
     return products.filter(p => {
@@ -69,6 +72,7 @@ function ShopPageContent() {
       const { data: orderData, error: orderError } = await supabase
         .from('shop_orders')
         .insert({
+          business_id: business?.id,
           customer_name: customerName.trim(),
           customer_email: customerEmail.trim(),
           customer_phone: customerPhone.trim(),
@@ -82,6 +86,7 @@ function ShopPageContent() {
       if (orderError || !orderData) throw new Error('Error creating order');
 
       const orderItems = items.map(i => ({
+        business_id: business?.id,
         order_id: orderData.id,
         product_id: i.product.id,
         product_name: i.product.name,
@@ -103,12 +108,13 @@ function ShopPageContent() {
           customer_name: customerName.trim(),
           customer_email: customerEmail.trim(),
           customer_phone: customerPhone.trim(),
+          business_slug: business?.slug,
         },
       });
 
       if (prefError || !prefData?.id) throw new Error('Error creating payment preference');
 
-      await supabase.from('shop_orders').update({ preference_id: prefData.id }).eq('id', orderData.id);
+      await supabase.from('shop_orders').update({ preference_id: prefData.id }).eq('id', orderData.id).eq('business_id', business?.id || '');
 
       setCheckoutInfo({ preferenceId: prefData.id, orderId: orderData.id });
       setView('checkout');
@@ -121,7 +127,7 @@ function ShopPageContent() {
 
   const pollPayment = async (orderId: string) => {
     const interval = setInterval(async () => {
-      const { data } = await supabase.from('shop_orders').select('payment_status').eq('id', orderId).single();
+      const { data } = await supabase.from('shop_orders').select('payment_status').eq('id', orderId).eq('business_id', business?.id || '').single();
       if (data?.payment_status === 'approved') {
         clearInterval(interval);
         setOrderSuccess(true);
@@ -449,6 +455,7 @@ function CartScreen({ items, subtotal, currency, onUpdateQuantity, onRemoveItem,
 function CheckoutScreen({ preferenceId, orderId, onComplete, pollPayment }: {
   preferenceId: string; orderId: string; onComplete: () => void; pollPayment: (id: string) => void;
 }) {
+  const { business } = useBusiness();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -465,7 +472,10 @@ function CheckoutScreen({ preferenceId, orderId, onComplete, pollPayment }: {
     const loadWallet = async () => {
       if (!window.MercadoPago) { setTimeout(loadWallet, 500); return; }
       try {
-        const { data } = await supabase.functions.invoke('get-mp-config');
+        const { data } = await supabase.functions.invoke('get-mp-config', {
+          method: 'POST',
+          body: { business_slug: business?.slug },
+        });
         const publicKey = data?.publicKey;
         if (!publicKey) { setError('Error de configuración'); return; }
         const mp = new window.MercadoPago(publicKey, { locale: 'es-AR' });

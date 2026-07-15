@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, Order } from '../types';
 import { PLAN_LIMITS, SHOP_STORAGE_BUCKET } from '../config';
 import { Button } from '../../../components/ui/button';
@@ -16,6 +17,7 @@ import { ImageUploader } from './ImageUploader';
 import { deleteStorageFile } from './storage-utils';
 
 export function ShopAdmin() {
+  const { business } = useBusiness();
   const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'trash'>('dashboard');
   return (
     <div className="space-y-6">
@@ -49,13 +51,15 @@ export function ShopAdmin() {
 }
 
 function ShopDashboard() {
+  const { business } = useBusiness();
   const [stats, setStats] = useState({ todaySales: 0, monthSales: 0, totalRevenue: 0, lowStock: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!business?.id) return;
     Promise.all([
-      supabase.from('shop_orders').select('total, created_at').eq('payment_status', 'approved'),
-      supabase.from('shop_products').select('id').lt('stock', 5).eq('is_active', true),
+      supabase.from('shop_orders').select('total, created_at').eq('business_id', business.id).eq('payment_status', 'approved'),
+      supabase.from('shop_products').select('id').eq('business_id', business.id).lt('stock', 5).eq('is_active', true),
     ]).then(([ordersRes, lowRes]) => {
       const orders = ordersRes.data || [];
       const today = new Date().toISOString().slice(0, 10);
@@ -68,7 +72,7 @@ function ShopDashboard() {
       });
       setLoading(false);
     });
-  }, []);
+  }, [business?.id]);
 
   if (loading) return <div className="text-center py-10"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>;
 
@@ -124,6 +128,7 @@ function ProductUsageIndicator({ count }: { count: number }) {
 }
 
 function ProductsManager() {
+  const { business } = useBusiness();
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
   const [showDialog, setShowDialog] = useState(false);
@@ -145,13 +150,15 @@ function ProductsManager() {
   const isAtLimit = activeCount >= PLAN_LIMITS.products;
 
   const reload = () => {
-    supabase.from('shop_products').select('*').is('deleted_at', null).order('sort_order').then(r => { if (r.data) setProducts(r.data); });
+    if (!business?.id) return;
+    supabase.from('shop_products').select('*').eq('business_id', business.id).is('deleted_at', null).order('sort_order').then(r => { if (r.data) setProducts(r.data); });
   };
 
   useEffect(() => {
+    if (!business?.id) return;
     reload();
-    supabase.from('shop_categories').select('*').order('sort_order').then(r => { if (r.data) setCategories(r.data); });
-  }, []);
+    supabase.from('shop_categories').select('*').eq('business_id', business.id).order('sort_order').then(r => { if (r.data) setCategories(r.data); });
+  }, [business?.id]);
 
   const openNew = () => {
     if (isAtLimit) {
@@ -166,12 +173,12 @@ function ProductsManager() {
   };
 
   const save = async () => {
-    if (!name.trim() || !price) return;
+    if (!name.trim() || !price || !business?.id) return;
     setSaving(true);
-    const payload = { name: name.trim(), description: description.trim(), price: parseFloat(price), currency, stock: parseInt(stock) || 0, sku: sku.trim() || null, image: imageUrl || null, category_id: categoryId || null, featured };
+    const payload = { business_id: business.id, name: name.trim(), description: description.trim(), price: parseFloat(price), currency, stock: parseInt(stock) || 0, sku: sku.trim() || null, image: imageUrl || null, category_id: categoryId || null, featured };
     try {
       if (editing) {
-        const { error } = await supabase.from('shop_products').update(payload).eq('id', editing.id);
+        const { error } = await supabase.from('shop_products').update(payload).eq('id', editing.id).eq('business_id', business.id);
         if (error) console.error('Error updating product:', error);
       } else {
         const { error } = await supabase.from('shop_products').insert(payload);
@@ -190,12 +197,12 @@ function ProductsManager() {
       setShowLimitDialog(true);
       return;
     }
-    await supabase.from('shop_products').update({ is_active: !p.is_active }).eq('id', p.id);
+    await supabase.from('shop_products').update({ is_active: !p.is_active }).eq('id', p.id).eq('business_id', business?.id || '');
     setProducts(prev => prev.map(x => x.id === p.id ? { ...x, is_active: !x.is_active } : x));
   };
 
   const remove = async (p: Product) => {
-    await supabase.from('shop_products').update({ deleted_at: new Date().toISOString() }).eq('id', p.id);
+    await supabase.from('shop_products').update({ deleted_at: new Date().toISOString() }).eq('id', p.id).eq('business_id', business?.id || '');
     setProducts(prev => prev.filter(x => x.id !== p.id));
   };
 
@@ -204,8 +211,9 @@ function ProductsManager() {
       setShowLimitDialog(true);
       return;
     }
+    if (!business?.id) return;
     const { data } = await supabase.from('shop_products').insert({
-      name: `${p.name} (copia)`, description: p.description, price: p.price, currency: p.currency, stock: 0, image: p.image, category_id: p.category_id,
+      business_id: business.id, name: `${p.name} (copia)`, description: p.description, price: p.price, currency: p.currency, stock: 0, image: p.image, category_id: p.category_id,
     }).select().single();
     if (data) setProducts(prev => [...prev, data]);
   };
@@ -350,24 +358,26 @@ function ProductsManager() {
 }
 
 function CategoriesManager() {
+  const { business } = useBusiness();
   const [categories, setCategories] = useState<Category[]>([]);
   const [name, setName] = useState('');
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
-    supabase.from('shop_categories').select('*').order('sort_order').then(r => { if (r.data) setCategories(r.data); });
-  }, []);
+    if (!business?.id) return;
+    supabase.from('shop_categories').select('*').eq('business_id', business.id).order('sort_order').then(r => { if (r.data) setCategories(r.data); });
+  }, [business?.id]);
 
   const save = async () => {
-    if (!name.trim()) return;
-    await supabase.from('shop_categories').insert({ name: name.trim() });
+    if (!name.trim() || !business?.id) return;
+    await supabase.from('shop_categories').insert({ business_id: business.id, name: name.trim() });
     setName('');
     setShowDialog(false);
-    supabase.from('shop_categories').select('*').order('sort_order').then(r => { if (r.data) setCategories(r.data); });
+    supabase.from('shop_categories').select('*').eq('business_id', business.id).order('sort_order').then(r => { if (r.data) setCategories(r.data); });
   };
 
   const remove = async (id: string) => {
-    await supabase.from('shop_categories').delete().eq('id', id);
+    await supabase.from('shop_categories').delete().eq('id', id).eq('business_id', business?.id || '');
     setCategories(prev => prev.filter(c => c.id !== id));
   };
 
@@ -412,19 +422,21 @@ function CategoriesManager() {
 }
 
 function OrdersList() {
+  const { business } = useBusiness();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.from('shop_orders').select('*').order('created_at', { ascending: false }).then(r => {
+    if (!business?.id) return;
+    supabase.from('shop_orders').select('*').eq('business_id', business.id).order('created_at', { ascending: false }).then(r => {
       if (r.data) setOrders(r.data);
       setLoading(false);
     });
-  }, []);
+  }, [business?.id]);
 
   const removeOrder = async (o: Order) => {
-    await supabase.from('shop_order_items').delete().eq('order_id', o.id);
-    await supabase.from('shop_orders').delete().eq('id', o.id);
+    await supabase.from('shop_order_items').delete().eq('order_id', o.id).eq('business_id', business?.id || '');
+    await supabase.from('shop_orders').delete().eq('id', o.id).eq('business_id', business?.id || '');
     setOrders(prev => prev.filter(x => x.id !== o.id));
   };
 
@@ -463,19 +475,21 @@ function OrdersList() {
 }
 
 function ProductsTrash() {
+  const { business } = useBusiness();
   const [deleted, setDeleted] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = () => {
+    if (!business?.id) return;
     setLoading(true);
-    supabase.from('shop_products').select('*').not('deleted_at', 'is', null).order('deleted_at', { ascending: false })
+    supabase.from('shop_products').select('*').eq('business_id', business.id).not('deleted_at', 'is', null).order('deleted_at', { ascending: false })
       .then(r => { setDeleted(r.data || []); setLoading(false); });
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [business?.id]);
 
   const restore = async (p: Product) => {
-    await supabase.from('shop_products').update({ deleted_at: null }).eq('id', p.id);
+    await supabase.from('shop_products').update({ deleted_at: null }).eq('id', p.id).eq('business_id', business?.id || '');
     setDeleted(prev => prev.filter(x => x.id !== p.id));
   };
 
@@ -488,7 +502,7 @@ function ProductsTrash() {
   const purgeAll = async () => {
     for (const p of deleted) {
       if (p.image) await deleteStorageFile(p.image, SHOP_STORAGE_BUCKET);
-      await supabase.from('shop_products').delete().eq('id', p.id);
+    await supabase.from('shop_products').delete().eq('id', p.id).eq('business_id', business?.id || '');
     }
     setDeleted([]);
   };

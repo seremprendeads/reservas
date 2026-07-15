@@ -1,5 +1,6 @@
 export type Product = {
   id: string;
+  business_id: string;
   name: string;
   description: string;
   price: number;
@@ -18,6 +19,7 @@ export type Product = {
 
 export type Category = {
   id: string;
+  business_id: string;
   name: string;
   description: string | null;
   sort_order: number;
@@ -26,6 +28,7 @@ export type Category = {
 
 export type Order = {
   id: string;
+  business_id: string;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -54,6 +57,7 @@ export type CartItem = {
 
 export type InventoryMovement = {
   id: string;
+  business_id: string;
   product_id: string;
   quantity: number;
   type: 'sale' | 'restock' | 'adjustment';

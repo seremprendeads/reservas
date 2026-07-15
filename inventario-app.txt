@@ -1,0 +1,520 @@
+================================================================================
+           RESERVA UNICA - INVENTARIO COMPLETO DE LA APLICACION
+================================================================================
+
+Fecha: 13 de julio de 2026
+Plataforma: Multi-tenant SaaS de reservas y tienda para profesionales en Argentina
+
+================================================================================
+1. RUTAS
+================================================================================
+
+Ruta                          | Componente       | Acceso
+------------------------------|------------------|---------------
+/                             | BookingPage      | Publico
+/tienda                       | ShopPage         | Publico
+/bio/:slug                    | BioPage          | Publico
+/seremprende-entendo-administrativo | AdminPage  | Requiere login
+
+================================================================================
+2. TABLAS DE BASE DE DATOS (17 tablas)
+================================================================================
+
+2.1 availability_settings (Horarios de atencion)
+-------------------------------------------------
+- id                   uuid PK
+- day_of_week          int (0=Domingo, 6=Sabado), UNIQUE
+- start_time           time NOT NULL
+- end_time             time NOT NULL
+- slot_duration_minutes int DEFAULT 60
+- is_active            boolean DEFAULT true
+- created_at           timestamptz
+
+2.2 blocked_dates (Fechas bloqueadas)
+--------------------------------------
+- id                   uuid PK
+- date                 date UNIQUE NOT NULL
+- reason               text
+- created_at           timestamptz
+
+2.3 bookings (Reservas)
+------------------------
+- id                   uuid PK
+- booking_code         text UNIQUE NOT NULL (formato: RES-YYYY-XXXX)
+- customer_name        text NOT NULL
+- customer_phone       text NOT NULL
+- customer_email       text NOT NULL
+- booking_date         date NOT NULL
+- booking_time         time NOT NULL
+- payment_status       text DEFAULT 'pending' (pending/approved/rejected)
+- payment_id           text
+- preference_id        text
+- booking_status       text DEFAULT 'pending' (pending/confirmed/cancelled/completed)
+- amount               decimal(10,2) NOT NULL
+- currency             text
+- notas_admin          text (solo visible para admin)
+- created_at           timestamptz
+- updated_at           timestamptz
+
+2.4 booking_counter (Contador de codigos)
+-----------------------------------------
+- year                 int PK
+- last_number          int DEFAULT 0
+
+2.5 admin_users (Usuarios administradores)
+-------------------------------------------
+- id                   uuid PK
+- email                text UNIQUE NOT NULL
+- password_hash        text NOT NULL
+- name                 text NOT NULL
+- created_at           timestamptz
+
+2.6 settings (Configuracion general)
+-------------------------------------
+- id                   uuid PK
+- price                decimal(10,2) DEFAULT 0
+- currency             text DEFAULT 'ARS'
+- slot_duration_minutes int DEFAULT 60
+
+2.7 branding (Identidad visual)
+--------------------------------
+- id                   uuid PK (fijo: 00000000-0000-0000-0000-000000000000)
+- business_name        text
+- logo_url             text
+- primary_color        text
+- secondary_color      text
+- accent_color         text
+- background_color     text
+- text_color           text
+- hero_title           text
+- hero_subtitle        text
+- whatsapp_number      text
+- instagram_url        text
+- facebook_url         text
+- website_url          text
+- footer_text          text
+- updated_at           timestamptz
+
+2.8 services (Servicios)
+-------------------------
+- id                   uuid PK
+- name                 text NOT NULL
+- description          text
+- price                decimal(10,2) NOT NULL
+- duration_minutes     int NOT NULL
+- is_active            boolean DEFAULT true
+- created_at           timestamptz
+
+2.9 bio_profiles (Perfiles bio/link-in-bio)
+--------------------------------------------
+- id                   uuid PK
+- slug                 text UNIQUE NOT NULL
+- name                 text NOT NULL
+- bio                  text
+- avatar_url           text
+- theme_color          text DEFAULT '#6366f1'
+- bg_type              text DEFAULT 'gradient'
+- button_style         text DEFAULT 'rounded'
+- is_active            boolean DEFAULT true
+- created_at           timestamptz
+- updated_at           timestamptz
+
+2.10 bio_links (Enlaces del perfil bio)
+----------------------------------------
+- id                   uuid PK
+- profile_id           uuid FK -> bio_profiles
+- title                text NOT NULL
+- url                  text NOT NULL
+- icon                 text
+- sort_order           int DEFAULT 0
+- is_active            boolean DEFAULT true
+- created_at           timestamptz
+
+2.11 bio_stats (Estadisticas de bio)
+-------------------------------------
+- id                   uuid PK
+- profile_id           uuid FK -> bio_profiles
+- link_id              uuid FK -> bio_links (nullable)
+- event_type           text ('view' o 'click')
+- ip_hash              text
+- user_agent           text
+- created_at           timestamptz
+
+2.12 shop_categories (Categorias de tienda)
+--------------------------------------------
+- id                   uuid PK
+- name                 text NOT NULL
+- sort_order           int DEFAULT 0
+- created_at           timestamptz
+
+2.13 shop_products (Productos de tienda)
+-----------------------------------------
+- id                   uuid PK
+- name                 text NOT NULL
+- description          text
+- price                decimal(10,2) NOT NULL
+- compare_price        decimal(10,2)
+- image_url            text
+- category_id          uuid FK -> shop_categories
+- stock                int DEFAULT 0
+- is_active            boolean DEFAULT true
+- sort_order           int DEFAULT 0
+- deleted_at           timestamptz (soft delete)
+- created_at           timestamptz
+- updated_at           timestamptz
+
+2.14 shop_orders (Ordenes de tienda)
+-------------------------------------
+- id                   uuid PK
+- customer_name        text NOT NULL
+- customer_phone       text NOT NULL
+- customer_email       text NOT NULL
+- total                decimal(10,2) NOT NULL
+- status               text DEFAULT 'pending'
+- notes                text
+- created_at           timestamptz
+- updated_at           timestamptz
+
+2.15 shop_order_items (Items de orden)
+---------------------------------------
+- id                   uuid PK
+- order_id             uuid FK -> shop_orders
+- product_id           uuid FK -> shop_products
+- quantity             int NOT NULL
+- price                decimal(10,2) NOT NULL
+
+2.16 shop_inventory_movements (Movimientos de inventario)
+---------------------------------------------------------
+- id                   uuid PK
+- product_id           uuid FK -> shop_products
+- type                 text ('sale', 'restock', 'adjustment')
+- quantity             int NOT NULL
+- notes                text
+- created_at           timestamptz
+
+2.17 payment_providers (Proveedores de pago)
+---------------------------------------------
+- id                   uuid PK
+- provider_name        text UNIQUE NOT NULL ('mercadopago', 'stripe', 'paypal', 'crypto')
+- is_active            boolean DEFAULT false
+- config               jsonb (credenciales encriptadas)
+- created_at           timestamptz
+- updated_at           timestamptz
+
+================================================================================
+3. FUNCIONES EDGE (19 endpoints)
+================================================================================
+
+Funcion                      | Proposito
+-----------------------------|--------------------------------------------------
+admin-login                  | Valida email+password contra admin_users
+admin-register               | Crea nuevo usuario admin via RPC
+admin-forgot-password        | Flujo de recuperacion de contrasena
+admin-update-settings        | Actualiza settings (precio, moneda, duracion)
+admin-update-branding        | Upserts branding (colores, logo, redes, etc.)
+admin-update-profile         | Actualiza perfil del administrador
+admin-update-availability    | Actualiza horarios por dia de la semana
+admin-manage-blocked-dates   | CRUD de fechas bloqueadas
+admin-update-booking         | Actualiza estado de reserva y notas_admin
+admin-delete-booking         | Soft delete de reserva
+admin-restore-booking        | Restaura reserva eliminada
+admin-purge-bookings         | Elimina permanentemente reservas borradas
+admin-update-waiting-list    | Gestiona lista de espera
+admin-get-waiting-list       | Obtiene lista de espera
+admin-manage-payments        | CRUD de proveedores de pago
+create-payment               | Crea preferencia de MercadoPago
+get-mp-config                | Devuelve public token de MP para frontend
+mercadopago-webhook           | Maneja notificaciones webhook de MP
+send-confirmation-email      | Envia email de confirmacion de reserva
+
+================================================================================
+4. TEMAS PREDEFINIDOS (8)
+================================================================================
+
+Cada tema define 14 propiedades CSS:
+
+- --theme-primary
+- --theme-secondary
+- --theme-accent
+- --theme-bg
+- --theme-surface
+- --theme-text
+- --theme-text-muted
+- --theme-border
+- --theme-success
+- --theme-warning
+- --theme-error
+- --theme-gradient-start
+- --theme-gradient-end
+- --theme-card-shadow
+
+Temas disponibles:
+1. spa
+2. barber
+3. psychology
+4. gym
+5. medical
+6. dental
+7. legal
+8. tattoo
+
+================================================================================
+5. PANEL DE ADMINISTRACION (AdminPage.tsx)
+================================================================================
+
+5.1 Autenticacion
+-----------------
+- Formulario de login: email + contrasena
+- Credenciales guardadas en sessionStorage
+- Logout: limpia sessionStorage y recarga
+
+5.2 Vistas principales (13)
+----------------------------
+
+Vista          | Descripcion
+---------------|----------------------------------------------------------------
+dashboard      | Tarjetas de estadisticas (total, pendientes, confirmadas, completadas, canceladas), tabla de reservas recientes
+bookings       | Lista completa de reservas con filtros (estado, rango de fechas, busqueda), badges de estado
+availability   | Editor de horarios por dia (inicio/fin, activo/inactivo)
+detail         | Vista individual de reserva, cambio de estado, campo notas_admin
+trash          | Reservas eliminadas (soft delete), restaurar/eliminar permanentemente
+whatsapp       | Mensajes de WhatsApp con plantilla personalizable
+clients        | Base de clientes, busqueda, filtros por fecha, exportar CSV/PDF
+waiting        | Lista de espera con estados (pendiente/contactado/convertido/cancelado)
+profile        | Editar nombre, email, contrasena, subir avatar
+appearance     | Branding: logo, colores, imagen de fondo, opacidad, titulo, subtitulo, redes sociales, footer
+shop           | Modulo completo de tienda (ver seccion 6)
+bio            | Modulo de bio/link-in-bio (ver seccion 7)
+payments       | Gestion de proveedores de pago (ver seccion 8)
+
+5.3 Acciones por reserva
+-------------------------
+- Cambiar estado: confirmed, pending, cancelled, completed
+- Editar notas_admin
+- Soft delete (mover a papelera)
+- Restaurar desde papelera
+- Eliminar permanentemente
+
+5.4 Sidebar
+-----------
+Items de navegacion:
+- Principal (dashboard)
+- Reservas
+- Clientes
+- Lista de espera (con badge de pendientes)
+- Disponibilidad
+- Servicios
+- Tienda
+- Mi Bio
+- Apariencia
+- Pagos
+- Perfil
+- WhatsApp
+- Papelera (con badge de eliminadas)
+- Enlace a pagina de reserva publica
+- Modo claro/oscuro
+- Cerrar sesion
+
+================================================================================
+6. MODULO DE TIENDA
+================================================================================
+
+6.1 Pagina publica (ShopPage.tsx)
+----------------------------------
+- Cuadricula de productos con filtro por categorias
+- Tarjetas: imagen, nombre, descripcion, precio (con precio de comparacion tachado), boton "Agregar al carrito"
+- Carrito deslizante (drawer): lista de items, cantidad +/-, eliminar, total, boton checkout
+- Carrito persistido en localStorage (clave: reservas_cart)
+- Limite maximo de 20 productos
+
+6.2 Admin (ShopAdmin.tsx)
+--------------------------
+
+Vista         | Funcionalidades
+--------------|----------------------------------------------------------------
+Dashboard     | Total productos, activos, stock bajo, sin stock, total ordenes, ingresos
+Productos     | CRUD, busqueda/filtro, soft delete/restaurar, subir imagen, duplicar, activar/desactivar, indicador de uso (limite por plan)
+Categorias    | CRUD, orden de clasificacion
+Ordenes       | Lista de ordenes, actualizacion de estado, vista detalle con items
+Papelera      | Productos eliminados, restaurar/eliminar permanentemente
+
+Barra de pestanas del admin:
+- Dashboard | Productos | Categorias | Ventas | Papelera | Ver tienda (enlace externo)
+
+6.3 Sistema de imagenes (ImageUploader.tsx)
+--------------------------------------------
+- Compresion client-side: resize a 600x600px, formato WebP, calidad 0.7
+- Upload a bucket de Supabase: shop-images
+- Maximo 2MB por archivo
+- Formatos soportados: webp, jpeg, png
+
+================================================================================
+7. MODULO BIO (Link-in-Bio)
+================================================================================
+
+7.1 Pagina publica (BioPage.tsx)
+---------------------------------
+- Renderiza perfil por slug (/bio/:slug)
+- Avatar, nombre, texto bio
+- Lista de enlaces con iconos, tracking de clics -> bio_stats
+- Tracking de visitas al cargar pagina
+- Generacion de codigo QR
+
+7.2 Admin (BioAdmin.tsx)
+--------------------------
+
+Pestana       | Funcionalidades
+--------------|----------------------------------------------------------------
+Profile       | Nombre, slug, texto bio, URL de avatar
+Links         | CRUD, reordenar (sort_order), titulo, URL, icono, toggle activo
+Appearance    | Selector de color de tema, tipo de fondo (gradiente/solido/imagen), estilo de boton (redondeado/pill/cuadrado)
+Stats         | Total visitas, total clics, clics por enlace, filtro por rango de fechas
+QR Code       | QR auto-generado para URL de bio, descargar como PNG
+
+================================================================================
+8. MODULO DE PAGOS
+================================================================================
+
+8.1 Proveedores soportados
+----------------------------
+- MercadoPago: COMPLETAMENTE INTEGRADO
+- Stripe: Solo UI de configuracion (no implementado)
+- PayPal: Solo UI de configuracion (no implementado)
+- Crypto: Solo UI de configuracion (no implementado)
+
+8.2 Admin (PaymentsAdmin.tsx)
+------------------------------
+- Lista de proveedores con estado activo/inactivo
+- Conexion/desconexion
+- Configuracion de credenciales (API keys, public keys, access tokens)
+- Boton de prueba de conexion
+- Almacenado en tabla payment_providers como JSONB
+
+8.3 Integracion MercadoPago (flujo completo)
+---------------------------------------------
+1. create-payment (edge function) -> crea preferencia MP
+2. Payment.tsx (frontend) -> renderiza MP Brick
+3. Al aprobarse -> polling para verificar estado
+4. mercadopago-webhook -> maneja notificaciones asincronas
+5. send-confirmation-email -> envia email de confirmacion
+
+================================================================================
+9. FLUJO DE RESERVA (Maquina de estados)
+================================================================================
+
+servicios -> calendario -> formulario -> pago -> confirmacion
+
+Paso 1: Servicios
+- Lista de servicios activos de la tabla services
+- Seleccionar uno (o saltar si hay servicio unico)
+
+Paso 2: Calendario (Calendar.tsx)
+- Navegacion por mes (anterior/siguiente)
+- Dias disponibles resaltados (de availability_settings donde is_active=true)
+- Fechas bloqueadas en gris (de blocked_dates)
+- Generacion de slots: start_time -> end_time, intervalo = slot_duration_minutes
+- Verificacion de capacidad: contar reservas existentes por slot
+- Formulario de lista de espera cuando el slot esta lleno
+
+Paso 3: Formulario (BookingForm.tsx)
+- Nombre: texto, validacion minimo 3 caracteres
+- Telefono: texto, regex /^\+?[\d\s-]{8,}$/
+- Email: texto, regex /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+- Verificacion de duplicados: previene mismo email con reserva pendiente en misma fecha/hora
+
+Paso 4: Pago (Payment.tsx)
+- Integracion con MercadoPago Brick (formulario de tarjeta)
+- Muestra monto + moneda
+- Polling para verificar estado de aprobacion
+
+Paso 5: Confirmacion (Confirmation.tsx)
+- Muestra codigo de reserva (RES-YYYY-XXXX)
+- Boton de copiar al portapapeles
+- Dispara edge function send-confirmation-email
+- Resumen de detalles de la reserva
+
+================================================================================
+10. COMPONENTES UI
+================================================================================
+
+Componente         | Ubicacion                    | Proposito
+-------------------|------------------------------|----------------------------------
+BookingForm        | src/components/              | Formulario de datos del cliente
+Calendar           | src/components/              | Selector de fecha/hora
+Confirmation       | src/components/              | Pantalla de exito
+Payment            | src/components/              | Integracion MercadoPago
+ThemeToggle        | src/components/              | Selector de temas (8 presets)
+ThemeProvider      | src/contexts/                | Inyeccion de propiedades CSS
+
+Componentes shadcn/ui:
+- Alert
+- Avatar
+- Badge
+- Button
+- Card
+- Dialog
+- Input
+- Progress
+- Select
+- Separator
+- Skeleton
+- Table
+
+================================================================================
+11. DEPENDENCIAS
+================================================================================
+
+Categoria      | Paquetes
+---------------|----------------------------------------------------------------
+Core           | react 18, react-dom, react-router-dom v7, typescript, vite
+Supabase       | @supabase/supabase-js
+Pagos          | @mercadopago/sdk-react
+UI             | @radix-ui/react-avatar, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu, @radix-ui/react-select, @radix-ui/react-tabs, @radix-ui/react-toast
+PDF            | jspdf, jspdf-autotable
+Iconos         | lucide-react
+Estilos        | tailwindcss, tailwindcss-animate, tailwind-merge
+Utilidades     | clsx
+
+================================================================================
+12. SEGURIDAD
+================================================================================
+
+- RLS (Row-Level Security) habilitado en todas las tablas
+- Autenticacion admin: email+password via RPC (verify_admin_password)
+- Credenciales almacenadas en sessionStorage
+- Todas las funciones admin autentican via headers email+password
+- Lectura publica: availability_settings, blocked_dates, settings, services
+- Insercion anonima: bookings (el publico puede crear)
+- CRUD admin: todas las operaciones via edge functions con service role
+- Sin secretos en frontend: public token de MP se obtiene via get-mp-config
+
+================================================================================
+13. LOCAL STORAGE
+================================================================================
+
+Clave                | Proposito
+---------------------|-------------------------------------------
+reservas_cart        | Items del carrito de compras (JSON)
+reservas_theme       | Tema seleccionado
+adminEmail           | Email de login admin (sessionStorage)
+adminPassword        | Contrasena de login admin (sessionStorage)
+
+================================================================================
+14. BUCKETS DE STORAGE
+================================================================================
+
+Nombre         | Proposito                    | Limites
+---------------|------------------------------|------------------
+shop-images    | Imagenes de productos        | Max 2MB, webp/jpeg/png
+
+================================================================================
+15. COMANDOS UTILES
+================================================================================
+
+npm run dev      | Iniciar servidor de desarrollo
+npm run build    | Build de produccion
+npm run preview  | Vista previa del build
+
+================================================================================
+                         FIN DEL INVENTARIO
+================================================================================

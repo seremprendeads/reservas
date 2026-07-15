@@ -1,5 +1,6 @@
 export type BioProfile = {
   id: string;
+  business_id: string;
   admin_email: string;
   slug: string;
   name: string;

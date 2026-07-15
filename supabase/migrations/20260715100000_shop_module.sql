@@ -11,7 +11,9 @@ CREATE TABLE IF NOT EXISTS shop_categories (
 
 ALTER TABLE shop_categories ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read shop_categories" ON shop_categories;
 CREATE POLICY "Public read shop_categories" ON shop_categories FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Admin all shop_categories" ON shop_categories;
 CREATE POLICY "Admin all shop_categories" ON shop_categories FOR ALL USING (
   EXISTS (SELECT 1 FROM admin_users WHERE email = current_setting('request.jwt.claims', true)::json->>'email')
 );
@@ -36,10 +38,15 @@ CREATE TABLE IF NOT EXISTS shop_products (
 
 ALTER TABLE shop_products ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read shop_products" ON shop_products;
 CREATE POLICY "Public read shop_products" ON shop_products FOR SELECT USING (is_active = true);
+DROP POLICY IF EXISTS "Admin read shop_products" ON shop_products;
 CREATE POLICY "Admin read shop_products" ON shop_products FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Admin insert shop_products" ON shop_products;
 CREATE POLICY "Admin insert shop_products" ON shop_products FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Admin update shop_products" ON shop_products;
 CREATE POLICY "Admin update shop_products" ON shop_products FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Admin delete shop_products" ON shop_products;
 CREATE POLICY "Admin delete shop_products" ON shop_products FOR DELETE USING (true);
 
 -- Orders
@@ -58,6 +65,7 @@ CREATE TABLE IF NOT EXISTS shop_orders (
 
 ALTER TABLE shop_orders ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admin all shop_orders" ON shop_orders;
 CREATE POLICY "Admin all shop_orders" ON shop_orders FOR ALL USING (true);
 
 -- Order items
@@ -73,6 +81,7 @@ CREATE TABLE IF NOT EXISTS shop_order_items (
 
 ALTER TABLE shop_order_items ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admin all shop_order_items" ON shop_order_items;
 CREATE POLICY "Admin all shop_order_items" ON shop_order_items FOR ALL USING (true);
 
 -- Inventory movements
@@ -87,6 +96,7 @@ CREATE TABLE IF NOT EXISTS inventory_movements (
 
 ALTER TABLE inventory_movements ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admin all inventory_movements" ON inventory_movements;
 CREATE POLICY "Admin all inventory_movements" ON inventory_movements FOR ALL USING (true);
 
 -- Function: decrement stock safely

@@ -5,6 +5,7 @@ import {
   Download, Upload, X,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import { useBusiness } from '../../../contexts/BusinessContext';
 import { BioProfile, BioLink, BioStats } from '../types';
 import { BIO_BUTTON_STYLES, BIO_BG_PRESETS } from '../config';
 import { Button } from '../../../components/ui/button';
@@ -30,6 +31,7 @@ function getButtonRadius(style: string) {
 }
 
 export function BioAdmin({ adminEmail }: { adminEmail: string }) {
+  const { business } = useBusiness();
   const [tab, setTab] = useState<Tab>('profile');
   const [profile, setProfile] = useState<BioProfile | null>(null);
   const [links, setLinks] = useState<BioLink[]>([]);
@@ -49,7 +51,8 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const profileRef = useRef<BioProfile | null>(null);
 
   const loadProfile = useCallback(async () => {
-    const { data } = await supabase.from('bio_profiles').select('*').eq('admin_email', adminEmail).maybeSingle();
+    if (!business?.id) return;
+    const { data } = await supabase.from('bio_profiles').select('*').eq('business_id', business.id).maybeSingle();
     if (data) {
       setProfile(data);
       profileRef.current = data;
@@ -59,6 +62,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     } else {
       const defaultSlug = adminEmail.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 30);
       const { data: newProfile } = await supabase.from('bio_profiles').insert({
+        business_id: business.id,
         admin_email: adminEmail,
         slug: defaultSlug,
         name: '',
@@ -70,7 +74,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
       }
     }
     setLoading(false);
-  }, [adminEmail]);
+  }, [adminEmail, business?.id]);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
@@ -82,8 +86,10 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
   const ensureProfile = async (): Promise<BioProfile> => {
     if (profile) return profile;
+    if (!business?.id) return null!;
     const defaultSlug = adminEmail.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 30);
     const { data } = await supabase.from('bio_profiles').insert({
+      business_id: business.id,
       admin_email: adminEmail,
       slug: defaultSlug,
       name: '',
@@ -135,10 +141,10 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     setSaving(true);
     try {
       if (p.id) {
-        await supabase.from('bio_profiles').update({ ...toSave, updated_at: new Date().toISOString() }).eq('id', p.id);
+        await supabase.from('bio_profiles').update({ ...toSave, updated_at: new Date().toISOString() }).eq('id', p.id).eq('business_id', business?.id || '');
       } else {
         const { data } = await supabase.from('bio_profiles').insert({
-          ...toSave, admin_email: adminEmail, slug: p.slug, name: p.name,
+          ...toSave, business_id: business?.id, admin_email: adminEmail, slug: p.slug, name: p.name,
         }).select().single();
         if (data) {
           profileRef.current = data;
@@ -184,7 +190,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
         });
       }
       const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
-      const fileName = `bio-avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`;
+      const fileName = `${business?.id || 'default'}/bio-avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from('branding').upload(fileName, blob, { upsert: false });
       if (error) throw error;
       const { data: urlData } = supabase.storage.from('branding').getPublicUrl(fileName);
@@ -226,7 +232,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
         });
       }
       const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
-      const fileName = `bio-bg-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`;
+      const fileName = `${business?.id || 'default'}/bio-bg-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from('branding').upload(fileName, blob, { upsert: false });
       if (error) throw error;
       const { data: urlData } = supabase.storage.from('branding').getPublicUrl(fileName);
@@ -279,7 +285,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const saveSlug = async () => {
     const clean = slug.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
     if (!clean || !profile) return;
-    const { error } = await supabase.from('bio_profiles').update({ slug: clean }).eq('id', profile.id);
+    const { error } = await supabase.from('bio_profiles').update({ slug: clean }).eq('id', profile.id).eq('business_id', business?.id || '');
     if (!error) { setSlug(clean); setProfile(prev => prev ? { ...prev, slug: clean } : prev); }
   };
 

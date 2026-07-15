@@ -4,7 +4,7 @@ export type PaymentProviderStatus = 'connected' | 'disconnected';
 
 export type PaymentProvider = {
   id: string;
-  shop_id: string;
+  business_id: string;
   provider: PaymentProviderSlug;
   access_token: string | null;
   client_id: string | null;

@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { User, Phone, Mail, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useBooking } from '../contexts/BookingContext';
 import { supabase, Settings, Booking } from '../lib/supabase';
+import { useBusiness } from '../contexts/BusinessContext';
 import { useEffect } from 'react';
 
 export function BookingForm() {
   const { bookingData, setCustomerInfo, setStep, setPaymentInfo } = useBooking();
+  const { business } = useBusiness();
   const [name, setName] = useState(bookingData.name);
   const [phone, setPhone] = useState(bookingData.phone);
   const [email, setEmail] = useState(bookingData.email);
@@ -14,11 +16,12 @@ export function BookingForm() {
   const [settings, setSettings] = useState<Settings | null>(null);
 
   useEffect(() => {
-    loadSettings();
-  }, []);
+    if (business?.id) loadSettings();
+  }, [business?.id]);
 
   const loadSettings = async () => {
-    const { data } = await supabase.from('settings').select('*').maybeSingle();
+    if (!business?.id) return;
+    const { data } = await supabase.from('settings').select('*').eq('business_id', business.id).maybeSingle();
     if (data) setSettings(data);
   };
 
@@ -53,7 +56,7 @@ export function BookingForm() {
     e.preventDefault();
 
     if (!validateForm()) return;
-    if (!settings) return;
+    if (!settings || !business?.id) return;
 
     setCustomerInfo(name, phone, email);
     setLoading(true);
@@ -61,7 +64,7 @@ export function BookingForm() {
     try {
       const dateStr = bookingData.date!.toISOString().split('T')[0];
 
-      const bookingRes = await supabase.rpc('generate_booking_code');
+      const bookingRes = await supabase.rpc('generate_booking_code', { p_business_id: business.id });
 
       if (bookingRes.error) {
         throw new Error('Error al generar codigo de reserva');
@@ -72,6 +75,7 @@ export function BookingForm() {
       const { error: insertError } = await supabase
         .from('bookings')
         .insert({
+          business_id: business.id,
           booking_code: bookingCode,
           customer_name: name,
           customer_phone: phone,
@@ -89,10 +93,12 @@ export function BookingForm() {
 
       const { data: preference, error: prefError } = await supabase.functions.invoke('create-payment', {
         body: {
+          business_slug: business.slug,
           bookingCode,
           amount: bookingData.amount,
           email,
           name,
+          service_id: bookingData.service?.id,
         },
       });
 
@@ -103,7 +109,8 @@ export function BookingForm() {
       const { data: updateData, error: updateError } = await supabase
         .from('bookings')
         .update({ preference_id: preference.id })
-        .eq('booking_code', bookingCode);
+        .eq('booking_code', bookingCode)
+        .eq('business_id', business.id);
 
       setPaymentInfo(preference.id, bookingCode, bookingData.amount, bookingData.currency);
       setStep('payment');

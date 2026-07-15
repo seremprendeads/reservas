@@ -1,10 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { createServiceClient, jsonSuccess, jsonError, corsHeaders, checkRateLimit } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -12,20 +7,48 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const MP_ACCESS_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
-
-    if (!MP_ACCESS_TOKEN) {
-      throw new Error("Mercado Pago access token not configured");
+    // Rate limit: 10 requests per minute per IP
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const rl = checkRateLimit(`create-payment:${ip}`, 10, 60_000);
+    if (!rl.allowed) {
+      return jsonError("Demasiadas solicitudes, intente más tarde", 429);
     }
 
     const body = await req.json();
-    const { bookingCode, amount, email, name } = body;
+    const { business_slug, bookingCode, amount, email, name, service_id } = body;
 
-    if (!bookingCode || !amount || !email || !name) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (!business_slug || !bookingCode || !amount || !email || !name) {
+      return jsonError("Campos requeridos faltantes", 400);
+    }
+
+    const supabase = createServiceClient();
+
+    // Get business
+    const { data: business } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("slug", business_slug)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (!business) {
+      return jsonError("Negocio no encontrado", 404);
+    }
+
+    // Get MP credentials for this business
+    const { data: mpConfig } = await supabase
+      .from("payment_providers")
+      .select("access_token")
+      .eq("business_id", business.id)
+      .eq("provider", "mercadopago")
+      .eq("status", "connected")
+      .maybeSingle();
+
+    // Fallback to env variable if no business-specific config
+    const MP_ACCESS_TOKEN = mpConfig?.access_token || Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
+
+    if (!MP_ACCESS_TOKEN) {
+      return jsonError("Mercado Pago no configurado", 500);
     }
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -34,13 +57,30 @@ Deno.serve(async (req: Request) => {
     const pendingUrl = `${SUPABASE_URL}/functions/v1/payment-pending?booking_code=${bookingCode}`;
     const notificationUrl = `${SUPABASE_URL}/functions/v1/mercadopago-webhook`;
 
+    // Get service name and validate price if service_id provided
+    let serviceName = "Turno reservado";
+    let validAmount = amount;
+    if (service_id) {
+      const { data: service } = await supabase
+        .from("services")
+        .select("name, price, currency")
+        .eq("id", service_id)
+        .eq("business_id", business.id)
+        .maybeSingle();
+      if (service) {
+        serviceName = service.name;
+        // Use the price from DB instead of client-supplied amount (prevents price manipulation)
+        validAmount = service.price;
+      }
+    }
+
     const preference = {
       items: [
         {
           id: bookingCode,
-          title: `Reserva ${bookingCode}`,
-          description: "Turno reservado",
-          unit_price: amount,
+          title: `Reserva ${bookingCode} - ${serviceName}`,
+          description: serviceName,
+          unit_price: validAmount,
           quantity: 1,
           currency_id: "ARS",
         },
@@ -72,24 +112,18 @@ Deno.serve(async (req: Request) => {
     if (!response.ok) {
       const errorData = await response.text();
       console.error("Mercado Pago error:", errorData);
-      throw new Error(`Mercado Pago API error: ${response.status}`);
+      return jsonError(`Mercado Pago API error: ${response.status}`, 502);
     }
 
     const data = await response.json();
 
-    return new Response(
-      JSON.stringify({
-        id: data.id,
-        init_point: data.init_point,
-        sandbox_init_point: data.sandbox_init_point,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return jsonSuccess({
+      id: data.id,
+      init_point: data.init_point,
+      sandbox_init_point: data.sandbox_init_point,
+    });
   } catch (err) {
-    console.error("Error creating payment preference:", err);
-    return new Response(
-      JSON.stringify({ error: err.message || "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    console.error("create-payment error:", err);
+    return jsonError(err.message || "Error interno");
   }
 });

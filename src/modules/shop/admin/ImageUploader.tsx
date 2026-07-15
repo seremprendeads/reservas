@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import { useBusiness } from '../../../contexts/BusinessContext';
 import { SHOP_STORAGE_BUCKET, IMAGE_CONFIG } from '../config';
 import { Progress } from '../../../components/ui/progress';
 import { Button } from '../../../components/ui/button';
@@ -91,6 +92,7 @@ export function ImageUploader({
   onOldImageDelete,
   disabled,
 }: ImageUploaderProps) {
+  const { business } = useBusiness();
   const [status, setStatus] = useState<UploadStatus>('idle');
   const [progress, setProgress] = useState(0);
   const [preview, setPreview] = useState<string | null>(currentImageUrl || null);
@@ -117,10 +119,11 @@ export function ImageUploader({
       return;
     }
 
-    // Upload
+    // Upload with business_id path
     setStatus('uploading');
     setProgress(0);
-    const fileName = `product-${Date.now()}.webp`;
+    const businessId = business?.id || 'default';
+    const fileName = `${businessId}/product-${Date.now()}.webp`;
     try {
       await uploadToStorage(SHOP_STORAGE_BUCKET, fileName, blob, setProgress);
     } catch (err: any) {

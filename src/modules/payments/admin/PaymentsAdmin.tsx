@@ -11,6 +11,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import { useBusiness } from '../../../contexts/BusinessContext';
 import { PaymentProvider } from '../types';
 import { PAYMENT_PROVIDERS } from '../config';
 import { Button } from '../../../components/ui/button';
@@ -23,6 +24,7 @@ import {
 } from '../../../components/ui/dialog';
 
 export function PaymentsAdmin() {
+  const { business } = useBusiness();
   const [providers, setProviders] = useState<PaymentProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [adminEmail] = useState(sessionStorage.getItem('admin_email') || '');

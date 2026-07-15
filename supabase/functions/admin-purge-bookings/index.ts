@@ -1,11 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { authenticateToken, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -13,57 +7,33 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { email, password, booking_id } = await req.json();
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    const { data: admin } = await supabase
-      .from("admin_users")
-      .select("id, password_hash")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (!admin) {
-      return new Response(JSON.stringify({ success: false, error: "No autorizado" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const auth = await authenticateToken(req);
+    if ('error' in auth) {
+      return jsonUnauthorized();
     }
 
-    const { data: verified } = await supabase.rpc("verify_admin_password", {
-      input_password: password,
-      stored_hash: admin.password_hash,
-    });
+    const { booking_id } = await req.json();
 
-    if (!verified) {
-      return new Response(JSON.stringify({ success: false, error: "No autorizado" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const supabase = createServiceClient();
+    
+    let query = supabase.from("bookings").delete()
+      .eq("business_id", auth.businessId)
+      .not("deleted_at", "is", null);
 
-    const threeWeeksAgo = new Date();
-    threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
-
-    let query = supabase.from("bookings").delete().not("deleted_at", "is", null);
-
-    // Si se pasa booking_id elimina solo esa, si no elimina todas las expiradas
     if (booking_id) {
-      query = supabase.from("bookings").delete().eq("id", booking_id).not("deleted_at", "is", null);
+      query = query.eq("id", booking_id);
     } else {
-      query = supabase.from("bookings").delete().lt("deleted_at", threeWeeksAgo.toISOString());
+      const threeWeeksAgo = new Date();
+      threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
+      query = query.lt("deleted_at", threeWeeksAgo.toISOString());
     }
 
     const { error } = await query;
     if (error) throw error;
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonSuccess();
   } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: "Error interno" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("admin-purge-bookings error:", err);
+    return jsonError("Error interno");
   }
 });

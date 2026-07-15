@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Clock, Calendar as CalendarIcon, Users, CheckCircle } from 'lucide-react';
 import { supabase, AvailabilitySetting, BlockedDate, Booking, Settings } from '../lib/supabase';
 import { useBooking } from '../contexts/BookingContext';
+import { useBusiness } from '../contexts/BusinessContext';
 
 const DAYS_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTHS = [
@@ -11,6 +12,7 @@ const MONTHS = [
 
 // ─── Formulario lista de espera ───────────────────────────────────────────────
 function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClose: () => void }) {
+  const { business } = useBusiness();
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
@@ -36,6 +38,7 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
     setLoading(true);
     try {
       const { error } = await supabase.from('waiting_list').insert({
+        business_id: business?.id,
         nombre: nombre.trim(),
         telefono: telefono.trim(),
         email: email.trim(),
@@ -140,6 +143,7 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
 // ─── Calendario principal ─────────────────────────────────────────────────────
 export function Calendar() {
   const { setDate, setTime, setStep, bookingData } = useBooking();
+  const { business } = useBusiness();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [availability, setAvailability] = useState<AvailabilitySetting[]>([]);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
@@ -150,7 +154,7 @@ export function Calendar() {
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [showWaitingForm, setShowWaitingForm] = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { if (business?.id) loadData(); }, [business?.id]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -160,11 +164,12 @@ export function Calendar() {
   }, [selectedDate, availability, bookedSlots]);
 
   const loadData = async () => {
+    if (!business?.id) return;
     try {
       const [availRes, blockedRes, settingsRes] = await Promise.all([
-        supabase.from('availability_settings').select('*'),
-        supabase.from('blocked_dates').select('*'),
-        supabase.from('settings').select('*').maybeSingle(),
+        supabase.from('availability_settings').select('*').eq('business_id', business.id),
+        supabase.from('blocked_dates').select('*').eq('business_id', business.id),
+        supabase.from('settings').select('*').eq('business_id', business.id).maybeSingle(),
       ]);
 
       if (availRes.data) setAvailability(availRes.data);
@@ -175,6 +180,7 @@ export function Calendar() {
       const bookingsRes = await supabase
         .from('bookings')
         .select('booking_date, booking_time, booking_status')
+        .eq('business_id', business.id)
         .gte('booking_date', today.toISOString().split('T')[0])
         .in('booking_status', ['confirmed', 'pending']);
 

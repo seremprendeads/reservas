@@ -1,10 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { createServiceClient, corsHeaders } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -12,7 +7,49 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const publicKey = Deno.env.get("MERCADO_PAGO_PUBLIC_KEY");
+    let businessSlug: string | null = null;
+
+    // Support both GET (query param) and POST (body)
+    if (req.method === "POST") {
+      const body = await req.json();
+      businessSlug = body.business_slug || null;
+    } else {
+      const url = new URL(req.url);
+      businessSlug = url.searchParams.get("business_slug");
+    }
+
+    const supabase = createServiceClient();
+
+    let publicKey: string | null = null;
+
+    // If business_slug provided, try to get business-specific public key
+    if (businessSlug) {
+      const { data: business } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("slug", businessSlug)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (business) {
+        const { data: mpConfig } = await supabase
+          .from("payment_providers")
+          .select("public_key")
+          .eq("business_id", business.id)
+          .eq("provider", "mercadopago")
+          .eq("status", "connected")
+          .maybeSingle();
+
+        if (mpConfig?.public_key) {
+          publicKey = mpConfig.public_key;
+        }
+      }
+    }
+
+    // Fallback to global env variable
+    if (!publicKey) {
+      publicKey = Deno.env.get("MERCADO_PAGO_PUBLIC_KEY") || Deno.env.get("MERCADOPAGO_PUBLIC_KEY");
+    }
 
     if (!publicKey) {
       return new Response(
@@ -26,7 +63,7 @@ Deno.serve(async (req: Request) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    console.error("Error:", err);
+    console.error("get-mp-config error:", err);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

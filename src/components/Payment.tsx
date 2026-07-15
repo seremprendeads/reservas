@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CreditCard, Loader2, Clock, XCircle } from 'lucide-react';
 import { useBooking } from '../contexts/BookingContext';
+import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
 
 declare global {
@@ -11,6 +12,7 @@ declare global {
 
 export function Payment() {
   const { bookingData, setPaymentStatus, setStep } = useBooking();
+  const { business } = useBusiness();
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +28,7 @@ export function Payment() {
         .from('bookings')
         .select('*')
         .eq('booking_code', bookingData.bookingCode)
+        .eq('business_id', business?.id || '')
         .maybeSingle();
 
       if (fetchError) throw fetchError;
@@ -41,7 +44,7 @@ export function Payment() {
       setChecking(false);
     }
     return false;
-  }, [bookingData.bookingCode, setPaymentStatus, setStep]);
+  }, [bookingData.bookingCode, business?.id, setPaymentStatus, setStep]);
 
   useEffect(() => {
     if (!bookingData.preferenceId) {
@@ -136,7 +139,10 @@ export function Payment() {
   };
 
   const getPublicKey = async (): Promise<string | null> => {
-    const { data, error } = await supabase.functions.invoke('get-mp-config');
+    const { data, error } = await supabase.functions.invoke('get-mp-config', {
+      method: 'POST',
+      body: { business_slug: business?.slug },
+    });
     if (error) {
       console.error('Error getting MP config:', error);
       return null;

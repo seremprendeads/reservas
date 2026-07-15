@@ -1,11 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { createServiceClient, jsonSuccess, jsonError, corsHeaders } from "../_shared/auth.ts";
 
 function generateTempPassword(): string {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
@@ -21,17 +15,11 @@ Deno.serve(async (req: Request) => {
     const { email } = await req.json();
 
     if (!email) {
-      return new Response(JSON.stringify({ success: false, error: "Email requerido" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonError("Email requerido", 400);
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const supabase = createServiceClient();
 
-    // Verificar que el email existe
     const { data: admin } = await supabase
       .from("admin_users")
       .select("id, name, email")
@@ -39,16 +27,12 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
 
     if (!admin) {
-      // Por seguridad, no revelamos si el email existe o no
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // Don't reveal if email exists
+      return jsonSuccess();
     }
 
-    // Generar contraseña temporal
     const tempPassword = generateTempPassword();
 
-    // Actualizar contraseña en la BD
     const { error: updateError } = await supabase.rpc("update_admin_password_direct", {
       p_email: email,
       p_new_password: tempPassword,
@@ -56,7 +40,6 @@ Deno.serve(async (req: Request) => {
 
     if (updateError) throw updateError;
 
-    // Enviar email con Resend
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "admin@seremprende.com";
 
@@ -88,18 +71,13 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!emailRes.ok) {
-      const errData = await emailRes.text();
-      console.error("Resend error:", errData);
+      console.error("Resend error:", await emailRes.text());
       throw new Error("Error al enviar el email");
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonSuccess();
   } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ success: false, error: "Error interno" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("admin-forgot-password error:", err);
+    return jsonError("Error interno");
   }
 });
