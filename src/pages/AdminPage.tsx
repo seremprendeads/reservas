@@ -2299,8 +2299,13 @@ export function AdminPage() {
             <div className="mx-auto max-w-7xl space-y-6">
               {/* Trial banner */}
               {(() => {
-                const trialEnds = sessionStorage.getItem('admin_trial_ends_at');
-                if (!trialEnds) return null;
+                let trialEnds = sessionStorage.getItem('admin_trial_ends_at');
+                if (!trialEnds) {
+                  // Para testing: simular prueba a 2 días del vencimiento
+                  const testDate = new Date();
+                  testDate.setDate(testDate.getDate() + 2);
+                  trialEnds = testDate.toISOString();
+                }
                 const daysLeft = trialDaysLeft ?? Math.ceil((new Date(trialEnds).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                 if (daysLeft <= 0) return null;
 
