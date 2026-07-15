@@ -2340,7 +2340,6 @@ export function AdminPage() {
     { id: 'payments', label: 'Pagos', icon: <CreditCard className="h-5 w-5" /> },
     { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
     { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquareText className="h-5 w-5" /> },
-    { id: 'team', label: 'Equipo', icon: <Users className="h-5 w-5" /> },
     {
       id: 'trash', label: 'Papelera', icon: <Archive className="h-5 w-5" />,
       badge: deletedBookings.length || undefined,
@@ -2901,8 +2900,8 @@ export function AdminPage() {
             <WhatsAppManager bookings={bookings} />
           )}
 
-          {/* ─── Team ──────────────────────────────────────────── */}
-          {view === 'team' && (
+          {/* ─── Team (hidden - not needed for single-user SaaS) ─── */}
+          {false && view === 'team' && (
             <TeamManager adminEmail={adminEmail} adminToken={adminToken} />
           )}
 
