@@ -2326,15 +2326,56 @@ export function AdminPage() {
                 if (days <= 0 && hours <= 0 && minutes <= 0 && seconds <= 0) return null;
 
                 const isUrgent = days <= 2;
+                const totalTrialMs = 14 * 24 * 60 * 60 * 1000;
+                const remainingMs = days * 86400000 + hours * 3600000 + minutes * 60000 + seconds * 1000;
+                const progress = Math.max(0, Math.min(100, ((totalTrialMs - remainingMs) / totalTrialMs) * 100));
+
+                const pad = (n: number) => String(n).padStart(2, '0');
 
                 return (
-                  <div className={`rounded-lg p-4 text-sm font-medium flex items-center justify-between ${isUrgent ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}`}>
-                    <span>
-                      Período de prueba: {days}d {hours}hs {minutes}m {seconds}s restantes
-                    </span>
-                    <a href="#prices" target="_blank" className={`ml-4 px-4 py-2 rounded-lg text-sm font-bold text-white transition-colors ${isUrgent ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}`}>
-                      Actualizar Plan
-                    </a>
+                  <div className={`relative overflow-hidden rounded-xl border shadow-sm ${isUrgent ? 'border-red-200 bg-gradient-to-r from-red-50 via-red-50 to-orange-50' : 'border-amber-200 bg-gradient-to-r from-amber-50 via-amber-50 to-yellow-50'}`}>
+                    <div className="p-4 sm:p-5">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isUrgent ? 'bg-red-100' : 'bg-amber-100'}`}>
+                            <Clock className={`h-5 w-5 ${isUrgent ? 'text-red-600' : 'text-amber-600'}`} />
+                          </div>
+                          <div>
+                            <p className={`text-sm font-semibold ${isUrgent ? 'text-red-800' : 'text-amber-800'}`}>
+                              Período de prueba
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              {[
+                                { val: days, label: 'D' },
+                                { val: hours, label: 'H' },
+                                { val: minutes, label: 'M' },
+                                { val: seconds, label: 'S' },
+                              ].map(({ val, label }) => (
+                                <span key={label} className={`inline-flex items-center gap-0.5 rounded-md px-2 py-1 text-xs font-bold tabular-nums ${isUrgent ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                  {pad(val)}
+                                  <span className="font-medium opacity-60">{label}</span>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <a
+                          href="#prices"
+                          target="_blank"
+                          className={`inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.97] ${isUrgent ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600' : 'bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600'}`}
+                        >
+                          Actualizar Plan
+                        </a>
+                      </div>
+                      <div className="mt-3">
+                        <div className={`h-1.5 w-full rounded-full overflow-hidden ${isUrgent ? 'bg-red-100' : 'bg-amber-100'}`}>
+                          <div
+                            className={`h-full rounded-full transition-all duration-1000 ${isUrgent ? 'bg-gradient-to-r from-red-500 to-red-400' : 'bg-gradient-to-r from-amber-500 to-yellow-400'}`}
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 );
               })()}
@@ -2835,26 +2876,50 @@ export function AdminPage() {
 
       {/* Trial Warning Popup */}
       <Dialog open={trialWarningOpen} onOpenChange={setTrialWarningOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50">
-              <Clock className="h-7 w-7 text-amber-600 dark:text-amber-400" />
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+          <div className="bg-gradient-to-br from-amber-500 to-orange-500 px-6 pt-8 pb-10 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+              <Clock className="h-8 w-8 text-white" />
             </div>
-            <DialogTitle className="text-center pt-4">Tu prueba está por vencer</DialogTitle>
-            <DialogDescription className="text-center">
-              {trialDaysLeft !== null && trialDaysLeft > 0
-                ? `Quedan ${trialDaysLeft} ${trialDaysLeft === 1 ? 'día' : 'días'} de prueba. Actualizá tu plan para no perder acceso.`
-                : 'Tu período de prueba ha expirado.'}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="sm:justify-center gap-2">
-            <Button variant="outline" onClick={() => setTrialWarningOpen(false)}>
-              Cerrar para continuar hasta el 14
-            </Button>
-            <Button className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
-              <a href="#prices" target="_blank">Actualizar Plan</a>
-            </Button>
-          </DialogFooter>
+            <DialogTitle className="text-center pt-4 text-xl font-bold text-white">
+              Tu prueba está por vencer
+            </DialogTitle>
+          </div>
+          <div className="px-6 -mt-4">
+            <div className="rounded-xl bg-white dark:bg-zinc-900 border border-amber-200 dark:border-amber-800 shadow-lg p-4">
+              <div className="flex items-center justify-center gap-2">
+                {trialDaysLeft !== null && trialDaysLeft > 0 ? (
+                  [
+                    { val: trialCountdown.days, label: 'Días' },
+                    { val: trialCountdown.hours, label: 'Horas' },
+                    { val: trialCountdown.minutes, label: 'Min' },
+                    { val: trialCountdown.seconds, label: 'Seg' },
+                  ].map(({ val, label }) => (
+                    <div key={label} className="flex flex-col items-center">
+                      <span className="text-2xl font-bold tabular-nums text-amber-600">{String(val).padStart(2, '0')}</span>
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
+                    </div>
+                  ))
+                ) : null}
+              </div>
+              {trialDaysLeft !== null && trialDaysLeft > 0 && (
+                <p className="text-center text-sm text-muted-foreground mt-3">
+                  Actualizá tu plan para no perder acceso a tu panel y reservas.
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 py-5">
+              <Button
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-md"
+                asChild
+              >
+                <a href="#prices" target="_blank">Actualizar Plan</a>
+              </Button>
+              <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => setTrialWarningOpen(false)}>
+                Cerrar para continuar hasta el 14
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
