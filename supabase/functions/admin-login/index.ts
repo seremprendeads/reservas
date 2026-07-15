@@ -19,7 +19,6 @@ Deno.serve(async (req: Request) => {
       return jsonUnauthorized();
     }
 
-    // Sign JWT token
     const jwtSecret = Deno.env.get("JWT_SECRET");
     if (!jwtSecret) {
       return jsonError("JWT_SECRET no configurado", 500);
@@ -32,26 +31,12 @@ Deno.serve(async (req: Request) => {
         business_id: auth.businessId,
       },
       jwtSecret,
-      24 // 24 hours
+      24
     );
 
-    // Get all businesses the user is a member of
     const supabase = createServiceClient();
-    const { data: memberships } = await supabase
-      .from("business_members")
-      .select("business_id, role, businesses(id, name, slug, logo_url)")
-      .eq("user_email", email)
-      .eq("is_active", true);
 
-    const businesses = (memberships || [])
-      .map((m: Record<string, unknown>) => ({
-        id: m.business_id,
-        role: m.role,
-        ...(m.businesses as Record<string, unknown>),
-      }))
-      .filter((b: Record<string, unknown>) => b.id);
-
-    // Check trial status for the current business
+    // Check trial status
     const { data: biz } = await supabase
       .from("businesses")
       .select("trial_ends_at, is_trial")
@@ -66,7 +51,6 @@ Deno.serve(async (req: Request) => {
       name: auth.admin.name,
       business_id: auth.businessId,
       token,
-      businesses,
       trial_ends_at: trialEndsAt,
       trial_expired: trialExpired,
     });

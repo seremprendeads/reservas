@@ -13,32 +13,22 @@ Deno.serve(async (req: Request) => {
     }
 
     const { business_id, confirmation } = await req.json();
-    const email = auth.admin.email;
 
     if (!business_id) {
       return jsonError("Campos requeridos faltantes", 400);
     }
 
-    // Must type the business name to confirm
     if (confirmation !== "ELIMINAR") {
       return jsonError('Debés escribir "ELIMINAR" para confirmar', 400);
     }
 
-    const supabase = createServiceClient();
-
-    // Verify user is owner of this business
-    const { data: member } = await supabase
-      .from("business_members")
-      .select("role")
-      .eq("business_id", business_id)
-      .eq("user_email", email)
-      .maybeSingle();
-
-    if (!member || member.role !== "owner") {
-      return jsonError("Solo el propietario puede eliminar el negocio", 403);
+    // Verify admin owns this business
+    if (auth.businessId !== business_id) {
+      return jsonError("No tenés permiso para eliminar este negocio", 403);
     }
 
-    // Get business name for confirmation
+    const supabase = createServiceClient();
+
     const { data: biz } = await supabase
       .from("businesses")
       .select("name")

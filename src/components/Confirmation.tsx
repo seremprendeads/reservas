@@ -13,7 +13,7 @@ export function Confirmation() {
       sendConfirmationEmail();
       setEmailSent(true);
     }
-  }, [bookingData.bookingCode]);
+  }, [bookingData.bookingCode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sendConfirmationEmail = async () => {
     try {

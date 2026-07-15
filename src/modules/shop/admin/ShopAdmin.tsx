@@ -17,7 +17,7 @@ import { ImageUploader } from './ImageUploader';
 import { deleteStorageFile } from './storage-utils';
 
 export function ShopAdmin() {
-  const { business } = useBusiness();
+  useBusiness();
   const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'trash'>('dashboard');
   return (
     <div className="space-y-6">
@@ -158,7 +158,7 @@ function ProductsManager() {
     if (!business?.id) return;
     reload();
     supabase.from('shop_categories').select('*').eq('business_id', business.id).order('sort_order').then(r => { if (r.data) setCategories(r.data); });
-  }, [business?.id]);
+  }, [business?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openNew = () => {
     if (isAtLimit) {
@@ -486,7 +486,7 @@ function ProductsTrash() {
       .then(r => { setDeleted(r.data || []); setLoading(false); });
   };
 
-  useEffect(() => { load(); }, [business?.id]);
+  useEffect(() => { load(); }, [business?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const restore = async (p: Product) => {
     await supabase.from('shop_products').update({ deleted_at: null }).eq('id', p.id).eq('business_id', business?.id || '');

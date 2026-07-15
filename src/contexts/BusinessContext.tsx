@@ -1,13 +1,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Business, FeatureFlag, supabase, FEATURE_KEYS, FeatureKey } from '../lib/supabase';
+import { Business, supabase } from '../lib/supabase';
 
 interface BusinessContextType {
   business: Business | null;
-  features: FeatureFlag[];
   loading: boolean;
   error: string | null;
-  isFeatureEnabled: (feature: FeatureKey) => boolean;
-  getFeatureConfig: (feature: FeatureKey) => Record<string, unknown>;
   refreshBusiness: () => Promise<void>;
   setBusinessBySlug: (slug: string) => Promise<void>;
   setBusinessById: (id: string) => Promise<void>;
@@ -20,7 +17,6 @@ const SLUG_STORAGE_KEY = 'reservas_business_slug';
 
 export function BusinessProvider({ children }: { children: ReactNode }) {
   const [business, setBusiness] = useState<Business | null>(null);
-  const [features, setFeatures] = useState<FeatureFlag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,14 +39,6 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
       }
 
       setBusiness(biz as Business);
-
-      // Load feature flags
-      const { data: flags } = await supabase
-        .from('feature_flags')
-        .select('*')
-        .eq('business_id', businessId);
-
-      setFeatures((flags || []) as FeatureFlag[]);
     } catch (err) {
       console.error('Error loading business:', err);
       setError(err instanceof Error ? err.message : 'Error cargando negocio');
@@ -105,23 +93,11 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const isFeatureEnabled = (feature: FeatureKey): boolean => {
-    const flag = features.find(f => f.feature_key === feature);
-    return flag?.is_enabled ?? false;
-  };
-
-  const getFeatureConfig = (feature: FeatureKey): Record<string, unknown> => {
-    const flag = features.find(f => f.feature_key === feature);
-    return flag?.config ?? {};
-  };
-
-  // Load business on mount
   useEffect(() => {
     const storedId = localStorage.getItem(STORAGE_KEY);
     if (storedId) {
       loadBusiness(storedId);
     } else {
-      // Fallback: load the first active business (no hardcoded UUID)
       setLoading(true);
       supabase
         .from('businesses')
@@ -141,11 +117,8 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
     <BusinessContext.Provider
       value={{
         business,
-        features,
         loading,
         error,
-        isFeatureEnabled,
-        getFeatureConfig,
         refreshBusiness,
         setBusinessBySlug,
         setBusinessById,

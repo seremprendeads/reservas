@@ -31,23 +31,22 @@ Deno.serve(async (req: Request) => {
     const supabase = createServiceClient();
 
     // Check if admin already has a business
-    const { data: existingMember } = await supabase
-      .from("business_members")
+    const { data: existingAdmin } = await supabase
+      .from("admin_users")
       .select("id")
-      .eq("user_email", email)
+      .eq("id", auth.admin.id)
+      .not("business_id", "is", null)
       .maybeSingle();
 
-    if (existingMember) {
+    if (existingAdmin) {
       return jsonError("Ya tenés un negocio asociado", 400);
     }
 
-    // Sanitize and validate slug
     const cleanSlug = slugify(slug);
     if (cleanSlug.length < 3) {
       return jsonError("El slug debe tener al menos 3 caracteres", 400);
     }
 
-    // Check slug uniqueness
     const { data: existingSlug } = await supabase
       .from("businesses")
       .select("id")
@@ -58,7 +57,6 @@ Deno.serve(async (req: Request) => {
       return jsonError("Ese nombre de URL ya está en uso", 400);
     }
 
-    // Create the business
     const { data: business, error: bizError } = await supabase
       .from("businesses")
       .insert({
@@ -73,48 +71,11 @@ Deno.serve(async (req: Request) => {
 
     if (bizError) throw bizError;
 
-    // Add the admin as owner
-    const { error: memberError } = await supabase
-      .from("business_members")
-      .insert({
-        business_id: business.id,
-        user_email: email,
-        role: "owner",
-      });
-
-    if (memberError) throw memberError;
-
     // Update admin_users with business_id
     await supabase
       .from("admin_users")
       .update({ business_id: business.id })
       .eq("id", auth.admin.id);
-
-    // Create default feature flags
-    const defaultFeatures = [
-      { feature_key: "booking", is_enabled: true },
-      { feature_key: "shop", is_enabled: true },
-      { feature_key: "bio", is_enabled: true },
-      { feature_key: "payments", is_enabled: true },
-      { feature_key: "whatsapp", is_enabled: true },
-      { feature_key: "landing", is_enabled: false },
-      { feature_key: "landing_ia", is_enabled: false },
-      { feature_key: "chat_ia", is_enabled: false },
-      { feature_key: "analytics", is_enabled: false },
-      { feature_key: "google_reviews", is_enabled: false },
-      { feature_key: "multi_staff", is_enabled: false },
-      { feature_key: "branches", is_enabled: false },
-      { feature_key: "events", is_enabled: false },
-      { feature_key: "crm", is_enabled: false },
-      { feature_key: "automations", is_enabled: false },
-      { feature_key: "api", is_enabled: false },
-      { feature_key: "custom_domain", is_enabled: false },
-      { feature_key: "email_notifications", is_enabled: false },
-    ];
-
-    await supabase.from("feature_flags").insert(
-      defaultFeatures.map((f) => ({ business_id: business.id, ...f }))
-    );
 
     // Create default settings
     await supabase.from("settings").insert({

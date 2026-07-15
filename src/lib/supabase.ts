@@ -19,44 +19,9 @@ export type Business = {
   slug: string;
   owner_email: string;
   logo_url: string | null;
-  domain: string | null;
   is_active: boolean;
-  plan: 'free' | 'starter' | 'pro' | 'enterprise';
   timezone: string;
   currency: string;
-  language: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export type BusinessMember = {
-  id: string;
-  business_id: string;
-  user_email: string;
-  role: 'owner' | 'admin' | 'member' | 'viewer';
-  is_active: boolean;
-  created_at: string;
-};
-
-export type FeatureFlag = {
-  id: string;
-  business_id: string;
-  feature_key: string;
-  is_enabled: boolean;
-  config: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
-};
-
-export type AiCredit = {
-  id: string;
-  business_id: string;
-  credits_remaining: number;
-  credits_used: number;
-  provider: 'platform' | 'openai' | 'claude' | 'gemini' | null;
-  api_key_encrypted: string | null;
-  monthly_limit: number;
-  reset_date: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -161,30 +126,3 @@ export type WaitingListItem = {
   created_at: string;
   updated_at: string;
 };
-
-// ============================================================================
-// FEATURE FLAG KEYS
-// ============================================================================
-
-export const FEATURE_KEYS = {
-  BOOKING: 'booking',
-  SHOP: 'shop',
-  BIO: 'bio',
-  PAYMENTS: 'payments',
-  WHATSAPP: 'whatsapp',
-  LANDING: 'landing',
-  LANDING_IA: 'landing_ia',
-  CHAT_IA: 'chat_ia',
-  ANALYTICS: 'analytics',
-  GOOGLE_REVIEWS: 'google_reviews',
-  MULTI_STAFF: 'multi_staff',
-  BRANCHES: 'branches',
-  EVENTS: 'events',
-  CRM: 'crm',
-  AUTOMATIONS: 'automations',
-  API: 'api',
-  CUSTOM_DOMAIN: 'custom_domain',
-  EMAIL_NOTIFICATIONS: 'email_notifications',
-} as const;
-
-export type FeatureKey = typeof FEATURE_KEYS[keyof typeof FEATURE_KEYS];

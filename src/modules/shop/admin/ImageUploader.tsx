@@ -126,9 +126,10 @@ export function ImageUploader({
     const fileName = `${businessId}/product-${Date.now()}.webp`;
     try {
       await uploadToStorage(SHOP_STORAGE_BUCKET, fileName, blob, setProgress);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'No se pudo subir la imagen. Verificá tu conexión e intentá nuevamente.';
       setStatus('error');
-      setErrorMessage(err?.message || 'No se pudo subir la imagen. Verificá tu conexión e intentá nuevamente.');
+      setErrorMessage(message);
       return;
     }
 
@@ -149,7 +150,7 @@ export function ImageUploader({
     setStatus('done');
     setProgress(100);
     onUploadComplete(publicUrl);
-  }, [currentImageUrl, onUploadComplete, onOldImageDelete]);
+  }, [currentImageUrl, onUploadComplete, onOldImageDelete, business?.id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

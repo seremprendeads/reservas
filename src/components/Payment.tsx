@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     MercadoPago: any;
   }
 }
@@ -88,7 +89,7 @@ export function Payment() {
     return () => {
       clearInterval(checkInterval);
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const initMercadoPago = async () => {
     try {

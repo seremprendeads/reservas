@@ -1,12 +1,15 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, ShoppingCart, X, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Tag, Package, Check } from 'lucide-react';
+import { Search, ShoppingCart, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Package, Check } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, CartItem } from '../types';
 import { CartProvider, useCart } from '../contexts/CartContext';
 
 declare global {
-  interface Window { MercadoPago: any; }
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MercadoPago: any;
+  }
 }
 
 function formatPrice(amount: number, currency: string) {
@@ -199,7 +202,7 @@ function ShopPageContent() {
 
       <div className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
         {view === 'checkout' && checkoutInfo && (
-          <CheckoutScreen preferenceId={checkoutInfo.preferenceId} orderId={checkoutInfo.orderId} onComplete={() => setOrderSuccess(true)} pollPayment={pollPayment} />
+          <CheckoutScreen preferenceId={checkoutInfo.preferenceId} orderId={checkoutInfo.orderId} pollPayment={pollPayment} />
         )}
 
         {view === 'cart' && (
@@ -452,8 +455,8 @@ function CartScreen({ items, subtotal, currency, onUpdateQuantity, onRemoveItem,
   );
 }
 
-function CheckoutScreen({ preferenceId, orderId, onComplete, pollPayment }: {
-  preferenceId: string; orderId: string; onComplete: () => void; pollPayment: (id: string) => void;
+function CheckoutScreen({ preferenceId, orderId, pollPayment }: {
+  preferenceId: string; orderId: string; pollPayment: (id: string) => void;
 }) {
   const { business } = useBusiness();
   const [error, setError] = useState<string | null>(null);
@@ -487,7 +490,7 @@ function CheckoutScreen({ preferenceId, orderId, onComplete, pollPayment }: {
       } catch { setError('Error al iniciar pago'); }
     };
     loadWallet();
-  }, [preferenceId]);
+  }, [preferenceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) {
     return (

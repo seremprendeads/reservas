@@ -154,14 +154,14 @@ export function Calendar() {
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [showWaitingForm, setShowWaitingForm] = useState(false);
 
-  useEffect(() => { if (business?.id) loadData(); }, [business?.id]);
+  useEffect(() => { if (business?.id) loadData(); }, [business?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (selectedDate) {
       generateTimeSlots(selectedDate);
       setShowWaitingForm(false); // reset al cambiar fecha
     }
-  }, [selectedDate, availability, bookedSlots]);
+  }, [selectedDate, availability, bookedSlots]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = async () => {
     if (!business?.id) return;

@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { Calendar } from '../components/Calendar';
 import { BookingForm } from '../components/BookingForm';
 import { Payment } from '../components/Payment';
 import { Confirmation } from '../components/Confirmation';
-import { Button } from '../components/ui/button';
 import { BookingProvider, useBooking } from '../contexts/BookingContext';
-import { Phone, MapPin, Check, Clock, Tag, Store } from 'lucide-react';
+import { MapPin, Check, Store } from 'lucide-react';
 import { supabase, Branding, Service } from '../lib/supabase';
 import { useBusiness } from '../contexts/BusinessContext';
 
@@ -72,7 +70,6 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
 function BookingContent() {
   const { step, setStep, bookingData, setSelectedService } = useBooking();
   const { business } = useBusiness();
-  const { slug } = useParams<{ slug: string }>();
   const [branding, setBranding] = useState<Branding | null>(null);
   const [services, setServices] = useState<Service[]>([]);
 
@@ -130,7 +127,7 @@ function BookingContent() {
       root.style.setProperty('--booking-text-muted', mutedColor);
       root.style.setProperty('--booking-caption', captionColor);
     }
-  }, [b]);
+  }, [b]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const stepIndex = ['services', 'calendar', 'form', 'payment', 'confirmation'];
   const stepLabels = ['Servicio', 'Fecha y hora', 'Tus datos', 'Pago', 'Confirmación'];

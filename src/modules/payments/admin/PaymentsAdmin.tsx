@@ -24,17 +24,17 @@ import {
 } from '../../../components/ui/dialog';
 
 export function PaymentsAdmin() {
-  const { business } = useBusiness();
+  useBusiness();
   const [providers, setProviders] = useState<PaymentProvider[]>([]);
   const [loading, setLoading] = useState(true);
-  const [adminEmail] = useState(sessionStorage.getItem('admin_email') || '');
-  const [adminPassword] = useState(sessionStorage.getItem('admin_password') || '');
+  const [adminToken] = useState(sessionStorage.getItem('admin_token') || '');
 
   const loadProviders = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await supabase.functions.invoke('admin-manage-payments', {
-        body: { email: adminEmail, password: adminPassword, action: 'list' },
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: { action: 'list' },
       });
       if (data?.success) {
         setProviders(data.providers || []);
@@ -44,7 +44,7 @@ export function PaymentsAdmin() {
     } finally {
       setLoading(false);
     }
-  }, [adminEmail, adminPassword]);
+  }, [adminToken]);
 
   useEffect(() => {
     loadProviders();
@@ -78,8 +78,7 @@ export function PaymentsAdmin() {
             config={config}
             provider={provider || null}
             onRefresh={loadProviders}
-            adminEmail={adminEmail}
-            adminPassword={adminPassword}
+            adminToken={adminToken}
           />
         );
       })}
@@ -93,14 +92,12 @@ function ProviderCard({
   config,
   provider,
   onRefresh,
-  adminEmail,
-  adminPassword,
+  adminToken,
 }: {
   config: typeof PAYMENT_PROVIDERS[number];
   provider: PaymentProvider | null;
   onRefresh: () => void;
-  adminEmail: string;
-  adminPassword: string;
+  adminToken: string;
 }) {
   const isConnected = provider?.status === 'connected';
   const [showToken, setShowToken] = useState(false);
@@ -126,9 +123,8 @@ function ProviderCard({
     setMessage(null);
     try {
       const { data } = await supabase.functions.invoke('admin-manage-payments', {
+        headers: { Authorization: `Bearer ${adminToken}` },
         body: {
-          email: adminEmail,
-          password: adminPassword,
           action: 'save',
           provider: config.slug,
           credentials: fields,
@@ -152,9 +148,8 @@ function ProviderCard({
     setMessage(null);
     try {
       const { data } = await supabase.functions.invoke('admin-manage-payments', {
+        headers: { Authorization: `Bearer ${adminToken}` },
         body: {
-          email: adminEmail,
-          password: adminPassword,
           action: 'test',
           provider: config.slug,
         },
@@ -176,9 +171,8 @@ function ProviderCard({
     setDisconnecting(true);
     try {
       const { data } = await supabase.functions.invoke('admin-manage-payments', {
+        headers: { Authorization: `Bearer ${adminToken}` },
         body: {
-          email: adminEmail,
-          password: adminPassword,
           action: 'disconnect',
           provider: config.slug,
         },
@@ -199,9 +193,8 @@ function ProviderCard({
     setDisconnecting(true);
     try {
       const { data } = await supabase.functions.invoke('admin-manage-payments', {
+        headers: { Authorization: `Bearer ${adminToken}` },
         body: {
-          email: adminEmail,
-          password: adminPassword,
           action: 'delete',
           provider: config.slug,
         },

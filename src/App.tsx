@@ -3,7 +3,6 @@ import { BookingPage } from './pages/BookingPage';
 import { AdminPage } from './pages/AdminPage';
 import { ShopPage } from './modules/shop/pages/ShopPage';
 import { BioPage } from './modules/bio/pages/BioPage';
-import { AcceptInvitePage } from './pages/AcceptInvitePage';
 import { CreateBusinessPage } from './pages/CreateBusinessPage';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BusinessProvider } from './contexts/BusinessContext';
@@ -30,7 +29,6 @@ function App() {
             {/* Admin panel */}
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/seremprende-entendo-administrativo" element={<AdminPage />} />
-            <Route path="/accept-invite" element={<AcceptInvitePage />} />
             <Route path="/create-business" element={<CreateBusinessPage />} />
           </Routes>
         </BrowserRouter>

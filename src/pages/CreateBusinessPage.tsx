@@ -12,13 +12,12 @@ export function CreateBusinessPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [adminEmail] = useState(sessionStorage.getItem('admin_email') || '');
-  const [adminPassword] = useState(sessionStorage.getItem('admin_password') || '');
+  const [adminToken] = useState(sessionStorage.getItem('admin_token') || '');
 
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [currency, setCurrency] = useState('ARS');
 
-  // If user already has a business, redirect to admin
   useEffect(() => {
     if (business?.id) {
       navigate('/admin');
@@ -50,9 +49,8 @@ export function CreateBusinessPage() {
 
     try {
       const { data } = await supabase.functions.invoke('create-business', {
+        headers: { Authorization: `Bearer ${adminToken}` },
         body: {
-          email: adminEmail,
-          password: adminPassword,
           name: name.trim(),
           slug: slug.trim(),
           currency,

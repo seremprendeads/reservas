@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { User, Phone, Mail, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useBooking } from '../contexts/BookingContext';
-import { supabase, Settings, Booking } from '../lib/supabase';
+import { supabase, Settings } from '../lib/supabase';
 import { useBusiness } from '../contexts/BusinessContext';
 import { useEffect } from 'react';
 
@@ -17,7 +17,7 @@ export function BookingForm() {
 
   useEffect(() => {
     if (business?.id) loadSettings();
-  }, [business?.id]);
+  }, [business?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadSettings = async () => {
     if (!business?.id) return;
@@ -106,7 +106,7 @@ export function BookingForm() {
         throw new Error('Error al crear preferencia de pago');
       }
 
-      const { data: updateData, error: updateError } = await supabase
+      await supabase
         .from('bookings')
         .update({ preference_id: preference.id })
         .eq('booking_code', bookingCode)

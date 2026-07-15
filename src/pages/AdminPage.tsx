@@ -1,12 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Calendar,
   Clock,
   Users,
-  DollarSign,
   Search,
   XCircle,
-  AlertCircle,
   RefreshCw,
   Edit,
   Trash2,
@@ -29,7 +27,6 @@ import {
   CalendarDays,
   UserCog,
   MessageSquareText,
-  Loader2,
   Archive,
   LayoutDashboard,
   ExternalLink,
@@ -40,7 +37,7 @@ import {
   Link,
   CreditCard,
 } from 'lucide-react';
-import { supabase, Booking, AvailabilitySetting, BlockedDate, Settings, Branding, Service, WaitingListItem } from '../lib/supabase';
+import { supabase, Booking, AvailabilitySetting, BlockedDate, Branding, Service, WaitingListItem } from '../lib/supabase';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
@@ -61,7 +58,7 @@ import { ShopAdmin } from '../modules/shop/admin/ShopAdmin';
 import { BioAdmin } from '../modules/bio/admin/BioAdmin';
 import { PaymentsAdmin } from '../modules/payments/admin/PaymentsAdmin';
 
-type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop' | 'bio' | 'payments' | 'team';
+type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop' | 'bio' | 'payments';
 
 function getStatusBadge(status: string) {
   const map: Record<string, { variant: 'success' | 'warning' | 'destructive' | 'info'; label: string }> = {
@@ -116,9 +113,6 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, token: string) => v
         sessionStorage.setItem('admin_name', data.name || '');
         if (data.business_id) {
           sessionStorage.setItem('admin_business_id', data.business_id);
-        }
-        if (data.businesses) {
-          sessionStorage.setItem('admin_businesses', JSON.stringify(data.businesses));
         }
         if (data.trial_ends_at) {
           sessionStorage.setItem('admin_trial_ends_at', data.trial_ends_at);
@@ -237,13 +231,12 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, token: string) => v
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
 function NotasAdmin({
-  booking, adminEmail, adminToken, onSaved
+  booking, onSaved
 }: {
   booking: Booking;
-  adminEmail: string;
-  adminToken: string;
   onSaved: () => void;
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [nota, setNota] = useState((booking as any).notas_admin || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -298,13 +291,11 @@ function NotasAdmin({
 // ─── Availability Manager ─────────────────────────────────────────────────────
 
 function AvailabilityManager({
-  availability, blockedDates, onRefresh, adminEmail, adminToken, showSuccess
+  availability, blockedDates, onRefresh, showSuccess
 }: {
   availability: AvailabilitySetting[];
   blockedDates: BlockedDate[];
   onRefresh: () => void;
-  adminEmail: string;
-  adminToken: string;
   showSuccess: (msg: string) => void;
 }) {
   const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -463,11 +454,9 @@ interface ClientData {
 }
 
 function ClientsManager({
-  bookings, adminEmail, adminToken, onRefresh, setConfirmModal, showSuccess,
+  bookings, onRefresh, setConfirmModal, showSuccess,
 }: {
   bookings: Booking[];
-  adminEmail: string;
-  adminToken: string;
   onRefresh: () => void;
   setConfirmModal: (modal: { open: boolean; message: string; onConfirm: () => void }) => void;
   showSuccess: (msg: string) => void;
@@ -659,227 +648,6 @@ function ClientsManager({
   );
 }
 
-// ─── Team Manager ────────────────────────────────────────────────────────────
-
-function TeamManager({ adminEmail, adminToken }: { adminEmail: string; adminToken: string }) {
-  const { business } = useBusiness();
-  const [members, setMembers] = useState<Array<{ id: string; user_email: string; role: string; is_active: boolean; created_at: string }>>([]);
-  const [invites, setInvites] = useState<Array<{ id: string; email: string; role: string; invited_by: string; expires_at: string; created_at: string }>>([]);
-  const [loading, setLoading] = useState(true);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('member');
-  const [inviting, setInviting] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  const loadData = useCallback(async () => {
-    if (!business?.id) return;
-    setLoading(true);
-    try {
-      const { data } = await authInvoke('admin-get-team');
-      if (data?.members) setMembers(data.members);
-      if (data?.invites) setInvites(data.invites);
-    } finally {
-      setLoading(false);
-    }
-  }, [business?.id]);
-
-  useEffect(() => { loadData(); }, [loadData]);
-
-  const handleInvite = async () => {
-    if (!inviteEmail.trim()) return;
-    setInviting(true);
-    setMessage(null);
-    try {
-      const { data } = await authInvoke('admin-invite-user', {
-        body: { target_email: inviteEmail.trim(), role: inviteRole },
-      });
-      if (data?.success) {
-        setMessage({ type: 'success', text: 'Invitación enviada' });
-        setInviteEmail('');
-        loadData();
-      } else {
-        setMessage({ type: 'error', text: data?.error || 'Error al invitar' });
-      }
-    } catch {
-      setMessage({ type: 'error', text: 'Error de conexión' });
-    } finally {
-      setInviting(false);
-    }
-  };
-
-  const handleRemoveMember = async (email: string) => {
-    if (!business?.id) return;
-    await supabase.from('business_members').delete().eq('business_id', business.id).eq('user_email', email);
-    loadData();
-  };
-
-  const roleLabels: Record<string, string> = { owner: 'Propietario', admin: 'Administrador', member: 'Miembro', viewer: 'Observador' };
-
-  if (loading) return <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin" /></div>;
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Equipo</h2>
-        <p className="text-sm text-muted-foreground">Gestioná los miembros de tu negocio</p>
-      </div>
-
-      {/* Invite form */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Invitar usuario</CardTitle>
-          <CardDescription>Enviá una invitación por email para unirse a tu negocio</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Input
-              type="email"
-              placeholder="email@ejemplo.com"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              className="flex-1"
-            />
-            <select
-              value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value)}
-              className="px-3 py-2 rounded-xl border text-sm bg-background"
-            >
-              <option value="member">Miembro</option>
-              <option value="admin">Administrador</option>
-              <option value="viewer">Observador</option>
-            </select>
-            <Button onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
-              {inviting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Invitar
-            </Button>
-          </div>
-          {message && (
-            <div className={`mt-3 text-sm ${message.type === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>
-              {message.text}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Members list */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Miembros ({members.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {members.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">Sin miembros</p>
-          ) : (
-            <div className="divide-y">
-              {members.map((m) => (
-                <div key={m.id} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium">{m.user_email}</p>
-                    <p className="text-xs text-muted-foreground">{roleLabels[m.role] || m.role}</p>
-                  </div>
-                  {m.role !== 'owner' && (
-                    <Button variant="destructive" size="sm" onClick={() => handleRemoveMember(m.user_email)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Pending invites */}
-      {invites.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Invitaciones pendientes ({invites.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="divide-y">
-              {invites.map((inv) => (
-                <div key={inv.id} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium">{inv.email}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {roleLabels[inv.role] || inv.role} · Invitado por {inv.invited_by}
-                    </p>
-                  </div>
-                  <Badge variant="secondary">Pendiente</Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Danger zone - Delete business */}
-      <Card className="border-red-200 dark:border-red-900">
-        <CardHeader>
-          <CardTitle className="text-base text-red-600 dark:text-red-400">Zona de peligro</CardTitle>
-          <CardDescription>Estas acciones son irreversibles</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DeleteBusinessSection adminEmail={adminEmail} adminToken={adminToken} />
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function DeleteBusinessSection({ adminEmail, adminToken }: { adminEmail: string; adminToken: string }) {
-  const { business } = useBusiness();
-  const [confirmText, setConfirmText] = useState('');
-  const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleDelete = async () => {
-    if (confirmText !== 'ELIMINAR' || !business?.id) return;
-    setDeleting(true);
-    setError(null);
-    try {
-      const { data } = await authInvoke('delete-business', {
-        body: { business_id: business.id, confirmation: 'ELIMINAR' },
-      });
-      if (data?.success) {
-        sessionStorage.removeItem('admin_business_id');
-        sessionStorage.removeItem('admin_businesses');
-        localStorage.removeItem('reservas_business_id');
-        window.location.href = '/create-business';
-      } else {
-        setError(data?.error || 'Error al eliminar');
-      }
-    } catch {
-      setError('Error de conexión');
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
-        Se eliminará permanentemente <strong>{business?.name}</strong> y todos sus datos (reservas, servicios, tienda, configuración, archivos).
-      </p>
-      <Input
-        placeholder='Escribí "ELIMINAR" para confirmar'
-        value={confirmText}
-        onChange={(e) => setConfirmText(e.target.value)}
-        className="max-w-sm"
-      />
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <Button
-        variant="destructive"
-        disabled={confirmText !== 'ELIMINAR' || deleting}
-        onClick={handleDelete}
-      >
-        {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
-        Eliminar negocio permanentemente
-      </Button>
-    </div>
-  );
-}
-
 function WhatsAppManager({ bookings }: { bookings: Booking[] }) {
   const DEFAULT_TEMPLATE = 'Hola {nombre} Tu reserva fue aprobada. Te esperamos el día {fecha} a las {hora}. Muy pronto la recepcionista a cargo se contactará contigo para darte información más detallada de la orden de llegada en estos días hábiles. ¡Muchas Gracias! Saludos.';
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -1006,12 +774,10 @@ function WhatsAppManager({ bookings }: { bookings: Booking[] }) {
 // ─── WaitingList Manager ──────────────────────────────────────────────────────
 
 function WaitingListManager({
-  waitingList, onRefresh, adminEmail, adminToken
+  waitingList, onRefresh
 }: {
   waitingList: WaitingListItem[];
   onRefresh: () => void;
-  adminEmail: string;
-  adminToken: string;
 }) {
   const [search, setSearch] = useState('');
   const [filterEstado, setFilterEstado] = useState('all');
@@ -1153,15 +919,14 @@ function WaitingListManager({
 // ─── Profile Manager ───────────────────────────────────────────────────────────
 
 function ProfileManager({
-  adminEmail, adminToken, adminName, avatarUrl, onRefresh, showSuccess, onProfileUpdated, onAvatarChange
+  adminEmail, adminName, avatarUrl, onRefresh, showSuccess, onProfileUpdated, onAvatarChange
 }: {
   adminEmail: string;
-  adminToken: string;
   adminName: string;
   avatarUrl: string;
   onRefresh: () => void;
   showSuccess: (msg: string) => void;
-  onProfileUpdated: (name: string, email: string, password: string) => void;
+  onProfileUpdated: (name: string, email: string) => void;
   onAvatarChange: (url: string) => void;
 }) {
   const { business } = useBusiness();
@@ -1275,11 +1040,8 @@ function ProfileManager({
 
       sessionStorage.setItem('admin_email', email.trim());
       sessionStorage.setItem('admin_name', name.trim());
-      if (newPassword) {
-        sessionStorage.setItem('admin_password', newPassword);
-      }
 
-      onProfileUpdated(name.trim(), email.trim(), newPassword || adminToken);
+      onProfileUpdated(name.trim(), email.trim());
       onRefresh();
       showSuccess('Perfil actualizado correctamente');
       setNewPassword('');
@@ -1400,12 +1162,10 @@ function ProfileManager({
 // ─── Appearance (Branding) Manager ─────────────────────────────────────────────
 
 function AppearanceManager({
-  branding, onRefresh, adminEmail, adminToken, showSuccess
+  branding, onRefresh, showSuccess
 }: {
   branding: Branding | null;
   onRefresh: () => void;
-  adminEmail: string;
-  adminToken: string;
   showSuccess: (msg: string) => void;
 }) {
   const { business } = useBusiness();
@@ -1911,7 +1671,7 @@ function ServicesManager() {
   const [imgError, setImgError] = useState('');
   const imgInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { if (business?.id) loadServices(); }, [business?.id]);
+  useEffect(() => { if (business?.id) loadServices(); }, [business?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadServices = async () => {
     if (!business?.id) return;
@@ -2138,7 +1898,6 @@ export function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [availability, setAvailability] = useState<AvailabilitySetting[]>([]);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
-  const [settings, setSettings] = useState<Settings | null>(null);
   const [branding, setBranding] = useState<Branding | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -2149,7 +1908,6 @@ export function AdminPage() {
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void }>({ open: false, message: '', onConfirm: () => {} });
   const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [myBusinesses, setMyBusinesses] = useState<Array<{ id: string; name: string; slug: string; logo_url: string | null; role: string }>>([]);
 
   const [darkMode, setDarkMode] = useState(() => {
     const stored = localStorage.getItem('admin_dark');
@@ -2163,23 +1921,15 @@ export function AdminPage() {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
-  // Load businesses from sessionStorage on mount
-  useEffect(() => {
-    const stored = sessionStorage.getItem('admin_businesses');
-    if (stored) {
-      try { setMyBusinesses(JSON.parse(stored)); } catch { /* ignore */ }
-    }
-  }, []);
-
   useEffect(() => {
     if (loggedIn && business?.id) loadData();
-  }, [loggedIn, business?.id]);
+  }, [loggedIn, business?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = async () => {
     if (!business?.id) return;
     setLoading(true);
     try {
-      const [bookingsRes, availRes, blockedRes, settingsRes, brandingRes, profileRes] = await Promise.all([
+      const [bookingsRes, availRes, blockedRes, , brandingRes, profileRes] = await Promise.all([
         supabase.from('bookings').select('*').eq('business_id', business.id).order('booking_date', { ascending: true }),
         supabase.from('availability_settings').select('*').eq('business_id', business.id).order('day_of_week'),
         supabase.from('blocked_dates').select('*').eq('business_id', business.id).order('date'),
@@ -2199,14 +1949,15 @@ export function AdminPage() {
         }
       }
       if (bookingsRes.data) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const active = bookingsRes.data.filter((b: any) => !b.deleted_at);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const deleted = bookingsRes.data.filter((b: any) => !!b.deleted_at);
         setBookings(active);
         setDeletedBookings(deleted);
       }
       if (availRes.data) setAvailability(availRes.data);
       if (blockedRes.data) setBlockedDates(blockedRes.data);
-      if (settingsRes.data) setSettings(settingsRes.data);
       if (brandingRes.data) setBranding(brandingRes.data);
 
       const { data: wlData } = await authInvoke('admin-get-waiting-list', {
@@ -2226,12 +1977,6 @@ export function AdminPage() {
     setAdminName(sessionStorage.getItem('admin_name') || '');
     setAdminAvatar(sessionStorage.getItem('admin_avatar') || '');
 
-    // Get businesses from login response stored in sessionStorage
-    const storedBusinesses = sessionStorage.getItem('admin_businesses');
-    if (storedBusinesses) {
-      try { setMyBusinesses(JSON.parse(storedBusinesses)); } catch { /* ignore */ }
-    }
-
     const storedBusinessId = sessionStorage.getItem('admin_business_id');
     if (storedBusinessId) {
       await setBusinessById(storedBusinessId);
@@ -2247,9 +1992,7 @@ export function AdminPage() {
     sessionStorage.removeItem('admin_token');
     sessionStorage.removeItem('admin_avatar');
     sessionStorage.removeItem('admin_business_id');
-    sessionStorage.removeItem('admin_businesses');
     localStorage.removeItem('reservas_business_id');
-    setMyBusinesses([]);
     setLoggedIn(false);
   };
 
@@ -2368,7 +2111,6 @@ export function AdminPage() {
     payments: 'Pagos',
     profile: 'Perfil',
     whatsapp: 'WhatsApp',
-    team: 'Equipo',
     trash: 'Papelera',
     detail: 'Detalle de Reserva',
   };
@@ -2419,27 +2161,6 @@ export function AdminPage() {
               <span className="text-xs text-muted-foreground">{adminName || adminEmail}</span>
             </div>
           </div>
-          {myBusinesses.length > 1 && (
-            <div className="px-6 pb-3">
-              <select
-                value={business?.id || ''}
-                onChange={async (e) => {
-                  const newId = e.target.value;
-                  if (newId && newId !== business?.id) {
-                    localStorage.setItem('reservas_business_id', newId);
-                    sessionStorage.setItem('admin_business_id', newId);
-                    await setBusinessById(newId);
-                    loadData();
-                  }
-                }}
-                className="w-full px-3 py-1.5 rounded-lg border text-xs bg-background truncate"
-              >
-                {myBusinesses.map((b) => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
 
         {/* Navigation */}
@@ -2830,8 +2551,6 @@ export function AdminPage() {
 
                   <NotasAdmin
                     booking={selectedBooking}
-                    adminEmail={adminEmail}
-                    adminToken={adminToken}
                     onSaved={() => loadData()}
                   />
 
@@ -2868,8 +2587,6 @@ export function AdminPage() {
               availability={availability}
               blockedDates={blockedDates}
               onRefresh={loadData}
-              adminEmail={adminEmail}
-              adminToken={adminToken}
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
             />
           )}
@@ -2888,8 +2605,6 @@ export function AdminPage() {
             <AppearanceManager
               branding={branding}
               onRefresh={() => { loadData(); }}
-              adminEmail={adminEmail}
-              adminToken={adminToken}
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
             />
           )}
@@ -2902,8 +2617,6 @@ export function AdminPage() {
             <WaitingListManager
               waitingList={waitingList}
               onRefresh={loadData}
-              adminEmail={adminEmail}
-              adminToken={adminToken}
             />
           )}
 
@@ -2911,8 +2624,6 @@ export function AdminPage() {
           {view === 'clients' && (
             <ClientsManager
               bookings={bookings}
-              adminEmail={adminEmail}
-              adminToken={adminToken}
               onRefresh={loadData}
               setConfirmModal={setConfirmModal}
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
@@ -2924,24 +2635,17 @@ export function AdminPage() {
             <WhatsAppManager bookings={bookings} />
           )}
 
-          {/* ─── Team (hidden - not needed for single-user SaaS) ─── */}
-          {false && view === 'team' && (
-            <TeamManager adminEmail={adminEmail} adminToken={adminToken} />
-          )}
-
           {/* ─── Profile ────────────────────────────────────────── */}
           {view === 'profile' && (
             <ProfileManager
               adminEmail={adminEmail}
-              adminToken={adminToken}
               adminName={adminName}
               avatarUrl={adminAvatar}
               onRefresh={loadData}
               showSuccess={(msg) => setSuccessModal({ open: true, message: msg })}
-              onProfileUpdated={(name, email, password) => {
+              onProfileUpdated={(name, email) => {
                 setAdminName(name);
                 setAdminEmail(email);
-                setAdminPassword(password);
               }}
               onAvatarChange={(url) => {
                 setAdminAvatar(url);
@@ -2995,7 +2699,7 @@ export function AdminPage() {
                   ) : (
                     <div className="space-y-2">
                       {deletedBookings.map((booking) => {
-                        const days = daysUntilPurge((booking as any).deleted_at);
+                        const days = daysUntilPurge((booking as unknown as { deleted_at: string }).deleted_at);
                         return (
                           <div key={booking.id} className="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50">
                             <div className="flex-1">
