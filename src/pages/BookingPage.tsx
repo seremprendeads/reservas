@@ -228,16 +228,14 @@ function BookingContent() {
         </div>
       </div>
 
-      {/* Footer (sin overlay) */}
-      <footer className="relative z-10 py-8" style={{ backgroundColor: cardBg }}>
-        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-6" style={{ color: textColor }}>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              <span style={{ color: mutedColor }}>Buenos Aires, Argentina</span>
-            </div>
+      {/* Footer */}
+      <footer className="relative z-10 py-4 border-t" style={{ backgroundColor: cardBg, borderColor: `${textColor}10` }}>
+        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: captionColor }}>
+            <MapPin className="w-3 h-3" />
+            Buenos Aires, Argentina
           </div>
-          <p className="text-sm" style={{ color: mutedColor }}>
+          <p className="text-xs" style={{ color: captionColor }}>
             Pagos seguros con Mercado Pago
           </p>
         </div>
