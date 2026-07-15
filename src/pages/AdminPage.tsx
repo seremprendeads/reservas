@@ -1910,6 +1910,7 @@ export function AdminPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [trialWarningOpen, setTrialWarningOpen] = useState(false);
   const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
+  const [trialCountdown, setTrialCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const trialWarningShownRef = useRef(false);
 
   const [darkMode, setDarkMode] = useState(() => {
@@ -1953,6 +1954,28 @@ export function AdminPage() {
     checkTrial();
     const interval = setInterval(checkTrial, 60 * 60 * 1000);
     return () => clearInterval(interval);
+  }, [loggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Live countdown ticker (every second)
+  useEffect(() => {
+    if (!loggedIn) return;
+    const update = () => {
+      let trialEnds = sessionStorage.getItem('admin_trial_ends_at');
+      if (!trialEnds) {
+        const testDate = new Date();
+        testDate.setDate(testDate.getDate() + 2);
+        trialEnds = testDate.toISOString();
+      }
+      const diff = Math.max(0, new Date(trialEnds).getTime() - Date.now());
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      setTrialCountdown({ days: d, hours: h, minutes: m, seconds: s });
+    };
+    update();
+    const ticker = setInterval(update, 1000);
+    return () => clearInterval(ticker);
   }, [loggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -2299,28 +2322,15 @@ export function AdminPage() {
             <div className="mx-auto max-w-7xl space-y-6">
               {/* Trial banner */}
               {(() => {
-                let trialEnds = sessionStorage.getItem('admin_trial_ends_at');
-                if (!trialEnds) {
-                  // Para testing: simular prueba a 2 días del vencimiento
-                  const testDate = new Date();
-                  testDate.setDate(testDate.getDate() + 2);
-                  trialEnds = testDate.toISOString();
-                }
-                const daysLeft = trialDaysLeft ?? Math.ceil((new Date(trialEnds).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                if (daysLeft <= 0) return null;
+                const { days, hours, minutes, seconds } = trialCountdown;
+                if (days <= 0 && hours <= 0 && minutes <= 0 && seconds <= 0) return null;
 
-                const endDate = new Date(trialEnds);
-                const now = new Date();
-                const totalHours = Math.max(0, Math.floor((endDate.getTime() - now.getTime()) / (1000 * 60 * 60)));
-                const hours = totalHours % 24;
-
-                const isUrgent = daysLeft <= 2;
-                const isCritical = daysLeft <= 0;
+                const isUrgent = days <= 2;
 
                 return (
-                  <div className={`rounded-lg p-4 text-sm font-medium flex items-center justify-between ${isCritical ? 'bg-red-100 text-red-800 border border-red-200' : isUrgent ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}`}>
+                  <div className={`rounded-lg p-4 text-sm font-medium flex items-center justify-between ${isUrgent ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}`}>
                     <span>
-                      Período de prueba: {daysLeft} {daysLeft === 1 ? 'día' : 'días'}{hours > 0 ? ` y ${hours}hs` : ''} restantes
+                      Período de prueba: {days}d {hours}hs {minutes}m {seconds}s restantes
                     </span>
                     <a href="#prices" target="_blank" className={`ml-4 px-4 py-2 rounded-lg text-sm font-bold text-white transition-colors ${isUrgent ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}`}>
                       Actualizar Plan
