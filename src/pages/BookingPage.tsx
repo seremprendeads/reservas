@@ -150,7 +150,7 @@ function BookingContent() {
       <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-black/5" style={{
         backgroundColor: `${headerColor}${Math.round((headerOpacity / 100) * 255).toString(16).padStart(2, '0')}`,
       }}>
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
           <div className="flex items-center gap-3">
             {logoUrl ? (
               <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-cover" />
