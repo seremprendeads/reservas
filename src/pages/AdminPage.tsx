@@ -665,12 +665,9 @@ function TeamManager({ adminEmail, adminToken }: { adminEmail: string; adminToke
     if (!business?.id) return;
     setLoading(true);
     try {
-      const [membersRes, invitesRes] = await Promise.all([
-        supabase.from('business_members').select('*').eq('business_id', business.id).order('created_at'),
-        supabase.from('invite_tokens').select('*').eq('business_id', business.id).is('accepted_at', null).gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }),
-      ]);
-      if (membersRes.data) setMembers(membersRes.data);
-      if (invitesRes.data) setInvites(invitesRes.data);
+      const { data } = await authInvoke('admin-get-team');
+      if (data?.members) setMembers(data.members);
+      if (data?.invites) setInvites(data.invites);
     } finally {
       setLoading(false);
     }
