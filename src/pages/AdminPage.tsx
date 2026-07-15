@@ -104,6 +104,12 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, token: string) => v
       if (fnError || !data?.success) {
         setError('Email o contraseña incorrectos');
       } else {
+        // Check trial status
+        if (data.trial_expired) {
+          setError('Tu período de prueba de 14 días ha expirado. Contactanos para continuar.');
+          setLoading(false);
+          return;
+        }
         sessionStorage.setItem('admin_logged_in', '1');
         sessionStorage.setItem('admin_email', email);
         sessionStorage.setItem('admin_token', data.token);
@@ -113,6 +119,9 @@ function LoginScreen({ onLogin }: { onLogin: (email: string, token: string) => v
         }
         if (data.businesses) {
           sessionStorage.setItem('admin_businesses', JSON.stringify(data.businesses));
+        }
+        if (data.trial_ends_at) {
+          sessionStorage.setItem('admin_trial_ends_at', data.trial_ends_at);
         }
         onLogin(email, data.token);
       }
@@ -2533,6 +2542,18 @@ export function AdminPage() {
           {/* ─── Dashboard ──────────────────────────────────────── */}
           {view === 'dashboard' && (
             <div className="mx-auto max-w-7xl space-y-6">
+              {/* Trial banner */}
+              {(() => {
+                const trialEnds = sessionStorage.getItem('admin_trial_ends_at');
+                if (!trialEnds) return null;
+                const daysLeft = Math.ceil((new Date(trialEnds).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                if (daysLeft <= 0) return null;
+                return (
+                  <div className={`rounded-lg p-4 text-sm font-medium ${daysLeft <= 3 ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}`}>
+                    Período de prueba: {daysLeft} {daysLeft === 1 ? 'día' : 'días'} restantes
+                  </div>
+                );
+              })()}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Card className="transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer"
                   onClick={() => setView('bookings')}>

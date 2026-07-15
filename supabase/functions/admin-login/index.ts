@@ -51,12 +51,24 @@ Deno.serve(async (req: Request) => {
       }))
       .filter((b: Record<string, unknown>) => b.id);
 
+    // Check trial status for the current business
+    const { data: biz } = await supabase
+      .from("businesses")
+      .select("trial_ends_at, is_trial")
+      .eq("id", auth.businessId)
+      .maybeSingle();
+
+    const trialExpired = biz?.is_trial && biz?.trial_ends_at && new Date(biz.trial_ends_at) < new Date();
+    const trialEndsAt = biz?.trial_ends_at || null;
+
     return jsonSuccess({
       success: true,
       name: auth.admin.name,
       business_id: auth.businessId,
-      token,  // JWT token — store this, NOT the password
+      token,
       businesses,
+      trial_ends_at: trialEndsAt,
+      trial_expired: trialExpired,
     });
   } catch (err) {
     console.error("admin-login error:", err);
