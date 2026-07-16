@@ -1,0 +1,87 @@
+=====================================
+  PASOS PARA CORREGIR LANDING PAGE
+=====================================
+
+PROBLEMA 1: Pantalla en blanco al abrir la web
+  Causa: Faltaba importar "Menu" de lucide-react en LandingAdmin.tsx
+  Estado: Ya corregido en el código
+
+PROBLEMA 2: Las imágenes no se suben en la sección Landing Page del admin
+  Causa: El bucket "branding" de Supabase no existía y no tenía permisos
+  Estado: Ya corregido en el código + migración creada
+
+
+=====================================
+  PASO 1: SUBIR CAMBIOS A GIT/VERCEL
+=====================================
+
+Abrir la terminal (PowerShell o CMD) en la carpeta del proyecto y ejecutar:
+
+  git add src/modules/landing/admin/LandingAdmin.tsx supabase/migrations/20260722000000_branding_bucket_fix.sql
+
+  git commit -m "fix: landing admin image upload + Menu import + branding bucket migration"
+
+  git push
+
+Después de push, Vercel redeploya solo (tarda 1-2 minutos).
+
+
+=====================================
+  PASO 2: CREAR BUCKET EN SUPABASE
+=====================================
+
+1. Abrir https://supabase.com/dashboard
+2. Seleccionar tu proyecto
+3. En el menú lateral izquierdo, click en "SQL Editor"
+4. Click en "New query"
+5. Pegar TODO este SQL:
+
+  INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  VALUES ('branding', 'branding', true, 5242880,
+    ARRAY['image/webp', 'image/jpeg', 'image/png'])
+  ON CONFLICT (id) DO UPDATE SET
+    public = true,
+    file_size_limit = 5242880,
+    allowed_mime_types = ARRAY['image/webp', 'image/jpeg', 'image/png'];
+
+  DROP POLICY IF EXISTS "Public read branding" ON storage.objects;
+  CREATE POLICY "Public read branding" ON storage.objects FOR SELECT
+    USING (
+      bucket_id = 'branding'
+      AND (storage.foldername(name))[1] IS NOT NULL
+    );
+
+  DROP POLICY IF EXISTS "Admin insert branding" ON storage.objects;
+  CREATE POLICY "Admin insert branding" ON storage.objects FOR INSERT
+    WITH CHECK (
+      bucket_id = 'branding'
+      AND EXISTS (
+        SELECT 1 FROM admin_users
+        WHERE email = current_setting('request.jwt.claims', true)::json->>'email'
+      )
+    );
+
+  DROP POLICY IF EXISTS "Admin delete branding" ON storage.objects;
+  CREATE POLICY "Admin delete branding" ON storage.objects FOR DELETE
+    USING (
+      bucket_id = 'branding'
+      AND EXISTS (
+        SELECT 1 FROM admin_users
+        WHERE email = current_setting('request.jwt.claims', true)::json->>'email'
+      )
+    );
+
+6. Click en "Run" (o Ctrl+Enter)
+7. Debería decir "Success" o "No rows returned" (eso es normal)
+
+
+=====================================
+  PASO 3: VERIFICAR
+=====================================
+
+1. Abrir la web en Vercel -> debe cargar sin pantalla en blanco
+2. Ir al panel admin -> sección Landing Page
+3. Probar subir una imagen (logo, hero, about, galería)
+4. Si la imagen aparece después de subir, todo funciona
+
+Si aparece un error rojo en pantalla, copiar el mensaje y reportarlo.

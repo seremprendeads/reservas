@@ -89,7 +89,9 @@ export function LandingAdmin({ business }: Props) {
   const [activeTab, setActiveTab] = useState<AdminTab>('general');
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadTargetRef = useRef<string>('');
   const [uploadTarget, setUploadTarget] = useState<string>('');
 
   const loadLanding = useCallback(async () => {
@@ -139,34 +141,39 @@ export function LandingAdmin({ business }: Props) {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !business?.id) return;
-    setUploadingImage(uploadTarget);
+    const target = uploadTargetRef.current || uploadTarget;
+    if (!target) return;
+    setUploadingImage(target);
+    setUploadError(null);
     try {
       const blob = await compressImage(file);
       const ext = 'webp';
-      const fileName = `${business.id}/landing-${uploadTarget}-${Date.now()}.${ext}`;
+      const fileName = `${business.id}/landing-${target}-${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from('branding').upload(fileName, blob, {
         upsert: false, contentType: 'image/webp',
       });
-      if (error) throw error;
+      if (error) throw new Error(error.message || 'Error al subir imagen al servidor');
       const { data: urlData } = supabase.storage.from('branding').getPublicUrl(fileName);
       const publicUrl = (urlData?.publicUrl || '') + `?t=${Date.now()}`;
 
-      if (uploadTarget === 'logo') {
+      if (target === 'logo') {
         setLogoUrl(publicUrl);
-      } else if (uploadTarget === 'hero_image') {
+      } else if (target === 'hero_image') {
         updateSection('hero', { ...sections.hero, image_url: publicUrl });
-      } else if (uploadTarget === 'hero_presentation') {
+      } else if (target === 'hero_presentation') {
         updateSection('hero', { ...sections.hero, presentation_image_url: publicUrl });
-      } else if (uploadTarget === 'about_image') {
+      } else if (target === 'about_image') {
         updateSection('about', { ...sections.about, image_url: publicUrl });
-      } else if (uploadTarget.startsWith('gallery_')) {
-        const idx = parseInt(uploadTarget.split('_')[1]);
+      } else if (target.startsWith('gallery_')) {
+        const idx = parseInt(target.split('_')[1]);
         const newImages = [...sections.gallery.images];
         newImages[idx] = publicUrl;
         updateSection('gallery', { ...sections.gallery, images: newImages });
       }
     } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al subir imagen';
       console.error('Upload error:', err);
+      setUploadError(msg);
     } finally {
       setUploadingImage(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -175,6 +182,8 @@ export function LandingAdmin({ business }: Props) {
 
   const triggerUpload = (target: string) => {
     setUploadTarget(target);
+    uploadTargetRef.current = target;
+    setUploadError(null);
     fileInputRef.current?.click();
   };
 
@@ -242,6 +251,14 @@ export function LandingAdmin({ business }: Props) {
         className="hidden"
         onChange={handleImageUpload}
       />
+
+      {uploadError && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive flex items-center gap-2">
+          <span className="shrink-0">Error:</span>
+          <span>{uploadError}</span>
+          <button onClick={() => setUploadError(null)} className="ml-auto shrink-0 hover:opacity-70">✕</button>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
