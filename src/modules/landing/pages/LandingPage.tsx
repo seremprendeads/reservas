@@ -206,9 +206,6 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
                 <div className="absolute inset-0" style={{ backgroundColor: theme.text_color, opacity: s.hero.overlay_opacity / 100 }} />
               </div>
               <div className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6">
-                {landing.logo_url && (
-                  <img src={landing.logo_url} alt="" className="h-16 w-16 rounded-full object-cover mx-auto mb-8" />
-                )}
                 <h1 style={{ ...headingStyle, color: '#ffffff' }} className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-tight mb-6">
                   {s.hero.title}
                 </h1>
