@@ -2,8 +2,7 @@ Sube a Vercel:
 ---------------
 
 git add .
-git commit -m "banner plan pro texto mas 
-grande"
+git commit -m "LandingPage"
 git push
 
 ----------------------------------------------
@@ -29,8 +28,8 @@ git add .
 git commit -m "estilo css"
 git push
 
-git add .
-git commit -m "14 dias"
+git add src/modules/landing/admin/LandingAdmin.tsx
+git commit -m "subir imagenes en landing"
 git push
 
 

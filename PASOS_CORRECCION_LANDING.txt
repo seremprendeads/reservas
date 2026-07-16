@@ -2,13 +2,17 @@
   PASOS PARA CORREGIR LANDING PAGE
 =====================================
 
-PROBLEMA 1: Pantalla en blanco al abrir la web
-  Causa: Faltaba importar "Menu" de lucide-react en LandingAdmin.tsx
-  Estado: Ya corregido en el código
+PROBLEMA 1: Pantalla en blanco
+  Causa: Faltaba import "Menu" de lucide-react
+  Estado: Corregido
 
-PROBLEMA 2: Las imágenes no se suben en la sección Landing Page del admin
-  Causa: El bucket "branding" de Supabase no existía y no tenía permisos
-  Estado: Ya corregido en el código + migración creada
+PROBLEMA 2: Imagenes no se suben
+  Causa: Bucket "branding" no existia + no tenia permisos
+  Estado: Corregido
+
+PROBLEMA 3: Pagina no encontrada / 401 en consola
+  Causa: RLS de landing_pages usa auth.jwt() pero el admin usa custom JWT
+  Estado: Corregido
 
 
 =====================================
@@ -17,25 +21,54 @@ PROBLEMA 2: Las imágenes no se suben en la sección Landing Page del admin
 
 Abrir la terminal (PowerShell o CMD) en la carpeta del proyecto y ejecutar:
 
-  git add src/modules/landing/admin/LandingAdmin.tsx supabase/migrations/20260722000000_branding_bucket_fix.sql
+  git add -A
 
-  git commit -m "fix: landing admin image upload + Menu import + branding bucket migration"
+  git commit -m "fix: landing page RLS + branding bucket + Menu import + Image shadow"
 
   git push
 
-Después de push, Vercel redeploya solo (tarda 1-2 minutos).
+Despues de push, Vercel redeploya solo (tarda 1-2 minutos).
 
 
 =====================================
-  PASO 2: CREAR BUCKET EN SUPABASE
+  PASO 2: ACTUALIZAR SUPABASE (SQL)
 =====================================
 
 1. Abrir https://supabase.com/dashboard
 2. Seleccionar tu proyecto
-3. En el menú lateral izquierdo, click en "SQL Editor"
+3. En el menu lateral izquierdo, click en "SQL Editor"
 4. Click en "New query"
 5. Pegar TODO este SQL:
 
+  -- Fix landing_pages RLS policies
+  DROP POLICY IF EXISTS "Owner can manage own landing pages" ON landing_pages;
+  DROP POLICY IF EXISTS "Public can read published landing pages" ON landing_pages;
+
+  CREATE POLICY "Public can read published landing pages"
+    ON landing_pages FOR SELECT
+    USING (status = 'published');
+
+  CREATE POLICY "Anon can read landing pages"
+    ON landing_pages FOR SELECT
+    USING (true);
+
+  CREATE POLICY "Anon can insert landing pages"
+    ON landing_pages FOR INSERT
+    WITH CHECK (true);
+
+  CREATE POLICY "Anon can update landing pages"
+    ON landing_pages FOR UPDATE
+    USING (true);
+
+  CREATE POLICY "Anon can delete landing pages"
+    ON landing_pages FOR DELETE
+    USING (true);
+
+  CREATE POLICY "Service role manages landing_pages"
+    ON landing_pages FOR ALL
+    TO service_role USING (true) WITH CHECK (true);
+
+  -- Create branding storage bucket
   INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
   VALUES ('branding', 'branding', true, 5242880,
     ARRAY['image/webp', 'image/jpeg', 'image/png'])
@@ -52,27 +85,15 @@ Después de push, Vercel redeploya solo (tarda 1-2 minutos).
     );
 
   DROP POLICY IF EXISTS "Admin insert branding" ON storage.objects;
-  CREATE POLICY "Admin insert branding" ON storage.objects FOR INSERT
-    WITH CHECK (
-      bucket_id = 'branding'
-      AND EXISTS (
-        SELECT 1 FROM admin_users
-        WHERE email = current_setting('request.jwt.claims', true)::json->>'email'
-      )
-    );
+  CREATE POLICY "Anon insert branding" ON storage.objects FOR INSERT
+    WITH CHECK (bucket_id = 'branding');
 
   DROP POLICY IF EXISTS "Admin delete branding" ON storage.objects;
-  CREATE POLICY "Admin delete branding" ON storage.objects FOR DELETE
-    USING (
-      bucket_id = 'branding'
-      AND EXISTS (
-        SELECT 1 FROM admin_users
-        WHERE email = current_setting('request.jwt.claims', true)::json->>'email'
-      )
-    );
+  CREATE POLICY "Anon delete branding" ON storage.objects FOR DELETE
+    USING (bucket_id = 'branding');
 
 6. Click en "Run" (o Ctrl+Enter)
-7. Debería decir "Success" o "No rows returned" (eso es normal)
+7. Deberia decir "Success" o "No rows returned"
 
 
 =====================================
@@ -80,8 +101,11 @@ Después de push, Vercel redeploya solo (tarda 1-2 minutos).
 =====================================
 
 1. Abrir la web en Vercel -> debe cargar sin pantalla en blanco
-2. Ir al panel admin -> sección Landing Page
-3. Probar subir una imagen (logo, hero, about, galería)
-4. Si la imagen aparece después de subir, todo funciona
+2. Ir al panel admin -> seccion Landing Page
+3. Llenar los datos (hero, about, galeria, etc.)
+4. Guardar -> no debe haber errores en consola F12
+5. Publicar
+6. Abrir /landing/tu-slug en nueva pestana -> debe mostrar la landing
+7. Probar subir una imagen -> debe funcionar
 
-Si aparece un error rojo en pantalla, copiar el mensaje y reportarlo.
+Si aparece un error rojo en pantalla o en consola, copiar el mensaje y reportarlo.

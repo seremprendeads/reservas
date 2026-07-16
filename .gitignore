@@ -36,17 +36,21 @@ estrutura.txt
 bookingbio
 profesiones
 esquema-proyecto.txt
-INFORME_REFACTORIZACION_MULTITENANTopencode
+
 
 lista-de-mantenimiento.txt
 
 
 backup-completo.sql
 
-INFORME_TECNICO_MULTITENANT.md
-INFORME_REFACTORIZACION_MULTITENANT.md
 
 AUDITORIA.txt
 AUDITORIA2.txt
 INFORME_ESTABILIZACION_BETA.txt
+INFORME_REFACTORIZACION_MULTITENANT.md
+INFORME_TECNICO_MULTITENANT.md
+
+
+
+
 
