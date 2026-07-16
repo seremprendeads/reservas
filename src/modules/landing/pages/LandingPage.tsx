@@ -544,7 +544,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
               <div>
                 {landing.logo_url && (
-                  <img src={landing.logo_url} alt="" className="h-10 w-10 rounded-full object-cover mb-4 brightness-0 invert" />
+                  <img src={landing.logo_url} alt="" className="h-10 w-10 rounded-full object-cover mb-4" />
                 )}
                 {s.footer.copyright && (
                   <p style={{ ...bodyStyle, opacity: 0.7 }} className="text-sm mt-3">{s.footer.copyright}</p>
