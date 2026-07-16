@@ -3,6 +3,7 @@ import { BookingPage } from './pages/BookingPage';
 import { AdminPage } from './pages/AdminPage';
 import { ShopPage } from './modules/shop/pages/ShopPage';
 import { BioPage } from './modules/bio/pages/BioPage';
+import { LandingPage } from './modules/landing/pages/LandingPage';
 import { CreateBusinessPage } from './pages/CreateBusinessPage';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BusinessProvider } from './contexts/BusinessContext';
@@ -25,6 +26,9 @@ function App() {
             
             {/* Bio - public */}
             <Route path="/bio/:slug" element={<BioPage />} />
+            
+            {/* Landing Page - public */}
+            <Route path="/landing/:slug" element={<LandingPage />} />
             
             {/* Admin panel */}
             <Route path="/admin" element={<AdminPage />} />

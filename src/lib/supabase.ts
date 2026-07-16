@@ -126,3 +126,41 @@ export type WaitingListItem = {
   created_at: string;
   updated_at: string;
 };
+
+// ============================================================================
+// LANDING PAGE TYPES
+// ============================================================================
+
+export type LandingPage = {
+  id: string;
+  business_id: string;
+  slug: string;
+  sections: Record<string, unknown>;
+  theme: Record<string, unknown>;
+  status: 'draft' | 'published';
+  seo: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
+// ============================================================================
+// AI CREDITS TYPES
+// ============================================================================
+
+export type AiCredits = {
+  id: string;
+  business_id: string;
+  credits_total: number;
+  credits_used: number;
+  last_reset_at: string | null;
+  created_at: string;
+};
+
+export type AiUsageHistory = {
+  id: string;
+  business_id: string;
+  action: string;
+  credits_cost: number;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};

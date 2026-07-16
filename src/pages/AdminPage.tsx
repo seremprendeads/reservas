@@ -36,6 +36,7 @@ import {
   ShoppingCart,
   Link,
   CreditCard,
+  Sparkles,
 } from 'lucide-react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Branding, Service, WaitingListItem } from '../lib/supabase';
 import { Button } from '../components/ui/button';
@@ -56,9 +57,10 @@ import { allThemes } from '../themes';
 import { cn } from '../lib/utils';
 import { ShopAdmin } from '../modules/shop/admin/ShopAdmin';
 import { BioAdmin } from '../modules/bio/admin/BioAdmin';
+import { LandingAdmin } from '../modules/landing/admin/LandingAdmin';
 import { PaymentsAdmin } from '../modules/payments/admin/PaymentsAdmin';
 
-type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop' | 'bio' | 'payments';
+type View = 'dashboard' | 'bookings' | 'availability' | 'detail' | 'trash' | 'whatsapp' | 'clients' | 'waiting' | 'profile' | 'appearance' | 'services' | 'shop' | 'bio' | 'payments' | 'landing';
 
 function getStatusBadge(status: string) {
   const map: Record<string, { variant: 'success' | 'warning' | 'destructive' | 'info'; label: string }> = {
@@ -2145,6 +2147,7 @@ export function AdminPage() {
     { id: 'services', label: 'Servicios', icon: <Package className="h-5 w-5" /> },
     { id: 'shop', label: 'Tienda', icon: <ShoppingCart className="h-5 w-5" /> },
     { id: 'bio', label: 'Mi Bio', icon: <Link className="h-5 w-5" /> },
+    { id: 'landing', label: 'Landing IA', icon: <Sparkles className="h-5 w-5" /> },
     { id: 'appearance', label: 'Apariencia', icon: <Palette className="h-5 w-5" /> },
     { id: 'payments', label: 'Pagos', icon: <CreditCard className="h-5 w-5" /> },
     { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
@@ -2164,6 +2167,7 @@ export function AdminPage() {
     services: 'Servicios',
     shop: 'Tienda',
     bio: 'Mi Bio',
+    landing: 'Landing IA',
     appearance: 'Apariencia',
     payments: 'Pagos',
     profile: 'Perfil',
@@ -2700,6 +2704,9 @@ export function AdminPage() {
 
           {/* ─── Mi Bio ──────────────────────────────────────── */}
           {view === 'bio' && <BioAdmin adminEmail={adminEmail} />}
+
+          {/* ─── Landing IA ──────────────────────────────────── */}
+          {view === 'landing' && <LandingAdmin business={business} />}
 
           {/* ─── Appearances ────────────────────────────────── */}
           {view === 'appearance' && (
