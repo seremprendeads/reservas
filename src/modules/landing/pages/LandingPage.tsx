@@ -550,9 +550,24 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
 
               <div>
                 <h4 style={{ ...headingStyle, opacity: 0.5 }} className="font-bold text-sm uppercase tracking-wider mb-4">
+                  Navegacion
+                </h4>
+                <nav className="space-y-2">
+                  {(s.header.menu_items || []).map((item, i) => (
+                    <a key={i} href={item.href} onClick={handleSmoothScroll}
+                      style={{ ...bodyStyle, opacity: 0.7 }}
+                      className="block text-sm hover:opacity-100 transition-opacity">
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+
+              <div className="text-center">
+                <h4 style={{ ...headingStyle, opacity: 0.5 }} className="font-bold text-sm uppercase tracking-wider mb-4">
                   Contacto
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-3 inline-block text-left">
                   {s.footer.address && (
                     <div className="flex items-start gap-2">
                       <MapPin className="h-4 w-4 mt-0.5 shrink-0" style={{ opacity: 0.6 }} />
@@ -576,21 +591,6 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
                     </div>
                   )}
                 </div>
-              </div>
-
-              <div>
-                <h4 style={{ ...headingStyle, opacity: 0.5 }} className="font-bold text-sm uppercase tracking-wider mb-4">
-                  Navegacion
-                </h4>
-                <nav className="space-y-2">
-                  {(s.header.menu_items || []).map((item, i) => (
-                    <a key={i} href={item.href} onClick={handleSmoothScroll}
-                      style={{ ...bodyStyle, opacity: 0.7 }}
-                      className="block text-sm hover:opacity-100 transition-opacity">
-                      {item.label}
-                    </a>
-                  ))}
-                </nav>
               </div>
 
               <div>
@@ -694,8 +694,7 @@ function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOpen, han
           {/* Logo */}
           <a href="#inicio" onClick={handleSmoothScroll} className="flex items-center gap-3 shrink-0">
             {landing.logo_url ? (
-              <img src={landing.logo_url} alt="" className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover"
-                style={{ filter: isTransparent || ts.headerStyle === 'gradient' ? 'brightness(0) invert(1)' : 'none' }} />
+              <img src={landing.logo_url} alt="" className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover" />
             ) : (
               <span style={{ ...headingStyle, color: headerTextColor }} className="font-bold text-lg">
                 {landing.slug}
