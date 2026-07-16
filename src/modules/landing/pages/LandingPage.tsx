@@ -207,7 +207,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
               </div>
               <div className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6">
                 {landing.logo_url && (
-                  <img src={landing.logo_url} alt="" className="h-16 mx-auto mb-8" />
+                  <img src={landing.logo_url} alt="" className="h-16 w-16 rounded-full object-cover mx-auto mb-8" />
                 )}
                 <h1 style={{ ...headingStyle, color: '#ffffff' }} className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-tight mb-6">
                   {s.hero.title}
@@ -240,7 +240,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div>
                     {landing.logo_url && (
-                      <img src={landing.logo_url} alt="" className="h-14 mb-6" />
+                      <img src={landing.logo_url} alt="" className="h-14 w-14 rounded-full object-cover mb-6" />
                     )}
                     <h1 style={headingStyle} className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
                       {s.hero.title}
@@ -289,7 +289,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
             <div className={`${ts.sectionSpacing}`}>
               <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
                 {landing.logo_url && (
-                  <img src={landing.logo_url} alt="" className="h-16 mx-auto mb-8" />
+                  <img src={landing.logo_url} alt="" className="h-16 w-16 rounded-full object-cover mx-auto mb-8" />
                 )}
                 <h1 style={headingStyle} className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
                   {s.hero.title}
@@ -325,6 +325,11 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
       {hasSection('about') && s.about.description && (
         <section id="nosotros" className={`${ts.sectionSpacing} px-4`} style={{ borderTop: `1px solid ${theme.text_color}10` }}>
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+            {s.about.image_url && (
+              <div className={`${ts.cardRadius} overflow-hidden ${ts.cardShadow}`}>
+                <img src={s.about.image_url} alt={s.about.title} className="w-full h-72 sm:h-80 object-cover" />
+              </div>
+            )}
             <div>
               <h2 style={headingStyle} className="text-3xl sm:text-4xl font-bold mb-6">
                 {s.about.title || 'Sobre nosotros'}
@@ -333,11 +338,6 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
                 {s.about.description}
               </p>
             </div>
-            {s.about.image_url && (
-              <div className={`${ts.cardRadius} overflow-hidden ${ts.cardShadow}`}>
-                <img src={s.about.image_url} alt={s.about.title} className="w-full h-72 sm:h-80 object-cover" />
-              </div>
-            )}
           </div>
         </section>
       )}
@@ -544,7 +544,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
               <div>
                 {landing.logo_url && (
-                  <img src={landing.logo_url} alt="" className="h-10 mb-4 brightness-0 invert" />
+                  <img src={landing.logo_url} alt="" className="h-10 w-10 rounded-full object-cover mb-4 brightness-0 invert" />
                 )}
                 {s.footer.copyright && (
                   <p style={{ ...bodyStyle, opacity: 0.7 }} className="text-sm mt-3">{s.footer.copyright}</p>
@@ -697,7 +697,7 @@ function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOpen, han
           {/* Logo */}
           <a href="#inicio" onClick={handleSmoothScroll} className="flex items-center gap-3 shrink-0">
             {landing.logo_url ? (
-              <img src={landing.logo_url} alt="" className="h-8 sm:h-10"
+              <img src={landing.logo_url} alt="" className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover"
                 style={{ filter: isTransparent || ts.headerStyle === 'gradient' ? 'brightness(0) invert(1)' : 'none' }} />
             ) : (
               <span style={{ ...headingStyle, color: headerTextColor }} className="font-bold text-lg">
