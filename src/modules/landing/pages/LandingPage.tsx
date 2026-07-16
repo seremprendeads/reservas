@@ -59,7 +59,7 @@ function getGoogleFontsUrl(...fonts: string[]) {
   return `https://fonts.googleapis.com/css2?${[...families].map(f => `family=${f}`).join('&')}&display=swap`;
 }
 
-export function LandingPage({ initialData }: { initialData?: LandingPageType } = {}) {
+export function LandingPage({ initialData, isPreview }: { initialData?: LandingPageType; isPreview?: boolean } = {}) {
   const { slug } = useParams<{ slug: string }>();
   const [landing, setLanding] = useState<LandingPageType | null>(initialData || null);
   const [loading, setLoading] = useState(!initialData);
@@ -192,6 +192,7 @@ export function LandingPage({ initialData }: { initialData?: LandingPageType } =
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
           landing={landing}
+          isPreview={isPreview}
         />
       )}
 
@@ -658,9 +659,10 @@ interface HeaderProps {
   headingStyle: React.CSSProperties;
   bodyStyle: React.CSSProperties;
   landing: LandingPageType;
+  isPreview?: boolean;
 }
 
-function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOpen, handleSmoothScroll, headingStyle, bodyStyle, landing }: HeaderProps) {
+function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOpen, handleSmoothScroll, headingStyle, bodyStyle, landing, isPreview }: HeaderProps) {
   const headerBg = (() => {
     if (ts.headerStyle === 'solid') {
       return scrolled
@@ -684,7 +686,7 @@ function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOpen, han
   const isTransparent = ts.headerStyle === 'transparent' && !scrolled;
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'shadow-md' : ''}`}
+    <header className={`${isPreview ? 'sticky' : 'fixed'} top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'shadow-md' : ''}`}
       style={{
         backgroundColor: scrolled || ts.headerStyle === 'gradient' ? headerBg : 'transparent',
         backgroundImage: !scrolled && ts.headerStyle === 'gradient' ? headerBg : 'none',

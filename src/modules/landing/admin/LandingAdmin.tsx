@@ -1025,8 +1025,8 @@ function PreviewPanel({ sections, theme, template, slug, logoUrl }: {
             </a>
           </Button>
         </div>
-        <div className="h-[600px] overflow-auto">
-          <LandingPageComponent initialData={previewData} />
+        <div className="h-[600px] overflow-auto border-t">
+          <LandingPageComponent initialData={previewData} isPreview />
         </div>
       </CardContent>
     </Card>
