@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Eye, EyeOff, Save, Loader2, Plus, Trash2, Globe,
-  Settings, Palette, Image, Eye as EyeIcon, Send,
+  Settings, Palette, Image, Eye as EyeIcon, Send, Menu,
   Sparkles, Info, Star, Wrench, Heart, MessageSquare,
   HelpCircle, MousePointerClick, Phone,
 } from 'lucide-react';
