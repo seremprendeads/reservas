@@ -196,15 +196,20 @@ export function LandingAdmin({ business }: Props) {
     setSaveMessage(null);
     try {
       if (landing?.id) {
-        const { error } = await supabase
+        const { data: updatedRows, error } = await supabase
           .from('landing_pages')
           .update({
             sections, theme, template, visible_sections: visibleSections,
             logo_url: logoUrl || null, slug, updated_at: new Date().toISOString(),
           })
-          .eq('id', landing.id);
+          .eq('id', landing.id)
+          .select('id');
         if (error) throw error;
+        if (!updatedRows || updatedRows.length === 0) {
+          throw new Error('No se pudo guardar. Verificá que las políticas de la tabla landing_pages estén configuradas (ejecutá el SQL de PASOS_CORRECCION_LANDING.txt)');
+        }
         await loadLanding();
+        setSaveMessage({ type: 'success', text: 'Guardado correctamente' });
         return landing.id;
       } else {
         const { data, error } = await supabase
@@ -219,6 +224,7 @@ export function LandingAdmin({ business }: Props) {
           .single();
         if (error) throw error;
         await loadLanding();
+        setSaveMessage({ type: 'success', text: 'Guardado correctamente' });
         return data?.id || null;
       }
     } catch (err) {
