@@ -160,16 +160,18 @@ export function LandingAdmin({ business }: Props) {
       if (target === 'logo') {
         setLogoUrl(publicUrl);
       } else if (target === 'hero_image') {
-        updateSection('hero', { ...sections.hero, image_url: publicUrl });
+        setSections(prev => ({ ...prev, hero: { ...prev.hero, image_url: publicUrl } }));
       } else if (target === 'hero_presentation') {
-        updateSection('hero', { ...sections.hero, presentation_image_url: publicUrl });
+        setSections(prev => ({ ...prev, hero: { ...prev.hero, presentation_image_url: publicUrl } }));
       } else if (target === 'about_image') {
-        updateSection('about', { ...sections.about, image_url: publicUrl });
+        setSections(prev => ({ ...prev, about: { ...prev.about, image_url: publicUrl } }));
       } else if (target.startsWith('gallery_')) {
         const idx = parseInt(target.split('_')[1]);
-        const newImages = [...sections.gallery.images];
-        newImages[idx] = publicUrl;
-        updateSection('gallery', { ...sections.gallery, images: newImages });
+        setSections(prev => {
+          const newImages = [...prev.gallery.images];
+          newImages[idx] = publicUrl;
+          return { ...prev, gallery: { ...prev.gallery, images: newImages } };
+        });
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al subir imagen';
