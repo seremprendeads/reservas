@@ -1,34 +1,8 @@
 import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { authenticateToken, corsHeaders } from '../_shared/auth.ts';
-import { callGemini, jsonError, jsonResponse } from '../_shared/gemini.ts';
-
-const SECTION_PROMPTS: Record<string, string> = {
-  hero: `Regenerá el hero de esta landing. El hero es lo primero que ve el visitante.
-El título debe ser impactante (máx 60 chars). El subtítulo persuasivo (máx 120 chars).
-El CTA debe generar urgencia (máx 25 chars).
-Respondé con JSON: { "title": "...", "subtitle": "...", "cta_text": "...", "image_url": null }`,
-
-  about: `Regenerá la sección "Sobre nosotros" de esta landing.
-Descripción profesional pero cercana, 2-3 oraciones.
-Respondé con JSON: { "title": "Sobre nosotros", "description": "...", "image_url": null }`,
-
-  services: `Regenerá la sección de servicios de esta landing.
-Incluí 3-4 servicios con nombre, descripción breve (1 oración) y precio en formato argentino.
-Respondé con JSON: { "title": "Nuestros servicios", "items": [{ "name": "...", "description": "...", "price": "$XXX" }] }`,
-
-  testimonials: `Generá 3 testimonios realistas para esta landing.
-Cada testimonio tiene nombre, texto positivo (1-2 oraciones) y rating (4-5 estrellas).
-Respondé con JSON: { "title": "Lo que dicen nuestros clientes", "items": [{ "name": "...", "text": "...", "rating": 5 }] }`,
-
-  faq: `Generá 4-5 preguntas frecuentes relevantes para este tipo de negocio.
-Preguntas que un cliente se haría antes de reservar.
-Respondé con JSON: { "title": "Preguntas frecuentes", "items": [{ "question": "...", "answer": "..." }] }`,
-
-  cta: `Regenerá el call to action final de esta landing.
-Título motivador, descripción breve que genere urgencia, botón con acción clara.
-Respondé con JSON: { "title": "...", "description": "...", "button_text": "..." }`,
-};
+import { jsonError, jsonResponse } from '../_shared/gemini.ts';
+import { createAIProvider } from '../_shared/ai-provider.ts';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -48,7 +22,8 @@ serve(async (req) => {
       return jsonError('landing_page_id and section_key are required');
     }
 
-    if (!SECTION_PROMPTS[section_key]) {
+    const VALID_SECTIONS = ['hero', 'about', 'services', 'testimonials', 'faq', 'cta'];
+    if (!VALID_SECTIONS.includes(section_key)) {
       return jsonError(`Invalid section_key: ${section_key}`);
     }
 
@@ -81,28 +56,15 @@ serve(async (req) => {
       return jsonError('Landing page not found', 404);
     }
 
-    // Build context for Gemini
+    // Regenerate via AIProvider
+    const ai = createAIProvider();
     const sections = landing.sections as Record<string, unknown>;
-    const context = `Negocio: ${landing.business_id}
-Sección a regenerar: ${section_key}
-Contenido actual de otras secciones: ${JSON.stringify(sections, null, 2)}
-${instructions ? `Instrucciones adicionales del usuario: ${instructions}` : ''}`;
-
-    // Call Gemini
-    const { text, tokensUsed } = await callGemini(
-      context,
-      SECTION_PROMPTS[section_key]
-    );
-
-    // Parse response
-    let newSection;
-    try {
-      const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      newSection = JSON.parse(cleaned);
-    } catch {
-      console.error('Failed to parse Gemini response:', text);
-      return jsonError('Failed to regenerate section. Please try again.', 500);
-    }
+    const { section: newSection, tokensUsed } = await ai.regenerateSection({
+      sectionKey: section_key,
+      currentSections: sections,
+      instructions,
+      businessContext: `Business ID: ${landing.business_id}`,
+    });
 
     // Update sections
     sections[section_key] = newSection;

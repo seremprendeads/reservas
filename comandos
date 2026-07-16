@@ -34,6 +34,7 @@ git commit -m "14 dias"
 git push
 
 
+
 Lo que sí consume recursos reales:
 - Storage de imágenes (logo, fondo) → ~2-5 MB por app → 100 apps = 200-500 MB
 - Autenticación de admin → trivial
@@ -80,3 +81,19 @@ Verificación:
 
 
    .\pg_dump postgresql://postgres.slsgkbepewxlsmzmcpri:Lolo1980CascotE@aws-1-us-east-1.pooler.supabase.com:6543/postgres
+
+       background: gray;
+    padding: 05px;
+    border-radius: 12px;
+
+    Cambios realizados:
+Archivo	Cambio
+package.json	+@fontsource/geist-sans (self-hosted, sin CDN externo)
+src/index.css	+imports de Geist 400/500/600/700, regla global h1,h2,h3 { font-family: Geist }
+tailwind.config.js	+font-display: ['Geist'] disponible vía font-display class
+src/components/ui/alert.tsx	AlertTitle (<h5>) usa font-display
+Resultado:
+- Geist → todos los <h1>, <h2>, <h3> (30 elementos) + CardTitle + DialogTitle + AlertTitle
+- Inter → todo lo demás (body, párrafos, botones, inputs, tablas, forms)
+- JetBrains Mono → código (sin cambios)
+- Centralizado en CSS global, sin font-family manual en componentes
