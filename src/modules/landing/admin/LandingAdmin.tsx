@@ -10,6 +10,14 @@ import { AiNoCreditsModal } from './AiNoCreditsModal';
 import { DEFAULT_SECTIONS, DEFAULT_THEME, LANDING_SECTIONS } from '../config';
 import type { LandingSections, LandingPage } from '../types';
 
+function aiInvoke(fnName: string, body: Record<string, unknown> = {}) {
+  const token = sessionStorage.getItem('admin_token') || '';
+  return supabase.functions.invoke(fnName, {
+    headers: { Authorization: `Bearer ${token}` },
+    body,
+  });
+}
+
 interface Props {
   business: Business | null;
 }
@@ -103,27 +111,40 @@ export function LandingAdmin({ business }: Props) {
     if (!business?.id) return;
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('ai-generate-landing', {
-        body: {
-          business_name: businessName || business.name,
-          business_type: businessType,
-          services: [],
-          city: city,
-          slug: slug || business.slug,
-        },
+      const { data, error } = await aiInvoke('ai-generate-landing', {
+        business_name: businessName || business.name,
+        business_type: businessType,
+        services: [],
+        city: city,
+        slug: slug || business.slug,
       });
 
-      if (error || !data?.success) {
-        if (data?.error?.includes('Not enough credits') || error?.includes('403')) {
+      const errMsg = typeof error === 'string' ? error : error?.message || '';
+      const dataErr = data?.error || '';
+
+      if (errMsg.includes('401') || errMsg.includes('No autorizado')) {
+        console.error('Auth error - token missing or invalid');
+        return;
+      }
+
+      if (!data?.success || errMsg || dataErr) {
+        if (String(dataErr).includes('Not enough credits') || String(errMsg).includes('403')) {
           setNoCreditsOpen(true);
           return;
         }
-        throw new Error(data?.error || 'Generation failed');
+        if (dataErr && !data?.success) {
+          throw new Error(dataErr);
+        }
+        if (errMsg && !data?.success) {
+          throw new Error(errMsg);
+        }
       }
 
-      setSections(data.sections);
-      setCreditsRemaining(data.credits_remaining);
-      await loadLanding();
+      if (data?.sections) {
+        setSections(data.sections);
+        setCreditsRemaining(data.credits_remaining);
+        await loadLanding();
+      }
     } catch (err) {
       console.error('Generate error:', err);
     } finally {
@@ -135,23 +156,36 @@ export function LandingAdmin({ business }: Props) {
     if (!landing?.id) return;
     setRegenerating(sectionKey);
     try {
-      const { data, error } = await supabase.functions.invoke('ai-regenerate-section', {
-        body: {
-          landing_page_id: landing.id,
-          section_key: sectionKey,
-        },
+      const { data, error } = await aiInvoke('ai-regenerate-section', {
+        landing_page_id: landing.id,
+        section_key: sectionKey,
       });
 
-      if (error || !data?.success) {
-        if (data?.error?.includes('Not enough credits') || error?.includes('403')) {
+      const errMsg = typeof error === 'string' ? error : error?.message || '';
+      const dataErr = data?.error || '';
+
+      if (errMsg.includes('401') || errMsg.includes('No autorizado')) {
+        console.error('Auth error - token missing or invalid');
+        return;
+      }
+
+      if (!data?.success || errMsg || dataErr) {
+        if (String(dataErr).includes('Not enough credits') || String(errMsg).includes('403')) {
           setNoCreditsOpen(true);
           return;
         }
-        throw new Error(data?.error || 'Regeneration failed');
+        if (dataErr && !data?.success) {
+          throw new Error(dataErr);
+        }
+        if (errMsg && !data?.success) {
+          throw new Error(errMsg);
+        }
       }
 
-      setSections((prev) => ({ ...prev, [sectionKey]: data.section }));
-      setCreditsRemaining(data.credits_remaining);
+      if (data?.section) {
+        setSections((prev) => ({ ...prev, [sectionKey]: data.section }));
+        setCreditsRemaining(data.credits_remaining);
+      }
     } catch (err) {
       console.error('Regenerate error:', err);
     } finally {

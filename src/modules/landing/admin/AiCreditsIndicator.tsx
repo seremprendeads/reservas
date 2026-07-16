@@ -9,13 +9,20 @@ interface Props {
   onNoCredits?: () => void;
 }
 
+function aiInvoke(fnName: string) {
+  const token = sessionStorage.getItem('admin_token') || '';
+  return supabase.functions.invoke(fnName, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function AiCreditsIndicator({ businessId, onNoCredits }: Props) {
   const [credits, setCredits] = useState<{ total: number; used: number; remaining: number } | null>(null);
 
   useEffect(() => {
     if (!businessId) return;
 
-    supabase.functions.invoke('ai-credits').then(({ data }) => {
+    aiInvoke('ai-credits').then(({ data }) => {
       if (data) {
         setCredits({
           total: data.credits_total || 15,

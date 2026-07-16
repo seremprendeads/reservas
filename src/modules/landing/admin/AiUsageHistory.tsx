@@ -19,6 +19,13 @@ interface Props {
   businessId: string;
 }
 
+function aiInvoke(fnName: string) {
+  const token = sessionStorage.getItem('admin_token') || '';
+  return supabase.functions.invoke(fnName, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function AiUsageHistory({ businessId }: Props) {
   const [history, setHistory] = useState<UsageHistoryType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +33,7 @@ export function AiUsageHistory({ businessId }: Props) {
   useEffect(() => {
     if (!businessId) return;
 
-    supabase.functions.invoke('ai-usage-history').then(({ data }) => {
+    aiInvoke('ai-usage-history').then(({ data }) => {
       if (data?.history) setHistory(data.history);
     }).catch(() => {}).finally(() => setLoading(false));
   }, [businessId]);
