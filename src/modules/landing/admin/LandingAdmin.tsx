@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Eye, EyeOff, Save, Loader2, Plus, Trash2, Globe,
-  Settings, Palette, Image, Eye as EyeIcon, Send, Menu,
+  Settings, Palette, Image as ImageIcon, Eye as EyeIcon, Send, Menu,
   Sparkles, Info, Star, Wrench, Heart, MessageSquare,
   HelpCircle, MousePointerClick, Phone,
 } from 'lucide-react';
@@ -19,7 +19,7 @@ import {
 } from '../types';
 
 const SECTION_ICONS: Record<string, typeof Sparkles> = {
-  Menu, Sparkles, Info, Star, Wrench, Heart, Image,
+  Menu, Sparkles, Info, Star, Wrench, Heart, ImageIcon,
   MessageSquare, HelpCircle, MousePointerClick, Phone,
 };
 
@@ -45,7 +45,7 @@ const ADMIN_TABS: { id: AdminTab; label: string; icon: typeof Sparkles }[] = [
   { id: 'main_service', label: 'Servicio Principal', icon: Star },
   { id: 'services', label: 'Servicios', icon: Wrench },
   { id: 'why', label: 'Por Qué Elegirnos', icon: Heart },
-  { id: 'gallery', label: 'Galería', icon: Image },
+  { id: 'gallery', label: 'Galería', icon: ImageIcon },
   { id: 'testimonials', label: 'Testimonios', icon: MessageSquare },
   { id: 'faq', label: 'FAQ', icon: HelpCircle },
   { id: 'cta', label: 'CTA', icon: MousePointerClick },
