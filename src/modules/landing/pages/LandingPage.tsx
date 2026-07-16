@@ -199,7 +199,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
       {/* ─── HERO ─── */}
       {hasSection('hero') && (
         <section id="inicio" className="relative overflow-hidden">
-          {ts.heroLayout === 'full' && s.hero.image_url ? (
+          {s.hero.image_url ? (
             <div className="relative min-h-screen flex items-center justify-center">
               <div className="absolute inset-0">
                 <img src={s.hero.image_url} alt="" className="w-full h-full object-cover" />
