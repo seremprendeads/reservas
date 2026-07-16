@@ -1,30 +1,55 @@
+export type LandingTemplate = 'minimal' | 'professional' | 'creative' | 'wellness';
+
 export interface LandingPage {
   id: string;
   business_id: string;
   slug: string;
+  template: LandingTemplate;
   sections: LandingSections;
   theme: LandingTheme;
   status: 'draft' | 'published';
+  visible_sections: string[];
+  logo_url: string | null;
   seo: LandingSEO;
   created_at: string;
   updated_at: string;
 }
 
 export interface LandingSections {
+  header: {
+    menu_items: { label: string; href: string }[];
+    cta_text: string;
+  };
   hero: {
     title: string;
     subtitle: string;
     cta_text: string;
+    cta_secondary_text: string;
     image_url: string | null;
+    presentation_image_url: string | null;
+    overlay_opacity: number;
   };
   about: {
     title: string;
     description: string;
     image_url: string | null;
   };
-  services: {
+  main_service: {
+    icon: string;
     title: string;
-    items: { name: string; description: string; price: string }[];
+    description: string;
+  };
+  secondary_services: {
+    title: string;
+    items: { icon: string; title: string; description: string }[];
+  };
+  why_choose_us: {
+    title: string;
+    items: { icon: string; text: string }[];
+  };
+  gallery: {
+    title: string;
+    images: string[];
   };
   testimonials: {
     title: string;
@@ -38,15 +63,27 @@ export interface LandingSections {
     title: string;
     description: string;
     button_text: string;
+    button_action: 'booking' | 'info';
+  };
+  footer: {
+    address: string;
+    phone: string;
+    email: string;
+    instagram: string;
+    facebook: string;
+    tiktok: string;
+    copyright: string;
   };
 }
 
 export interface LandingTheme {
   primary_color: string;
+  secondary_color: string;
   bg_color: string;
   text_color: string;
-  muted_color: string;
-  section_padding: string;
+  button_color: string;
+  footer_bg_color: string;
+  footer_text_color: string;
   font_heading: string;
   font_body: string;
 }
@@ -57,33 +94,18 @@ export interface LandingSEO {
   og_image: string | null;
 }
 
-export interface AiCredits {
-  id: string;
-  business_id: string;
-  credits_total: number;
-  credits_used: number;
-  credits_remaining: number;
-  last_reset_at: string | null;
-  created_at: string;
-}
+export const SECTION_DEFINITIONS = [
+  { key: 'header', label: 'Header', icon: 'Menu' as const },
+  { key: 'hero', label: 'Hero', icon: 'Sparkles' as const },
+  { key: 'about', label: 'Nosotros', icon: 'Info' as const },
+  { key: 'main_service', label: 'Servicio Principal', icon: 'Star' as const },
+  { key: 'secondary_services', label: 'Servicios', icon: 'Wrench' as const },
+  { key: 'why_choose_us', label: 'Por Qué Elegirnos', icon: 'Heart' as const },
+  { key: 'gallery', label: 'Galería', icon: 'Image' as const },
+  { key: 'testimonials', label: 'Testimonios', icon: 'MessageSquare' as const },
+  { key: 'faq', label: 'FAQ', icon: 'HelpCircle' as const },
+  { key: 'cta', label: 'Call to Action', icon: 'MousePointerClick' as const },
+  { key: 'footer', label: 'Footer', icon: 'Phone' as const },
+] as const;
 
-export interface AiUsageHistory {
-  id: string;
-  business_id: string;
-  action: string;
-  credits_cost: number;
-  metadata: Record<string, unknown>;
-  created_at: string;
-}
-
-export const AI_ACTION_LABELS: Record<string, string> = {
-  landing_generation: 'Landing generada',
-  hero_rewrite: 'Hero regenerado',
-  about_rewrite: 'Sección "Sobre nosotros" regenerada',
-  services_rewrite: 'Servicios regenerados',
-  testimonials_generate: 'Testimonios generados',
-  faq_generation: 'FAQ generadas',
-  seo_generation: 'SEO generado',
-  text_rewrite: 'Texto mejorado',
-  section_regenerate: 'Sección regenerada',
-};
+export type SectionKey = typeof SECTION_DEFINITIONS[number]['key'];

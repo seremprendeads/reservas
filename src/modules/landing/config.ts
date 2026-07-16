@@ -1,73 +1,146 @@
-export const AI_CREDIT_COSTS = {
-  LANDING_GENERATION: 5,
-  HERO_REWRITE: 1,
-  ABOUT_REWRITE: 1,
-  SERVICES_REWRITE: 1,
-  TESTIMONIALS_GENERATE: 1,
-  FAQ_GENERATION: 1,
-  SEO_GENERATION: 1,
-  TEXT_REWRITE: 1,
-  SECTION_REGENERATE: 1,
-} as const;
+import type { LandingTemplate, LandingSections, LandingTheme } from './types';
 
-export const PLAN_CREDITS: Record<string, number> = {
-  free: 0,
-  beta: 15,
-  starter: 10,
-  pro: 15,
-  enterprise: 50,
-};
+export const TEMPLATES: { id: LandingTemplate; name: string; description: string; icon: string }[] = [
+  { id: 'minimal', name: 'Minimal', description: 'Vercel / Linear. Ideal para desarrolladores, abogados, arquitectos.', icon: '◆' },
+  { id: 'professional', name: 'Profesional', description: 'Médicos, odontólogos, psicólogos y terapeutas.', icon: '●' },
+  { id: 'creative', name: 'Creativa', description: 'Tatuadores, fotógrafos, artistas y diseñadores.', icon: '▲' },
+  { id: 'wellness', name: 'Wellness', description: 'Spa, centros de estética, gimnasios y bienestar.', icon: '◎' },
+];
 
-export const LOW_CREDITS_THRESHOLD = 3;
+export const AVAILABLE_FONTS = [
+  { id: 'Geist', label: 'Geist' },
+  { id: 'Inter', label: 'Inter' },
+  { id: 'Manrope', label: 'Manrope' },
+  { id: 'Plus Jakarta Sans', label: 'Plus Jakarta Sans' },
+  { id: 'Instrument Sans', label: 'Instrument Sans' },
+];
 
-export const LANDING_SECTIONS = [
-  { key: 'hero', label: 'Hero', icon: 'Sparkles', cost: AI_CREDIT_COSTS.HERO_REWRITE },
-  { key: 'about', label: 'Sobre nosotros', icon: 'Info', cost: AI_CREDIT_COSTS.ABOUT_REWRITE },
-  { key: 'services', label: 'Servicios', icon: 'Wrench', cost: AI_CREDIT_COSTS.SERVICES_REWRITE },
-  { key: 'testimonials', label: 'Testimonios', icon: 'Star', cost: AI_CREDIT_COSTS.TESTIMONIALS_GENERATE },
-  { key: 'faq', label: 'Preguntas frecuentes', icon: 'HelpCircle', cost: AI_CREDIT_COSTS.FAQ_GENERATION },
-  { key: 'cta', label: 'Call to Action', icon: 'MousePointerClick', cost: AI_CREDIT_COSTS.TEXT_REWRITE },
-] as const;
-
-export type LandingSectionKey = typeof LANDING_SECTIONS[number]['key'];
-
-export const DEFAULT_SECTIONS = {
+export const DEFAULT_SECTIONS: LandingSections = {
+  header: {
+    menu_items: [
+      { label: 'Inicio', href: '#inicio' },
+      { label: 'Nosotros', href: '#nosotros' },
+      { label: 'Servicios', href: '#servicios' },
+      { label: 'FAQ', href: '#faq' },
+      { label: 'Contacto', href: '#contacto' },
+    ],
+    cta_text: 'Reservar Turno',
+  },
   hero: {
-    title: '',
-    subtitle: '',
-    cta_text: 'Reservá tu turno',
-    image_url: null as string | null,
+    title: 'Tu negocio de confianza',
+    subtitle: 'Descripción breve de tu negocio. Lo que hacemos y por qué somos diferentes.',
+    cta_text: 'Reservar Turno',
+    cta_secondary_text: 'Conocer más',
+    image_url: null,
+    presentation_image_url: null,
+    overlay_opacity: 40,
   },
   about: {
     title: 'Sobre nosotros',
-    description: '',
-    image_url: null as string | null,
+    description: 'Contá tu historia, tu trayectoria y lo que te hace único. Esta sección genera confianza en tus potenciales clientes.',
+    image_url: null,
   },
-  services: {
-    title: 'Nuestros servicios',
-    items: [] as { name: string; description: string; price: string }[],
+  main_service: {
+    icon: 'Star',
+    title: 'Nuestro servicio principal',
+    description: 'Describí el servicio estrella de tu negocio. Explicá qué lo hace especial y por qué los clientes lo eligen.',
+  },
+  secondary_services: {
+    title: 'Otros servicios',
+    items: [
+      { icon: 'Wrench', title: 'Servicio 1', description: 'Descripción del servicio' },
+      { icon: 'Palette', title: 'Servicio 2', description: 'Descripción del servicio' },
+      { icon: 'Zap', title: 'Servicio 3', description: 'Descripción del servicio' },
+    ],
+  },
+  why_choose_us: {
+    title: '¿Por qué elegirnos?',
+    items: [
+      { icon: 'Shield', text: 'Profesionales certificados' },
+      { icon: 'Clock', text: 'Trámites ágiles y rápidos' },
+      { icon: 'Heart', text: 'Atención personalizada' },
+      { icon: 'Award', text: 'Años de experiencia' },
+    ],
+  },
+  gallery: {
+    title: 'Galería',
+    images: [],
   },
   testimonials: {
     title: 'Lo que dicen nuestros clientes',
-    items: [] as { name: string; text: string; rating: number }[],
+    items: [],
   },
   faq: {
     title: 'Preguntas frecuentes',
-    items: [] as { question: string; answer: string }[],
+    items: [],
   },
   cta: {
     title: '¿Listo para reservar?',
     description: 'Agendá tu turno ahora y experience la diferencia.',
-    button_text: 'Reservar ahora',
+    button_text: 'Reservar Turno',
+    button_action: 'booking',
+  },
+  footer: {
+    address: '',
+    phone: '',
+    email: '',
+    instagram: '',
+    facebook: '',
+    tiktok: '',
+    copyright: '',
   },
 };
 
-export const DEFAULT_THEME = {
+export const DEFAULT_THEME: LandingTheme = {
   primary_color: '#059669',
+  secondary_color: '#10b981',
   bg_color: '#ffffff',
   text_color: '#111827',
-  muted_color: '#6b7280',
-  section_padding: 'py-16',
+  button_color: '#059669',
+  footer_bg_color: '#111827',
+  footer_text_color: '#f3f4f6',
   font_heading: 'Geist',
   font_body: 'Inter',
+};
+
+export const TEMPLATE_STYLES: Record<LandingTemplate, {
+  cardRadius: string;
+  sectionSpacing: string;
+  headerStyle: 'solid' | 'transparent' | 'gradient';
+  heroLayout: 'centered' | 'split' | 'full';
+  cardShadow: string;
+  buttonRadius: string;
+}> = {
+  minimal: {
+    cardRadius: 'rounded-none',
+    sectionSpacing: 'py-20',
+    headerStyle: 'solid',
+    heroLayout: 'centered',
+    cardShadow: '',
+    buttonRadius: 'rounded-none',
+  },
+  professional: {
+    cardRadius: 'rounded-xl',
+    sectionSpacing: 'py-20',
+    headerStyle: 'solid',
+    heroLayout: 'centered',
+    cardShadow: 'shadow-lg',
+    buttonRadius: 'rounded-lg',
+  },
+  creative: {
+    cardRadius: 'rounded-2xl',
+    sectionSpacing: 'py-24',
+    headerStyle: 'transparent',
+    heroLayout: 'split',
+    cardShadow: 'shadow-xl',
+    buttonRadius: 'rounded-full',
+  },
+  wellness: {
+    cardRadius: 'rounded-2xl',
+    sectionSpacing: 'py-20',
+    headerStyle: 'gradient',
+    heroLayout: 'centered',
+    cardShadow: 'shadow-md',
+    buttonRadius: 'rounded-full',
+  },
 };
