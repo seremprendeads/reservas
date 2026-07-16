@@ -59,16 +59,17 @@ function getGoogleFontsUrl(...fonts: string[]) {
   return `https://fonts.googleapis.com/css2?${[...families].map(f => `family=${f}`).join('&')}&display=swap`;
 }
 
-export function LandingPage() {
+export function LandingPage({ initialData }: { initialData?: LandingPageType } = {}) {
   const { slug } = useParams<{ slug: string }>();
-  const [landing, setLanding] = useState<LandingPageType | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [landing, setLanding] = useState<LandingPageType | null>(initialData || null);
+  const [loading, setLoading] = useState(!initialData);
   const [notFound, setNotFound] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
+    if (initialData) return;
     if (!slug) return;
     setLoading(true);
     supabase
@@ -86,7 +87,7 @@ export function LandingPage() {
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
-  }, [slug]);
+  }, [slug, initialData]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);

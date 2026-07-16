@@ -17,6 +17,7 @@ import {
   SECTION_DEFINITIONS, type LandingSections, type LandingPage,
   type LandingTheme, type LandingTemplate,
 } from '../types';
+import { LandingPage as LandingPageComponent } from '../pages/LandingPage';
 
 const SECTION_ICONS: Record<string, typeof Sparkles> = {
   Menu, Sparkles, Info, Star, Wrench, Heart, ImageIcon,
@@ -90,6 +91,7 @@ export function LandingAdmin({ business }: Props) {
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetRef = useRef<string>('');
   const [uploadTarget, setUploadTarget] = useState<string>('');
@@ -187,30 +189,42 @@ export function LandingAdmin({ business }: Props) {
     fileInputRef.current?.click();
   };
 
-  const handleSave = async () => {
-    if (!business?.id) return;
+  const handleSave = async (): Promise<string | null> => {
+    if (!business?.id) return null;
     setSaving(true);
+    setSaveMessage(null);
     try {
       if (landing?.id) {
-        await supabase
+        const { error } = await supabase
           .from('landing_pages')
           .update({
             sections, theme, template, visible_sections: visibleSections,
             logo_url: logoUrl || null, slug, updated_at: new Date().toISOString(),
           })
           .eq('id', landing.id);
+        if (error) throw error;
+        await loadLanding();
+        return landing.id;
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('landing_pages')
           .insert({
             business_id: business.id,
             slug: slug || business.slug,
             sections, theme, template, visible_sections: visibleSections,
             logo_url: logoUrl || null, status: 'draft',
-          });
+          })
+          .select('id')
+          .single();
         if (error) throw error;
         await loadLanding();
+        return data?.id || null;
       }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al guardar';
+      setSaveMessage({ type: 'error', text: msg });
+      console.error('Save error:', err);
+      return null;
     } finally {
       setSaving(false);
     }
@@ -219,16 +233,25 @@ export function LandingAdmin({ business }: Props) {
   const handlePublish = async () => {
     if (!business?.id) return;
     setSaving(true);
+    setSaveMessage(null);
     try {
-      await handleSave();
-      const targetId = landing?.id;
-      if (targetId) {
-        await supabase
-          .from('landing_pages')
-          .update({ status: 'published', updated_at: new Date().toISOString() })
-          .eq('id', targetId);
+      const savedId = await handleSave();
+      const targetId = savedId || landing?.id;
+      if (!targetId) {
+        setSaveMessage({ type: 'error', text: 'No se pudo guardar la landing. Intentá de nuevo.' });
+        return;
       }
+      const { error } = await supabase
+        .from('landing_pages')
+        .update({ status: 'published', updated_at: new Date().toISOString() })
+        .eq('id', targetId);
+      if (error) throw error;
       await loadLanding();
+      setSaveMessage({ type: 'success', text: 'Landing publicada correctamente' });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al publicar';
+      setSaveMessage({ type: 'error', text: msg });
+      console.error('Publish error:', err);
     } finally {
       setSaving(false);
     }
@@ -257,6 +280,17 @@ export function LandingAdmin({ business }: Props) {
           <span className="shrink-0">Error:</span>
           <span>{uploadError}</span>
           <button onClick={() => setUploadError(null)} className="ml-auto shrink-0 hover:opacity-70">✕</button>
+        </div>
+      )}
+
+      {saveMessage && (
+        <div className={`rounded-lg border p-3 text-sm flex items-center gap-2 ${
+          saveMessage.type === 'success'
+            ? 'border-emerald-500/50 bg-emerald-50 text-emerald-700'
+            : 'border-destructive/50 bg-destructive/10 text-destructive'
+        }`}>
+          <span>{saveMessage.text}</span>
+          <button onClick={() => setSaveMessage(null)} className="ml-auto shrink-0 hover:opacity-70">✕</button>
         </div>
       )}
 
@@ -961,18 +995,38 @@ function IconSelector({ value, onChange }: { value: string; onChange: (v: string
   );
 }
 
-function PreviewPanel({ slug }: {
-  slug: string;
+function PreviewPanel({ sections, theme, template, slug, logoUrl }: {
+  sections: LandingSections; theme: LandingTheme; template: LandingTemplate;
+  slug: string; logoUrl: string;
 }) {
+  const previewData: LandingPage = {
+    id: 'preview',
+    business_id: 'preview',
+    slug,
+    template,
+    sections: sections as unknown as Record<string, unknown>,
+    theme: theme as unknown as Record<string, unknown>,
+    status: 'published',
+    visible_sections: SECTION_DEFINITIONS.map(s => s.key),
+    logo_url: logoUrl || null,
+    seo: { title: '', description: '', og_image: null },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="text-center py-4 text-muted-foreground">
-          <Eye className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">Vista previa de la landing en /landing/{slug}</p>
-          <Button variant="outline" size="sm" className="mt-3" asChild>
-            <a href={`/landing/${slug}`} target="_blank">Abrir en nueva pestaña</a>
+      <CardContent className="p-0 overflow-hidden rounded-xl">
+        <div className="bg-muted/30 px-4 py-2 border-b flex items-center justify-between">
+          <span className="text-xs font-medium text-muted-foreground">Vista previa en vivo</span>
+          <Button variant="outline" size="sm" asChild>
+            <a href={`/landing/${slug}`} target="_blank" className="flex items-center gap-1">
+              <Eye className="h-3 w-3" /> Abrir en nueva pestaña
+            </a>
           </Button>
+        </div>
+        <div className="h-[600px] overflow-auto">
+          <LandingPageComponent initialData={previewData} />
         </div>
       </CardContent>
     </Card>

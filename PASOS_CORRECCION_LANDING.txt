@@ -2,18 +2,6 @@
   PASOS PARA CORREGIR LANDING PAGE
 =====================================
 
-PROBLEMA 1: Pantalla en blanco
-  Causa: Faltaba import "Menu" de lucide-react
-  Estado: Corregido
-
-PROBLEMA 2: Imagenes no se suben
-  Causa: Bucket "branding" no existia + no tenia permisos
-  Estado: Corregido
-
-PROBLEMA 3: Pagina no encontrada / 401 en consola
-  Causa: RLS de landing_pages usa auth.jwt() pero el admin usa custom JWT
-  Estado: Corregido
-
 
 =====================================
   PASO 1: SUBIR CAMBIOS A GIT/VERCEL
@@ -21,79 +9,88 @@ PROBLEMA 3: Pagina no encontrada / 401 en consola
 
 Abrir la terminal (PowerShell o CMD) en la carpeta del proyecto y ejecutar:
 
-  git add -A
+  git add .
 
-  git commit -m "fix: landing page RLS + branding bucket + Menu import + Image shadow"
+  git commit -m "fix: landing save/publish/preview"
 
   git push
 
-Despues de push, Vercel redeploya solo (tarda 1-2 minutos).
-
 
 =====================================
-  PASO 2: ACTUALIZAR SUPABASE (SQL)
+  PASO 2: EJECUTAR SQL EN SUPABASE
 =====================================
 
 1. Abrir https://supabase.com/dashboard
 2. Seleccionar tu proyecto
-3. En el menu lateral izquierdo, click en "SQL Editor"
-4. Click en "New query"
-5. Pegar TODO este SQL:
+3. Menu lateral -> "SQL Editor" -> "New query"
+4. Pegar TODO el SQL de abajo y darle Run
+5. Deberia decir "Success" o "No rows returned"
 
-  -- Fix landing_pages RLS policies
-  DROP POLICY IF EXISTS "Owner can manage own landing pages" ON landing_pages;
-  DROP POLICY IF EXISTS "Public can read published landing pages" ON landing_pages;
 
-  CREATE POLICY "Public can read published landing pages"
-    ON landing_pages FOR SELECT
-    USING (status = 'published');
+-- =============================================
+-- COPIAR DESDE AQUI
+-- =============================================
 
-  CREATE POLICY "Anon can read landing pages"
-    ON landing_pages FOR SELECT
-    USING (true);
+DROP POLICY IF EXISTS "Owner can manage own landing pages" ON landing_pages;
+DROP POLICY IF EXISTS "Public can read published landing pages" ON landing_pages;
+DROP POLICY IF EXISTS "Anon can read landing pages" ON landing_pages;
+DROP POLICY IF EXISTS "Anon can insert landing pages" ON landing_pages;
+DROP POLICY IF EXISTS "Anon can update landing pages" ON landing_pages;
+DROP POLICY IF EXISTS "Anon can delete landing pages" ON landing_pages;
+DROP POLICY IF EXISTS "Service role manages landing_pages" ON landing_pages;
 
-  CREATE POLICY "Anon can insert landing pages"
-    ON landing_pages FOR INSERT
-    WITH CHECK (true);
+CREATE POLICY "Public can read published landing pages"
+  ON landing_pages FOR SELECT
+  USING (status = 'published');
 
-  CREATE POLICY "Anon can update landing pages"
-    ON landing_pages FOR UPDATE
-    USING (true);
+CREATE POLICY "Anon can read landing pages"
+  ON landing_pages FOR SELECT
+  USING (true);
 
-  CREATE POLICY "Anon can delete landing pages"
-    ON landing_pages FOR DELETE
-    USING (true);
+CREATE POLICY "Anon can insert landing pages"
+  ON landing_pages FOR INSERT
+  WITH CHECK (true);
 
-  CREATE POLICY "Service role manages landing_pages"
-    ON landing_pages FOR ALL
-    TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY "Anon can update landing pages"
+  ON landing_pages FOR UPDATE
+  USING (true);
 
-  -- Create branding storage bucket
-  INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-  VALUES ('branding', 'branding', true, 5242880,
-    ARRAY['image/webp', 'image/jpeg', 'image/png'])
-  ON CONFLICT (id) DO UPDATE SET
-    public = true,
-    file_size_limit = 5242880,
-    allowed_mime_types = ARRAY['image/webp', 'image/jpeg', 'image/png'];
+CREATE POLICY "Anon can delete landing pages"
+  ON landing_pages FOR DELETE
+  USING (true);
 
-  DROP POLICY IF EXISTS "Public read branding" ON storage.objects;
-  CREATE POLICY "Public read branding" ON storage.objects FOR SELECT
-    USING (
-      bucket_id = 'branding'
-      AND (storage.foldername(name))[1] IS NOT NULL
-    );
+CREATE POLICY "Service role manages landing_pages"
+  ON landing_pages FOR ALL
+  TO service_role USING (true) WITH CHECK (true);
 
-  DROP POLICY IF EXISTS "Admin insert branding" ON storage.objects;
-  CREATE POLICY "Anon insert branding" ON storage.objects FOR INSERT
-    WITH CHECK (bucket_id = 'branding');
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('branding', 'branding', true, 5242880,
+  ARRAY['image/webp', 'image/jpeg', 'image/png'])
+ON CONFLICT (id) DO UPDATE SET
+  public = true,
+  file_size_limit = 5242880,
+  allowed_mime_types = ARRAY['image/webp', 'image/jpeg', 'image/png'];
 
-  DROP POLICY IF EXISTS "Admin delete branding" ON storage.objects;
-  CREATE POLICY "Anon delete branding" ON storage.objects FOR DELETE
-    USING (bucket_id = 'branding');
+DROP POLICY IF EXISTS "Public read branding" ON storage.objects;
+CREATE POLICY "Public read branding" ON storage.objects FOR SELECT
+  USING (
+    bucket_id = 'branding'
+    AND (storage.foldername(name))[1] IS NOT NULL
+  );
 
-6. Click en "Run" (o Ctrl+Enter)
-7. Deberia decir "Success" o "No rows returned"
+DROP POLICY IF EXISTS "Admin insert branding" ON storage.objects;
+DROP POLICY IF EXISTS "Anon insert branding" ON storage.objects;
+CREATE POLICY "Anon insert branding" ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'branding');
+
+DROP POLICY IF EXISTS "Admin delete branding" ON storage.objects;
+DROP POLICY IF EXISTS "Anon delete branding" ON storage.objects;
+CREATE POLICY "Anon delete branding" ON storage.objects FOR DELETE
+  USING (bucket_id = 'branding');
+
+-- =============================================
+-- HASTA AQUI
+-- =============================================
 
 
 =====================================
@@ -103,9 +100,9 @@ Despues de push, Vercel redeploya solo (tarda 1-2 minutos).
 1. Abrir la web en Vercel -> debe cargar sin pantalla en blanco
 2. Ir al panel admin -> seccion Landing Page
 3. Llenar los datos (hero, about, galeria, etc.)
-4. Guardar -> no debe haber errores en consola F12
-5. Publicar
-6. Abrir /landing/tu-slug en nueva pestana -> debe mostrar la landing
-7. Probar subir una imagen -> debe funcionar
+4. Hacer click en "Guardar" -> debe ver mensaje verde de exito
+5. Hacer click en "Publicar" -> debe ver mensaje verde "Landing publicada"
+6. Ir a pestana "Vista Previa" -> debe ver la landing renderizada en vivo
+7. Abrir /landing/tu-slug en nueva pestana -> debe mostrar la landing publica
 
-Si aparece un error rojo en pantalla o en consola, copiar el mensaje y reportarlo.
+Si ves algun error rojo, copiar el mensaje y reportarlo.
