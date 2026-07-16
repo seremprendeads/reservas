@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import {
-  Eye, EyeOff, Save, Loader2, Plus, Trash2, Globe,
+  Eye, Save, Loader2, Plus, Trash2, Globe,
   Settings, Palette, Image as ImageIcon, Eye as EyeIcon, Send, Menu,
   Sparkles, Info, Star, Wrench, Heart, MessageSquare,
   HelpCircle, MousePointerClick, Phone,
@@ -88,7 +88,6 @@ export function LandingAdmin({ business }: Props) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<AdminTab>('general');
-  const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -305,9 +304,17 @@ export function LandingAdmin({ business }: Props) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowMobilePreview(!showMobilePreview)}>
-            {showMobilePreview ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
-            {showMobilePreview ? 'Editor' : 'Preview'}
+          {slug && (
+            <Button variant="outline" size="sm" asChild>
+              <a href={`/landing/${slug}`} target="_blank" className="flex items-center gap-1">
+                <Eye className="h-4 w-4" /> Ver sitio web
+              </a>
+            </Button>
+          )}
+          <Button size="sm" onClick={handlePublish} disabled={saving}
+            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white">
+            {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
+            Publicar
           </Button>
         </div>
       </div>
@@ -403,9 +410,6 @@ export function LandingAdmin({ business }: Props) {
               <Button variant="outline" onClick={handleSave} disabled={saving}>
                 {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
                 Guardar
-              </Button>
-              <Button onClick={handlePublish} disabled={saving} className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white">
-                <Send className="h-4 w-4 mr-1" /> Publicar
               </Button>
             </div>
           </div>
