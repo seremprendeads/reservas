@@ -12,6 +12,7 @@ export const AI_CREDIT_COSTS = {
 
 export const PLAN_CREDITS: Record<string, number> = {
   free: 0,
+  beta: 15,
   starter: 10,
   pro: 15,
   enterprise: 50,
