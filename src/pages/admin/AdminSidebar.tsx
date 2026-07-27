@@ -14,7 +14,7 @@ const NAV_GROUPS: { id: string; label: string; icon: React.ReactNode; ids: strin
   { id: 'gestion', label: 'Gestión', icon: <LayoutDashboard className="h-4 w-4" />, ids: ['dashboard', 'calendar', 'bookings', 'clients', 'waiting'] },
   { id: 'negocio', label: 'Negocio', icon: <Package className="h-4 w-4" />, ids: ['availability', 'services', 'shop'] },
   { id: 'presencia', label: 'Presencia', icon: <Sparkles className="h-4 w-4" />, ids: ['bio', 'landing', 'appearance'] },
-  { id: 'sistema', label: 'Sistema', icon: <Settings className="h-4 w-4" />, ids: ['payments', 'profile', 'whatsapp', 'trash'] },
+  { id: 'sistema', label: 'Sistema', icon: <Settings className="h-4 w-4" />, ids: ['integrations', 'payments', 'profile', 'whatsapp', 'trash'] },
 ];
 
 interface AdminSidebarProps {

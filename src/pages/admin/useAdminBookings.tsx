@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { supabase, Booking, AvailabilitySetting, BlockedDate, Branding, WaitingListItem } from '../../lib/supabase';
 import { authInvoke } from './helpers';
+import { syncBookingToCalendar } from '../../modules/calendar-integration';
 import * as session from '../../lib/admin-session';
 
 interface UseAdminBookingsOpts {
@@ -70,6 +71,7 @@ export function useAdminBookings({ businessId, onProfileLoaded, setConfirmModal 
     try {
       const { data, error } = await authInvoke('admin-update-booking', { booking_id: id, booking_status: status });
       if (error || !data?.success) throw new Error('Error al actualizar');
+      syncBookingToCalendar(id).catch(() => {});
       loadData();
     } catch {
       alert('Error al actualizar la reserva');

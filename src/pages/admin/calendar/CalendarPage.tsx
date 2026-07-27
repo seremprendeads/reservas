@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Booking, AvailabilitySetting, BlockedDate } from '../../../lib/supabase';
 import type { CalendarView, CalendarFilters, BlockedTimeBlock } from './types';
+import { syncBookingToCalendar } from '../../../modules/calendar-integration';
 import { CalendarHeader } from './CalendarHeader';
 import { CalendarToolbar } from './CalendarToolbar';
 import { CalendarDayView } from './CalendarDayView';
@@ -136,7 +137,7 @@ export function CalendarPage({
 
   const handleSaveBooking = async (bookingData: Partial<Booking>) => {
     if (!business?.id) return;
-    await supabase.from('bookings').insert({
+    const { data } = await supabase.from('bookings').insert({
       business_id: business.id,
       booking_code: `CAL-${Date.now().toString(36).toUpperCase()}`,
       customer_name: bookingData.customer_name || '',
@@ -148,7 +149,8 @@ export function CalendarPage({
       booking_status: 'pending',
       amount: bookingData.amount || 0,
       notas_admin: bookingData.notas_admin || null,
-    });
+    }).select('id').single();
+    if (data?.id) syncBookingToCalendar(data.id).catch(() => {});
     onRefresh();
   };
 

@@ -20,6 +20,7 @@ import { AdminModals } from './admin/AdminModals';
 import { useAdminData } from './admin/useAdminData';
 import { useSubscription, FreePlanBanner } from '../modules/subscription';
 import { SuspendedScreen } from '../modules/subscription';
+import { CalendarIntegrations } from '../modules/calendar-integration';
 
 export function AdminPage() {
   const {
@@ -156,6 +157,8 @@ export function AdminPage() {
             onDelete={deleteBooking}
           />
         );
+      case 'integrations':
+        return <CalendarIntegrations />;
       case 'availability':
         return (
           <AvailabilityManager
