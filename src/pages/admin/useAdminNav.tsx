@@ -10,6 +10,7 @@ import {
   MessageSquareText,
   Archive,
   LayoutDashboard,
+  Calendar,
 } from 'lucide-react';
 import type { View, NavItem } from './types';
 import type { WaitingListItem, Booking } from '../../lib/supabase';
@@ -29,9 +30,11 @@ export function useAdminNav(
     const core: NavItem[] = isFreePlan
       ? [
           { id: 'dashboard', label: 'Principal', icon: <LayoutDashboard className="h-5 w-5" /> },
+          { id: 'calendar', label: 'Calendario', icon: <Calendar className="h-5 w-5" /> },
         ]
       : [
           { id: 'dashboard', label: 'Principal', icon: <LayoutDashboard className="h-5 w-5" /> },
+          { id: 'calendar', label: 'Calendario', icon: <Calendar className="h-5 w-5" /> },
           { id: 'bookings', label: 'Reservas', icon: <CalendarDays className="h-5 w-5" /> },
           { id: 'clients', label: 'Clientes', icon: <Users className="h-5 w-5" /> },
           {
@@ -80,6 +83,7 @@ export function useAdminNav(
 
   const coreTitles: Record<string, string> = {
     dashboard: 'Panel Principal',
+    calendar: 'Calendario',
     bookings: 'Reservas',
     clients: 'Clientes',
     waiting: 'Lista de Espera',

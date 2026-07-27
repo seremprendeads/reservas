@@ -13,6 +13,7 @@ import { DashboardView } from './admin/DashboardView';
 import { BookingsListView } from './admin/BookingsListView';
 import { BookingDetailView } from './admin/BookingDetailView';
 import { TrashView } from './admin/TrashView';
+import { CalendarPage } from './admin/calendar/CalendarPage';
 import { AdminSidebar } from './admin/AdminSidebar';
 import { AdminHeader } from './admin/AdminHeader';
 import { AdminModals } from './admin/AdminModals';
@@ -83,7 +84,7 @@ export function AdminPage() {
   const renderView = () => {
     if (!business) return null;
 
-    const freePlanAllowedViews = ['dashboard', 'bio', 'profile'];
+    const freePlanAllowedViews = ['dashboard', 'bio', 'profile', 'calendar'];
     if (isFreePlan && !freePlanAllowedViews.includes(view)) {
       return <DashboardView
         trialCountdown={trialCountdown}
@@ -144,6 +145,17 @@ export function AdminPage() {
             }}
           />
         ) : null;
+      case 'calendar':
+        return (
+          <CalendarPage
+            bookings={bookings}
+            availability={availability}
+            blockedDates={blockedDates}
+            onRefresh={loadData}
+            onUpdateStatus={updateBookingStatus}
+            onDelete={deleteBooking}
+          />
+        );
       case 'availability':
         return (
           <AvailabilityManager
