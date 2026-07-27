@@ -77,6 +77,6 @@ export const BLOCK_TYPE_COLORS: Record<BlockType, string> = {
   manual: 'bg-gray-300 border-gray-400',
 };
 
-export const SLOT_HEIGHT = 64;
+export const SLOT_HEIGHT = 80;
 export const HOURS_START = 0;
 export const HOURS_END = 24;

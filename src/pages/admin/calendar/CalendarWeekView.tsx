@@ -78,7 +78,7 @@ export function CalendarWeekView({
         })}
       </div>
 
-      <div className="overflow-y-auto max-h-[calc(100vh-380px)]">
+      <div className="overflow-y-auto max-h-[calc(100vh-280px)]">
         <div className="relative grid grid-cols-8">
           <div className="border-r border-border">
             {allSlots.map((slot, i) => (
