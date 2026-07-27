@@ -60,7 +60,7 @@ export function CalendarDayView({
 
   return (
     <div className="rounded-2xl border border-border bg-card overflow-hidden">
-      <div className="overflow-y-auto max-h-[calc(100vh-220px)]">
+      <div className="overflow-y-auto max-h-[calc(100vh-160px)]">
         <div className="relative">
           {schedule.slots.map((slot, i) => {
             const slotBookings = bookingsByTime.get(slot.time) || [];
