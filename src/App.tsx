@@ -14,26 +14,25 @@ function App() {
       <ThemeProvider>
         <BrowserRouter>
           <Routes>
-            {/* Public booking page - uses business slug from URL or default */}
-            <Route path="/" element={<BookingPage />} />
+            {/* Admin panel - must be before catch-all */}
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/seremprende-entendo-administrativo" element={<AdminPage />} />
+            <Route path="/create-business" element={<CreateBusinessPage />} />
             
-            {/* Business-specific booking page */}
-            <Route path="/:slug" element={<BookingPage />} />
+            {/* Public booking page */}
+            <Route path="/reservas" element={<BookingPage />} />
+            <Route path="/:slug/reservas" element={<BookingPage />} />
             
             {/* Shop - public */}
             <Route path="/tienda" element={<ShopPage />} />
             <Route path="/:slug/tienda" element={<ShopPage />} />
             
             {/* Bio - public */}
-            <Route path="/bio/:slug" element={<BioPage />} />
+            <Route path="/:slug/bio" element={<BioPage />} />
             
-            {/* Landing Page - public */}
-            <Route path="/landing/:slug" element={<LandingPage />} />
-            
-            {/* Admin panel */}
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/seremprende-entendo-administrativo" element={<AdminPage />} />
-            <Route path="/create-business" element={<CreateBusinessPage />} />
+            {/* Landing page - catch-all: / or /:slug */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/:slug" element={<LandingPage />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

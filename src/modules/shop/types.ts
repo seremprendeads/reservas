@@ -10,6 +10,7 @@ export type Product = {
   images: string[];
   stock: number;
   sku: string | null;
+  sizes: string[];
   is_active: boolean;
   featured: boolean;
   sort_order: number;
@@ -48,11 +49,13 @@ export type OrderItem = {
   quantity: number;
   unit_price: number;
   currency: string;
+  selected_size: string | null;
 };
 
 export type CartItem = {
   product: Product;
   quantity: number;
+  selected_size: string | null;
 };
 
 export type InventoryMovement = {

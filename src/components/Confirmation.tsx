@@ -45,13 +45,13 @@ export function Confirmation() {
   };
 
   return (
-    <div className="max-w-xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-        <div className="w-20 h-20 bg-booking-primary-light rounded-full flex items-center justify-center mx-auto mb-6">
+    <div className="max-w-xl mx-auto px-4">
+      <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,.05)] p-8 text-center">
+        <div className="w-20 h-20 bg-booking-primary-light rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
           <CheckCircle className="w-10 h-10 text-booking-primary" />
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
+        <h1 className="text-3xl font-bold text-gray-800 mb-4 font-display">
           Reserva confirmada
         </h1>
 
@@ -63,7 +63,7 @@ export function Confirmation() {
           <div className="flex items-center justify-center gap-2 mb-4">
             <button
               onClick={copyCode}
-              className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg hover:bg-booking-primary-light transition-colors"
+              className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl hover:bg-booking-primary-light transition-all duration-200"
             >
               <span className="text-2xl font-bold text-booking-primary font-mono">
                 {bookingData.bookingCode}
@@ -103,7 +103,7 @@ export function Confirmation() {
         <button
           onClick={resetBooking}
           className="w-full py-4 bg-booking-primary text-white rounded-xl font-semibold text-lg
-            hover:bg-booking-primary-hover transition-all duration-300 shadow-lg hover:shadow-xl"
+            hover:bg-booking-primary-hover transition-all duration-200 shadow-lg hover:shadow-xl"
         >
           Hacer otra reserva
         </button>

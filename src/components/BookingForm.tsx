@@ -123,22 +123,22 @@ export function BookingForm() {
   };
 
   return (
-    <div className="max-w-xl mx-auto">
+    <div className="max-w-xl mx-auto px-4">
       <button
         onClick={() => setStep('calendar')}
-        className="flex items-center gap-2 text-booking-muted hover:text-booking-primary mb-6 transition-colors"
+        className="flex items-center gap-2 text-booking-muted hover:text-booking-primary mb-6 transition-all duration-200"
       >
         <ArrowLeft className="w-5 h-5" />
         <span>Volver</span>
       </button>
 
-      <div className="bg-white rounded-2xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Tus datos</h2>
+      <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,.05)] p-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-2 font-display">Tus datos</h2>
         <p className="text-gray-600 mb-8">
           Completa tu informacion para confirmar la reserva
         </p>
 
-        <div className="bg-booking-primary-light rounded-xl p-4 mb-8">
+        <div className="bg-booking-primary-light rounded-xl p-5 mb-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-booking-primary rounded-full flex items-center justify-center">
               <span className="text-white font-bold">
@@ -177,7 +177,7 @@ export function BookingForm() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Juan Perez"
-                className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-colors text-lg
+                className={`w-full pl-12 pr-4 h-12 rounded-xl border-2 transition-all duration-200 text-lg
                   ${errors.name
                     ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
                     : 'border-gray-200 focus:border-booking-primary focus:ring-booking-primary'
@@ -200,7 +200,7 @@ export function BookingForm() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+54 11 1234-5678"
-                className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-colors text-lg
+                className={`w-full pl-12 pr-4 h-12 rounded-xl border-2 transition-all duration-200 text-lg
                   ${errors.phone
                     ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
                     : 'border-gray-200 focus:border-booking-primary focus:ring-booking-primary'
@@ -223,7 +223,7 @@ export function BookingForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="juan@email.com"
-                className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-colors text-lg
+                className={`w-full pl-12 pr-4 h-12 rounded-xl border-2 transition-all duration-200 text-lg
                   ${errors.email
                     ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
                     : 'border-gray-200 focus:border-booking-primary focus:ring-booking-primary'
@@ -236,7 +236,7 @@ export function BookingForm() {
           </div>
 
           {bookingData.amount > 0 && (
-            <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
+            <div className="bg-gray-50 rounded-xl p-5 flex justify-between items-center">
               <span className="text-gray-700 font-medium">Total a pagar:</span>
               <span className="text-2xl font-bold text-booking-primary">
                 ${bookingData.amount.toLocaleString('es-AR')} {bookingData.currency}
@@ -247,9 +247,9 @@ export function BookingForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-booking-primary text-white rounded-xl font-semibold text-lg
+            className="w-full h-12 bg-booking-primary text-white rounded-xl font-semibold text-lg
               hover:bg-booking-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed
-              transition-all duration-300 shadow-lg hover:shadow-xl"
+              transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             {loading ? 'Procesando...' : 'Continuar al pago'}
           </button>

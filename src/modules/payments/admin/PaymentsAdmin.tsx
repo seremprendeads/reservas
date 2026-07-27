@@ -11,6 +11,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import { getToken } from '../../../lib/admin-session';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { PaymentProvider } from '../types';
 import { PAYMENT_PROVIDERS } from '../config';
@@ -27,7 +28,7 @@ export function PaymentsAdmin() {
   useBusiness();
   const [providers, setProviders] = useState<PaymentProvider[]>([]);
   const [loading, setLoading] = useState(true);
-  const [adminToken] = useState(sessionStorage.getItem('admin_token') || '');
+  const [adminToken] = useState(getToken);
 
   const loadProviders = useCallback(async () => {
     setLoading(true);

@@ -1,24 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink, X, Megaphone, Timer, MessageSquare } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, Order } from '../types';
 import { PLAN_LIMITS, SHOP_STORAGE_BUCKET } from '../config';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Card, CardContent } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
 import { Progress } from '../../../components/ui/progress';
+import { Separator } from '../../../components/ui/separator';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
   DialogFooter,
 } from '../../../components/ui/dialog';
 import { ImageUploader } from './ImageUploader';
+import { MultiImageUploader } from './MultiImageUploader';
 import { deleteStorageFile } from './storage-utils';
 
 export function ShopAdmin() {
   useBusiness();
-  const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'trash'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'trash' | 'popup' | 'banner' | 'avisos'>('dashboard');
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 border-b pb-4 mb-6 flex-wrap">
@@ -37,6 +39,15 @@ export function ShopAdmin() {
         <button onClick={() => setView('trash')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'trash' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <Archive className="w-4 h-4 inline mr-1.5" />Papelera
         </button>
+        <button onClick={() => setView('popup')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'popup' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <Megaphone className="w-4 h-4 inline mr-1.5" />Popup
+        </button>
+        <button onClick={() => setView('banner')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'banner' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <Timer className="w-4 h-4 inline mr-1.5" />Banner
+        </button>
+        <button onClick={() => setView('avisos')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'avisos' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <MessageSquare className="w-4 h-4 inline mr-1.5" />Avisos
+        </button>
         <a href="/tienda" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent ml-auto inline-flex items-center">
           <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
         </a>
@@ -46,21 +57,23 @@ export function ShopAdmin() {
       {view === 'categories' && <CategoriesManager />}
       {view === 'orders' && <OrdersList />}
       {view === 'trash' && <ProductsTrash />}
+      {view === 'popup' && <ShopPopupTab />}
+      {view === 'banner' && <ShopBannerTab />}
+      {view === 'avisos' && <ShopAvisosTab />}
     </div>
   );
 }
 
 function ShopDashboard() {
   const { business } = useBusiness();
-  const [stats, setStats] = useState({ todaySales: 0, monthSales: 0, totalRevenue: 0, lowStock: 0 });
+  const [stats, setStats] = useState({ todaySales: 0, monthSales: 0, totalRevenue: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!business?.id) return;
     Promise.all([
       supabase.from('shop_orders').select('total, created_at').eq('business_id', business.id).eq('payment_status', 'approved'),
-      supabase.from('shop_products').select('id').eq('business_id', business.id).lt('stock', 5).eq('is_active', true),
-    ]).then(([ordersRes, lowRes]) => {
+    ]).then(([ordersRes]) => {
       const orders = ordersRes.data || [];
       const today = new Date().toISOString().slice(0, 10);
       const month = new Date().toISOString().slice(0, 7);
@@ -68,7 +81,6 @@ function ShopDashboard() {
         todaySales: orders.filter(o => o.created_at?.startsWith(today)).length,
         monthSales: orders.filter(o => o.created_at?.startsWith(month)).length,
         totalRevenue: orders.reduce((s, o) => s + (o.total || 0), 0),
-        lowStock: lowRes.data?.length || 0,
       });
       setLoading(false);
     });
@@ -77,15 +89,25 @@ function ShopDashboard() {
   if (loading) return <div className="text-center py-10"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Ventas hoy</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">{stats.todaySales}</p></CardContent></Card>
-      <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Ventas del mes</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">{stats.monthSales}</p></CardContent></Card>
-      <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Ingresos totales</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">${stats.totalRevenue.toLocaleString('es-AR')}</p></CardContent></Card>
-      <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Stock bajo</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold text-destructive">{stats.lowStock}</p></CardContent></Card>
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <Card className="transition-all duration-200 hover:shadow-premium-hover active:scale-[0.99]">
+        <CardContent className="p-8">
+          <p className="text-4xl font-display tracking-tight text-foreground">{stats.todaySales}</p>
+          <p className="text-base text-muted-foreground mt-3">Ventas hoy</p>
+        </CardContent>
+      </Card>
+      <Card className="transition-all duration-200 hover:shadow-premium-hover active:scale-[0.99]">
+        <CardContent className="p-8">
+          <p className="text-4xl font-display tracking-tight text-foreground">{stats.monthSales}</p>
+          <p className="text-base text-muted-foreground mt-3">Ventas del mes</p>
+        </CardContent>
+      </Card>
+      <Card className="transition-all duration-200 hover:shadow-premium-hover active:scale-[0.99]">
+        <CardContent className="p-8">
+          <p className="text-4xl font-display tracking-tight text-foreground">${stats.totalRevenue.toLocaleString('es-AR')}</p>
+          <p className="text-base text-muted-foreground mt-3">Ingresos totales</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -140,8 +162,11 @@ function ProductsManager() {
   const [stock, setStock] = useState('');
   const [sku, setSku] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [categoryId, setCategoryId] = useState('');
   const [featured, setFeatured] = useState(false);
+  const [sizes, setSizes] = useState<string[]>([]);
+  const [newSize, setNewSize] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [saving, setSaving] = useState(false);
   const [showLimitDialog, setShowLimitDialog] = useState(false);
@@ -165,17 +190,17 @@ function ProductsManager() {
       setShowLimitDialog(true);
       return;
     }
-    setEditing(null); setName(''); setDescription(''); setPrice(''); setStock(''); setSku(''); setImageUrl(''); setCategoryId(''); setFeatured(false); setShowDialog(true);
+    setEditing(null); setName(''); setDescription(''); setPrice(''); setStock(''); setSku(''); setImageUrl(''); setGalleryImages([]); setCategoryId(''); setFeatured(false); setSizes([]); setNewSize(''); setShowDialog(true);
   };
 
   const openEdit = (p: Product) => {
-    setEditing(p); setName(p.name); setDescription(p.description); setPrice(String(p.price)); setStock(String(p.stock)); setSku(p.sku || ''); setImageUrl(p.image || ''); setCategoryId(p.category_id || ''); setFeatured(p.featured); setShowDialog(true);
+    setEditing(p); setName(p.name); setDescription(p.description); setPrice(String(p.price)); setStock(String(p.stock)); setSku(p.sku || ''); setImageUrl(p.image || ''); setGalleryImages(p.images || []); setCategoryId(p.category_id || ''); setFeatured(p.featured); setSizes(p.sizes || []); setNewSize(''); setShowDialog(true);
   };
 
   const save = async () => {
     if (!name.trim() || !price || !business?.id) return;
     setSaving(true);
-    const payload = { business_id: business.id, name: name.trim(), description: description.trim(), price: parseFloat(price), currency, stock: parseInt(stock) || 0, sku: sku.trim() || null, image: imageUrl || null, category_id: categoryId || null, featured };
+    const payload = { business_id: business.id, name: name.trim(), description: description.trim(), price: parseFloat(price), currency, stock: parseInt(stock) || 0, sku: sku.trim() || null, image: imageUrl || null, images: galleryImages, category_id: categoryId || null, featured, sizes };
     try {
       if (editing) {
         const { error } = await supabase.from('shop_products').update(payload).eq('id', editing.id).eq('business_id', business.id);
@@ -202,7 +227,7 @@ function ProductsManager() {
   };
 
   const remove = async (p: Product) => {
-    await supabase.from('shop_products').update({ deleted_at: new Date().toISOString() }).eq('id', p.id).eq('business_id', business?.id || '');
+    await supabase.from('shop_products').update({ deleted_at: new Date().toISOString(), is_active: false }).eq('id', p.id).eq('business_id', business?.id || '');
     setProducts(prev => prev.filter(x => x.id !== p.id));
   };
 
@@ -213,7 +238,7 @@ function ProductsManager() {
     }
     if (!business?.id) return;
     const { data } = await supabase.from('shop_products').insert({
-      business_id: business.id, name: `${p.name} (copia)`, description: p.description, price: p.price, currency: p.currency, stock: 0, image: p.image, category_id: p.category_id,
+      business_id: business.id, name: `${p.name} (copia)`, description: p.description, price: p.price, currency: p.currency, stock: 0, image: p.image, category_id: p.category_id, sizes: p.sizes || [],
     }).select().single();
     if (data) setProducts(prev => [...prev, data]);
   };
@@ -258,6 +283,7 @@ function ProductsManager() {
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <span>${p.price.toLocaleString('es-AR')} {p.currency}</span>
                       <span>Stock: {p.stock}</span>
+                      {p.sizes && p.sizes.length > 0 && <span>Talles: {p.sizes.join(', ')}</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -320,11 +346,37 @@ function ProductsManager() {
               </label>
             </div>
             <div className="col-span-2 space-y-1.5">
-              <label className="text-sm font-medium">Imagen</label>
+              <label className="text-sm font-medium">Talles</label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {sizes.map((s, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                    {s}
+                    <button type="button" onClick={() => setSizes(sizes.filter((_, j) => j !== i))} className="hover:text-destructive">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input value={newSize} onChange={e => setNewSize(e.target.value)} placeholder="Ej: S, M, L, XL / 38, 39, 40"
+                  onKeyDown={e => { if (e.key === 'Enter' && newSize.trim()) { e.preventDefault(); setSizes([...sizes, newSize.trim()]); setNewSize(''); } }} />
+                <Button type="button" variant="outline" size="sm" onClick={() => { if (newSize.trim()) { setSizes([...sizes, newSize.trim()]); setNewSize(''); } }}>Agregar</Button>
+              </div>
+            </div>
+            <div className="col-span-2 space-y-1.5">
+              <label className="text-sm font-medium">Imagen principal</label>
               <ImageUploader
                 currentImageUrl={imageUrl}
                 onUploadComplete={setImageUrl}
                 onOldImageDelete={handleOldImageDelete}
+              />
+            </div>
+            <div className="col-span-2 space-y-1.5">
+              <label className="text-sm font-medium">Imágenes adicionales (hasta 4)</label>
+              <MultiImageUploader
+                images={galleryImages}
+                onImagesChange={setGalleryImages}
+                maxImages={4}
               />
             </div>
           </div>
@@ -489,12 +541,15 @@ function ProductsTrash() {
   useEffect(() => { load(); }, [business?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const restore = async (p: Product) => {
-    await supabase.from('shop_products').update({ deleted_at: null }).eq('id', p.id).eq('business_id', business?.id || '');
+    await supabase.from('shop_products').update({ deleted_at: null, is_active: true }).eq('id', p.id).eq('business_id', business?.id || '');
     setDeleted(prev => prev.filter(x => x.id !== p.id));
   };
 
   const purge = async (p: Product) => {
     if (p.image) await deleteStorageFile(p.image, SHOP_STORAGE_BUCKET);
+    for (const img of (p.images || [])) {
+      await deleteStorageFile(img, SHOP_STORAGE_BUCKET);
+    }
     await supabase.from('shop_products').delete().eq('id', p.id);
     setDeleted(prev => prev.filter(x => x.id !== p.id));
   };
@@ -502,6 +557,9 @@ function ProductsTrash() {
   const purgeAll = async () => {
     for (const p of deleted) {
       if (p.image) await deleteStorageFile(p.image, SHOP_STORAGE_BUCKET);
+      for (const img of (p.images || [])) {
+        await deleteStorageFile(img, SHOP_STORAGE_BUCKET);
+      }
     await supabase.from('shop_products').delete().eq('id', p.id).eq('business_id', business?.id || '');
     }
     setDeleted([]);
@@ -548,6 +606,570 @@ function ProductsTrash() {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+const SHOP_POPUP_KEY = 'shop_popup_config';
+
+interface ShopPopupConfig {
+  enabled: boolean;
+  title: string;
+  subtitle: string;
+  description: string;
+  button_text: string;
+  button_url: string;
+  image_url: string | null;
+  overlay_color: string;
+  overlay_opacity: number;
+}
+
+const DEFAULT_SHOP_POPUP: ShopPopupConfig = {
+  enabled: false,
+  title: '¡Oferta especial!',
+  subtitle: 'No te pierdas nuestras promociones',
+  description: '',
+  button_text: 'Ver oferta',
+  button_url: '',
+  image_url: null,
+  overlay_color: '#111827',
+  overlay_opacity: 80,
+};
+
+function ShopPopupTab() {
+  const { business } = useBusiness();
+  const [config, setConfig] = useState<ShopPopupConfig>(DEFAULT_SHOP_POPUP);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (!business?.id) return;
+    try {
+      const raw = localStorage.getItem(`${SHOP_POPUP_KEY}_${business.id}`);
+      if (raw) setConfig({ ...DEFAULT_SHOP_POPUP, ...JSON.parse(raw) });
+    } catch {}
+  }, [business?.id]);
+
+  const save = () => {
+    if (!business?.id) return;
+    setSaving(true);
+    localStorage.setItem(`${SHOP_POPUP_KEY}_${business.id}`, JSON.stringify(config));
+    setTimeout(() => setSaving(false), 600);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !business?.id) return;
+    setUploading(true);
+    try {
+      const { compressImage } = await import('../../../lib/image-utils');
+      const blob = await compressImage(file, { maxWidth: 800, maxHeight: 600 });
+      const path = `${business.id}/shop-popup-${Date.now()}.webp`;
+      const { error } = await supabase.storage.from('branding').upload(path, blob, { upsert: false, contentType: 'image/webp' });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('branding').getPublicUrl(path);
+      setConfig(prev => ({ ...prev, image_url: (urlData?.publicUrl || '') + `?t=${Date.now()}` }));
+    } catch (err) {
+      console.error('Upload error:', err);
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-6 space-y-5">
+          <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-muted/40 transition-all duration-200">
+            <input
+              type="checkbox"
+              checked={config.enabled}
+              onChange={() => setConfig(prev => ({ ...prev, enabled: !prev.enabled }))}
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <Megaphone className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Activar popup de marketing</span>
+          </label>
+
+          <Separator />
+
+          <div>
+            <label className="text-sm font-medium">Título</label>
+            <Input value={config.title} onChange={e => setConfig(prev => ({ ...prev, title: e.target.value }))} className="mt-1.5 h-12 rounded-xl" placeholder="¡Oferta especial!" />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Subtítulo</label>
+            <Input value={config.subtitle} onChange={e => setConfig(prev => ({ ...prev, subtitle: e.target.value }))} className="mt-1.5 h-12 rounded-xl" placeholder="No te pierdas nuestras promociones" />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Descripción</label>
+            <textarea
+              value={config.description}
+              onChange={e => setConfig(prev => ({ ...prev, description: e.target.value }))}
+              className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm min-h-[80px] resize-none"
+              placeholder="Describí tu oferta..."
+            />
+          </div>
+
+          <Separator />
+
+          <div>
+            <label className="text-sm font-medium">Texto del botón</label>
+            <Input value={config.button_text} onChange={e => setConfig(prev => ({ ...prev, button_text: e.target.value }))} className="mt-1.5 h-12 rounded-xl" placeholder="Ver oferta" />
+          </div>
+          <div>
+            <label className="text-sm font-medium">URL del botón</label>
+            <Input value={config.button_url} onChange={e => setConfig(prev => ({ ...prev, button_url: e.target.value }))} className="mt-1.5 h-12 rounded-xl" placeholder="#contacto o https://..." />
+          </div>
+
+          <Separator />
+
+          <div>
+            <label className="text-sm font-medium mb-2 block">Imagen de fondo</label>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="sm" onClick={() => document.getElementById('shop-popup-image-input')?.click()} disabled={uploading}>
+                {uploading ? 'Subiendo...' : config.image_url ? 'Cambiar' : 'Subir imagen'}
+              </Button>
+              <input id="shop-popup-image-input" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              {config.image_url && (
+                <>
+                  <img src={config.image_url} alt="" className="h-16 w-32 rounded-xl object-cover border" />
+                  <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setConfig(prev => ({ ...prev, image_url: null }))}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {config.image_url && (
+            <>
+              <div>
+                <label className="text-sm font-medium">Color de capa</label>
+                <div className="flex items-center gap-2.5 mt-1.5">
+                  <input type="color" value={config.overlay_color}
+                    onChange={e => setConfig(prev => ({ ...prev, overlay_color: e.target.value }))}
+                    className="h-8 w-8 cursor-pointer rounded-xl border bg-transparent p-0.5 shrink-0" />
+                  <Input type="text" value={config.overlay_color}
+                    onChange={e => setConfig(prev => ({ ...prev, overlay_color: e.target.value }))}
+                    className="h-9 font-mono text-xs" />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Opacidad de capa — {config.overlay_opacity}%</label>
+                <input type="range" min="0" max="100" value={config.overlay_opacity}
+                  onChange={e => setConfig(prev => ({ ...prev, overlay_opacity: Number(e.target.value) }))}
+                  className="w-full mt-1" />
+              </div>
+            </>
+          )}
+
+          <div className="flex justify-end pt-2">
+            <Button onClick={save} disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : null}
+              Guardar
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+const SHOP_BANNER_KEY = 'shop_banner_config';
+
+interface ShopBannerConfig {
+  enabled: boolean;
+  text: string;
+  button_text: string;
+  button_url: string;
+  end_date: string;
+  gradient_from: string;
+  gradient_to: string;
+  text_color: string;
+}
+
+const DEFAULT_BANNER: ShopBannerConfig = {
+  enabled: false,
+  text: '¡Oferta por tiempo limitado!',
+  button_text: 'COMPRAR AHORA',
+  button_url: '',
+  end_date: '',
+  gradient_from: '#f97316',
+  gradient_to: '#ef4444',
+  text_color: '#ffffff',
+};
+
+function ShopBannerTab() {
+  const { business } = useBusiness();
+  const [config, setConfig] = useState<ShopBannerConfig>(DEFAULT_BANNER);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!business?.id) return;
+    try {
+      const raw = localStorage.getItem(`${SHOP_BANNER_KEY}_${business.id}`);
+      if (raw) setConfig({ ...DEFAULT_BANNER, ...JSON.parse(raw) });
+    } catch {}
+  }, [business?.id]);
+
+  const save = () => {
+    if (!business?.id) return;
+    setSaving(true);
+    localStorage.setItem(`${SHOP_BANNER_KEY}_${business.id}`, JSON.stringify(config));
+    setTimeout(() => setSaving(false), 600);
+  };
+
+  const toLocalDatetime = (iso: string) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 16);
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-6 space-y-5">
+          <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-muted/40 transition-all duration-200">
+            <input
+              type="checkbox"
+              checked={config.enabled}
+              onChange={() => setConfig(prev => ({ ...prev, enabled: !prev.enabled }))}
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <Timer className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Activar banner fijo con temporizador</span>
+          </label>
+
+          <Separator />
+
+          <div>
+            <label className="text-sm font-medium">Texto del banner</label>
+            <Input value={config.text} onChange={e => setConfig(prev => ({ ...prev, text: e.target.value }))} className="mt-1.5 h-12 rounded-xl" placeholder="¡Oferta por tiempo limitado!" />
+          </div>
+
+          <Separator />
+
+          <div>
+            <label className="text-sm font-medium">Texto del botón</label>
+            <Input value={config.button_text} onChange={e => setConfig(prev => ({ ...prev, button_text: e.target.value.toUpperCase() }))} className="mt-1.5 h-12 rounded-xl uppercase" placeholder="COMPRAR AHORA" />
+          </div>
+          <div>
+            <label className="text-sm font-medium">URL del botón</label>
+            <Input value={config.button_url} onChange={e => setConfig(prev => ({ ...prev, button_url: e.target.value }))} className="mt-1.5 h-12 rounded-xl" placeholder="#contacto o https://..." />
+          </div>
+
+          <Separator />
+
+          <div>
+            <label className="text-sm font-medium">Fecha y hora de fin</label>
+            <input
+              type="datetime-local"
+              value={toLocalDatetime(config.end_date)}
+              onChange={e => setConfig(prev => ({ ...prev, end_date: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
+              className="mt-1.5 w-full h-12 rounded-xl border border-input bg-background px-3 text-sm"
+            />
+          </div>
+
+          <Separator />
+
+          <div>
+            <label className="text-sm font-medium mb-2 block">Colores del gradiente</label>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-muted-foreground">Desde</label>
+                <input type="color" value={config.gradient_from}
+                  onChange={e => setConfig(prev => ({ ...prev, gradient_from: e.target.value }))}
+                  className="h-8 w-8 cursor-pointer rounded-xl border bg-transparent p-0.5" />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-muted-foreground">Hasta</label>
+                <input type="color" value={config.gradient_to}
+                  onChange={e => setConfig(prev => ({ ...prev, gradient_to: e.target.value }))}
+                  className="h-8 w-8 cursor-pointer rounded-xl border bg-transparent p-0.5" />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-muted-foreground">Texto</label>
+                <input type="color" value={config.text_color}
+                  onChange={e => setConfig(prev => ({ ...prev, text_color: e.target.value }))}
+                  className="h-8 w-8 cursor-pointer rounded-xl border bg-transparent p-0.5" />
+              </div>
+            </div>
+            <div className="mt-3 rounded-xl overflow-hidden h-14 flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${config.gradient_from}, ${config.gradient_to})` }}>
+              <span className="text-sm font-bold uppercase tracking-wider" style={{ color: config.text_color }}>Preview del banner</span>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <Button onClick={save} disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : null}
+              Guardar
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+const SHOP_SOCIAL_KEY = 'shop_social_config';
+
+interface SocialEntry {
+  id: string;
+  name: string;
+  product: string;
+  location: string;
+  time_ago: string;
+}
+
+interface ShopSocialConfig {
+  enabled: boolean;
+  entries: SocialEntry[];
+  interval_seconds: number;
+}
+
+const DEFAULT_SOCIAL: ShopSocialConfig = {
+  enabled: false,
+  entries: [
+    { id: '1', name: 'María', product: 'Remera Básica', location: 'Buenos Aires', time_ago: 'Hace 2 minutos' },
+    { id: '2', name: 'Carlos', product: 'Zapatillas Runner', location: 'Córdoba', time_ago: 'Hace 5 minutos' },
+    { id: '3', name: 'Lucía', product: 'Campera Urban', location: 'Rosario', time_ago: 'Hace 8 minutos' },
+    { id: '4', name: 'Pedro', product: 'Jeans Slim Fit', location: 'Mendoza', time_ago: 'Hace 12 minutos' },
+    { id: '5', name: 'Ana', product: 'Buzo Oversized', location: 'Santa Fe', time_ago: 'Hace 15 minutos' },
+  ],
+  interval_seconds: 8,
+};
+
+function ShopAvisosTab() {
+  const { business } = useBusiness();
+  const [config, setConfig] = useState<ShopSocialConfig>(DEFAULT_SOCIAL);
+  const [saving, setSaving] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<SocialEntry | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    if (!business?.id) return;
+    try {
+      const raw = localStorage.getItem(`${SHOP_SOCIAL_KEY}_${business.id}`);
+      if (raw) setConfig({ ...DEFAULT_SOCIAL, ...JSON.parse(raw) });
+    } catch {}
+  }, [business?.id]);
+
+  const save = () => {
+    if (!business?.id) return;
+    setSaving(true);
+    localStorage.setItem(`${SHOP_SOCIAL_KEY}_${business.id}`, JSON.stringify(config));
+    setTimeout(() => setSaving(false), 600);
+  };
+
+  const addEntry = () => {
+    const newEntry: SocialEntry = {
+      id: Date.now().toString(),
+      name: '',
+      product: '',
+      location: '',
+      time_ago: 'Hace 2 minutos',
+    };
+    setEditingEntry(newEntry);
+    setShowForm(true);
+  };
+
+  const editEntry = (entry: SocialEntry) => {
+    setEditingEntry({ ...entry });
+    setShowForm(true);
+  };
+
+  const saveEntry = () => {
+    if (!editingEntry) return;
+    if (editingEntry.name.trim() && editingEntry.product.trim()) {
+      const exists = config.entries.find(e => e.id === editingEntry.id);
+      if (exists) {
+        setConfig(prev => ({
+          ...prev,
+          entries: prev.entries.map(e => e.id === editingEntry.id ? editingEntry : e),
+        }));
+      } else {
+        setConfig(prev => ({
+          ...prev,
+          entries: [...prev.entries, editingEntry],
+        }));
+      }
+    }
+    setEditingEntry(null);
+    setShowForm(false);
+  };
+
+  const removeEntry = (id: string) => {
+    setConfig(prev => ({
+      ...prev,
+      entries: prev.entries.filter(e => e.id !== id),
+    }));
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-6 space-y-5">
+          <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-muted/40 transition-all duration-200">
+            <input
+              type="checkbox"
+              checked={config.enabled}
+              onChange={() => setConfig(prev => ({ ...prev, enabled: !prev.enabled }))}
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Mostrar avisos de compra en la tienda</span>
+          </label>
+
+          <Separator />
+
+          <div>
+            <label className="text-sm font-medium">Intervalo entre avisos (segundos)</label>
+            <Input
+              type="number"
+              min={3}
+              max={60}
+              value={config.interval_seconds}
+              onChange={e => setConfig(prev => ({ ...prev, interval_seconds: Math.max(3, parseInt(e.target.value) || 8) }))}
+              className="mt-1.5 h-12 rounded-xl"
+            />
+            <p className="text-xs text-muted-foreground mt-1">Tiempo entre cada aviso automático (mínimo 3s)</p>
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Avisos de compra</p>
+              <p className="text-xs text-muted-foreground">{config.entries.length} avisos configurados</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={addEntry}>
+              <Plus className="w-4 h-4 mr-1" />Agregar aviso
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-3">
+        {config.entries.map(entry => (
+          <Card key={entry.id}>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+                  {entry.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm font-medium">
+                    <span className="text-foreground">{entry.name}</span>
+                    {' '}compró{' '}
+                    <span className="text-primary font-semibold">{entry.product}</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">{entry.location} · {entry.time_ago}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <button onClick={() => editEntry(entry)} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button onClick={() => removeEntry(entry.id)} className="p-2 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-all">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+
+        {config.entries.length === 0 && (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <MessageSquare className="w-8 h-8 mx-auto text-muted-foreground/40 mb-2" />
+              <p className="text-sm text-muted-foreground">No hay avisos configurados</p>
+              <p className="text-xs text-muted-foreground mt-1">Agregá avisos para mostrar compras recientes en la tienda</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <div className="flex justify-end pt-2">
+        <Button onClick={save} disabled={saving}>
+          {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : null}
+          Guardar
+        </Button>
+      </div>
+
+      <Dialog open={showForm} onOpenChange={open => { if (!open) { setShowForm(false); setEditingEntry(null); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingEntry?.id && config.entries.find(e => e.id === editingEntry.id) ? 'Editar aviso' : 'Nuevo aviso de compra'}</DialogTitle>
+            <DialogDescription>Completá los datos del aviso que se mostrará en la tienda.</DialogDescription>
+          </DialogHeader>
+          {editingEntry && (
+            <div className="space-y-4 py-2">
+              <div>
+                <label className="text-sm font-medium">Nombre del comprador</label>
+                <Input
+                  value={editingEntry.name}
+                  onChange={e => setEditingEntry(prev => prev ? { ...prev, name: e.target.value } : null)}
+                  className="mt-1.5 h-12 rounded-xl"
+                  placeholder="Ej: María"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Producto comprado</label>
+                <Input
+                  value={editingEntry.product}
+                  onChange={e => setEditingEntry(prev => prev ? { ...prev, product: e.target.value } : null)}
+                  className="mt-1.5 h-12 rounded-xl"
+                  placeholder="Ej: Remera Básica"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Ubicación</label>
+                <Input
+                  value={editingEntry.location}
+                  onChange={e => setEditingEntry(prev => prev ? { ...prev, location: e.target.value } : null)}
+                  className="mt-1.5 h-12 rounded-xl"
+                  placeholder="Ej: Buenos Aires"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Tiempo que hace</label>
+                <Input
+                  value={editingEntry.time_ago}
+                  onChange={e => setEditingEntry(prev => prev ? { ...prev, time_ago: e.target.value } : null)}
+                  className="mt-1.5 h-12 rounded-xl"
+                  placeholder="Ej: Hace 2 minutos"
+                />
+              </div>
+
+              <div className="rounded-xl bg-muted/40 p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Preview</p>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+                    {(editingEntry.name || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm">
+                      <span className="font-medium">{editingEntry.name || 'Nombre'}</span>
+                      {' '}compró{' '}
+                      <span className="text-primary font-semibold">{editingEntry.product || 'Producto'}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">{editingEntry.location || 'Ubicación'} · {editingEntry.time_ago || 'Tiempo'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => { setShowForm(false); setEditingEntry(null); }}>Cancelar</Button>
+                <Button onClick={saveEntry} disabled={!editingEntry.name.trim() || !editingEntry.product.trim()}>
+                  Guardar aviso
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

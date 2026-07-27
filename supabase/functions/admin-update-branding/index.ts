@@ -12,7 +12,8 @@ Deno.serve(async (req: Request) => {
       return jsonUnauthorized();
     }
 
-    const { logo_url, title, subtitle, primary_color, background_color, card_bg_color, text_color, muted_color, caption_color, background_image_url, bg_opacity, overlay_color, header_color, header_opacity } = await req.json();
+    const body = await req.json();
+    const { logo_url, title, subtitle, primary_color, background_color, card_bg_color, text_color, muted_color, caption_color, background_image_url, bg_opacity, overlay_color, header_color, header_opacity } = body;
 
     const supabase = createServiceClient();
     const { error } = await supabase
@@ -25,14 +26,14 @@ Deno.serve(async (req: Request) => {
         primary_color: primary_color || "#059669",
         background_color: background_color || "#111827",
         card_bg_color: card_bg_color || "#1f2937",
-        text_color: text_color || "#f3f4f6",
-        muted_color: muted_color || "#9ca3af",
-        caption_color: caption_color || "#9ca3af",
+        text_color: text_color || "#ffffff",
+        muted_color: muted_color || "#e6e6e6",
+        caption_color: caption_color || "#e6e6e6",
         background_image_url: background_image_url || "",
         bg_opacity: bg_opacity ?? 80,
         overlay_color: overlay_color || background_color || "#111827",
-        header_color: header_color || card_bg_color || "#1f2937",
-        header_opacity: header_opacity ?? 100,
+        header_color: header_color || primary_color || "#1f2937",
+        header_opacity: header_opacity ?? 26,
         updated_at: new Date().toISOString(),
       }, { onConflict: "business_id" });
 

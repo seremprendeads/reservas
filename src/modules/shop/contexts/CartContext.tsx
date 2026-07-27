@@ -3,9 +3,9 @@ import { CartItem, Product } from '../types';
 
 interface CartContextValue {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, quantity?: number, size?: string | null) => void;
+  removeItem: (productId: string, size?: string | null) => void;
+  updateQuantity: (productId: string, quantity: number, size?: string | null) => void;
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
@@ -23,6 +23,10 @@ function loadCart(): CartItem[] {
   } catch { return []; }
 }
 
+function cartKey(productId: string, size: string | null): string {
+  return `${productId}__${size || ''}`;
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(loadCart);
 
@@ -30,29 +34,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product: Product, quantity = 1) => {
+  const addItem = (product: Product, quantity = 1, size: string | null = null) => {
     setItems(prev => {
-      const existing = prev.find(i => i.product.id === product.id);
+      const key = cartKey(product.id, size);
+      const existing = prev.find(i => cartKey(i.product.id, i.selected_size) === key);
       if (existing) {
         return prev.map(i =>
-          i.product.id === product.id
+          cartKey(i.product.id, i.selected_size) === key
             ? { ...i, quantity: Math.min(i.quantity + quantity, product.stock) }
             : i
         );
       }
-      return [...prev, { product, quantity: Math.min(quantity, product.stock) }];
+      return [...prev, { product, quantity: Math.min(quantity, product.stock), selected_size: size }];
     });
   };
 
-  const removeItem = (productId: string) => {
-    setItems(prev => prev.filter(i => i.product.id !== productId));
+  const removeItem = (productId: string, size: string | null = null) => {
+    setItems(prev => prev.filter(i => !(i.product.id === productId && i.selected_size === size)));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) { removeItem(productId); return; }
+  const updateQuantity = (productId: string, quantity: number, size: string | null = null) => {
+    if (quantity <= 0) { removeItem(productId, size); return; }
     setItems(prev =>
       prev.map(i =>
-        i.product.id === productId ? { ...i, quantity } : i
+        i.product.id === productId && i.selected_size === size ? { ...i, quantity } : i
       )
     );
   };

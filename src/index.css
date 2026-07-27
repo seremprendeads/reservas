@@ -9,26 +9,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 40 20% 97%;
+    --foreground: 0 0% 7%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 0 0% 7%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 0 0% 7%;
     --primary: 160 84% 39%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --secondary: 40 15% 94%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 40 15% 94%;
+    --muted-foreground: 0 0% 42%;
     --accent: 160 84% 95%;
     --accent-foreground: 160 84% 15%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
     --ring: 160 84% 39%;
-    --radius: 0.75rem;
+    --radius: 1.25rem;
   }
 
   .dark {
@@ -54,7 +54,9 @@
   }
 
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   * {
@@ -72,8 +74,19 @@
   }
 }
 
-/* Heading font — outside @layer to override any Tailwind utility */
-h1, h2, h3, .font-display {
+/* Editorial heading font — Newsreader serif for all headings */
+h1, h2, h3 {
+  font-family: 'Newsreader', 'Georgia', serif;
+  letter-spacing: -0.01em;
+}
+
+.font-display {
+  font-family: 'Newsreader', 'Georgia', serif;
+  letter-spacing: -0.01em;
+}
+
+/* Geist for UI elements that need a sans-serif */
+.font-ui {
   font-family: 'Geist', system-ui, sans-serif;
 }
 
@@ -82,19 +95,19 @@ h1, h2, h3, .font-display {
   @apply transition-all duration-200 ease-out;
 }
 .admin-card:hover {
-  @apply shadow-md;
-  transform: translateY(-1px);
+  @apply shadow-lg;
+  transform: translateY(-2px);
 }
 .admin-card:active {
   transform: translateY(0) scale(0.995);
 }
 
 .admin-nav-item {
-  @apply relative transition-all duration-150 ease-out;
+  @apply relative transition-all duration-200 ease-out;
 }
 .admin-nav-item::before {
   content: '';
-  @apply absolute left-0 top-1/2 -translate-y-1/2 h-0 w-0.5 rounded-full bg-primary transition-all duration-200 ease-out;
+  @apply absolute left-0 top-1/2 -translate-y-1/2 h-0 w-[3px] rounded-full bg-primary transition-all duration-200 ease-out;
   opacity: 0;
 }
 .admin-nav-item.active::before {
@@ -111,15 +124,16 @@ h1, h2, h3, .font-display {
 }
 
 .admin-stat-card {
-  @apply relative overflow-hidden rounded-2xl border bg-card p-6 transition-all duration-200 ease-out;
+  @apply relative overflow-hidden rounded-2xl border bg-card p-8 transition-all duration-200 ease-out;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
 }
 .admin-stat-card:hover {
-  @apply shadow-lg;
-  transform: translateY(-2px);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 16px 40px rgba(0,0,0,.1);
+  transform: translateY(-3px);
 }
 .admin-stat-card::after {
   content: '';
-  @apply absolute -right-4 -top-4 h-24 w-24 rounded-full opacity-[0.03];
+  @apply absolute -right-6 -top-6 h-32 w-32 rounded-full opacity-[0.04];
   background: currentColor;
 }
 
@@ -128,12 +142,12 @@ h1, h2, h3, .font-display {
   --booking-primary: #059669;
   --booking-primary-hover: #047857;
   --booking-primary-light: #d1fae5;
-  --booking-bg: #f0fdf4;
+  --booking-bg: #FAFAF8;
   --booking-card-bg: #ffffff;
   --booking-text: #111827;
   --booking-text-muted: #6b7280;
   --booking-caption: #9ca3af;
-  --booking-border: #d1d5db;
+  --booking-border: #E8E8E8;
   --booking-ring: #059669;
   --booking-input-bg: #ffffff;
   --booking-success: #059669;

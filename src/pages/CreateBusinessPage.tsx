@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, Store } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useBusiness } from '../contexts/BusinessContext';
+import { getEmail, getToken, setBusinessId } from '../lib/admin-session';
 
 export function CreateBusinessPage() {
   const navigate = useNavigate();
@@ -11,8 +12,8 @@ export function CreateBusinessPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [adminEmail] = useState(sessionStorage.getItem('admin_email') || '');
-  const [adminToken] = useState(sessionStorage.getItem('admin_token') || '');
+  const [adminEmail] = useState(getEmail);
+  const [adminToken] = useState(getToken);
 
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -59,7 +60,7 @@ export function CreateBusinessPage() {
 
       if (data?.success) {
         await setBusinessById(data.business_id);
-        sessionStorage.setItem('admin_business_id', data.business_id);
+        setBusinessId(data.business_id);
         navigate('/admin');
       } else {
         setError(data?.error || 'Error al crear el negocio');

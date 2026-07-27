@@ -8,6 +8,7 @@ import { supabase } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { BioProfile, BioLink, BioStats } from '../types';
 import { BIO_BUTTON_STYLES, BIO_BG_PRESETS } from '../config';
+import { authInvoke } from '../../../pages/admin/helpers';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Card, CardContent } from '../../../components/ui/card';
@@ -17,17 +18,33 @@ import {
 
 type Tab = 'profile' | 'links' | 'appearance' | 'stats' | 'qr';
 
-const ICON_MAP: Record<string, string> = {
-  'calendar': '📅', 'shopping-bag': '🛍️', 'message-circle': '💬', 'instagram': '📸',
-  'facebook': '👤', 'twitter': '🐦', 'youtube': '▶️', 'music': '🎵', 'video': '🎬',
-  'map-pin': '📍', 'phone': '📞', 'mail': '✉️', 'globe': '🌐', 'file-text': '📄',
-  'linkedin': '💼', 'star': '⭐', 'link': '🔗', 'tiktok': '🎵',
-};
+const ICON_MAP: Record<string, string> = {};
 
 function getButtonRadius(style: string) {
   if (style === 'pill') return 'rounded-full';
   if (style === 'square') return 'rounded-sm';
   return 'rounded-xl';
+}
+
+function SocialIcon({ name }: { name: string }) {
+  const cls = 'w-5 h-5';
+  const svgBase = `fill-current ${cls}`;
+  switch (name) {
+    case 'instagram':
+      return <svg viewBox="0 0 24 24" className={svgBase}><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.17.054 1.805.249 2.228.415.56.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.054 1.17-.249 1.805-.413 2.227-.217.56-.477.96-.896 1.382-.42.419-.822.679-1.382.896-.422.164-1.057.36-2.227.413-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.17-.054-1.805-.249-2.227-.413a3.73 3.73 0 01-1.382-.896 3.73 3.73 0 01-.896-1.382c-.164-.422-.36-1.057-.413-2.227C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.85c.054-1.17.249-1.805.413-2.227a3.73 3.73 0 01.896-1.382A3.73 3.73 0 014.93 2.74c.422-.164 1.057-.36 2.227-.413C8.414 2.175 8.794 2.163 12 2.163zM12 0C8.741 0 8.333.014 7.053.072 5.775.13 4.902.333 4.14.63a5.87 5.87 0 00-2.126 1.384A5.87 5.87 0 00.63 4.14C.333 4.902.13 5.775.072 7.053.014 8.333 0 8.741 0 12s.014 3.668.072 4.948c.058 1.277.261 2.15.558 2.913.306.748.726 1.376 1.384 2.126a5.87 5.87 0 002.126 1.384c.764.297 1.636.5 2.913.558C8.333 23.986 8.741 24 12 24s3.668-.014 4.948-.072c1.277-.058 2.15-.261 2.913-.558a5.87 5.87 0 002.126-1.384 5.87 5.87 0 001.384-2.126c.297-.764.5-1.636.558-2.913C23.986 15.668 24 15.259 24 12s-.014-3.668-.072-4.948c-.058-1.277-.261-2.15-.558-2.913a5.87 5.87 0 00-1.384-2.126A5.87 5.87 0 0019.86.63C19.098.333 18.225.13 16.947.072 15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm7.846-10.405a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg>;
+    case 'tiktok':
+      return <svg viewBox="0 0 24 24" className={svgBase}><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.46v-7.14a8.16 8.16 0 005.58 2.18V11.2a4.85 4.85 0 01-5.58-2.77V2h5.58v4.69z"/></svg>;
+    case 'facebook':
+      return <svg viewBox="0 0 24 24" className={svgBase}><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>;
+    case 'youtube':
+      return <svg viewBox="0 0 24 24" className={svgBase}><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>;
+    case 'twitter':
+      return <svg viewBox="0 0 24 24" className={svgBase}><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>;
+    case 'linkedin':
+      return <svg viewBox="0 0 24 24" className={svgBase}><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>;
+    default:
+      return null;
+  }
 }
 
 export function BioAdmin({ adminEmail }: { adminEmail: string }) {
@@ -37,7 +54,6 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const [links, setLinks] = useState<BioLink[]>([]);
   const [stats, setStats] = useState<BioStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [slug, setSlug] = useState('');
   const [copied, setCopied] = useState(false);
   const [showAddLink, setShowAddLink] = useState(false);
   const [editingLink, setEditingLink] = useState<BioLink | null>(null);
@@ -56,25 +72,20 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     if (data) {
       setProfile(data);
       profileRef.current = data;
-      setSlug(data.slug);
       const { data: linkData } = await supabase.from('bio_links').select('*').eq('profile_id', data.id).order('sort_order');
       if (linkData) setLinks(linkData);
     } else {
-      const defaultSlug = adminEmail.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 30);
-      const { data: newProfile } = await supabase.from('bio_profiles').insert({
-        business_id: business.id,
-        admin_email: adminEmail,
-        slug: defaultSlug,
-        name: '',
-      }).select().single();
-      if (newProfile) {
-        setProfile(newProfile);
-        profileRef.current = newProfile;
-        setSlug(newProfile.slug);
+      const { data: result, error } = await authInvoke('admin-update-bio', {
+        action: 'create_profile',
+        profile: { slug: business.slug, name: '' },
+      });
+      if (!error && result?.profile) {
+        setProfile(result.profile);
+        profileRef.current = result.profile;
       }
     }
     setLoading(false);
-  }, [adminEmail, business?.id]);
+  }, [adminEmail, business?.id, business?.slug]);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
@@ -87,15 +98,12 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const ensureProfile = async (): Promise<BioProfile> => {
     if (profile) return profile;
     if (!business?.id) return null!;
-    const defaultSlug = adminEmail.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 30);
-    const { data } = await supabase.from('bio_profiles').insert({
-      business_id: business.id,
-      admin_email: adminEmail,
-      slug: defaultSlug,
-      name: '',
-    }).select().single();
-    if (data) { setProfile(data); profileRef.current = data; setSlug(data.slug); }
-    return data!;
+    const { data: result, error } = await authInvoke('admin-update-bio', {
+      action: 'create_profile',
+      profile: { slug: business.slug, name: '' },
+    });
+    if (!error && result?.profile) { setProfile(result.profile); profileRef.current = result.profile; }
+    return result?.profile!;
   };
 
   const draftRef = useRef<Partial<BioProfile>>({});
@@ -105,12 +113,15 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     setProfile(prev => {
       if (!prev) {
         const base: BioProfile = {
-          id: '', admin_email: adminEmail, slug: slug || adminEmail.split('@')[0],
+          id: '', admin_email: adminEmail, slug: business?.slug || '',
           name: '', description: '', avatar_url: null, city: null, whatsapp: null,
           email: null, website: null, social_instagram: null, social_tiktok: null,
           social_facebook: null, social_youtube: null, social_twitter: null, social_linkedin: null,
-          primary_color: '#059669', bg_type: 'solid', bg_solid_color: '#ffffff',
+          social_icon_color: null,
+          primary_color: '#059669', title_color: null, description_color: null,
+          bg_type: 'solid', bg_solid_color: '#ffffff',
           bg_gradient_from: '#f0fdf4', bg_gradient_to: '#dcfce7', bg_image_url: null,
+          bg_opacity: 0,
           button_style: 'rounded', button_shadow: true, is_active: true,
           created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
         };
@@ -129,26 +140,51 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     draftRef.current = {};
     const p = profileRef.current;
     if (!p) return;
-    const toSave = Object.keys(fields).length > 0 ? fields : {
+    const toSave = Object.keys(fields).length > 0 ? {
       slug: p.slug, name: p.name, description: p.description, primary_color: p.primary_color,
+      title_color: p.title_color, description_color: p.description_color,
       bg_type: p.bg_type, bg_solid_color: p.bg_solid_color, bg_gradient_from: p.bg_gradient_from,
-      bg_gradient_to: p.bg_gradient_to, bg_image_url: p.bg_image_url, button_style: p.button_style,
-      button_shadow: p.button_shadow, avatar_url: p.avatar_url, whatsapp: p.whatsapp,
-      email: p.email, city: p.city, social_instagram: p.social_instagram,
-      social_tiktok: p.social_tiktok, social_youtube: p.social_youtube,
-      social_facebook: p.social_facebook, social_linkedin: p.social_linkedin,
+      bg_gradient_to: p.bg_gradient_to, bg_image_url: p.bg_image_url, bg_opacity: p.bg_opacity,
+      button_style: p.button_style, button_shadow: p.button_shadow, avatar_url: p.avatar_url,
+      whatsapp: p.whatsapp, email: p.email, website: p.website, city: p.city,
+      social_instagram: p.social_instagram, social_tiktok: p.social_tiktok, social_youtube: p.social_youtube,
+      social_facebook: p.social_facebook, social_twitter: p.social_twitter,
+      social_linkedin: p.social_linkedin, social_icon_color: p.social_icon_color,
+      ...fields,
+    } : {
+      slug: p.slug, name: p.name, description: p.description, primary_color: p.primary_color,
+      title_color: p.title_color, description_color: p.description_color,
+      bg_type: p.bg_type, bg_solid_color: p.bg_solid_color, bg_gradient_from: p.bg_gradient_from,
+      bg_gradient_to: p.bg_gradient_to, bg_image_url: p.bg_image_url, bg_opacity: p.bg_opacity,
+      button_style: p.button_style, button_shadow: p.button_shadow, avatar_url: p.avatar_url,
+      whatsapp: p.whatsapp, email: p.email, website: p.website, city: p.city,
+      social_instagram: p.social_instagram, social_tiktok: p.social_tiktok, social_youtube: p.social_youtube,
+      social_facebook: p.social_facebook, social_twitter: p.social_twitter,
+      social_linkedin: p.social_linkedin, social_icon_color: p.social_icon_color,
     };
     setSaving(true);
     try {
       if (p.id) {
-        await supabase.from('bio_profiles').update({ ...toSave, updated_at: new Date().toISOString() }).eq('id', p.id).eq('business_id', business?.id || '');
+        const { error } = await authInvoke('admin-update-bio', { action: 'save_profile', profile: toSave });
+        if (error) {
+          showSuccess('Error al guardar: ' + error);
+          return;
+        }
       } else {
-        const { data } = await supabase.from('bio_profiles').insert({
-          ...toSave, business_id: business?.id, admin_email: adminEmail, slug: p.slug, name: p.name,
-        }).select().single();
-        if (data) {
-          profileRef.current = data;
-          setProfile(data);
+        const { data: result, error } = await authInvoke('admin-update-bio', {
+          action: 'create_profile',
+          profile: { ...toSave, name: p.name },
+        });
+        if (!error && result?.profile) {
+          profileRef.current = result.profile;
+          setProfile(result.profile);
+        }
+      }
+      if (p.id) {
+        const { data: fresh } = await supabase.from('bio_profiles').select('*').eq('business_id', business?.id).maybeSingle();
+        if (fresh) {
+          profileRef.current = fresh;
+          setProfile(fresh);
         }
       }
       setSaved(true);
@@ -282,14 +318,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
   useEffect(() => { if (tab === 'stats') loadStats(); }, [tab, loadStats]);
 
-  const saveSlug = async () => {
-    const clean = slug.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
-    if (!clean || !profile) return;
-    const { error } = await supabase.from('bio_profiles').update({ slug: clean }).eq('id', profile.id).eq('business_id', business?.id || '');
-    if (!error) { setSlug(clean); setProfile(prev => prev ? { ...prev, slug: clean } : prev); }
-  };
-
-  const publicUrl = `${window.location.origin}/bio/${profile?.slug || slug}`;
+  const publicUrl = `${window.location.origin}/${business?.slug || '...'}/bio`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(publicUrl);
@@ -308,33 +337,32 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     items.splice(toIdx, 0, moved);
     setLinks(items);
     setDragId(null);
-    for (let i = 0; i < items.length; i++) {
-      await supabase.from('bio_links').update({ sort_order: i }).eq('id', items[i].id);
-    }
+    await authInvoke('admin-update-bio', { action: 'reorder_links', links: items.map((l, i) => ({ id: l.id, title: l.title, url: l.url, sort_order: i, is_active: l.is_active })) });
   };
 
   const addLink = async (title: string, url: string, icon: string) => {
     const p = await ensureProfile();
-    const { data } = await supabase.from('bio_links').insert({
-      profile_id: p.id, title, url, icon, sort_order: links.length,
-    }).select().single();
-    if (data) setLinks(prev => [...prev, data]);
+    const { data: result, error } = await authInvoke('admin-update-bio', {
+      action: 'add_link',
+      link: { profile_id: p.id, title, url, icon, sort_order: links.length },
+    });
+    if (!error && result?.link) setLinks(prev => [...prev, result.link]);
     setShowAddLink(false);
   };
 
   const updateLink = async (id: string, fields: Partial<BioLink>) => {
-    await supabase.from('bio_links').update(fields).eq('id', id);
+    await authInvoke('admin-update-bio', { action: 'update_link', linkId: id, link: fields });
     setLinks(prev => prev.map(l => l.id === id ? { ...l, ...fields } : l));
     setEditingLink(null);
   };
 
   const removeLink = async (id: string) => {
-    await supabase.from('bio_links').delete().eq('id', id);
+    await authInvoke('admin-update-bio', { action: 'delete_link', linkId: id });
     setLinks(prev => prev.filter(l => l.id !== id));
   };
 
   const toggleLink = async (id: string, isActive: boolean) => {
-    await supabase.from('bio_links').update({ is_active: isActive }).eq('id', id);
+    await authInvoke('admin-update-bio', { action: 'update_link', linkId: id, link: { is_active: isActive } });
     setLinks(prev => prev.map(l => l.id === id ? { ...l, is_active: isActive } : l));
   };
 
@@ -387,14 +415,6 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
             <Card className="border-border/50">
               <CardContent className="p-6 space-y-5">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Slug (tu enlace)</label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">{window.location.origin}/bio/</span>
-                    <Input value={slug} onChange={e => setSlug(e.target.value)} onBlur={saveSlug}
-                      className="flex-1" placeholder="mi-negocio" />
-                  </div>
-                </div>
-                <div className="space-y-2">
                   <label className="text-sm font-medium">Logo / Avatar</label>
                   <input ref={logoInputRef} type="file" accept="image/*" className="hidden"
                     onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f); }} />
@@ -422,12 +442,6 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                       )}
                     </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Nombre del negocio</label>
-                  <Input defaultValue={profile?.name || ''} key={profile?.id || 'new-name'}
-                    onChange={e => handleFieldChange('name', e.target.value)} onBlur={saveDraft}
-                    placeholder="Spa Relax" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Descripción</label>
@@ -502,6 +516,16 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                       placeholder="https://linkedin.com/..." />
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Color de íconos sociales</label>
+                  <div className="flex items-center gap-3">
+                    <input type="color" value={profile?.social_icon_color || '#9ca3af'}
+                      onChange={e => { handleFieldChange('social_icon_color', e.target.value || null); debouncedSave(); }}
+                      className="h-8 w-8 rounded-lg border cursor-pointer" />
+                    <Input value={profile?.social_icon_color || ''} onChange={e => { handleFieldChange('social_icon_color', e.target.value || null); debouncedSave(); }}
+                      className="w-32 font-mono text-sm" placeholder="#9ca3af" />
+                  </div>
+                </div>
                 <div className="h-px bg-border/50" />
                 <Button onClick={saveDraft} disabled={saving} className="w-full gap-1.5">
                   {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Guardando...</>
@@ -537,7 +561,6 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                           link.is_active ? 'border-border/50 bg-card' : 'border-border/30 bg-muted/30 opacity-60'
                         } ${dragId === link.id ? 'ring-2 ring-primary/30' : ''}`}>
                         <GripVertical className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-                        <span className="text-lg shrink-0">{ICON_MAP[link.icon || 'link'] || '🔗'}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{link.title}</p>
                           <p className="text-xs text-muted-foreground truncate">{link.url}</p>
@@ -560,6 +583,11 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     ))}
                   </div>
                 )}
+                <Button onClick={saveDraft} disabled={saving} className="w-full gap-1.5">
+                  {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Guardando...</>
+                    : saved ? <><Check className="w-4 h-4" />Guardado</>
+                    : 'Guardar enlaces'}
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -577,6 +605,30 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     <Input value={profile?.primary_color || '#059669'}
                       onChange={e => { handleFieldChange('primary_color', e.target.value); debouncedSave(); }}
                       className="w-32 font-mono text-sm" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Color del título</label>
+                  <p className="text-xs text-muted-foreground">Color del nombre en tu bio</p>
+                  <div className="flex items-center gap-3">
+                    <input type="color" value={profile?.title_color || '#ffffff'}
+                      onChange={e => { handleFieldChange('title_color', e.target.value); debouncedSave(); }}
+                      className="h-10 w-10 rounded-lg border cursor-pointer" />
+                    <Input value={profile?.title_color || ''}
+                      onChange={e => { handleFieldChange('title_color', e.target.value); debouncedSave(); }}
+                      className="w-32 font-mono text-sm" placeholder="#ffffff" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Color de descripción</label>
+                  <p className="text-xs text-muted-foreground">Color de la descripción y ciudad</p>
+                  <div className="flex items-center gap-3">
+                    <input type="color" value={profile?.description_color || '#ffffff'}
+                      onChange={e => { handleFieldChange('description_color', e.target.value); debouncedSave(); }}
+                      className="h-10 w-10 rounded-lg border cursor-pointer" />
+                    <Input value={profile?.description_color || ''}
+                      onChange={e => { handleFieldChange('description_color', e.target.value); debouncedSave(); }}
+                      className="w-32 font-mono text-sm" placeholder="#ffffff" />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -669,6 +721,17 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                   </div>
                 )}
                 <div className="space-y-2">
+                  <label className="text-sm font-medium">Transparencia del fondo</label>
+                  <div className="flex items-center gap-3">
+                    <input type="range" min={0} max={100}
+                      value={profile?.bg_opacity ?? 0}
+                      onChange={e => { handleFieldChange('bg_opacity', parseInt(e.target.value)); debouncedSave(); }}
+                      className="flex-1 h-2 rounded-lg appearance-none cursor-pointer bg-muted" />
+                    <span className="text-sm font-mono text-muted-foreground w-10 text-right">{profile?.bg_opacity ?? 0}%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Capa oscura sobre el fondo para que el texto sea más legible</p>
+                </div>
+                <div className="space-y-2">
                   <label className="text-sm font-medium">Estilo de botones</label>
                   <div className="grid grid-cols-3 gap-2">
                     {BIO_BUTTON_STYLES.map(s => (
@@ -692,6 +755,11 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${profile?.button_shadow ? 'translate-x-5' : ''}`} />
                   </button>
                 </div>
+                <Button onClick={saveDraft} disabled={saving} className="w-full gap-1.5">
+                  {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Guardando...</>
+                    : saved ? <><Check className="w-4 h-4" />Guardado</>
+                    : 'Guardar apariencia'}
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -796,7 +864,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Vista previa</p>
             <div className="mx-auto max-w-[280px]">
               <div className="rounded-[2.5rem] border-[6px] border-gray-900 bg-gray-900 overflow-hidden shadow-2xl">
-                <div className="rounded-[2rem] overflow-hidden" style={{
+                <div className="rounded-[2rem] overflow-hidden relative" style={{
                   background: profile?.bg_type === 'gradient'
                     ? `linear-gradient(135deg, ${profile.bg_gradient_from}, ${profile.bg_gradient_to})`
                     : profile?.bg_type === 'image' && profile.bg_image_url
@@ -804,7 +872,10 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     : profile?.bg_solid_color || '#ffffff',
                   minHeight: '500px',
                 }}>
-                  <div className="p-6 flex flex-col items-center text-center space-y-5 pt-10">
+                  {(profile?.bg_opacity ?? 0) > 0 && (
+                    <div className="absolute inset-0 bg-black" style={{ opacity: (profile?.bg_opacity ?? 0) / 100 }} />
+                  )}
+                  <div className="relative p-6 flex flex-col items-center text-center space-y-5 pt-10">
                     {profile?.avatar_url ? (
                       <img src={profile.avatar_url} alt="" className="w-20 h-20 rounded-full object-cover border-2 border-white/20 shadow-lg" />
                     ) : (
@@ -814,9 +885,17 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                       </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-lg">{profile?.name || 'Tu negocio'}</h3>
-                      {profile?.description && <p className="text-xs mt-1 opacity-70">{profile.description}</p>}
-                      {profile?.city && <p className="text-xs mt-1 opacity-50">📍 {profile.city}</p>}
+                      <h3 className="font-bold text-lg" style={profile?.title_color ? { color: profile.title_color } : undefined}>{profile?.name || 'Tu negocio'}</h3>
+                      {profile?.description && <p className="text-xs mt-1" style={profile?.description_color ? { color: profile.description_color, opacity: 0.8 } : { opacity: 0.7 }}>{profile.description}</p>}
+                      {profile?.city && <p className="text-xs mt-1" style={profile?.description_color ? { color: profile.description_color, opacity: 0.6 } : { opacity: 0.5 }}>{profile.city}</p>}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {profile?.social_instagram && <span className="opacity-60 hover:opacity-100 transition-opacity" style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="instagram" /></span>}
+                      {profile?.social_tiktok && <span className="opacity-60 hover:opacity-100 transition-opacity" style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="tiktok" /></span>}
+                      {profile?.social_facebook && <span className="opacity-60 hover:opacity-100 transition-opacity" style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="facebook" /></span>}
+                      {profile?.social_youtube && <span className="opacity-60 hover:opacity-100 transition-opacity" style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="youtube" /></span>}
+                      {profile?.social_twitter && <span className="opacity-60 hover:opacity-100 transition-opacity" style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="twitter" /></span>}
+                      {profile?.social_linkedin && <span className="opacity-60 hover:opacity-100 transition-opacity" style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="linkedin" /></span>}
                     </div>
                     <div className="w-full space-y-2.5">
                       {links.filter(l => l.is_active).map(link => (
@@ -828,18 +907,9 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                             background: link.color || profile?.primary_color || '#059669',
                             color: '#ffffff',
                           }}>
-                          <span className="mr-1.5">{ICON_MAP[link.icon || 'link'] || '🔗'}</span>
                           {link.title}
                         </div>
                       ))}
-                    </div>
-                    <div className="flex items-center gap-3 pt-2">
-                      {profile?.social_instagram && <span className="text-lg opacity-60 hover:opacity-100 transition-opacity">📸</span>}
-                      {profile?.social_tiktok && <span className="text-lg opacity-60 hover:opacity-100 transition-opacity">🎵</span>}
-                      {profile?.social_facebook && <span className="text-lg opacity-60 hover:opacity-100 transition-opacity">👤</span>}
-                      {profile?.social_youtube && <span className="text-lg opacity-60 hover:opacity-100 transition-opacity">▶️</span>}
-                      {profile?.social_twitter && <span className="text-lg opacity-60 hover:opacity-100 transition-opacity">🐦</span>}
-                      {profile?.social_linkedin && <span className="text-lg opacity-60 hover:opacity-100 transition-opacity">💼</span>}
                     </div>
                   </div>
                 </div>

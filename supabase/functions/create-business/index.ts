@@ -94,7 +94,9 @@ Deno.serve(async (req: Request) => {
       primary_color: "#059669",
       background_color: "#111827",
       card_bg_color: "#1f2937",
-      text_color: "#f3f4f6",
+      text_color: "#ffffff",
+      muted_color: "#e6e6e6",
+      caption_color: "#e6e6e6",
     });
 
     return jsonSuccess({

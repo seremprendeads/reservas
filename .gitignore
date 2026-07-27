@@ -12,6 +12,7 @@ node_modules
 # build
 dist
 dist-ssr
+*.tsbuildinfo
 
 # env
 .env
@@ -49,8 +50,28 @@ AUDITORIA2.txt
 INFORME_ESTABILIZACION_BETA.txt
 INFORME_REFACTORIZACION_MULTITENANT.md
 INFORME_TECNICO_MULTITENANT.md
+AUDITORIA3.txt
+arquitectura_del_proyecto.txt
+PLAN_REFACTORIZACION_ADMIN.txt
+MAPA_ARQUITECTURA.txt
+VERIFICACION_DISCREPANCIAS.txt
+AUDITORIA_FASE1_5.txt
+estructura-admin.txt
+auditoria4.txt 
+auditoria5.txt
+auditoria6.txt
+
+ARCHITECTURE.md
+INFORME_REFACTORIZACION_MULTITENANT.md
+ARCHITECTURE.md
+INFORME_REFACTORIZACION_MULTITENANT.md
+inventario-app.txt
+estructura.txt
+datos.txt
+comandos
+PLAN_LANDING_IA.md
+INFORME_REFACTORIZACION_MULTITENANT.md
 
 
-
-
+backup-completo.sql
 

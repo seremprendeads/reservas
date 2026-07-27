@@ -153,7 +153,7 @@ export function Payment() {
 
   if (loading) {
     return (
-      <div className="max-w-xl py-20 mx-auto text-center">
+      <div className="max-w-xl py-24 mx-auto text-center">
         <Loader2 className="w-12 h-12 mx-auto mb-4 text-booking-primary animate-spin" />
         <p className="text-booking-muted">Preparando el pago...</p>
       </div>
@@ -162,16 +162,16 @@ export function Payment() {
 
   if (error) {
     return (
-      <div className="max-w-xl mx-auto">
-        <div className="p-8 text-center bg-white shadow-lg rounded-2xl">
-          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
+      <div className="max-w-xl mx-auto px-4">
+        <div className="p-8 text-center bg-white shadow-[0_8px_30px_rgba(0,0,0,.05)] rounded-2xl">
+          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-5 bg-red-100 rounded-full">
             <XCircle className="w-8 h-8 text-red-600" />
           </div>
-          <h2 className="mb-2 text-xl font-bold text-gray-800">Error</h2>
+          <h2 className="mb-2 text-xl font-bold text-gray-800 font-display">Error</h2>
           <p className="mb-6 text-red-600">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-3 font-semibold text-white transition-colors bg-booking-primary rounded-xl hover:bg-booking-primary-hover"
+            className="w-full py-3.5 font-semibold text-white transition-all duration-200 bg-booking-primary rounded-xl hover:bg-booking-primary-hover"
           >
             Intentar nuevamente
           </button>
@@ -181,19 +181,19 @@ export function Payment() {
   }
 
   return (
-    <div className="max-w-xl mx-auto">
-      <div className="p-8 bg-white shadow-lg rounded-2xl">
+    <div className="max-w-xl mx-auto px-4">
+      <div className="p-8 bg-white shadow-[0_8px_30px_rgba(0,0,0,.05)] rounded-2xl">
         <div className="mb-8 text-center">
-          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-booking-primary-light">
+          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-5 rounded-full bg-booking-primary-light">
             <CreditCard className="w-8 h-8 text-booking-primary" />
           </div>
-          <h2 className="mb-2 text-2xl font-bold text-gray-800">Confirmar tu reserva</h2>
+          <h2 className="mb-2 text-2xl font-bold text-gray-800 font-display">Confirmar tu reserva</h2>
           <p className="text-gray-600">
             Para confirmar tu turno debes completar el pago
           </p>
         </div>
 
-        <div className="p-4 mb-6 bg-booking-primary-light rounded-xl">
+        <div className="p-5 mb-6 bg-booking-primary-light rounded-xl">
           <div className="flex items-center justify-between">
             <span className="text-gray-700">Fecha:</span>
             <span className="font-medium">
@@ -236,7 +236,7 @@ export function Payment() {
           <button
             onClick={checkPaymentStatus}
             disabled={checking}
-            className="flex items-center justify-center w-full gap-2 py-3 mt-6 font-medium text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50"
+            className="flex items-center justify-center w-full gap-2 py-3.5 mt-6 font-medium text-gray-700 transition-all duration-200 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50"
           >
             {checking ? (
               <>

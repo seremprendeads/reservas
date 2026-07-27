@@ -16,12 +16,16 @@ export type BioProfile = {
   social_youtube: string | null;
   social_twitter: string | null;
   social_linkedin: string | null;
+  social_icon_color: string | null;
   primary_color: string;
+  title_color: string | null;
+  description_color: string | null;
   bg_type: 'solid' | 'gradient' | 'image';
   bg_solid_color: string;
   bg_gradient_from: string;
   bg_gradient_to: string;
   bg_image_url: string | null;
+  bg_opacity: number;
   button_style: 'rounded' | 'pill' | 'square';
   button_shadow: boolean;
   is_active: boolean;

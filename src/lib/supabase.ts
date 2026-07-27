@@ -20,6 +20,9 @@ export type Business = {
   owner_email: string;
   logo_url: string | null;
   is_active: boolean;
+  plan: string;
+  is_trial: boolean;
+  trial_ends_at: string | null;
   timezone: string;
   currency: string;
   created_at: string;
@@ -47,6 +50,7 @@ export type Booking = {
   notas_admin: string | null;
   created_at: string;
   updated_at: string;
+  deleted_at?: string;
 };
 
 export type AvailabilitySetting = {
