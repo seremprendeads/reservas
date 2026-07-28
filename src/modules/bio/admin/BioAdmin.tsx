@@ -9,9 +9,11 @@ import { useBusiness } from '../../../contexts/BusinessContext';
 import { BioProfile, BioLink, BioStats } from '../types';
 import { BIO_BUTTON_STYLES, BIO_BG_PRESETS } from '../config';
 import { authInvoke } from '../../../pages/admin/helpers';
+import { allThemes } from '../../../themes';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Card, CardContent } from '../../../components/ui/card';
+import { Separator } from '../../../components/ui/separator';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '../../../components/ui/dialog';
@@ -61,6 +63,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [bioThemeId, setBioThemeId] = useState('');
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bgInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -596,6 +599,70 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
           {tab === 'appearance' && (
             <Card className="border-border/50">
               <CardContent className="p-6 space-y-6">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={async () => {
+                    if (!business?.id) return;
+                    setBioThemeId('');
+                    const { data } = await supabase.from('branding').select('*').eq('business_id', business.id).maybeSingle();
+                    if (!data) return;
+                    handleFieldChange('primary_color', data.primary_color || '#059669');
+                    handleFieldChange('title_color', data.text_color || '#ffffff');
+                    handleFieldChange('description_color', data.muted_color || data.text_color || '#e6e6e6');
+                    handleFieldChange('social_icon_color', data.muted_color || '#9ca3af');
+                    handleFieldChange('bg_solid_color', data.background_color || '#ffffff');
+                    handleFieldChange('bg_gradient_from', data.background_color || '#f0fdf4');
+                    handleFieldChange('bg_gradient_to', data.card_bg_color || '#dcfce7');
+                    saveDraft();
+                  }}>Copiar paleta de Apariencia</Button>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    setBioThemeId('');
+                    handleFieldChange('primary_color', '#059669');
+                    handleFieldChange('title_color', null);
+                    handleFieldChange('description_color', null);
+                    handleFieldChange('social_icon_color', null);
+                    handleFieldChange('bg_type', 'solid');
+                    handleFieldChange('bg_solid_color', '#ffffff');
+                    handleFieldChange('bg_gradient_from', '#f0fdf4');
+                    handleFieldChange('bg_gradient_to', '#dcfce7');
+                    handleFieldChange('bg_opacity', 0);
+                    handleFieldChange('button_style', 'rounded');
+                    handleFieldChange('button_shadow', true);
+                    saveDraft();
+                  }}>Restaurar valores predeterminados</Button>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-3 block">Temas predefinidos</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {allThemes.map(t => (
+                      <button key={t.id} onClick={() => {
+                        setBioThemeId(t.id);
+                        handleFieldChange('primary_color', t.tokens.primary);
+                        handleFieldChange('title_color', t.tokens.text);
+                        handleFieldChange('description_color', t.tokens.textMuted);
+                        handleFieldChange('social_icon_color', t.tokens.textMuted);
+                        handleFieldChange('bg_solid_color', t.tokens.background);
+                        handleFieldChange('bg_gradient_from', t.tokens.background);
+                        handleFieldChange('bg_gradient_to', t.tokens.cardBg);
+                        saveDraft();
+                      }}
+                        className={`relative flex items-center gap-1.5 rounded-xl border-2 p-2.5 transition-all ${
+                          bioThemeId === t.id ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-muted-foreground/30'
+                        }`}>
+                        <div className="flex gap-1">
+                          <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.primary }} />
+                          <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.background }} />
+                          <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.cardBg }} />
+                          <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.text }} />
+                        </div>
+                        <span className="text-[11px] font-medium text-muted-foreground truncate">{t.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Color principal</label>
                   <div className="flex items-center gap-3">

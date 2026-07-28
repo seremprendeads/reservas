@@ -1,15 +1,80 @@
+import { useState } from 'react';
 import { Input } from '../../../../components/ui/input';
+import { Button } from '../../../../components/ui/button';
 import { Separator } from '../../../../components/ui/separator';
-import { AVAILABLE_FONTS } from '../../config';
+import { supabase } from '../../../../lib/supabase';
+import { AVAILABLE_FONTS, DEFAULT_THEME } from '../../config';
+import { allThemes } from '../../../../themes';
 import type { LandingTheme } from '../../types';
 
 interface DesignTabProps {
-  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void; businessId: string;
 }
 
-export function DesignTab({ theme, updateTheme }: DesignTabProps) {
+export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
+  const [selectedThemeId, setSelectedThemeId] = useState('');
+
+  const applyTheme = (themeId: string) => {
+    const t = allThemes.find(th => th.id === themeId);
+    if (!t) return;
+    setSelectedThemeId(themeId);
+    updateTheme('primary_color', t.tokens.primary);
+    updateTheme('bg_color', t.tokens.background);
+    updateTheme('text_color', t.tokens.text);
+    updateTheme('footer_bg_color', t.tokens.cardBg);
+    updateTheme('social_icon_color', t.tokens.textMuted);
+    updateTheme('button_color', t.tokens.primary);
+    updateTheme('service_icon_color', t.tokens.primary);
+  };
+
+  const copyFromBranding = async () => {
+    if (!businessId) return;
+    const { data } = await supabase.from('branding').select('*').eq('business_id', businessId).maybeSingle();
+    if (!data) return;
+    setSelectedThemeId('');
+    updateTheme('primary_color', data.primary_color || DEFAULT_THEME.primary_color);
+    updateTheme('bg_color', data.background_color || DEFAULT_THEME.bg_color);
+    updateTheme('text_color', data.text_color || DEFAULT_THEME.text_color);
+    updateTheme('footer_bg_color', data.card_bg_color || DEFAULT_THEME.footer_bg_color);
+    updateTheme('social_icon_color', data.muted_color || DEFAULT_THEME.social_icon_color);
+    updateTheme('button_color', data.primary_color || DEFAULT_THEME.button_color);
+    updateTheme('service_icon_color', data.primary_color || DEFAULT_THEME.service_icon_color);
+  };
+
+  const resetToDefaults = () => {
+    setSelectedThemeId('');
+    (Object.entries(DEFAULT_THEME) as [string, string][]).forEach(([k, v]) => updateTheme(k, v));
+  };
+
   return (
     <div className="space-y-7">
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={copyFromBranding}>Copiar paleta de Apariencia</Button>
+        <Button variant="outline" size="sm" onClick={resetToDefaults}>Restaurar valores predeterminados</Button>
+      </div>
+
+      <div>
+        <label className="text-sm font-medium text-foreground mb-3 block">Temas predefinidos</label>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {allThemes.map(t => (
+            <button key={t.id} onClick={() => applyTheme(t.id)}
+              className={`relative flex items-center gap-1.5 rounded-xl border-2 p-2.5 transition-all ${
+                selectedThemeId === t.id ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-muted-foreground/30'
+              }`}>
+              <div className="flex gap-1">
+                <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.primary }} />
+                <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.background }} />
+                <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.cardBg }} />
+                <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.text }} />
+              </div>
+              <span className="text-[11px] font-medium text-muted-foreground truncate">{t.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Separator />
+
       <div>
         <label className="text-sm font-medium text-foreground mb-3 block">Colores</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

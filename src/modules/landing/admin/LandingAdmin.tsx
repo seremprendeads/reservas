@@ -197,7 +197,7 @@ export function LandingAdmin({ business }: Props) {
                 <FooterTab sections={sections} updateSection={updateSection} />
               )}
               {activeTab === 'design' && (
-                <DesignTab theme={theme} updateTheme={updateTheme} />
+                <DesignTab theme={theme} updateTheme={updateTheme} businessId={business?.id || ''} />
               )}
             </CardContent>
           </Card>
