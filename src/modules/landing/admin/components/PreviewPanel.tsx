@@ -8,9 +8,12 @@ interface PreviewPanelProps {
   template: LandingTemplate;
   slug: string;
   logoUrl: string;
+  isEditing?: boolean;
+  selectedSection?: string;
+  onSelectSection?: (key: string) => void;
 }
 
-export function PreviewPanel({ sections, theme, template, slug, logoUrl }: PreviewPanelProps) {
+export function PreviewPanel({ sections, theme, template, slug, logoUrl, isEditing, selectedSection, onSelectSection }: PreviewPanelProps) {
   const previewData: LandingPage = {
     id: 'preview',
     business_id: 'preview',
@@ -26,5 +29,13 @@ export function PreviewPanel({ sections, theme, template, slug, logoUrl }: Previ
     updated_at: new Date().toISOString(),
   };
 
-  return <LandingPageComponent initialData={previewData} isPreview />;
+  return (
+    <LandingPageComponent
+      initialData={previewData}
+      isPreview
+      isEditing={isEditing}
+      selectedSection={selectedSection}
+      onSelectSection={onSelectSection}
+    />
+  );
 }

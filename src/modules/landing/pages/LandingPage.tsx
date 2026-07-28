@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, type ReactNode } from 'react';
 import {
   ChevronDown, ChevronRight, MapPin, Phone, Mail,
   Instagram, Facebook, ExternalLink, ArrowRight, Loader2,
@@ -32,6 +32,7 @@ import { MarketingPopup } from '../sections/MarketingPopup';
 import { ShopInviteSection } from '../sections/ShopInviteSection';
 import { Header } from '../sections/Header';
 import { useModuleAccess, ModuleBlockedScreen } from '../../subscription';
+import { cn } from '../../lib/utils';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Star, Wrench, Palette, Zap, Shield, Clock, Heart, Award, CheckCircle,
@@ -45,12 +46,41 @@ function getIcon(name: string) {
   return ICON_MAP[name] || Star;
 }
 
-export function LandingPage({ initialData, isPreview }: { initialData?: LandingPageType; isPreview?: boolean } = {}) {
+export function LandingPage({ initialData, isPreview, isEditing, selectedSection, onSelectSection }: {
+  initialData?: LandingPageType; isPreview?: boolean;
+  isEditing?: boolean; selectedSection?: string; onSelectSection?: (key: string) => void;
+} = {}) {
   const { landing, loading, notFound, s, theme, seo, ts, hasSection, headingStyle, bodyStyle } = useLandingData({ initialData });
   const { isModuleEnabled } = useModuleAccess();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const SectionWrap = useCallback(({ sectionKey, children, className }: { sectionKey: string; children: ReactNode; className?: string }) => {
+    if (!isEditing) return <>{children}</>;
+    return (
+      <div
+        data-section-key={sectionKey}
+        onClick={() => onSelectSection?.(sectionKey)}
+        className={cn(
+          'cursor-pointer relative',
+          selectedSection === sectionKey && 'ring-2 ring-blue-500/50 ring-offset-2 rounded-lg',
+          'hover:ring-1 hover:ring-blue-400/30 rounded-lg transition-all',
+          className
+        )}
+      >
+        {children}
+        {selectedSection === sectionKey && (
+          <div className="absolute top-2 right-2 z-50 flex items-center gap-1 rounded-lg bg-blue-500 px-2 py-1 text-[10px] font-medium text-white shadow-lg">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Editando
+          </div>
+        )}
+      </div>
+    );
+  }, [isEditing, selectedSection, onSelectSection]);
 
   useEffect(() => {
     if (isPreview) {
@@ -220,6 +250,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
       {seo.og_image && <meta property="og:image" content={seo.og_image} />}
 
       {/* ─── HEADER + HERO ─── */}
+      <SectionWrap sectionKey="header">
       {isPreview && hasSection('header') && hasSection('hero') ? (
         <div className="relative">
           <Header
@@ -236,6 +267,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
             isPreview={isPreview}
           />
           {/* ─── HERO ─── */}
+          <SectionWrap sectionKey="hero">
           <HeroSection
             s={s}
             theme={theme}
@@ -245,6 +277,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
             bodyStyle={bodyStyle}
             handleSmoothScroll={handleSmoothScroll}
           />
+          </SectionWrap>
         </div>
       ) : (
         <>
@@ -267,6 +300,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
 
           {/* ─── HERO ─── */}
           {hasSection('hero') && (
+            <SectionWrap sectionKey="hero">
             <HeroSection
               s={s}
               theme={theme}
@@ -276,12 +310,15 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
               bodyStyle={bodyStyle}
               handleSmoothScroll={handleSmoothScroll}
             />
+            </SectionWrap>
           )}
         </>
       )}
+      </SectionWrap>
 
       {/* ─── ABOUT ─── */}
       {hasSection('about') && s.about.description && (
+        <SectionWrap sectionKey="about">
         <AboutSection
           about={s.about}
           theme={theme}
@@ -289,10 +326,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
         />
+        </SectionWrap>
       )}
 
       {/* ─── ABOUT TEXT ─── */}
       {hasSection('about_text') && s.about_text && (
+        <SectionWrap sectionKey="about_text">
         <AboutTextSection
           aboutText={s.about_text}
           theme={theme}
@@ -300,10 +339,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
         />
+        </SectionWrap>
       )}
 
       {/* ─── MAIN SERVICE ─── */}
       {hasSection('main_service') && s.main_service.title && (
+        <SectionWrap sectionKey="main_service">
         <MainServiceSection
           mainService={s.main_service}
           theme={theme}
@@ -312,10 +353,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           bodyStyle={bodyStyle}
           getIcon={getIcon}
         />
+        </SectionWrap>
       )}
 
       {/* ─── SECONDARY SERVICES ─── */}
       {hasSection('secondary_services') && s.secondary_services.items.length > 0 && (
+        <SectionWrap sectionKey="secondary_services">
         <SecondaryServicesSection
           secondaryServices={s.secondary_services}
           theme={theme}
@@ -324,10 +367,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           bodyStyle={bodyStyle}
           getIcon={getIcon}
         />
+        </SectionWrap>
       )}
 
       {/* ─── WHY CHOOSE US ─── */}
       {hasSection('why_choose_us') && s.why_choose_us.items.length > 0 && (
+        <SectionWrap sectionKey="why_choose_us">
         <WhyChooseUsSection
           whyChooseUs={s.why_choose_us}
           theme={theme}
@@ -336,10 +381,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           bodyStyle={bodyStyle}
           getIcon={getIcon}
         />
+        </SectionWrap>
       )}
 
       {/* ─── GALLERY ─── */}
       {hasSection('gallery') && galleryImages.length > 0 && (
+        <SectionWrap sectionKey="gallery">
         <GallerySection
           gallery={s.gallery}
           galleryImages={galleryImages}
@@ -349,6 +396,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           bodyStyle={bodyStyle}
           onImageClick={(i) => setLightboxIndex(i)}
         />
+        </SectionWrap>
       )}
 
       {/* ─── LIGHTBOX ─── */}
@@ -364,7 +412,8 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
 
       {/* ─── BANNER ─── */}
       {(s.banner.title || s.banner.subtitle || s.banner.image_url) && (
-        <section className="relative py-32 sm:py-40 px-5 sm:px-8 lg:px-12 overflow-hidden">
+        <SectionWrap sectionKey="banner">
+        <section className="relative py-32 sm:py-40 px-5 sm:px-8 lg:px-12">
           <div className="absolute inset-0 bg-fixed bg-cover bg-center" style={{ backgroundImage: s.banner.image_url ? `url(${s.banner.image_url})` : undefined }}>
             {s.banner.image_url ? (
               <div className="absolute inset-0" style={{ backgroundColor: s.banner.overlay_color, opacity: s.banner.overlay_opacity / 100 }} />
@@ -385,10 +434,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
             )}
           </div>
         </section>
+        </SectionWrap>
       )}
 
       {/* ─── TESTIMONIALS ─── */}
       {hasSection('testimonials') && s.testimonials.items.length > 0 && (
+        <SectionWrap sectionKey="testimonials">
         <TestimonialsSection
           testimonials={s.testimonials}
           theme={theme}
@@ -396,10 +447,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
         />
+        </SectionWrap>
       )}
 
       {/* ─── SHOP INVITE ─── */}
       {hasSection('shop_invite') && s.shop_invite && s.shop_invite.title && (
+        <SectionWrap sectionKey="shop_invite">
         <ShopInviteSection
           shopInvite={s.shop_invite}
           theme={theme}
@@ -408,10 +461,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           bodyStyle={bodyStyle}
           shopUrl="/tienda"
         />
+        </SectionWrap>
       )}
 
       {/* ─── FAQ ─── */}
       {hasSection('faq') && s.faq.items.length > 0 && (
+        <SectionWrap sectionKey="faq">
         <FaqSection
           faq={s.faq}
           theme={theme}
@@ -419,10 +474,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
         />
+        </SectionWrap>
       )}
 
       {/* ─── MAP ─── */}
       {(s.map.address || s.map.map_url) && (
+        <SectionWrap sectionKey="map">
         <MapSection
           map={s.map}
           theme={theme}
@@ -430,10 +487,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
         />
+        </SectionWrap>
       )}
 
       {/* ─── CTA ─── */}
       {hasSection('cta') && s.cta.title && (
+        <SectionWrap sectionKey="cta">
         <CtaSection
           cta={s.cta}
           logoUrl={landing.logo_url}
@@ -443,10 +502,12 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           bodyStyle={bodyStyle}
           handleSmoothScroll={handleSmoothScroll}
         />
+        </SectionWrap>
       )}
 
       {/* ─── FOOTER ─── */}
       {hasSection('footer') && (
+        <SectionWrap sectionKey="footer">
         <FooterSection
           footer={s.footer}
           menuItems={s.header.menu_items || []}
@@ -458,16 +519,19 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           bodyStyle={bodyStyle}
           handleSmoothScroll={handleSmoothScroll}
         />
+        </SectionWrap>
       )}
 
       {/* ─── MARKETING POPUP ─── */}
       {s.popup?.enabled && (
+        <SectionWrap sectionKey="popup">
         <MarketingPopup
           popup={s.popup}
           theme={theme}
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
         />
+        </SectionWrap>
       )}
     </div>
   );

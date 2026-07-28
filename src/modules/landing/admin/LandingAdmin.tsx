@@ -50,6 +50,25 @@ export function LandingAdmin({ business }: Props) {
   });
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [contentCollapsed, setContentCollapsed] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+
+  const SECTION_TO_TAB: Record<string, AdminTab> = {
+    header: 'menu', hero: 'hero', about: 'about', about_text: 'about_text',
+    main_service: 'main_service', secondary_services: 'services',
+    why_choose_us: 'why', gallery: 'gallery', banner: 'banner',
+    shop_invite: 'shop_invite', testimonials: 'testimonials', faq: 'faq',
+    cta: 'cta', map: 'map', footer: 'footer', popup: 'popup',
+  };
+
+  const handleSelectSection = (sectionKey: string) => {
+    setSelectedSection(sectionKey);
+    const tab = SECTION_TO_TAB[sectionKey];
+    if (tab) {
+      setActiveTab(tab);
+      setPanelCollapsed(false);
+      setContentCollapsed(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -227,7 +246,7 @@ export function LandingAdmin({ business }: Props) {
                 <span className="text-xs font-medium text-muted-foreground">Vista previa</span>
               </div>
               <div data-preview-container className="h-[600px] overflow-auto">
-                <PreviewPanel sections={sections} theme={theme} template={template} slug={slug} logoUrl={logoUrl} />
+                <PreviewPanel sections={sections} theme={theme} template={template} slug={slug} logoUrl={logoUrl} isEditing selectedSection={selectedSection || undefined} onSelectSection={handleSelectSection} />
               </div>
             </CardContent>
           </Card>
