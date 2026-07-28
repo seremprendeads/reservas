@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink, X, Megaphone, Timer, MessageSquare } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink, X, Megaphone, Timer, MessageSquare, Copy, Check } from 'lucide-react';
 import { supabase, ShopBannerConfig, ShopPopupConfig, ShopSocialConfig, ShopSocialEntry as SocialEntry } from '../../../lib/supabase';
 import { allThemes } from '../../../themes';
 import { useBusiness } from '../../../contexts/BusinessContext';
@@ -337,27 +337,39 @@ function ProductsManager() {
           ) : (
             <div className="divide-y">
               {filtered.map(p => (
-                <div key={p.id} className="flex items-center gap-4 px-6 py-3">
-                  <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
-                    {p.image ? <img src={p.image} alt={p.name} className="w-full h-full object-cover" /> : <Package className="w-6 h-6 m-3 text-muted-foreground" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium truncate">{p.name}</span>
-                      {!p.is_active && <Badge variant="secondary">Inactivo</Badge>}
-                      {p.featured && <Badge>Destacado</Badge>}
+                <div key={p.id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 sm:px-6 py-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
+                      {p.image ? <img src={p.image} alt={p.name} className="w-full h-full object-cover" /> : <Package className="w-5 h-5 sm:w-6 sm:h-6 m-2.5 sm:m-3 text-muted-foreground" />}
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span>${p.price.toLocaleString('es-AR')} {p.currency}</span>
-                      <span>Stock: {p.stock}</span>
-                      {p.sizes && p.sizes.length > 0 && <span>Talles: {p.sizes.join(', ')}</span>}
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-medium text-sm sm:text-base truncate">{p.name}</span>
+                        {!p.is_active && <Badge variant="secondary" className="text-[10px] sm:text-xs">Inactivo</Badge>}
+                        {p.featured && <Badge className="text-[10px] sm:text-xs">Destacado</Badge>}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
+                        <span>${p.price.toLocaleString('es-AR')} {p.currency}</span>
+                        <span>Stock: {p.stock}</span>
+                        {p.sizes && p.sizes.length > 0 && <span className="truncate max-w-[120px] sm:max-w-none">Talles: {p.sizes.join(', ')}</span>}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Button variant="outline" size="sm" onClick={() => toggleActive(p)}>{p.is_active ? 'Desactivar' : 'Activar'}</Button>
-                    <Button variant="outline" size="sm" onClick={() => duplicate(p)}>Duplicar</Button>
-                    <Button variant="outline" size="sm" onClick={() => openEdit(p)}><Edit className="w-4 h-4" /></Button>
-                    <Button variant="destructive" size="sm" onClick={() => remove(p)}><Trash2 className="w-4 h-4" /></Button>
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-0 sm:ml-auto">
+                    <Button variant="outline" size="sm" onClick={() => toggleActive(p)} title={p.is_active ? 'Desactivar' : 'Activar'}>
+                      {p.is_active ? <span className="sm:hidden"><X className="w-3.5 h-3.5" /></span> : <span className="sm:hidden"><Check className="w-3.5 h-3.5" /></span>}
+                      <span className="hidden sm:inline">{p.is_active ? 'Desactivar' : 'Activar'}</span>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => duplicate(p)} className="px-2 sm:px-3" title="Duplicar">
+                      <Copy className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline ml-1">Duplicar</span>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => openEdit(p)} className="px-2" title="Editar">
+                      <Edit className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => remove(p)} className="px-2" title="Eliminar">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -513,12 +525,12 @@ function CategoriesManager() {
           ) : (
             <div className="divide-y">
               {categories.map(c => (
-                <div key={c.id} className="flex items-center justify-between px-6 py-3">
-                  <div>
-                    <span className="font-medium">{c.name}</span>
-                    {c.description && <p className="text-sm text-muted-foreground">{c.description}</p>}
+                <div key={c.id} className="flex items-center justify-between px-4 sm:px-6 py-3 gap-3">
+                  <div className="min-w-0">
+                    <span className="font-medium text-sm sm:text-base">{c.name}</span>
+                    {c.description && <p className="text-xs sm:text-sm text-muted-foreground truncate">{c.description}</p>}
                   </div>
-                  <Button variant="destructive" size="sm" onClick={() => remove(c.id)}><Trash2 className="w-4 h-4" /></Button>
+                  <Button variant="destructive" size="sm" onClick={() => remove(c.id)} className="shrink-0"><Trash2 className="w-4 h-4" /></Button>
                 </div>
               ))}
             </div>
@@ -569,21 +581,23 @@ function OrdersList() {
         ) : (
           <div className="divide-y">
             {orders.map(o => (
-              <div key={o.id} className="flex items-center justify-between px-6 py-3 gap-4">
+              <div key={o.id} className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 py-3 gap-2 sm:gap-4">
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium">{o.customer_name}</p>
-                  <p className="text-sm text-muted-foreground">{o.customer_email} · {o.customer_phone}</p>
+                  <p className="font-medium text-sm sm:text-base">{o.customer_name}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{o.customer_email} · {o.customer_phone}</p>
                   <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString('es-AR')}</p>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="font-bold">${o.total.toLocaleString('es-AR')} {o.currency}</p>
-                  <Badge variant={o.payment_status === 'approved' ? 'default' : o.payment_status === 'pending' ? 'secondary' : 'destructive'}>
-                    {o.payment_status === 'approved' ? 'Pagado' : o.payment_status === 'pending' ? 'Pendiente' : 'Rechazado'}
-                  </Badge>
+                <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+                  <div className="text-right shrink-0">
+                    <p className="font-bold text-sm sm:text-base">${o.total.toLocaleString('es-AR')} {o.currency}</p>
+                    <Badge variant={o.payment_status === 'approved' ? 'default' : o.payment_status === 'pending' ? 'secondary' : 'destructive'} className="text-[10px] sm:text-xs">
+                      {o.payment_status === 'approved' ? 'Pagado' : o.payment_status === 'pending' ? 'Pendiente' : 'Rechazado'}
+                    </Badge>
+                  </div>
+                  <Button variant="destructive" size="sm" className="shrink-0" onClick={() => removeOrder(o)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
-                <Button variant="destructive" size="sm" className="shrink-0" onClick={() => removeOrder(o)}>
-                  <Trash2 className="w-4 h-4" />
-                </Button>
               </div>
             ))}
           </div>
@@ -651,20 +665,21 @@ function ProductsTrash() {
           ) : (
             <div className="divide-y">
               {deleted.map(p => (
-                <div key={p.id} className="flex items-center gap-4 px-6 py-3">
-                  <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
-                    {p.image ? <img src={p.image} alt={p.name} className="w-full h-full object-cover" /> : <Package className="w-6 h-6 m-3 text-muted-foreground" />}
+                <div key={p.id} className="flex items-center gap-3 px-4 sm:px-6 py-3">
+                  <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
+                    {p.image ? <img src={p.image} alt={p.name} className="w-full h-full object-cover" /> : <Package className="w-5 h-5 sm:w-6 sm:h-6 m-2.5 sm:m-3 text-muted-foreground" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="font-medium truncate block">{p.name}</span>
-                    <span className="text-sm text-muted-foreground">${p.price.toLocaleString('es-AR')} {p.currency}</span>
+                    <span className="font-medium text-sm sm:text-base truncate block">{p.name}</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">${p.price.toLocaleString('es-AR')} {p.currency}</span>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Button variant="outline" size="sm" onClick={() => restore(p)}>
-                      <RotateCcw className="w-4 h-4 mr-1" />Restaurar
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => restore(p)} title="Restaurar">
+                      <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline ml-1">Restaurar</span>
                     </Button>
-                    <Button variant="destructive" size="sm" onClick={() => purge(p)}>
-                      <Trash2 className="w-4 h-4" />
+                    <Button variant="destructive" size="sm" onClick={() => purge(p)} title="Eliminar permanentemente">
+                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                 </div>
