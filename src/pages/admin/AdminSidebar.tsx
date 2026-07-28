@@ -225,9 +225,9 @@ export function AdminSidebar({
           </button>
         </div>
 
-        {/* Branding */}
+        {/* Branding - solo visible en móvil (< 640px) */}
         {!collapsed && (
-          <div className="border-t border-border px-3 py-3 text-center">
+          <div className="border-t border-border px-3 py-3 text-center sm:hidden">
             <span className="text-xs text-gray-500 font-bold">by bookingBio</span>
           </div>
         )}
