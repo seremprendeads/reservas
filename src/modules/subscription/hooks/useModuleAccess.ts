@@ -16,8 +16,11 @@ export function useModuleAccess(): UseModuleAccessResult {
   const { subscription } = useSubscription({ business });
 
   const isFreePlan = useMemo(() => {
-    return subscription.plan === 'free' && !business?.is_trial;
-  }, [subscription.plan, business?.is_trial]);
+    if (subscription.plan !== 'free') return false;
+    if (!business?.is_trial) return true;
+    if (business.trial_ends_at && new Date(business.trial_ends_at).getTime() <= Date.now()) return true;
+    return false;
+  }, [subscription.plan, business?.is_trial, business?.trial_ends_at]);
 
   const isTrial = useMemo(() => {
     return business?.is_trial || false;
