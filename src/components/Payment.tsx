@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CreditCard, Loader2, Clock, XCircle } from 'lucide-react';
+import { CreditCard, Loader2, Clock, XCircle, Shield, Lock } from 'lucide-react';
 import { useBooking } from '../contexts/BookingContext';
 import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
@@ -118,9 +118,18 @@ export function Payment() {
           redirectMode: 'blank'
         },
         customization: {
+          theme: 'default',
           visual: {
             borderRadius: '12px',
-            buttonHeight: '56px',
+            buttonHeight: '52px',
+            style: {
+              customVariables: {
+                baseColor: '#009ee3',
+                buttonTextColor: '#ffffff',
+                borderRadiusMedium: '12px',
+                borderRadiusLarge: '16px',
+              },
+            },
           },
         },
         callbacks: {
@@ -187,7 +196,7 @@ export function Payment() {
   return (
     <div className="max-w-xl mx-auto px-4">
       <div className="p-8 bg-white shadow-[0_8px_30px_rgba(0,0,0,.05)] rounded-2xl">
-        <div className="mb-8 text-center">
+        <div className="mb-6 text-center">
           <div className="flex items-center justify-center w-16 h-16 mx-auto mb-5 rounded-full bg-booking-primary-light">
             <CreditCard className="w-8 h-8 text-booking-primary" />
           </div>
@@ -197,10 +206,10 @@ export function Payment() {
           </p>
         </div>
 
-        <div className="p-5 mb-6 bg-booking-primary-light rounded-xl">
+        <div className="p-5 mb-6 bg-gray-50 rounded-xl border border-gray-100">
           <div className="flex items-center justify-between">
-            <span className="text-gray-700">Fecha:</span>
-            <span className="font-medium">
+            <span className="text-gray-500 text-sm">Fecha</span>
+            <span className="font-medium text-gray-800">
               {bookingData.date?.toLocaleDateString('es-AR', {
                 weekday: 'long',
                 day: 'numeric',
@@ -208,13 +217,19 @@ export function Payment() {
               })}
             </span>
           </div>
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-gray-700">Hora:</span>
-            <span className="font-medium">{bookingData.time} hs</span>
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-gray-500 text-sm">Hora</span>
+            <span className="font-medium text-gray-800">{bookingData.time} hs</span>
           </div>
-          <div className="flex items-center justify-between pt-2 mt-2 border-t border-booking-card">
-            <span className="font-medium text-gray-700">Total:</span>
-            <span className="text-xl font-bold text-booking-primary">
+          {bookingData.service?.name && (
+            <div className="flex items-center justify-between mt-3">
+              <span className="text-gray-500 text-sm">Servicio</span>
+              <span className="font-medium text-gray-800">{bookingData.service.name}</span>
+            </div>
+          )}
+          <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200">
+            <span className="font-semibold text-gray-800">Total</span>
+            <span className="text-2xl font-bold text-booking-primary">
               ${bookingData.amount.toLocaleString('es-AR')} {bookingData.currency}
             </span>
           </div>
@@ -223,24 +238,27 @@ export function Payment() {
         {checking && (
           <div className="flex items-center gap-3 p-4 mb-6 border border-yellow-200 bg-yellow-50 rounded-xl">
             <Loader2 className="w-5 h-5 text-yellow-600 animate-spin" />
-            <p className="text-yellow-700">Verificando estado del pago...</p>
+            <p className="text-yellow-700 text-sm">Verificando estado del pago...</p>
           </div>
         )}
 
-        <div id="mercadopago_container" className="min-h-[100px]">
-          {!mpLoaded && (
-            <div className="py-8 text-center">
-              <Loader2 className="w-8 h-8 mx-auto mb-2 text-booking-primary animate-spin" />
-              <p className="text-gray-500">Cargando opciones de pago...</p>
-            </div>
-          )}
+        <div className="mb-4">
+          <p className="text-center text-xs text-gray-400 mb-3 font-medium uppercase tracking-wider">Elegí cómo pagar</p>
+          <div id="mercadopago_container" className="min-h-[80px]">
+            {!mpLoaded && (
+              <div className="py-6 text-center">
+                <Loader2 className="w-6 h-6 mx-auto mb-2 text-booking-primary animate-spin" />
+                <p className="text-gray-400 text-sm">Cargando opciones de pago...</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {paymentStarted && (
           <button
             onClick={checkPaymentStatus}
             disabled={checking}
-            className="flex items-center justify-center w-full gap-2 py-3.5 mt-6 font-medium text-gray-700 transition-all duration-200 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50"
+            className="flex items-center justify-center w-full gap-2 py-3.5 mt-2 font-medium text-gray-600 transition-all duration-200 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 disabled:opacity-50 text-sm"
           >
             {checking ? (
               <>
@@ -255,6 +273,17 @@ export function Payment() {
             )}
           </button>
         )}
+
+        <div className="flex items-center justify-center gap-4 mt-6 pt-5 border-t border-gray-100">
+          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+            <Lock className="w-3.5 h-3.5" />
+            <span>Pago seguro</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+            <Shield className="w-3.5 h-3.5" />
+            <span>Datos protegidos</span>
+          </div>
+        </div>
       </div>
     </div>
   );
