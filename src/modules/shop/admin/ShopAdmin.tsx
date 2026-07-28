@@ -786,10 +786,7 @@ function useShopSubConfig<T>(key: 'banner' | 'popup' | 'social', defaults: T) {
       .eq('business_id', business.id)
       .maybeSingle();
     const current = (data?.shop_config || {}) as Record<string, unknown>;
-    const { error } = await supabase
-      .from('branding')
-      .upsert({ business_id: business.id, shop_config: { ...current, [key]: next } }, { onConflict: 'business_id' });
-    if (error) console.error('Error saving shop config:', error);
+    await authInvoke('admin-update-shop-config', { shop_config: { ...current, [key]: next } });
     setSaving(false);
   }, [business?.id, key]);
 
