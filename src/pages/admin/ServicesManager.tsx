@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ExternalLink, CalendarCheck } from 'lucide-react';
+import { ExternalLink, CalendarCheck, Plus, Edit, Trash2, X, Check } from 'lucide-react';
 import { supabase, Service } from '../../lib/supabase';
 import { compressImage } from '../../lib/image-utils';
 import { Button } from '../../components/ui/button';
@@ -113,16 +113,16 @@ export function ServicesManager() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold font-display">Servicios</h2>
-          <p className="text-sm text-muted-foreground">Administrá los servicios que ofrecés</p>
+          <h2 className="text-xl sm:text-2xl font-bold font-display">Servicios</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">Administrá los servicios que ofrecés</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <a href={`/${business?.slug || '...'}/reservas`} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="sm" className="gap-1.5 transition-all duration-200"><ExternalLink className="w-3.5 h-3.5" />Ver reservas</Button>
+            <Button variant="outline" size="sm" className="gap-1.5 transition-all duration-200"><ExternalLink className="w-3.5 h-3.5" /><span className="hidden sm:inline">Ver reservas</span></Button>
           </a>
-          <Button onClick={openNew} size="sm" className="transition-all duration-200">+ Nuevo servicio</Button>
+          <Button onClick={openNew} size="sm" className="transition-all duration-200"><Plus className="w-4 h-4 sm:mr-1.5" /><span className="hidden sm:inline">Nuevo servicio</span></Button>
         </div>
       </div>
 
@@ -136,23 +136,30 @@ export function ServicesManager() {
           ) : (
             <div className="divide-y divide-border/60">
               {services.map((s) => (
-                <div key={s.id} className="flex items-center justify-between px-8 py-6 transition-all duration-200 hover:bg-muted/40">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <span className="font-medium">{s.name}</span>
-                      {!s.is_active && <Badge variant="secondary">Inactivo</Badge>}
+                <div key={s.id} className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-8 py-3 sm:py-6 gap-3 transition-all duration-200 hover:bg-muted/40">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap">
+                      <span className="font-medium text-sm sm:text-base">{s.name}</span>
+                      {!s.is_active && <Badge variant="secondary" className="text-[10px] sm:text-xs">Inactivo</Badge>}
                     </div>
-                    {s.description && <p className="text-sm text-muted-foreground">{s.description}</p>}
-                    <p className="text-sm font-medium text-primary">
+                    {s.description && <p className="text-xs sm:text-sm text-muted-foreground truncate">{s.description}</p>}
+                    <p className="text-xs sm:text-sm font-medium text-primary">
                       ${s.price.toLocaleString('es-AR')} {s.currency}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Button variant="outline" size="sm" className="transition-all duration-200" onClick={() => toggleActive(s)}>
-                      {s.is_active ? 'Desactivar' : 'Activar'}
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Button variant="outline" size="sm" className="transition-all duration-200" onClick={() => toggleActive(s)} title={s.is_active ? 'Desactivar' : 'Activar'}>
+                      <span className="sm:hidden">{s.is_active ? <X className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}</span>
+                      <span className="hidden sm:inline">{s.is_active ? 'Desactivar' : 'Activar'}</span>
                     </Button>
-                    <Button variant="outline" size="sm" className="transition-all duration-200" onClick={() => openEdit(s)}>Editar</Button>
-                    <Button variant="destructive" size="sm" className="transition-all duration-200" onClick={() => remove(s.id)}>Eliminar</Button>
+                    <Button variant="outline" size="sm" className="transition-all duration-200 px-2 sm:px-3" onClick={() => openEdit(s)} title="Editar">
+                      <Edit className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline ml-1">Editar</span>
+                    </Button>
+                    <Button variant="destructive" size="sm" className="transition-all duration-200 px-2 sm:px-3" onClick={() => remove(s.id)} title="Eliminar">
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline ml-1">Eliminar</span>
+                    </Button>
                   </div>
                 </div>
               ))}
