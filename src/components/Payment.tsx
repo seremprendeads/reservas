@@ -54,55 +54,59 @@ export function Payment() {
       return;
     }
 
-    const existingScript = document.getElementById('mp-sdk');
-    if (existingScript) {
-      if (window.MercadoPago) {
-        initMercadoPago();
-        setMpLoaded(true);
+    let cancelled = false;
+
+    const init = async () => {
+      const [sdkReady, publicKey] = await Promise.all([
+        waitForMpSdk(),
+        getPublicKey(),
+      ]);
+
+      if (cancelled) return;
+
+      if (!publicKey) {
+        setError('No se pudo obtener la configuracion de pago');
         setLoading(false);
         return;
       }
-      existingScript.onload = () => {
-        setMpLoaded(true);
-        setLoading(false);
-        initMercadoPago();
-      };
-      return;
-    }
 
-    const script = document.createElement('script');
-    script.id = 'mp-sdk';
-    script.src = 'https://sdk.mercadopago.com/js/v2';
-    script.onload = () => {
+      if (!sdkReady) {
+        setError('Error al cargar Mercado Pago');
+        setLoading(false);
+        return;
+      }
+
       setMpLoaded(true);
-      setLoading(false);
-      initMercadoPago();
-    };
-    script.onerror = () => {
-      setError('Error al cargar Mercado Pago');
+      initBrick(publicKey);
       setLoading(false);
     };
-    document.head.appendChild(script);
+
+    init();
 
     const checkInterval = setInterval(checkPaymentStatus, 10000);
-
     return () => {
+      cancelled = true;
       clearInterval(checkInterval);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const initMercadoPago = async () => {
+  const waitForMpSdk = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (window.MercadoPago) return resolve(true);
+      const check = setInterval(() => {
+        if (window.MercadoPago) {
+          clearInterval(check);
+          resolve(true);
+        }
+      }, 50);
+      setTimeout(() => { clearInterval(check); resolve(false); }, 8000);
+    });
+  };
+
+  const initBrick = async (publicKey: string) => {
     try {
-      // Evitar inicializar si el container ya tiene contenido
       const container = document.getElementById('mercadopago_container');
       if (container && container.innerHTML.trim() !== '') return;
-
-      const publicKey = await getPublicKey();
-
-      if (!publicKey) {
-        setError('No se pudo obtener la configuracion de pago');
-        return;
-      }
 
       const mp = new window.MercadoPago(publicKey, {
         locale: 'es-AR'
