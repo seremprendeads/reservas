@@ -1,4 +1,4 @@
-import { Menu, ExternalLink } from 'lucide-react';
+import { Menu, ExternalLink, Sun, Moon } from 'lucide-react';
 import { Avatar } from '../../components/ui/avatar';
 import { Separator } from '../../components/ui/separator';
 
@@ -7,6 +7,8 @@ interface AdminHeaderProps {
   onMenuClick: () => void;
   adminName: string;
   adminAvatar: string;
+  darkMode: boolean;
+  onToggleDarkMode: () => void;
   businessSlug?: string;
 }
 
@@ -15,6 +17,8 @@ export function AdminHeader({
   onMenuClick,
   adminName,
   adminAvatar,
+  darkMode,
+  onToggleDarkMode,
   businessSlug,
 }: AdminHeaderProps) {
   return (
@@ -29,7 +33,14 @@ export function AdminHeader({
         <h1 className="text-xl font-display">{title}</h1>
       </div>
 
-      <div className="ml-auto flex items-center gap-4">
+      <div className="ml-auto flex items-center gap-2">
+        <button
+          onClick={onToggleDarkMode}
+          title={darkMode ? 'Modo claro' : 'Modo oscuro'}
+          className="rounded-xl p-2 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all duration-200">
+          {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
+
         <a
           href={`/${businessSlug || '...'}/reservas`}
           target="_blank"

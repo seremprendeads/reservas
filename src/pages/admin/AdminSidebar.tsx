@@ -95,6 +95,13 @@ export function AdminSidebar({
               <span className="text-xs text-muted-foreground truncate block mt-0.5">{adminName || adminEmail}</span>
             </div>
           )}
+          <button
+            onClick={onToggleDarkMode}
+            title={darkMode ? 'Modo claro' : 'Modo oscuro'}
+            className="shrink-0 rounded-xl p-2 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all duration-200"
+          >
+            {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
         </div>
 
         {/* Toggle collapse button */}
@@ -202,17 +209,7 @@ export function AdminSidebar({
         )}
 
         {/* Footer */}
-        <div className="border-t border-border p-3 space-y-1">
-          <button
-            onClick={onToggleDarkMode}
-            title={collapsed ? (darkMode ? 'Modo claro' : 'Modo oscuro') : undefined}
-            className={cn(
-              'flex w-full items-center rounded-2xl text-base font-display text-muted-foreground transition-colors duration-200 hover:bg-muted/40 hover:text-foreground',
-              collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3'
-            )}>
-            {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            {!collapsed && <span>{darkMode ? 'Modo claro' : 'Modo oscuro'}</span>}
-          </button>
+        <div className="border-t border-border p-3">
           <button
             onClick={onLogout}
             title={collapsed ? 'Cerrar sesión' : undefined}

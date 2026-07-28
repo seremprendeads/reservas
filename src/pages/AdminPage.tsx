@@ -287,6 +287,8 @@ export function AdminPage() {
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           adminName={adminName}
           adminAvatar={adminAvatar}
+          darkMode={darkMode}
+          onToggleDarkMode={() => setDarkMode(!darkMode)}
           businessSlug={business?.slug}
         />
 
