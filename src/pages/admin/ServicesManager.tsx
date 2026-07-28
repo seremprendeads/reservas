@@ -120,7 +120,7 @@ export function ServicesManager() {
         </div>
         <div className="flex items-center gap-2">
           <a href={`/${business?.slug || '...'}/reservas`} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="sm" className="gap-1.5 transition-all duration-200"><ExternalLink className="w-3.5 h-3.5" /><span className="hidden sm:inline">Ver reservas</span></Button>
+            <Button variant="outline" size="sm" className="gap-1.5 transition-all duration-200"><ExternalLink className="w-3.5 h-3.5" />Ver servicios</Button>
           </a>
           <Button onClick={openNew} size="sm" className="transition-all duration-200"><Plus className="w-4 h-4 sm:mr-1.5" /><span className="hidden sm:inline">Nuevo servicio</span></Button>
         </div>
@@ -149,8 +149,7 @@ export function ServicesManager() {
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <Button variant="outline" size="sm" className="transition-all duration-200" onClick={() => toggleActive(s)} title={s.is_active ? 'Desactivar' : 'Activar'}>
-                      <span className="sm:hidden">{s.is_active ? <X className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}</span>
-                      <span className="hidden sm:inline">{s.is_active ? 'Desactivar' : 'Activar'}</span>
+                      {s.is_active ? 'Desactivar' : 'Activar'}
                     </Button>
                     <Button variant="outline" size="sm" className="transition-all duration-200 px-2 sm:px-3" onClick={() => openEdit(s)} title="Editar">
                       <Edit className="w-3.5 h-3.5" />
