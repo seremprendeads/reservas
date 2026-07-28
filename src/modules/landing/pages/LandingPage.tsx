@@ -32,7 +32,7 @@ import { MarketingPopup } from '../sections/MarketingPopup';
 import { ShopInviteSection } from '../sections/ShopInviteSection';
 import { Header } from '../sections/Header';
 import { useModuleAccess, ModuleBlockedScreen } from '../../subscription';
-import { cn } from '../../lib/utils';
+import { cn } from '../../../lib/utils';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Star, Wrench, Palette, Zap, Shield, Clock, Heart, Award, CheckCircle,
