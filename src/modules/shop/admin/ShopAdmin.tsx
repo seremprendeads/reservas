@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink, X, Megaphone, Timer, MessageSquare } from 'lucide-react';
-import { supabase } from '../../../lib/supabase';
+import { supabase, ShopBannerConfig, ShopPopupConfig, ShopSocialConfig, ShopSocialEntry as SocialEntry } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, Order } from '../types';
 import { PLAN_LIMITS, SHOP_STORAGE_BUCKET } from '../config';
+import { authInvoke } from '../../../pages/admin/helpers';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Card, CardContent } from '../../../components/ui/card';
@@ -610,21 +611,7 @@ function ProductsTrash() {
   );
 }
 
-const SHOP_POPUP_KEY = 'shop_popup_config';
-
-interface ShopPopupConfig {
-  enabled: boolean;
-  title: string;
-  subtitle: string;
-  description: string;
-  button_text: string;
-  button_url: string;
-  image_url: string | null;
-  overlay_color: string;
-  overlay_opacity: number;
-}
-
-const DEFAULT_SHOP_POPUP: ShopPopupConfig = {
+const SHOP_POPUP_DEFAULTS: ShopPopupConfig = {
   enabled: false,
   title: '¡Oferta especial!',
   subtitle: 'No te pierdas nuestras promociones',
@@ -638,24 +625,8 @@ const DEFAULT_SHOP_POPUP: ShopPopupConfig = {
 
 function ShopPopupTab() {
   const { business } = useBusiness();
-  const [config, setConfig] = useState<ShopPopupConfig>(DEFAULT_SHOP_POPUP);
-  const [saving, setSaving] = useState(false);
+  const { config, setConfig, saving, save } = useShopSubConfig('popup', SHOP_POPUP_DEFAULTS);
   const [uploading, setUploading] = useState(false);
-
-  useEffect(() => {
-    if (!business?.id) return;
-    try {
-      const raw = localStorage.getItem(`${SHOP_POPUP_KEY}_${business.id}`);
-      if (raw) setConfig({ ...DEFAULT_SHOP_POPUP, ...JSON.parse(raw) });
-    } catch {}
-  }, [business?.id]);
-
-  const save = () => {
-    if (!business?.id) return;
-    setSaving(true);
-    localStorage.setItem(`${SHOP_POPUP_KEY}_${business.id}`, JSON.stringify(config));
-    setTimeout(() => setSaving(false), 600);
-  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -777,20 +748,7 @@ function ShopPopupTab() {
   );
 }
 
-const SHOP_BANNER_KEY = 'shop_banner_config';
-
-interface ShopBannerConfig {
-  enabled: boolean;
-  text: string;
-  button_text: string;
-  button_url: string;
-  end_date: string;
-  gradient_from: string;
-  gradient_to: string;
-  text_color: string;
-}
-
-const DEFAULT_BANNER: ShopBannerConfig = {
+const SHOP_BANNER_DEFAULTS: ShopBannerConfig = {
   enabled: false,
   text: '¡Oferta por tiempo limitado!',
   button_text: 'COMPRAR AHORA',
@@ -801,25 +759,47 @@ const DEFAULT_BANNER: ShopBannerConfig = {
   text_color: '#ffffff',
 };
 
-function ShopBannerTab() {
+function useShopSubConfig<T>(key: 'banner' | 'popup' | 'social', defaults: T) {
   const { business } = useBusiness();
-  const [config, setConfig] = useState<ShopBannerConfig>(DEFAULT_BANNER);
+  const [config, setConfig] = useState<T>(defaults);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!business?.id) return;
-    try {
-      const raw = localStorage.getItem(`${SHOP_BANNER_KEY}_${business.id}`);
-      if (raw) setConfig({ ...DEFAULT_BANNER, ...JSON.parse(raw) });
-    } catch {}
-  }, [business?.id]);
+    (async () => {
+      const { data } = await supabase
+        .from('branding')
+        .select('shop_config')
+        .eq('business_id', business.id)
+        .maybeSingle();
+      const cfg = (data?.shop_config as Record<string, unknown> | null)?.[key] as T | null;
+      if (cfg) setConfig({ ...defaults, ...cfg });
+    })();
+  }, [business?.id, key]);
 
-  const save = () => {
+  const save = useCallback(async (next: T) => {
     if (!business?.id) return;
     setSaving(true);
-    localStorage.setItem(`${SHOP_BANNER_KEY}_${business.id}`, JSON.stringify(config));
-    setTimeout(() => setSaving(false), 600);
-  };
+    const { data } = await supabase
+      .from('branding')
+      .select('shop_config')
+      .eq('business_id', business.id)
+      .maybeSingle();
+    const current = (data?.shop_config || {}) as Record<string, unknown>;
+    const { error } = await supabase
+      .from('branding')
+      .upsert({ business_id: business.id, shop_config: { ...current, [key]: next } }, { onConflict: 'business_id' });
+    if (error) console.error('Error saving shop config:', error);
+    setSaving(false);
+  }, [business?.id, key]);
+
+  return { config, setConfig, saving, save };
+}
+
+function ShopBannerTab() {
+  const { config, setConfig, saving, save } = useShopSubConfig('banner', SHOP_BANNER_DEFAULTS);
+
+  const handleSave = () => save(config);
 
   const toLocalDatetime = (iso: string) => {
     if (!iso) return '';
@@ -902,7 +882,7 @@ function ShopBannerTab() {
           </div>
 
           <div className="flex justify-end pt-2">
-            <Button onClick={save} disabled={saving}>
+            <Button onClick={() => save(config)} disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : null}
               Guardar
             </Button>
@@ -913,23 +893,7 @@ function ShopBannerTab() {
   );
 }
 
-const SHOP_SOCIAL_KEY = 'shop_social_config';
-
-interface SocialEntry {
-  id: string;
-  name: string;
-  product: string;
-  location: string;
-  time_ago: string;
-}
-
-interface ShopSocialConfig {
-  enabled: boolean;
-  entries: SocialEntry[];
-  interval_seconds: number;
-}
-
-const DEFAULT_SOCIAL: ShopSocialConfig = {
+const SHOP_SOCIAL_DEFAULTS: ShopSocialConfig = {
   enabled: false,
   entries: [
     { id: '1', name: 'María', product: 'Remera Básica', location: 'Buenos Aires', time_ago: 'Hace 2 minutos' },
@@ -943,25 +907,9 @@ const DEFAULT_SOCIAL: ShopSocialConfig = {
 
 function ShopAvisosTab() {
   const { business } = useBusiness();
-  const [config, setConfig] = useState<ShopSocialConfig>(DEFAULT_SOCIAL);
-  const [saving, setSaving] = useState(false);
+  const { config, setConfig, saving, save } = useShopSubConfig('social', SHOP_SOCIAL_DEFAULTS);
   const [editingEntry, setEditingEntry] = useState<SocialEntry | null>(null);
   const [showForm, setShowForm] = useState(false);
-
-  useEffect(() => {
-    if (!business?.id) return;
-    try {
-      const raw = localStorage.getItem(`${SHOP_SOCIAL_KEY}_${business.id}`);
-      if (raw) setConfig({ ...DEFAULT_SOCIAL, ...JSON.parse(raw) });
-    } catch {}
-  }, [business?.id]);
-
-  const save = () => {
-    if (!business?.id) return;
-    setSaving(true);
-    localStorage.setItem(`${SHOP_SOCIAL_KEY}_${business.id}`, JSON.stringify(config));
-    setTimeout(() => setSaving(false), 600);
-  };
 
   const addEntry = () => {
     const newEntry: SocialEntry = {
@@ -1092,7 +1040,7 @@ function ShopAvisosTab() {
       </div>
 
       <div className="flex justify-end pt-2">
-        <Button onClick={save} disabled={saving}>
+        <Button onClick={() => save(config)} disabled={saving}>
           {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : null}
           Guardar
         </Button>

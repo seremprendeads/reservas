@@ -1,0 +1,2 @@
+ALTER TABLE branding
+  ADD COLUMN IF NOT EXISTS shop_config jsonb DEFAULT NULL;

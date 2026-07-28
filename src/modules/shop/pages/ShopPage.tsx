@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Search, ShoppingCart, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Package, Check, X, MapPin } from 'lucide-react';
-import { supabase } from '../../../lib/supabase';
+import { supabase, ShopConfig } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, CartItem } from '../types';
 import { CartProvider, useCart } from '../contexts/CartContext';
@@ -547,6 +547,25 @@ function CheckoutScreen({ preferenceId, orderId, pollPayment }: {
   );
 }
 
+function useShopConfig() {
+  const { business } = useBusiness();
+  const [config, setConfig] = useState<ShopConfig | null>(null);
+
+  useEffect(() => {
+    if (!business?.id) return;
+    supabase
+      .from('branding')
+      .select('shop_config')
+      .eq('business_id', business.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.shop_config) setConfig(data.shop_config as ShopConfig);
+      });
+  }, [business?.id]);
+
+  return config;
+}
+
 export function ShopPage() {
   return (
     <CartProvider>
@@ -558,40 +577,13 @@ export function ShopPage() {
   );
 }
 
-const SHOP_POPUP_KEY = 'shop_popup_config';
-
-interface ShopPopupConfig {
-  enabled: boolean;
-  title: string;
-  subtitle: string;
-  description: string;
-  button_text: string;
-  button_url: string;
-  image_url: string | null;
-  overlay_color: string;
-  overlay_opacity: number;
-}
-
 function ShopMarketingPopup() {
-  const { business } = useBusiness();
-  const [config, setConfig] = useState<ShopPopupConfig | null>(null);
+  const shopConfig = useShopConfig();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!business?.id) return;
-    try {
-      const raw = localStorage.getItem(`${SHOP_POPUP_KEY}_${business.id}`);
-      if (raw) {
-        const parsed: ShopPopupConfig = JSON.parse(raw);
-        if (parsed.enabled && !sessionStorage.getItem('shop_popup_dismissed')) {
-          setConfig(parsed);
-        }
-      }
-    } catch {}
-  }, [business?.id]);
-
-  useEffect(() => {
-    if (!config) return;
+    const config = shopConfig?.popup;
+    if (!config?.enabled || sessionStorage.getItem('shop_popup_dismissed')) return;
 
     const checkScroll = () => {
       const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
@@ -603,14 +595,15 @@ function ShopMarketingPopup() {
 
     window.addEventListener('scroll', checkScroll, { passive: true });
     return () => window.removeEventListener('scroll', checkScroll);
-  }, [config]);
+  }, [shopConfig]);
 
+  const config = shopConfig?.popup;
   const close = () => {
     setVisible(false);
     sessionStorage.setItem('shop_popup_dismissed', '1');
   };
 
-  if (!config || !visible) return null;
+  if (!config?.enabled || !visible) return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={close}>
@@ -667,35 +660,11 @@ function ShopMarketingPopup() {
   );
 }
 
-const SHOP_BANNER_KEY = 'shop_banner_config';
-
-interface ShopBannerConfig {
-  enabled: boolean;
-  text: string;
-  button_text: string;
-  button_url: string;
-  end_date: string;
-  gradient_from: string;
-  gradient_to: string;
-  text_color: string;
-}
-
 function ShopCountdownBanner() {
-  const { business } = useBusiness();
-  const [config, setConfig] = useState<ShopBannerConfig | null>(null);
+  const shopConfig = useShopConfig();
+  const config = shopConfig?.banner;
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    if (!business?.id) return;
-    try {
-      const raw = localStorage.getItem(`${SHOP_BANNER_KEY}_${business.id}`);
-      if (raw) {
-        const parsed: ShopBannerConfig = JSON.parse(raw);
-        if (parsed.enabled) setConfig(parsed);
-      }
-    } catch {}
-  }, [business?.id]);
 
   useEffect(() => {
     if (!config?.end_date) return;
@@ -773,50 +742,21 @@ function ShopCountdownBanner() {
   );
 }
 
-const SHOP_SOCIAL_KEY = 'shop_social_config';
-
-interface SocialEntry {
-  id: string;
-  name: string;
-  product: string;
-  location: string;
-  time_ago: string;
-}
-
-interface ShopSocialConfig {
-  enabled: boolean;
-  entries: SocialEntry[];
-  interval_seconds: number;
-}
-
 function ShopSocialProof() {
-  const { business } = useBusiness();
-  const [config, setConfig] = useState<ShopSocialConfig | null>(null);
+  const shopConfig = useShopConfig();
+  const config = shopConfig?.social;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [show, setShow] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    if (!business?.id) return;
-    try {
-      const raw = localStorage.getItem(`${SHOP_SOCIAL_KEY}_${business.id}`);
-      if (raw) {
-        const parsed: ShopSocialConfig = JSON.parse(raw);
-        if (parsed.enabled && parsed.entries.length > 0) {
-          setConfig(parsed);
-        }
-      }
-    } catch {}
-  }, [business?.id]);
-
-  useEffect(() => {
-    if (!config || config.entries.length === 0) return;
+    if (!config?.enabled || config.entries.length === 0) return;
     const startDelay = setTimeout(() => setShow(true), 5000);
     return () => clearTimeout(startDelay);
   }, [config]);
 
   useEffect(() => {
-    if (!config || config.entries.length === 0 || dismissed) return;
+    if (!config?.enabled || config.entries.length === 0 || dismissed) return;
     const interval = setInterval(() => {
       setShow(false);
       setTimeout(() => {
@@ -827,7 +767,7 @@ function ShopSocialProof() {
     return () => clearInterval(interval);
   }, [config, dismissed]);
 
-  if (!config || config.entries.length === 0 || dismissed || !show) return null;
+  if (!config?.enabled || config.entries.length === 0 || dismissed || !show) return null;
 
   const entry = config.entries[currentIndex];
 

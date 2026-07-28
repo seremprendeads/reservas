@@ -92,6 +92,48 @@ export type Settings = {
   slot_duration_minutes: number;
 };
 
+export type ShopBannerConfig = {
+  enabled: boolean;
+  text: string;
+  button_text: string;
+  button_url: string;
+  end_date: string;
+  gradient_from: string;
+  gradient_to: string;
+  text_color: string;
+};
+
+export type ShopPopupConfig = {
+  enabled: boolean;
+  title: string;
+  subtitle: string;
+  description: string;
+  button_text: string;
+  button_url: string;
+  image_url: string;
+  overlay_color: string;
+};
+
+export type ShopSocialEntry = {
+  id: string;
+  name: string;
+  product: string;
+  location: string;
+  time_ago: string;
+};
+
+export type ShopSocialConfig = {
+  enabled: boolean;
+  entries: ShopSocialEntry[];
+  interval_seconds: number;
+};
+
+export type ShopConfig = {
+  banner: ShopBannerConfig | null;
+  popup: ShopPopupConfig | null;
+  social: ShopSocialConfig | null;
+};
+
 export type Branding = {
   id: string;
   business_id: string;
@@ -109,6 +151,7 @@ export type Branding = {
   overlay_color: string;
   header_color: string;
   header_opacity: number;
+  shop_config: ShopConfig | null;
   updated_at: string;
 };
 

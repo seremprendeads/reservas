@@ -13,7 +13,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const body = await req.json();
-    const { logo_url, title, subtitle, primary_color, background_color, card_bg_color, text_color, muted_color, caption_color, background_image_url, bg_opacity, overlay_color, header_color, header_opacity } = body;
+    const { logo_url, title, subtitle, primary_color, background_color, card_bg_color, text_color, muted_color, caption_color, background_image_url, bg_opacity, overlay_color, header_color, header_opacity, shop_config } = body;
 
     const supabase = createServiceClient();
     const { error } = await supabase
@@ -34,6 +34,7 @@ Deno.serve(async (req: Request) => {
         overlay_color: overlay_color || background_color || "#111827",
         header_color: header_color || primary_color || "#1f2937",
         header_opacity: header_opacity ?? 26,
+        shop_config: shop_config ?? null,
         updated_at: new Date().toISOString(),
       }, { onConflict: "business_id" });
 
