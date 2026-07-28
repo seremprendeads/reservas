@@ -67,7 +67,7 @@ export function ShopAdmin() {
           <div className="flex items-center justify-between">
             <label className="text-sm font-semibold text-foreground">Colores de la tienda</label>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={copyBrandingToShop}>Copiar paleta de Apariencia</Button>
+              <Button variant="outline" size="sm" onClick={copyBrandingToShop}>Copiar colores</Button>
               <Button variant="outline" size="sm" onClick={resetShopColors} title="Restaurar valores predeterminados"><RotateCcw className="w-4 h-4" /></Button>
             </div>
           </div>
