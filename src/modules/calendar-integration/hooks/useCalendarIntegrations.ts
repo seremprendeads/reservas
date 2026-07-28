@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { authInvoke } from '../../pages/admin/helpers';
+import { authInvoke } from '../../../pages/admin/helpers';
 
 interface CalendarIntegrationData {
   id: string;
