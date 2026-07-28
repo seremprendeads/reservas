@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LogOut, Sun, Moon, ExternalLink, ChevronDown, PanelLeftClose, PanelLeftOpen, LayoutDashboard, Package, Sparkles, Settings } from 'lucide-react';
 import { Avatar } from '../../components/ui/avatar';
 import { cn } from '../../lib/utils';
@@ -49,21 +49,12 @@ export function AdminSidebar({
   onLogout,
 }: AdminSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const initialGroup = NAV_GROUPS.find(g => g.ids.includes(currentView));
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => ({
-    gestion: initialGroup?.id === 'gestion',
-    negocio: initialGroup?.id === 'negocio',
-    presencia: initialGroup?.id === 'presencia',
-    sistema: initialGroup?.id === 'sistema',
-  }));
-
-  // Auto-abrir el grupo de la vista actual
-  useEffect(() => {
-    const group = NAV_GROUPS.find(g => g.ids.includes(currentView));
-    if (group) {
-      setOpenGroups(prev => prev[group.id] ? prev : { ...prev, [group.id]: true });
-    }
-  }, [currentView]);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    gestion: false,
+    negocio: false,
+    presencia: false,
+    sistema: false,
+  });
 
   const toggleGroup = (id: string) => {
     if (collapsed) {
