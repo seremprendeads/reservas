@@ -48,7 +48,9 @@ export function LandingAdmin({ business }: Props) {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     secciones: false, engagement: false, config: false,
   });
-  const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const [panelCollapsed, setPanelCollapsed] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+  );
   const [contentCollapsed, setContentCollapsed] = useState(false);
 
   if (loading) {
