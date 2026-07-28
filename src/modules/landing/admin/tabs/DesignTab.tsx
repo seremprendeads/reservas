@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 import { Input } from '../../../../components/ui/input';
 import { Button } from '../../../../components/ui/button';
 import { Separator } from '../../../../components/ui/separator';
@@ -50,7 +51,7 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
     <div className="space-y-7">
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={copyFromBranding}>Copiar paleta de Apariencia</Button>
-        <Button variant="outline" size="sm" onClick={resetToDefaults}>Restaurar valores predeterminados</Button>
+        <Button variant="outline" size="sm" onClick={resetToDefaults} title="Restaurar valores predeterminados"><RotateCcw className="w-4 h-4" /></Button>
       </div>
 
       <div>

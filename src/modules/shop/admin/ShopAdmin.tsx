@@ -21,11 +21,75 @@ import { MultiImageUploader } from './MultiImageUploader';
 import { deleteStorageFile } from './storage-utils';
 
 export function ShopAdmin() {
-  useBusiness();
+  const { business } = useBusiness();
   const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'trash' | 'popup' | 'banner' | 'avisos'>('dashboard');
+  const { config: bannerCfg, setConfig: setBannerCfg, save: saveBanner } = useShopSubConfig('banner', SHOP_BANNER_DEFAULTS);
+  const { config: popupCfg, setConfig: setPopupCfg, save: savePopup } = useShopSubConfig('popup', SHOP_POPUP_DEFAULTS);
+  const [shopThemeId, setShopThemeId] = useState('');
+
+  const applyShopTheme = (themeId: string) => {
+    const t = allThemes.find(th => th.id === themeId);
+    if (!t) return;
+    setShopThemeId(themeId);
+    const newBanner = { ...bannerCfg, gradient_from: t.tokens.primary, gradient_to: t.tokens.cardBg, text_color: t.tokens.text };
+    const newPopup = { ...popupCfg, overlay_color: t.tokens.primary };
+    setBannerCfg(newBanner);
+    setPopupCfg(newPopup);
+    saveBanner(newBanner);
+    savePopup(newPopup);
+  };
+
+  const copyBrandingToShop = async () => {
+    if (!business?.id) return;
+    setShopThemeId('');
+    const { data } = await supabase.from('branding').select('*').eq('business_id', business.id).maybeSingle();
+    if (!data) return;
+    const newBanner = { ...bannerCfg, gradient_from: data.primary_color || bannerCfg.gradient_from, gradient_to: data.card_bg_color || bannerCfg.gradient_to, text_color: data.text_color || bannerCfg.text_color };
+    const newPopup = { ...popupCfg, overlay_color: data.primary_color || popupCfg.overlay_color };
+    setBannerCfg(newBanner);
+    setPopupCfg(newPopup);
+    saveBanner(newBanner);
+    savePopup(newPopup);
+  };
+
+  const resetShopColors = () => {
+    setShopThemeId('');
+    setBannerCfg(SHOP_BANNER_DEFAULTS);
+    setPopupCfg(SHOP_POPUP_DEFAULTS);
+    saveBanner(SHOP_BANNER_DEFAULTS);
+    savePopup(SHOP_POPUP_DEFAULTS);
+  };
 
   return (
     <div className="space-y-6">
+      <Card>
+        <CardContent className="p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-semibold text-foreground">Colores de la tienda</label>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={copyBrandingToShop}>Copiar paleta de Apariencia</Button>
+              <Button variant="outline" size="sm" onClick={resetShopColors} title="Restaurar valores predeterminados"><RotateCcw className="w-4 h-4" /></Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {allThemes.map(t => (
+              <button key={t.id} onClick={() => applyShopTheme(t.id)}
+                className={`relative flex items-center gap-1.5 rounded-xl border-2 p-2.5 transition-all ${
+                  shopThemeId === t.id ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-muted-foreground/30'
+                }`}>
+                <div className="flex gap-1">
+                  <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.primary }} />
+                  <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.background }} />
+                  <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.cardBg }} />
+                  <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.text }} />
+                </div>
+                <span className="text-[11px] font-medium text-muted-foreground truncate">{t.name}</span>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center gap-3 border-b pb-4 mb-6 overflow-x-auto lg:flex-wrap">
         <button onClick={() => setView('dashboard')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'dashboard' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <BarChart3 className="w-4 h-4 inline mr-1.5" />Dashboard
@@ -629,7 +693,6 @@ function ShopPopupTab() {
   const { business } = useBusiness();
   const { config, setConfig, saving, save } = useShopSubConfig('popup', SHOP_POPUP_DEFAULTS);
   const [uploading, setUploading] = useState(false);
-  const [popupThemeId, setPopupThemeId] = useState('');
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -655,51 +718,6 @@ function ShopPopupTab() {
     <div className="space-y-6">
       <Card>
         <CardContent className="p-6 space-y-5">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={async () => {
-              if (!business?.id) return;
-              setPopupThemeId('');
-              const { data } = await supabase.from('branding').select('*').eq('business_id', business.id).maybeSingle();
-              if (!data) return;
-              const merged = {
-                ...config,
-                overlay_color: data.primary_color || config.overlay_color,
-              };
-              setConfig(merged);
-              save(merged);
-            }}>Copiar paleta de Apariencia</Button>
-            <Button variant="outline" size="sm" onClick={() => {
-              setPopupThemeId('');
-              setConfig(SHOP_POPUP_DEFAULTS);
-              save(SHOP_POPUP_DEFAULTS);
-            }}>Restaurar valores predeterminados</Button>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground mb-3 block">Temas predefinidos</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {allThemes.map(t => (
-                <button key={t.id} onClick={() => {
-                  setPopupThemeId(t.id);
-                  const merged = { ...config, overlay_color: t.tokens.primary };
-                  setConfig(merged);
-                  save(merged);
-                }}
-                  className={`relative flex items-center gap-1.5 rounded-xl border-2 p-2.5 transition-all ${
-                    popupThemeId === t.id ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-muted-foreground/30'
-                  }`}>
-                  <div className="flex gap-1">
-                    <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.primary }} />
-                    <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.background }} />
-                    <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.cardBg }} />
-                    <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.text }} />
-                  </div>
-                  <span className="text-[11px] font-medium text-muted-foreground truncate">{t.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
           <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-muted/40 transition-all duration-200">
             <input
               type="checkbox"
@@ -861,7 +879,6 @@ function useShopSubConfig<T>(key: 'banner' | 'popup' | 'social', defaults: T) {
 function ShopBannerTab() {
   const { business } = useBusiness();
   const { config, setConfig, saving, save } = useShopSubConfig('banner', SHOP_BANNER_DEFAULTS);
-  const [bannerThemeId, setBannerThemeId] = useState('');
 
   const toLocalDatetime = (iso: string) => {
     if (!iso) return '';
@@ -869,66 +886,10 @@ function ShopBannerTab() {
     return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 16);
   };
 
-  const applyBannerTheme = (themeId: string) => {
-    const t = allThemes.find(th => th.id === themeId);
-    if (!t) return;
-    setBannerThemeId(themeId);
-    const merged = {
-      ...config,
-      gradient_from: t.tokens.primary,
-      gradient_to: t.tokens.cardBg,
-      text_color: t.tokens.text,
-    };
-    setConfig(merged);
-    save(merged);
-  };
-
   return (
     <div className="space-y-6">
       <Card>
         <CardContent className="p-6 space-y-5">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={async () => {
-              if (!business?.id) return;
-              setBannerThemeId('');
-              const { data } = await supabase.from('branding').select('*').eq('business_id', business.id).maybeSingle();
-              if (!data) return;
-              const merged = {
-                ...config,
-                gradient_from: data.primary_color || config.gradient_from,
-                gradient_to: data.card_bg_color || config.gradient_to,
-                text_color: data.text_color || config.text_color,
-              };
-              setConfig(merged);
-              save(merged);
-            }}>Copiar paleta de Apariencia</Button>
-            <Button variant="outline" size="sm" onClick={() => {
-              setBannerThemeId('');
-              setConfig(SHOP_BANNER_DEFAULTS);
-              save(SHOP_BANNER_DEFAULTS);
-            }}>Restaurar valores predeterminados</Button>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground mb-3 block">Temas predefinidos</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {allThemes.map(t => (
-                <button key={t.id} onClick={() => applyBannerTheme(t.id)}
-                  className={`relative flex items-center gap-1.5 rounded-xl border-2 p-2.5 transition-all ${
-                    bannerThemeId === t.id ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-muted-foreground/30'
-                  }`}>
-                  <div className="flex gap-1">
-                    <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.primary }} />
-                    <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.background }} />
-                    <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.cardBg }} />
-                    <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.text }} />
-                  </div>
-                  <span className="text-[11px] font-medium text-muted-foreground truncate">{t.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
           <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-muted/40 transition-all duration-200">
             <input
               type="checkbox"

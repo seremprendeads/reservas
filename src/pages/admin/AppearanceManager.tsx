@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { XCircle } from 'lucide-react';
+import { XCircle, RotateCcw } from 'lucide-react';
 import { Branding } from '../../lib/supabase';
 import { compressImage as compressImageUtil } from '../../lib/image-utils';
 import { Button } from '../../components/ui/button';
@@ -288,9 +288,19 @@ export function AppearanceManager({
           </Card>
 
           {/* Guardar */}
-          <Button onClick={saveBranding} disabled={saving} size="lg" className="w-full">
-            {saving ? 'Guardando...' : 'Guardar apariencia'}
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={saveBranding} disabled={saving} size="lg" className="flex-1">
+              {saving ? 'Guardando...' : 'Guardar apariencia'}
+            </Button>
+            <Button variant="outline" size="lg" onClick={() => {
+              setPrimaryColor('#059669'); setBgColor('#111827'); setCardBgColor('#1f2937');
+              setTextColor('#ffffff'); setMutedColor('#e6e6e6'); setCaptionColor('#e6e6e6');
+              setOverlayColor('#111827'); setBgOpacity(80); setHeaderOpacity(26);
+              setSelectedThemeId('');
+            }} title="Restaurar valores predeterminados">
+              <RotateCcw className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         {/* ── Right: Phone Preview ─────────────────────────────────────── */}

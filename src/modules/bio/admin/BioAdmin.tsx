@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   User, Link as LinkIcon, Palette, BarChart3, QrCode, Plus, Trash2,
   GripVertical, ExternalLink, Copy, Check, Loader2, Eye, EyeOff,
-  Download, Upload, X,
+  Download, Upload, X, RotateCcw,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
@@ -628,7 +628,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     handleFieldChange('button_style', 'rounded');
                     handleFieldChange('button_shadow', true);
                     saveDraft();
-                  }}>Restaurar valores predeterminados</Button>
+                  }} title="Restaurar valores predeterminados"><RotateCcw className="w-4 h-4" /></Button>
                 </div>
 
                 <div>
