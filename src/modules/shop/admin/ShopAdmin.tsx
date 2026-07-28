@@ -782,11 +782,28 @@ function useShopSubConfig<T>(key: 'banner' | 'popup' | 'social', defaults: T) {
     setSaving(true);
     const { data } = await supabase
       .from('branding')
-      .select('shop_config')
+      .select('*')
       .eq('business_id', business.id)
       .maybeSingle();
-    const current = (data?.shop_config || {}) as Record<string, unknown>;
-    await authInvoke('admin-update-shop-config', { shop_config: { ...current, [key]: next } });
+    if (!data) { setSaving(false); return; }
+    const currentShopConfig = (data.shop_config || {}) as Record<string, unknown>;
+    await authInvoke('admin-update-branding', {
+      logo_url: data.logo_url,
+      title: data.title,
+      subtitle: data.subtitle,
+      primary_color: data.primary_color,
+      background_color: data.background_color,
+      card_bg_color: data.card_bg_color,
+      text_color: data.text_color,
+      muted_color: data.muted_color,
+      caption_color: data.caption_color,
+      background_image_url: data.background_image_url,
+      bg_opacity: data.bg_opacity,
+      overlay_color: data.overlay_color,
+      header_color: data.header_color,
+      header_opacity: data.header_opacity,
+      shop_config: { ...currentShopConfig, [key]: next },
+    });
     setSaving(false);
   }, [business?.id, key]);
 
