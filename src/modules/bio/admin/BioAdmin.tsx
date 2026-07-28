@@ -393,7 +393,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
             {copied ? 'Copiado' : 'Copiar enlace'}
           </Button>
           <a href={publicUrl} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="sm" className="gap-1.5"><ExternalLink className="w-3.5 h-3.5" />Ver</Button>
+            <Button variant="outline" size="sm" className="gap-1.5"><ExternalLink className="w-3.5 h-3.5" />Ver Bio</Button>
           </a>
         </div>
       </div>
