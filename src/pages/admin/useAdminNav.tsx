@@ -67,6 +67,7 @@ export function useAdminNav(
 
     const tail: NavItem[] = isFreePlan
       ? [
+          { id: 'integrations', label: 'Integraciones', icon: <Plug className="h-5 w-5" /> },
           { id: 'profile', label: 'Configuración de Cuenta', icon: <UserCog className="h-5 w-5" /> },
         ]
       : [

@@ -85,7 +85,7 @@ export function AdminPage() {
   const renderView = () => {
     if (!business) return null;
 
-    const freePlanAllowedViews = ['dashboard', 'bio', 'profile', 'calendar'];
+    const freePlanAllowedViews = ['dashboard', 'bio', 'profile', 'calendar', 'integrations'];
     if (isFreePlan && !freePlanAllowedViews.includes(view)) {
       return <DashboardView
         trialCountdown={trialCountdown}
