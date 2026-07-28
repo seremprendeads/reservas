@@ -50,6 +50,7 @@ export function LandingAdmin({ business }: Props) {
   });
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [contentCollapsed, setContentCollapsed] = useState(false);
+  const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
 
   if (loading) {
     return (
@@ -99,6 +100,28 @@ export function LandingAdmin({ business }: Props) {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <div className="lg:hidden flex items-center gap-1 rounded-lg bg-muted p-1">
+            <button
+              onClick={() => setMobileView('edit')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                mobileView === 'edit'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Editar
+            </button>
+            <button
+              onClick={() => setMobileView('preview')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                mobileView === 'preview'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Vista previa
+            </button>
+          </div>
           {slug && (
             <Button variant="outline" size="sm" asChild>
               <a href={`/${encodeURIComponent(slug)}`} target="_blank" className="flex items-center gap-1">
@@ -120,7 +143,7 @@ export function LandingAdmin({ business }: Props) {
         />
 
         {activeTab && !contentCollapsed ? (
-        <div className="w-[420px] shrink-0">
+        <div className={`w-[420px] shrink-0 ${mobileView === 'preview' ? 'hidden lg:block' : ''}`}>
           <Card className="shadow-[0_8px_30px_rgba(0,0,0,.05)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="font-display">
@@ -220,8 +243,8 @@ export function LandingAdmin({ business }: Props) {
         </div>
         ) : null}
 
-        <div className="flex-1 min-w-0">
-          <Card className="sticky top-4 shadow-[0_8px_30px_rgba(0,0,0,.05)]">
+        <div className={`flex-1 min-w-0 ${mobileView === 'edit' ? 'hidden lg:block' : ''}`}>
+          <Card className="lg:sticky lg:top-4 shadow-[0_8px_30px_rgba(0,0,0,.05)]">
             <CardContent className="p-0 overflow-hidden">
               <div className="bg-muted/30 px-6 py-3 border-b">
                 <span className="text-xs font-medium text-muted-foreground">Vista previa</span>
