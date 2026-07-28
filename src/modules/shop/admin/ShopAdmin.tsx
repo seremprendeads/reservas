@@ -103,9 +103,6 @@ export function ShopAdmin() {
         <button onClick={() => setView('orders')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'orders' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <ShoppingCart className="w-4 h-4 inline mr-1.5" />Ventas
         </button>
-        <button onClick={() => setView('trash')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'trash' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
-          <Archive className="w-4 h-4 inline mr-1.5" />Papelera
-        </button>
         <button onClick={() => setView('popup')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'popup' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <Megaphone className="w-4 h-4 inline mr-1.5" />Popup
         </button>
@@ -115,6 +112,9 @@ export function ShopAdmin() {
         <button onClick={() => setView('avisos')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'avisos' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <MessageSquare className="w-4 h-4 inline mr-1.5" />Avisos
         </button>
+        <button onClick={() => setView('trash')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'trash' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <Archive className="w-4 h-4 inline mr-1.5" />Papelera
+        </button>
         <a href="/tienda" target="_blank" rel="noopener noreferrer" className="shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent lg:ml-auto inline-flex items-center">
           <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
         </a>
@@ -123,10 +123,10 @@ export function ShopAdmin() {
       {view === 'products' && <ProductsManager />}
       {view === 'categories' && <CategoriesManager />}
       {view === 'orders' && <OrdersList />}
-      {view === 'trash' && <ProductsTrash />}
       {view === 'popup' && <ShopPopupTab />}
       {view === 'banner' && <ShopBannerTab />}
       {view === 'avisos' && <ShopAvisosTab />}
+      {view === 'trash' && <ProductsTrash />}
     </div>
   );
 }
