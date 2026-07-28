@@ -48,27 +48,26 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
   };
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={copyFromBranding}>Copiar paleta de Apariencia</Button>
         <Button variant="outline" size="sm" onClick={resetToDefaults} title="Restaurar valores predeterminados"><RotateCcw className="w-4 h-4" /></Button>
       </div>
 
       <div>
-        <label className="text-sm font-medium text-foreground mb-3 block">Temas predefinidos</label>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <label className="text-xs font-medium text-foreground mb-2 block">Temas predefinidos</label>
+        <div className="grid grid-cols-3 gap-1.5">
           {allThemes.map(t => (
             <button key={t.id} onClick={() => applyTheme(t.id)}
-              className={`relative flex items-center gap-1.5 rounded-xl border-2 p-2.5 transition-all ${
-                selectedThemeId === t.id ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-muted-foreground/30'
+              className={`relative flex flex-col items-center gap-0.5 rounded-lg border p-1.5 transition-all ${
+                selectedThemeId === t.id ? 'border-primary ring-1 ring-primary/20' : 'border-border hover:border-muted-foreground/30'
               }`}>
-              <div className="flex gap-1">
-                <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.primary }} />
-                <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.background }} />
-                <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.cardBg }} />
-                <div className="h-4 w-4 rounded-full border border-white/20" style={{ backgroundColor: t.tokens.text }} />
+              <div className="flex gap-0.5">
+                <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: t.tokens.primary }} />
+                <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: t.tokens.background }} />
+                <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: t.tokens.cardBg }} />
               </div>
-              <span className="text-[11px] font-medium text-muted-foreground truncate">{t.name}</span>
+              <span className="text-[9px] font-medium text-muted-foreground truncate leading-none">{t.name}</span>
             </button>
           ))}
         </div>
@@ -77,8 +76,8 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
       <Separator />
 
       <div>
-        <label className="text-sm font-medium text-foreground mb-3 block">Colores</label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <label className="text-xs font-medium text-foreground mb-2 block">Colores</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {[
             { label: 'Principal', key: 'primary_color' },
             { label: 'Secundario', key: 'secondary_color' },
@@ -90,15 +89,15 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
             { label: 'Iconos Redes', key: 'social_icon_color' },
             { label: 'Iconos Servicios', key: 'service_icon_color' },
           ].map(c => (
-            <div key={c.key} className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">{c.label}</label>
-              <div className="flex items-center gap-2.5">
+            <div key={c.key} className="space-y-1">
+              <label className="text-xs text-muted-foreground">{c.label}</label>
+              <div className="flex items-center gap-2">
                 <input type="color" value={theme[c.key as keyof LandingTheme] as string}
                   onChange={e => updateTheme(c.key, e.target.value)}
-                  className="h-8 w-8 cursor-pointer rounded-xl border bg-transparent p-0.5 shrink-0" />
+                  className="h-7 w-7 cursor-pointer rounded-lg border bg-transparent p-0.5 shrink-0" />
                 <Input type="text" value={theme[c.key as keyof LandingTheme] as string}
                   onChange={e => updateTheme(c.key, e.target.value)}
-                  className="h-9 font-mono text-xs" />
+                  className="h-8 font-mono text-xs" />
               </div>
             </div>
           ))}
@@ -108,12 +107,12 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
       <Separator />
 
       <div>
-        <label className="text-sm font-medium text-foreground mb-3 block">Bordes de Botones</label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <label className="text-xs font-medium text-foreground mb-2 block">Bordes de Botones</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <div>
-            <label className="text-sm font-medium text-foreground">Forma de bordes</label>
+            <label className="text-xs text-muted-foreground">Forma de bordes</label>
             <select value={theme.button_border_radius} onChange={e => updateTheme('button_border_radius', e.target.value)}
-              className="mt-1.5 w-full h-12 rounded-xl border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              className="mt-1 w-full h-9 rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <option value="rounded-none">Cuadrado</option>
               <option value="rounded-sm">Redondeado chico</option>
               <option value="rounded">Redondeado</option>
@@ -131,19 +130,19 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
       <Separator />
 
       <div>
-        <label className="text-sm font-medium text-foreground mb-3 block">Tipografía</label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <label className="text-xs font-medium text-foreground mb-2 block">Tipografía</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <div>
-            <label className="text-sm font-medium text-foreground">Títulos</label>
+            <label className="text-xs text-muted-foreground">Títulos</label>
             <select value={theme.font_heading} onChange={e => updateTheme('font_heading', e.target.value)}
-              className="mt-1.5 w-full h-12 rounded-xl border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              className="mt-1 w-full h-9 rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               {AVAILABLE_FONTS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground">Cuerpo</label>
+            <label className="text-xs text-muted-foreground">Cuerpo</label>
             <select value={theme.font_body} onChange={e => updateTheme('font_body', e.target.value)}
-              className="mt-1.5 w-full h-12 rounded-xl border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              className="mt-1 w-full h-9 rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               {AVAILABLE_FONTS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
             </select>
           </div>
