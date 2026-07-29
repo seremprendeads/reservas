@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { ArrowLeft, LayoutDashboard } from 'lucide-react';
 import { Booking } from '../lib/supabase';
 import { setName as setSessionName, setAvatar as setSessionAvatar } from '../lib/admin-session';
 import { getModuleById } from '../lib/admin-registry';
@@ -78,6 +80,12 @@ export function AdminPage() {
 
   const { subscription, config: subConfig } = useSubscription({ business });
 
+  const [prevView, setPrevView] = useState<string | null>(null);
+  const handleNavigate = (newView: string) => {
+    setPrevView(view);
+    setView(newView);
+  };
+
   const showSuccess = (msg: string) => {
     setSuccessModal({ open: true, message: msg });
   };
@@ -93,10 +101,10 @@ export function AdminPage() {
         upcomingBookings={upcomingBookings}
         paidBookings={paidBookings}
         pendingPayments={pendingPayments}
-        onNavigate={(newView: string) => setView(newView)}
+        onNavigate={(newView: string) => handleNavigate(newView)}
         onSelectBooking={(booking: Booking) => {
           setSelectedBooking(booking);
-          setView('detail');
+          handleNavigate('detail');
         }}
       />;
     }
@@ -110,10 +118,10 @@ export function AdminPage() {
             upcomingBookings={upcomingBookings}
             paidBookings={paidBookings}
             pendingPayments={pendingPayments}
-            onNavigate={(newView: string) => setView(newView)}
+            onNavigate={(newView: string) => handleNavigate(newView)}
             onSelectBooking={(booking: Booking) => {
               setSelectedBooking(booking);
-              setView('detail');
+              handleNavigate('detail');
             }}
           />
         );
@@ -128,7 +136,7 @@ export function AdminPage() {
             onRefresh={loadData}
             onSelectBooking={(booking: Booking) => {
               setSelectedBooking(booking);
-              setView('detail');
+              handleNavigate('detail');
             }}
             onUpdateStatus={updateBookingStatus}
             onDelete={deleteBooking}
@@ -138,7 +146,7 @@ export function AdminPage() {
         return selectedBooking ? (
           <BookingDetailView
             selectedBooking={selectedBooking}
-            onBack={() => setView('bookings')}
+            onBack={() => handleNavigate('bookings')}
             onUpdateStatus={updateBookingStatus}
             onDelete={deleteBooking}
             onSaved={() => {
@@ -262,13 +270,13 @@ export function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900 flex">
-      <AdminSidebar
-        navItems={navItems}
-        currentView={view}
-        onNavigate={(newView: string) => {
-          setView(newView);
-          setSidebarOpen(false);
-        }}
+        <AdminSidebar
+          navItems={navItems}
+          currentView={view}
+          onNavigate={(newView: string) => {
+            handleNavigate(newView);
+            setSidebarOpen(false);
+          }}
         sidebarOpen={sidebarOpen}
         onSidebarClose={() => setSidebarOpen(false)}
         adminName={adminName}
@@ -281,7 +289,7 @@ export function AdminPage() {
         onLogout={handleLogout}
       />
 
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden pb-16 lg:pb-0">
         <AdminHeader
           title={currentViewTitle}
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
@@ -297,9 +305,28 @@ export function AdminPage() {
           {renderView()}
         </main>
 
-        <footer className="border-t border-border bg-card/80 backdrop-blur-sm px-6 py-3 text-center">
-          <span className="text-xs text-gray-500 font-bold">by bookingBio</span>
-        </footer>
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between border-t border-border bg-card/95 backdrop-blur-md px-6 py-2.5 safe-area-bottom">
+          <button
+            onClick={() => {
+              if (prevView) { handleNavigate(prevView); }
+              else { handleNavigate('dashboard'); }
+            }}
+            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            <span className="text-[10px] font-medium">Atrás</span>
+          </button>
+
+          <span className="text-[10px] text-gray-500 font-bold">by bookingBio</span>
+
+          <button
+            onClick={() => handleNavigate('dashboard')}
+            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <LayoutDashboard className="h-5 w-5" />
+            <span className="text-[10px] font-medium">Inicio</span>
+          </button>
+        </nav>
       </div>
 
       <AdminModals
