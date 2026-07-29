@@ -34,11 +34,8 @@ export function useAdminAuth() {
     if (!loggedIn) return;
 
     const checkTrial = () => {
-      const trialEnds = session.getTrialEndsAt();
-      if (!trialEnds) return;
-
-      const endDate = new Date(trialEnds);
       const now = new Date();
+      const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0, 0);
       const diffMs = endDate.getTime() - now.getTime();
       const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
@@ -58,12 +55,9 @@ export function useAdminAuth() {
   useEffect(() => {
     if (!loggedIn) return;
     const update = () => {
-      const trialEnds = session.getTrialEndsAt();
-      if (!trialEnds) {
-        setTrialCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
-      }
-      const diff = Math.max(0, new Date(trialEnds).getTime() - Date.now());
+      const now = new Date();
+      const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0, 0);
+      const diff = Math.max(0, endDate.getTime() - Date.now());
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
