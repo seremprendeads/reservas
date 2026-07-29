@@ -357,7 +357,7 @@ export function AdminPage() {
                 <Mail className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
               </div>
               <p className="text-center text-sm leading-relaxed text-muted-foreground">
-                Gracias por comunicarte, en breve estaremos revisando la duda o el problema.
+                Gracias por comunicarte,<br />en breve estaremos revisando la duda o el problema.
               </p>
               <p className="text-center text-xs font-semibold text-foreground">
                 El equipo de soporte
