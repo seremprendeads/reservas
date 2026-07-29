@@ -349,28 +349,61 @@ export function AdminPage() {
       </button>
 
       <Dialog open={supportOpen} onOpenChange={setSupportOpen}>
-        <DialogContent className="sm:max-w-xs rounded-2xl p-6">
+        <DialogContent className="sm:max-w-md rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-center font-display">Contactar soporte</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-3 pt-2">
-            <a
-              href="mailto:support@bookingbio.com"
-              className="inline-flex items-center justify-center gap-3 rounded-xl border border-border bg-card px-5 py-4 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-muted"
-            >
-              <Mail className="h-5 w-5 text-primary" />
-              support@bookingbio.com
-            </a>
-            <a
-              href="https://wa.me/54123456789"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-3 rounded-xl bg-green-500 px-5 py-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-green-600"
-            >
-              <MessageCircle className="h-5 w-5" />
-              WhatsApp
-            </a>
-          </div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const name = (form.nombre as HTMLInputElement).value;
+              const phone = (form.telefono as HTMLInputElement).value;
+              const msg = (form.mensaje as HTMLTextAreaElement).value;
+              const body = `Nombre: ${name}%0ACelular: ${phone}%0A%0AMensaje:%0A${msg}`;
+              window.location.href = `mailto:support@bookingbio.com?subject=Soporte%20BookingBio&body=${body}`;
+            }}
+            className="flex flex-col gap-4 pt-2"
+          >
+            <input
+              name="nombre"
+              placeholder="Tu nombre"
+              required
+              className="h-11 rounded-xl border border-border bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            />
+            <input
+              name="telefono"
+              type="tel"
+              placeholder="Tu celular"
+              required
+              className="h-11 rounded-xl border border-border bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            />
+            <textarea
+              name="mensaje"
+              placeholder="Escribí tu mensaje..."
+              rows={4}
+              required
+              className="rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all resize-none"
+            />
+            <div className="flex flex-col gap-2 pt-1">
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90"
+              >
+                <Mail className="h-4 w-4" />
+                Enviar por email
+              </button>
+              <a
+                href="https://wa.me/54123456789"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-green-600"
+              >
+                <MessageCircle className="h-4 w-4" />
+                WhatsApp
+              </a>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
 
