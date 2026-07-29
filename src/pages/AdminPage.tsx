@@ -368,7 +368,7 @@ export function AdminPage() {
               >
                 Cerrar
               </button>
-              <p className="text-center text-xs text-gray-400">
+              <p className="text-center text-xs text-gray-400 mt-4">
                 Powered by <span className="font-bold">Bookingbio</span>
               </p>
             </div>
