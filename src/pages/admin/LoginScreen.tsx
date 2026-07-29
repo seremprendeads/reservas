@@ -29,7 +29,7 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
       } else {
         // Check trial status
         if (data.trial_expired) {
-          setError('Tu período de prueba de 14 días ha expirado. Contactanos para continuar.');
+          setError('Tu período de prueba de 14 días ha expirado. Escribinos a support@bookingbio.com para continuar.');
           setLoading(false);
           return;
         }
@@ -70,13 +70,11 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
     <div className="flex min-h-screen items-center justify-center bg-background p-4 dark:bg-gray-950">
       <div className="w-full max-w-md">
         <div className="mb-12 text-center">
-          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-xl shadow-primary/20">
-            <Lock className="h-6 w-6 text-primary-foreground" />
-          </div>
+
           <h1 className="text-3xl font-display text-foreground">
             {mode === 'login' ? 'Bienvenido' : 'Recuperar contraseña'}
           </h1>
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="mt-3 text-sm text-foreground/70">
             {mode === 'login' ? 'Ingresá a tu panel de administración' : 'Te enviamos una contraseña temporal por email'}
           </p>
         </div>
@@ -146,7 +144,7 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
             )}
           </CardContent>
         </Card>
-        <p className="mt-8 text-center text-base font-bold text-gray-500">by bookingBio</p>
+        <p className="mt-8 text-center text-base font-bold text-foreground/60">by bookingBio</p>
       </div>
     </div>
   );
