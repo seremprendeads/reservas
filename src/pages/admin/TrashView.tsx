@@ -46,24 +46,24 @@ export function TrashView({
               {deletedBookings.map((booking) => {
                 const days = daysUntilPurge(booking.deleted_at ?? booking.updated_at);
                 return (
-                  <div key={booking.id} className="flex items-center justify-between rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:bg-muted/40">
-                    <div className="flex-1">
+                  <div key={booking.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:bg-muted/40 gap-3 sm:gap-0">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3">
-                        <p className="font-medium">{booking.customer_name}</p>
-                        <span className="font-mono text-xs text-muted-foreground">{booking.booking_code}</span>
+                        <p className="font-medium truncate">{booking.customer_name}</p>
+                        <span className="font-mono text-xs text-muted-foreground shrink-0">{booking.booking_code}</span>
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} {booking.booking_time}
-                        <Badge variant={days <= 3 ? 'destructive' : 'warning'} className="ml-2">
+                      <p className="mt-1 text-sm text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span>{new Date(booking.booking_date + 'T12:00:00').toLocaleDateString('es-AR')} {booking.booking_time}</span>
+                        <Badge variant={days <= 3 ? 'destructive' : 'warning'} className="shrink-0">
                           Se elimina en {days} días
                         </Badge>
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 ml-4 shrink-0">
-                      <Button onClick={() => onRestore(booking.id)} variant="secondary" size="sm">
+                    <div className="flex items-center gap-2 sm:ml-4 shrink-0">
+                      <Button onClick={() => onRestore(booking.id)} variant="secondary" size="sm" className="flex-1 sm:flex-none">
                         <RotateCcw className="mr-1 h-4 w-4" /> Restaurar
                       </Button>
-                      <Button onClick={() => onPurge(booking.id)} variant="destructive" size="sm">
+                      <Button onClick={() => onPurge(booking.id)} variant="destructive" size="sm" className="flex-1 sm:flex-none">
                         <Trash2 className="mr-1 h-4 w-4" /> Eliminar
                       </Button>
                     </div>
