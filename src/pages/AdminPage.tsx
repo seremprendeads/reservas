@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ArrowLeft, LayoutDashboard } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, Mail, MessageCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Booking } from '../lib/supabase';
 import { setName as setSessionName, setAvatar as setSessionAvatar } from '../lib/admin-session';
 import { getModuleById } from '../lib/admin-registry';
@@ -81,6 +82,7 @@ export function AdminPage() {
 
   const { subscription, config: subConfig } = useSubscription({ business });
 
+  const [supportOpen, setSupportOpen] = useState(false);
   const [prevView, setPrevView] = useState<string | null>(null);
   const handleNavigate = (newView: string) => {
     setPrevView(view);
@@ -331,8 +333,8 @@ export function AdminPage() {
         trialCountdown={trialCountdown}
       />
 
-      <a
-        href="mailto:support@bookingbio.com"
+      <button
+        onClick={() => setSupportOpen(true)}
         className="group fixed bottom-6 right-6 z-50 flex items-center gap-2 hidden lg:flex"
         title="Soporte"
       >
@@ -344,7 +346,33 @@ export function AdminPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
           </svg>
         </span>
-      </a>
+      </button>
+
+      <Dialog open={supportOpen} onOpenChange={setSupportOpen}>
+        <DialogContent className="sm:max-w-xs rounded-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-center font-display">Contactar soporte</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 pt-2">
+            <a
+              href="mailto:support@bookingbio.com"
+              className="inline-flex items-center justify-center gap-3 rounded-xl border border-border bg-card px-5 py-4 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-muted"
+            >
+              <Mail className="h-5 w-5 text-primary" />
+              support@bookingbio.com
+            </a>
+            <a
+              href="https://wa.me/54123456789"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-3 rounded-xl bg-green-500 px-5 py-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-green-600"
+            >
+              <MessageCircle className="h-5 w-5" />
+              WhatsApp
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
