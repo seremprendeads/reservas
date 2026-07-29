@@ -362,15 +362,15 @@ export function AdminPage() {
               <p className="text-center text-xs font-semibold text-foreground">
                 El equipo de soporte
               </p>
-              <p className="text-center text-xs text-gray-400">
-                Powered by <span className="font-bold">Bookingbio</span>
-              </p>
               <button
                 onClick={() => { setSupportOpen(false); setSupportSent(false); }}
                 className="mt-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90"
               >
                 Cerrar
               </button>
+              <p className="text-center text-xs text-gray-400">
+                Powered by <span className="font-bold">Bookingbio</span>
+              </p>
             </div>
           ) : (
             <>
