@@ -177,7 +177,7 @@ export function FooterSection({ footer, menuItems, logoUrl, slug, theme, ts, hea
               )}
             </div>
             <a href="https://bookingbio.com" target="_blank" rel="noopener noreferrer" className="inline-block mt-8 group">
-              <span style={{ ...bodyStyle, color: footerTextColor }} className="text-2xl font-black tracking-tight opacity-30 group-hover:opacity-60 transition-opacity">
+              <span style={{ ...bodyStyle, color: footerTextColor }} className="text-sm font-black tracking-tight opacity-30 group-hover:opacity-60 transition-opacity">
                 by BookingBio
               </span>
             </a>
