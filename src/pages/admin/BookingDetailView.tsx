@@ -24,10 +24,6 @@ export function BookingDetailView({
 }: BookingDetailViewProps) {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
-      <Button onClick={onBack} variant="ghost" size="sm">
-        <ArrowLeft className="mr-2 h-4 w-4" /> Volver
-      </Button>
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -104,6 +100,12 @@ export function BookingDetailView({
           </div>
         </CardContent>
       </Card>
+
+      <div className="flex justify-center">
+        <Button onClick={onBack} variant="outline" size="lg" className="rounded-xl px-8">
+          <ArrowLeft className="mr-2 h-5 w-5" /> Volver
+        </Button>
+      </div>
     </div>
   );
 }
