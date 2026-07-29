@@ -7,6 +7,7 @@ import { LandingPage } from './modules/landing/pages/LandingPage';
 import { CreateBusinessPage } from './pages/CreateBusinessPage';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BusinessProvider } from './contexts/BusinessContext';
+import { SuspendedGuard } from './modules/subscription';
 
 function App() {
   return (
@@ -20,19 +21,19 @@ function App() {
             <Route path="/create-business" element={<CreateBusinessPage />} />
             
             {/* Public booking page */}
-            <Route path="/reservas" element={<BookingPage />} />
-            <Route path="/:slug/reservas" element={<BookingPage />} />
+            <Route path="/reservas" element={<SuspendedGuard><BookingPage /></SuspendedGuard>} />
+            <Route path="/:slug/reservas" element={<SuspendedGuard><BookingPage /></SuspendedGuard>} />
             
             {/* Shop - public */}
-            <Route path="/tienda" element={<ShopPage />} />
-            <Route path="/:slug/tienda" element={<ShopPage />} />
+            <Route path="/tienda" element={<SuspendedGuard><ShopPage /></SuspendedGuard>} />
+            <Route path="/:slug/tienda" element={<SuspendedGuard><ShopPage /></SuspendedGuard>} />
             
             {/* Bio - public */}
-            <Route path="/:slug/bio" element={<BioPage />} />
+            <Route path="/:slug/bio" element={<SuspendedGuard><BioPage /></SuspendedGuard>} />
             
             {/* Landing page - catch-all: / or /:slug */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/:slug" element={<LandingPage />} />
+            <Route path="/" element={<SuspendedGuard><LandingPage /></SuspendedGuard>} />
+            <Route path="/:slug" element={<SuspendedGuard><LandingPage /></SuspendedGuard>} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

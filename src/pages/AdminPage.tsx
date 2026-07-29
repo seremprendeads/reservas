@@ -265,6 +265,7 @@ export function AdminPage() {
         message={subConfig.suspended_message}
         supportWhatsapp={subConfig.support_whatsapp}
         supportEmail={subConfig.support_email}
+        paymentButtonUrl={subConfig.payment_button_url}
       />
     );
   }
