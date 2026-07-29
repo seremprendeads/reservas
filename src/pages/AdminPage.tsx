@@ -259,17 +259,6 @@ export function AdminPage() {
     );
   }
 
-  if (subscription.is_blocked) {
-    return (
-      <SuspendedScreen
-        message={subConfig.suspended_message}
-        supportWhatsapp={subConfig.support_whatsapp}
-        supportEmail={subConfig.support_email}
-        paymentButtonUrl={subConfig.payment_button_url}
-      />
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900 flex">
         <AdminSidebar
