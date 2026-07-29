@@ -44,10 +44,7 @@ export function useAdminAuth() {
 
       setTrialDaysLeft(days > 0 ? days : 0);
 
-      if (days <= 0) {
-        handleLogout();
-        return;
-      }
+      // removed: trial expired no longer logs out (read_only_when_cancelled: false)
 
       if (days <= 2 && !trialWarningShownRef.current) {
         trialWarningShownRef.current = true;
