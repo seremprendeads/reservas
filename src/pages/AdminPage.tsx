@@ -83,6 +83,7 @@ export function AdminPage() {
   const { subscription, config: subConfig } = useSubscription({ business });
 
   const [supportOpen, setSupportOpen] = useState(false);
+  const [supportSent, setSupportSent] = useState(false);
   const [prevView, setPrevView] = useState<string | null>(null);
   const handleNavigate = (newView: string) => {
     setPrevView(view);
@@ -348,62 +349,74 @@ export function AdminPage() {
         </span>
       </button>
 
-      <Dialog open={supportOpen} onOpenChange={setSupportOpen}>
+      <Dialog open={supportOpen} onOpenChange={(open) => { setSupportOpen(open); if (!open) setSupportSent(false); }}>
         <DialogContent className="sm:max-w-md rounded-2xl p-6">
-          <DialogHeader>
-            <DialogTitle className="text-center font-display">Contactar soporte</DialogTitle>
-          </DialogHeader>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const form = e.currentTarget;
-              const name = (form.nombre as HTMLInputElement).value;
-              const phone = (form.telefono as HTMLInputElement).value;
-              const msg = (form.mensaje as HTMLTextAreaElement).value;
-              const body = `Nombre: ${name}%0ACelular: ${phone}%0A%0AMensaje:%0A${msg}`;
-              window.location.href = `mailto:support@bookingbio.com?subject=Soporte%20BookingBio&body=${body}`;
-            }}
-            className="flex flex-col gap-4 pt-2"
-          >
-            <input
-              name="nombre"
-              placeholder="Tu nombre"
-              required
-              className="h-11 rounded-xl border border-border bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-            />
-            <input
-              name="telefono"
-              type="tel"
-              placeholder="Tu celular"
-              required
-              className="h-11 rounded-xl border border-border bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-            />
-            <textarea
-              name="mensaje"
-              placeholder="Escribí tu mensaje..."
-              rows={4}
-              required
-              className="rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all resize-none"
-            />
-            <div className="flex flex-col gap-2 pt-1">
+          {supportSent ? (
+            <div className="flex flex-col items-center gap-4 py-6">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+                <Mail className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-center text-sm leading-relaxed text-muted-foreground">
+                Gracias por comunicarte, en breve estaremos revisando la duda o el problema.
+              </p>
+              <p className="text-center text-xs font-semibold text-foreground">
+                El equipo de soporte
+              </p>
               <button
-                type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90"
+                onClick={() => { setSupportOpen(false); setSupportSent(false); }}
+                className="mt-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90"
               >
-                <Mail className="h-4 w-4" />
-                Enviar por email
+                Cerrar
               </button>
-              <a
-                href="https://wa.me/54123456789"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-green-600"
-              >
-                <MessageCircle className="h-4 w-4" />
-                WhatsApp
-              </a>
             </div>
-          </form>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-center font-display">Contactar soporte</DialogTitle>
+              </DialogHeader>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const name = (form.nombre as HTMLInputElement).value;
+                  const phone = (form.telefono as HTMLInputElement).value;
+                  const msg = (form.mensaje as HTMLTextAreaElement).value;
+                  const body = `Nombre: ${name}%0ACelular: ${phone}%0A%0AMensaje:%0A${msg}`;
+                  window.location.href = `mailto:support@bookingbio.com?subject=Soporte%20BookingBio&body=${body}`;
+                  setSupportSent(true);
+                }}
+                className="flex flex-col gap-4 pt-2"
+              >
+                <input
+                  name="nombre"
+                  placeholder="Tu nombre"
+                  required
+                  className="h-11 rounded-xl border border-border bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                />
+                <input
+                  name="telefono"
+                  type="tel"
+                  placeholder="Tu celular"
+                  required
+                  className="h-11 rounded-xl border border-border bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                />
+                <textarea
+                  name="mensaje"
+                  placeholder="Escribí tu mensaje..."
+                  rows={4}
+                  required
+                  className="rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all resize-none"
+                />
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90"
+                >
+                  <Mail className="h-4 w-4" />
+                  Enviar
+                </button>
+              </form>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
