@@ -19,8 +19,11 @@ export function SuspendedScreen({ message, supportWhatsapp, supportEmail, paymen
         <h2 className="font-display mb-3 text-center text-xl font-semibold text-gray-900">
           Suscripción suspendida
         </h2>
-        <p className="mb-8 text-center text-sm leading-relaxed text-gray-500">
+        <p className="mb-4 text-center text-sm leading-relaxed text-gray-500">
           {message}
+        </p>
+        <p className="mb-6 text-center text-xs font-semibold text-red-500">
+          Tenés 15 días para renovar, de lo contrario se eliminarán todos tus datos.
         </p>
         <div className="flex flex-col gap-3">
           <a
