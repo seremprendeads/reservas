@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, LayoutDashboard, Mail, MessageCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { Booking } from '../lib/supabase';
+import { Booking, supabase } from '../lib/supabase';
 import { setName as setSessionName, setAvatar as setSessionAvatar } from '../lib/admin-session';
 import { getModuleById } from '../lib/admin-registry';
 import { LoginScreen } from './admin/LoginScreen';
@@ -378,14 +378,15 @@ export function AdminPage() {
                 <DialogTitle className="text-center font-display">Contactar soporte</DialogTitle>
               </DialogHeader>
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   const form = e.currentTarget;
                   const name = (form.nombre as HTMLInputElement).value;
                   const phone = (form.telefono as HTMLInputElement).value;
                   const msg = (form.mensaje as HTMLTextAreaElement).value;
-                  const body = `Nombre: ${name}%0ACelular: ${phone}%0A%0AMensaje:%0A${msg}`;
-                  window.location.href = `mailto:support@bookingbio.com?subject=Soporte%20BookingBio&body=${body}`;
+                  await supabase.functions.invoke('send-support-email', {
+                    body: { name, phone, message: msg },
+                  });
                   setSupportSent(true);
                 }}
                 className="flex flex-col gap-4 pt-2"
