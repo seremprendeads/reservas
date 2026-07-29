@@ -1,13 +1,37 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { supabase } from '../../../lib/supabase';
+import { supabase, type Business } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { SuspendedScreen } from './SuspendedScreen';
 import { DEFAULT_SUBSCRIPTION_CONFIG } from '../lib/constants';
 
 interface SuspendedGuardProps {
   children: React.ReactNode;
+}
+
+function getTrialEnd(business: Business): Date | null {
+  if (!business.is_trial) return null;
+  if (DEFAULT_SUBSCRIPTION_CONFIG.trial_duration_minutes > 0 && business.created_at) {
+    const end = new Date(business.created_at);
+    end.setMinutes(end.getMinutes() + DEFAULT_SUBSCRIPTION_CONFIG.trial_duration_minutes);
+    return end;
+  }
+  if (!business.trial_ends_at) return null;
+  return new Date(business.trial_ends_at);
+}
+
+function isBusinessBlocked(business: Business): boolean {
+  if (!business.is_active) return true;
+  if (business.is_trial) {
+    const trialEnd = getTrialEnd(business);
+    if (!trialEnd) return false;
+    const daysLeft = Math.ceil(
+      (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    );
+    if (daysLeft <= 0 && DEFAULT_SUBSCRIPTION_CONFIG.read_only_when_cancelled) return true;
+  }
+  return false;
 }
 
 export function SuspendedGuard({ children }: SuspendedGuardProps) {
@@ -38,11 +62,11 @@ export function SuspendedGuard({ children }: SuspendedGuardProps) {
     }
 
     if (contextBusiness) {
-      if (!contextBusiness.is_active) {
-        setState(prev => ({ ...prev, checking: false, suspended: true }));
-      } else {
-        setState(prev => ({ ...prev, checking: false, suspended: false }));
-      }
+      setState(prev => ({
+        ...prev,
+        checking: false,
+        suspended: isBusinessBlocked(contextBusiness),
+      }));
       return;
     }
 
@@ -50,12 +74,17 @@ export function SuspendedGuard({ children }: SuspendedGuardProps) {
 
     supabase
       .from('businesses')
-      .select('id, is_active')
+      .select('*')
       .eq('slug', slug)
       .maybeSingle()
       .then(({ data }) => {
-        if (data && !data.is_active) {
-          setState(prev => ({ ...prev, checking: false, suspended: true }));
+        if (data) {
+          const biz = data as unknown as Business;
+          setState(prev => ({
+            ...prev,
+            checking: false,
+            suspended: isBusinessBlocked(biz),
+          }));
         } else {
           setState(prev => ({ ...prev, checking: false, suspended: false }));
         }
