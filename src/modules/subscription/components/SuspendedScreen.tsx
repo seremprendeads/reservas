@@ -7,7 +7,7 @@ interface SuspendedScreenProps {
 
 export function SuspendedScreen({ message, supportWhatsapp, supportEmail, paymentButtonUrl }: SuspendedScreenProps) {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-6">
+    <div className="flex min-h-screen items-center justify-center px-6">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,.05)] transition-all duration-200">
         <div className="mb-6 flex justify-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
