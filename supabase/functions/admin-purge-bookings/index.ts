@@ -12,7 +12,7 @@ Deno.serve(async (req: Request) => {
       return jsonUnauthorized();
     }
 
-    const { booking_id } = await req.json();
+    const { booking_id, purge_all } = await req.json();
 
     const supabase = createServiceClient();
     
@@ -22,7 +22,7 @@ Deno.serve(async (req: Request) => {
 
     if (booking_id) {
       query = query.eq("id", booking_id);
-    } else {
+    } else if (!purge_all) {
       const threeWeeksAgo = new Date();
       threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
       query = query.lt("deleted_at", threeWeeksAgo.toISOString());

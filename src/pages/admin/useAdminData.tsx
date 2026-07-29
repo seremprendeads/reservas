@@ -75,6 +75,7 @@ export function useAdminData() {
     deleteBooking: bookings.deleteBooking,
     restoreBooking: bookings.restoreBooking,
     purgeBooking: bookings.purgeBooking,
+    emptyTrash: bookings.emptyTrash,
     daysUntilPurge: bookings.daysUntilPurge,
     filteredBookings: bookings.filteredBookings,
     todaysBookings: bookings.todaysBookings,

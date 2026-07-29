@@ -122,6 +122,23 @@ export function useAdminBookings({ businessId, onProfileLoaded, setConfirmModal 
     });
   };
 
+  const emptyTrash = async () => {
+    setConfirmModal({
+      open: true,
+      message: '¿Vaciar papelera? Todas las reservas se eliminarán definitivamente.',
+      onConfirm: async () => {
+        setConfirmModal({ open: false, message: '', onConfirm: () => {} });
+        try {
+          const { data, error } = await authInvoke('admin-purge-bookings', { purge_all: true });
+          if (error || !data?.success) throw new Error('Error al vaciar papelera');
+          loadData();
+        } catch {
+          alert('Error al vaciar la papelera');
+        }
+      },
+    });
+  };
+
   const daysUntilPurge = (deletedAt: string) => {
     const deleted = new Date(deletedAt);
     const purgeDate = new Date(deleted);
@@ -167,6 +184,7 @@ export function useAdminBookings({ businessId, onProfileLoaded, setConfirmModal 
     deleteBooking,
     restoreBooking,
     purgeBooking,
+    emptyTrash,
     daysUntilPurge,
     filteredBookings,
     todaysBookings,

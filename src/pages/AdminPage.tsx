@@ -67,6 +67,7 @@ export function AdminPage() {
     deleteBooking,
     restoreBooking,
     purgeBooking,
+    emptyTrash,
     daysUntilPurge,
     filteredBookings,
     todaysBookings,
@@ -234,7 +235,7 @@ export function AdminPage() {
             deletedBookings={deletedBookings}
             onRestore={restoreBooking}
             onPurge={purgeBooking}
-            onEmptyTrash={() => {}}
+            onEmptyTrash={emptyTrash}
             daysUntilPurge={daysUntilPurge}
           />
         );
@@ -305,7 +306,7 @@ export function AdminPage() {
           {renderView()}
         </main>
 
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between border-t border-border bg-card/95 backdrop-blur-md px-6 py-2.5 safe-area-bottom">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between border-t border-border bg-card/95 backdrop-blur-md px-6 py-2.5">
           <button
             onClick={() => {
               if (prevView) { handleNavigate(prevView); }
@@ -314,17 +315,17 @@ export function AdminPage() {
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span className="text-[10px] font-medium">Atrás</span>
+            <span className="text-[10px] font-bold">Atrás</span>
           </button>
 
-          <span className="text-[10px] text-gray-500 font-bold">by bookingBio</span>
+          <span className="text-xs text-gray-500 font-bold">by bookingBio</span>
 
           <button
             onClick={() => handleNavigate('dashboard')}
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <LayoutDashboard className="h-5 w-5" />
-            <span className="text-[10px] font-medium">Inicio</span>
+            <span className="text-[10px] font-bold">Inicio</span>
           </button>
         </nav>
       </div>
@@ -342,7 +343,7 @@ export function AdminPage() {
 
       <a
         href="mailto:support@bookingbio.com"
-        className="group fixed bottom-6 right-6 z-50 flex items-center gap-2"
+        className="group fixed bottom-6 right-6 z-50 flex items-center gap-2 hidden lg:flex"
         title="Soporte"
       >
         <span className="hidden rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white shadow-lg transition-all duration-200 group-hover:block dark:bg-gray-100 dark:text-gray-900">
