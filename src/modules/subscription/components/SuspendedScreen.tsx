@@ -51,7 +51,7 @@ export function SuspendedScreen({ message, supportWhatsapp, supportEmail, paymen
           )}
         </div>
         <p className="mt-6 text-center text-xs font-bold text-gray-400">
-          Powered by BookingBio
+          Bookingbio
         </p>
       </div>
     </div>
