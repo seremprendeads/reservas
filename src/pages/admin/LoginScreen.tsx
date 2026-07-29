@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Lock, Eye, EyeOff, XCircle, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { saveLoginSession } from '../../lib/admin-session';
 import { Button } from '../../components/ui/button';
@@ -83,13 +83,11 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
           <CardContent className="p-10">
             {error && (
               <Alert variant="destructive" className="mb-6">
-                <XCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             {success && (
               <Alert variant="success" className="mb-6">
-                <CheckCircle className="h-4 w-4" />
                 <AlertDescription>{success}</AlertDescription>
               </Alert>
             )}
