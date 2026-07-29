@@ -27,12 +27,7 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
       if (fnError || !data?.success) {
         setError('Email o contraseña incorrectos');
       } else {
-        // Check trial status
-        if (data.trial_expired) {
-          setError('Tu período de prueba de 14 días ha expirado. Escribinos a support@bookingbio.com para continuar.');
-          setLoading(false);
-          return;
-        }
+
         saveLoginSession({
           email,
           token: data.token,

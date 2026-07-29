@@ -8,7 +8,7 @@ export const DEFAULT_SUBSCRIPTION_CONFIG: SubscriptionConfig = {
   support_whatsapp: '',
   support_email: '',
   payment_button_url: '',
-  read_only_when_cancelled: true,
+  read_only_when_cancelled: false,
 };
 
 export const STATUS_LABELS: Record<string, string> = {
