@@ -50,8 +50,8 @@ export function SuspendedScreen({ message, supportWhatsapp, supportEmail, paymen
             </a>
           )}
         </div>
-        <p className="mt-6 text-center text-xs font-bold text-gray-400">
-          Bookingbio
+        <p className="mt-6 text-center text-xs text-gray-400">
+          Powered by <span className="font-bold">Bookingbio</span>
         </p>
       </div>
     </div>
