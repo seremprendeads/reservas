@@ -13,13 +13,25 @@ interface UseSubscriptionResult {
   config: SubscriptionConfig;
 }
 
-function deriveStatus(business: Business | null, warningDays: number): SubscriptionStatus {
+function getTrialEnd(business: Business | null, trialDurationMinutes: number): Date | null {
+  if (!business?.is_trial) return null;
+  if (trialDurationMinutes > 0 && business.created_at) {
+    const end = new Date(business.created_at);
+    end.setMinutes(end.getMinutes() + trialDurationMinutes);
+    return end;
+  }
+  if (!business.trial_ends_at) return null;
+  return new Date(business.trial_ends_at);
+}
+
+function deriveStatus(business: Business | null, warningDays: number, trialDurationMinutes: number): SubscriptionStatus {
   if (!business) return 'active';
   if (!business.is_active) return 'suspended';
   if (business.is_trial) {
-    if (!business.trial_ends_at) return 'trial';
+    const trialEnd = getTrialEnd(business, trialDurationMinutes);
+    if (!trialEnd) return 'trial';
     const daysLeft = Math.ceil(
-      (new Date(business.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
     if (daysLeft <= 0) return 'cancelled';
     if (daysLeft <= warningDays) return 'expiring';
@@ -28,12 +40,13 @@ function deriveStatus(business: Business | null, warningDays: number): Subscript
   return 'active';
 }
 
-function calcDaysUntilExpiry(business: Business | null): number | null {
-  if (!business?.trial_ends_at) return null;
+function calcDaysUntilExpiry(business: Business | null, trialDurationMinutes: number): number | null {
+  const trialEnd = getTrialEnd(business, trialDurationMinutes);
+  if (!trialEnd) return null;
   return Math.max(
     0,
     Math.ceil(
-      (new Date(business.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     )
   );
 }
@@ -45,8 +58,8 @@ export function useSubscription({ business, config: configOverrides }: UseSubscr
   );
 
   const subscription = useMemo<SubscriptionInfo>(() => {
-    const status = deriveStatus(business, config.days_before_expiry_warning);
-    const daysUntilExpiry = calcDaysUntilExpiry(business);
+    const status = deriveStatus(business, config.days_before_expiry_warning, config.trial_duration_minutes);
+    const daysUntilExpiry = calcDaysUntilExpiry(business, config.trial_duration_minutes);
     const isBlocked =
       status === 'suspended' ||
       (status === 'cancelled' && config.read_only_when_cancelled);

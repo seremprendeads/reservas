@@ -3,7 +3,8 @@ import type { SubscriptionConfig, ModuleId } from '../types';
 export const DEFAULT_SUBSCRIPTION_CONFIG: SubscriptionConfig = {
   show_trial_banner: true,
   show_expiring_popup: true,
-  days_before_expiry_warning: 7,
+  days_before_expiry_warning: 5,
+  trial_duration_minutes: 0,
   suspended_message: 'Tu suscripción está suspendida. Para continuar usando el sistema, renová tu plan.',
   support_whatsapp: '',
   support_email: '',

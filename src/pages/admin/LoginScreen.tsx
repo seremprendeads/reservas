@@ -50,10 +50,14 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
     setSuccess('');
     setLoading(true);
     try {
-      await supabase.functions.invoke('admin-forgot-password', {
+      const { data } = await supabase.functions.invoke('admin-forgot-password', {
         body: { email: email.trim() },
       });
-      setSuccess('Si el email existe, te enviamos una contraseña temporal. Revisá tu bandeja de entrada.');
+      if (data?.temp_password) {
+        setSuccess(`Tu contraseña temporal es: ${data.temp_password}. Usala para ingresar.`);
+      } else {
+        setSuccess('Si el email existe, te enviamos una contraseña temporal. Revisá tu bandeja de entrada.');
+      }
     } catch {
       setError('Error al enviar el email. Intentá de nuevo.');
     } finally {

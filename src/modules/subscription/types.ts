@@ -26,4 +26,5 @@ export interface SubscriptionConfig {
   support_email: string;
   payment_button_url: string;
   read_only_when_cancelled: boolean;
+  trial_duration_minutes: number;
 }
