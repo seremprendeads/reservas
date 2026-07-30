@@ -214,6 +214,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
   footer: {
     address: '',
     phone: '',
+    whatsapp: '',
     email: '',
     instagram: '',
     facebook: '',

@@ -28,6 +28,7 @@ import { FaqSection } from '../sections/FaqSection';
 import { CtaSection } from '../sections/CtaSection';
 import { MapSection } from '../sections/MapSection';
 import { FooterSection } from '../sections/FooterSection';
+import { FloatingWhatsApp } from '../components/FloatingWhatsApp';
 import { MarketingPopup } from '../sections/MarketingPopup';
 import { ShopInviteSection } from '../sections/ShopInviteSection';
 import { Header } from '../sections/Header';
@@ -468,6 +469,11 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
         />
+      )}
+
+      {/* ─── FLOATING WHATSAPP ─── */}
+      {s.footer?.whatsapp && (
+        <FloatingWhatsApp phone={s.footer.whatsapp} />
       )}
     </div>
   );

@@ -90,6 +90,7 @@ export interface LandingSections {
   footer: {
     address: string;
     phone: string;
+    whatsapp: string;
     email: string;
     instagram: string;
     facebook: string;

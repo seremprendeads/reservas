@@ -41,6 +41,11 @@ export function FooterTab({ sections, updateSection }: FooterTabProps) {
         </div>
       </div>
       <Separator />
+      <div>
+        <label className="text-sm font-medium text-foreground">WhatsApp (botón flotante)</label>
+        <Input value={f.whatsapp} onChange={e => update('whatsapp', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="+54 11 1234-5678" />
+      </div>
+      <Separator />
       <p className="text-sm font-medium text-foreground">Redes sociales</p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div>
