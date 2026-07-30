@@ -18,7 +18,9 @@ Deno.serve(async (req: Request) => {
 
     const now = new Date();
     const ticketDate = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-    const ticketNum = `BK-${ticketDate}-${String(Math.floor(Math.random()*900)+100)}`;
+    const secs = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    const counter = String(Math.floor(secs / 86.4) + 1).padStart(3, '0');
+    const ticketNum = `BK-${ticketDate}-${counter}`;
 
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev";
