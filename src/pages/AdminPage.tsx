@@ -84,6 +84,8 @@ export function AdminPage() {
 
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportSent, setSupportSent] = useState(false);
+  const [supportSending, setSupportSending] = useState(false);
+  const [supportError, setSupportError] = useState('');
   const [prevView, setPrevView] = useState<string | null>(null);
   const handleNavigate = (newView: string) => {
     setPrevView(view);
@@ -380,13 +382,20 @@ export function AdminPage() {
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
+                  setSupportSending(true);
+                  setSupportError('');
                   const form = e.currentTarget;
                   const name = (form.nombre as HTMLInputElement).value;
                   const phone = (form.telefono as HTMLInputElement).value;
                   const msg = (form.mensaje as HTMLTextAreaElement).value;
-                  await supabase.functions.invoke('send-support-email', {
+                  const { error: fnError } = await supabase.functions.invoke('send-support-email', {
                     body: { name, phone, message: msg },
                   });
+                  setSupportSending(false);
+                  if (fnError) {
+                    setSupportError('Error al enviar. Intentalo de nuevo.');
+                    return;
+                  }
                   setSupportSent(true);
                 }}
                 className="flex flex-col gap-4 pt-2"
@@ -411,12 +420,16 @@ export function AdminPage() {
                   required
                   className="rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all resize-none"
                 />
+                {supportError && (
+                  <p className="text-center text-xs text-red-500">{supportError}</p>
+                )}
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90"
+                  disabled={supportSending}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 disabled:opacity-50"
                 >
                   <Mail className="h-4 w-4" />
-                  Enviar
+                  {supportSending ? 'Enviando...' : 'Enviar'}
                 </button>
               </form>
             </>
