@@ -388,12 +388,12 @@ export function AdminPage() {
                   const name = (form.nombre as HTMLInputElement).value;
                   const phone = (form.telefono as HTMLInputElement).value;
                   const msg = (form.mensaje as HTMLTextAreaElement).value;
-                  const { error: fnError } = await supabase.functions.invoke('send-support-email', {
+                  const { data, error: fnError } = await supabase.functions.invoke('send-support-email', {
                     body: { name, phone, message: msg },
                   });
                   setSupportSending(false);
                   if (fnError) {
-                    setSupportError('Error al enviar. Intentalo de nuevo.');
+                    setSupportError(fnError.message || 'Error al enviar. Intentalo de nuevo.');
                     return;
                   }
                   setSupportSent(true);
