@@ -86,6 +86,7 @@ export function AdminPage() {
   const [supportSent, setSupportSent] = useState(false);
   const [supportSending, setSupportSending] = useState(false);
   const [supportError, setSupportError] = useState('');
+  const [supportTicket, setSupportTicket] = useState('');
   const [prevView, setPrevView] = useState<string | null>(null);
   const handleNavigate = (newView: string) => {
     setPrevView(view);
@@ -351,13 +352,18 @@ export function AdminPage() {
         </span>
       </button>
 
-      <Dialog open={supportOpen} onOpenChange={(open) => { setSupportOpen(open); if (!open) setSupportSent(false); }}>
+        <Dialog open={supportOpen} onOpenChange={(open) => { setSupportOpen(open); if (!open) { setSupportSent(false); setSupportTicket(''); } }}>
         <DialogContent className="sm:max-w-md rounded-2xl p-6">
           {supportSent ? (
             <div className="flex flex-col items-center gap-4 py-6">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
                 <Mail className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
               </div>
+              {supportTicket && (
+                <p className="text-center text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  Ticket #{supportTicket}
+                </p>
+              )}
               <p className="text-center text-sm leading-relaxed text-muted-foreground">
                 Gracias por comunicarte,<br />en breve estaremos revisando la duda o el problema.
               </p>
@@ -365,7 +371,7 @@ export function AdminPage() {
                 El equipo de soporte
               </p>
               <button
-                onClick={() => { setSupportOpen(false); setSupportSent(false); }}
+                onClick={() => { setSupportOpen(false); setSupportSent(false); setSupportTicket(''); }}
                 className="mt-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90"
               >
                 Cerrar
@@ -397,6 +403,7 @@ export function AdminPage() {
                     setSupportError(msg);
                     return;
                   }
+                  setSupportTicket((data as Record<string, string>)?.ticket || '');
                   setSupportSent(true);
                 }}
                 className="flex flex-col gap-4 pt-2"

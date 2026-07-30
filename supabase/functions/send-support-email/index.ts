@@ -16,6 +16,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const now = new Date();
+    const ticketDate = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    const ticketNum = `BK-${ticketDate}-${String(Math.floor(Math.random()*900)+100)}`;
+
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev";
     const TO_EMAIL = Deno.env.get("TO_EMAIL") || "seremprendeads@gmail.com";
@@ -30,11 +34,12 @@ Deno.serve(async (req: Request) => {
     const payload = {
       from: FROM_EMAIL,
       to: TO_EMAIL,
-      subject: `Soporte BookingBio - ${name}`,
+      subject: `[${ticketNum}] Soporte BookingBio - ${name}`,
       html: `
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
           <div style="background: #059669; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
             <h1 style="color: white; margin: 0; font-size: 24px;">Soporte BookingBio</h1>
+            <p style="color: #d1fae5; margin: 8px 0 0; font-size: 14px;">Ticket #${ticketNum}</p>
           </div>
           <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin: 24px 0;">
             <p style="color: #4b5563; margin: 0 0 8px;"><strong>Nombre:</strong> ${name}</p>
@@ -68,7 +73,7 @@ Deno.serve(async (req: Request) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, sent: true }),
+      JSON.stringify({ success: true, sent: true, ticket: ticketNum }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
