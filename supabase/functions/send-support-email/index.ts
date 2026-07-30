@@ -28,7 +28,7 @@ Deno.serve(async (req: Request) => {
       },
       body: JSON.stringify({
         from: FROM_EMAIL,
-        to: "admin@soporte.com",
+        to: "seremprende@gmail.com",
         replyTo: phone.includes("@") ? phone : undefined,
         subject: `Soporte BookingBio - ${name}`,
         html: `
