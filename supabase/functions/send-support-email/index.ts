@@ -32,7 +32,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const payload = {
-      from: FROM_EMAIL,
+      from: `BookingBio <${FROM_EMAIL}>`,
       to: TO_EMAIL,
       subject: `Soporte | BookingBio - [${ticketNum}]`,
       html: `
