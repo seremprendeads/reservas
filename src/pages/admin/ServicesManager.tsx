@@ -35,6 +35,7 @@ export function ServicesManager() {
   const [imageUrl, setImageUrl] = useState('');
   const [imgError, setImgError] = useState('');
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
@@ -117,7 +118,6 @@ export function ServicesManager() {
   };
 
   const remove = async (id: string) => {
-    if (!window.confirm('¿Eliminar este servicio? No se puede deshacer.')) return;
     const { error } = await authInvoke('admin-manage-services', {
       action: 'delete',
       service_id: id,
@@ -127,6 +127,7 @@ export function ServicesManager() {
       return;
     }
     showNotification('success', 'Servicio eliminado');
+    setDeleteTarget(null);
     loadServices();
   };
 
@@ -184,7 +185,7 @@ export function ServicesManager() {
                       <Edit className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline ml-1">Editar</span>
                     </Button>
-                    <Button variant="destructive" size="sm" className="transition-all duration-200 px-2 sm:px-3" onClick={() => remove(s.id)} title="Eliminar">
+                    <Button variant="destructive" size="sm" className="transition-all duration-200 px-2 sm:px-3" onClick={() => setDeleteTarget(s.id)} title="Eliminar">
                       <Trash2 className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline ml-1">Eliminar</span>
                     </Button>
@@ -243,6 +244,21 @@ export function ServicesManager() {
             <Button variant="outline" className="transition-all duration-200" onClick={() => setShowDialog(false)}>Cancelar</Button>
             <Button onClick={save} disabled={!name.trim() || !price} className="transition-all duration-200">Guardar</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent className="sm:max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-center font-display">Eliminar servicio</DialogTitle>
+            <DialogDescription className="text-center">
+              ¿Estás seguro? Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 justify-center pt-2">
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={() => deleteTarget && remove(deleteTarget)}>Eliminar</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
