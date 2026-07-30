@@ -34,6 +34,12 @@ export function ServicesManager() {
   const [currency, setCurrency] = useState('ARS');
   const [imageUrl, setImageUrl] = useState('');
   const [imgError, setImgError] = useState('');
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   useEffect(() => { if (business?.id) loadServices(); }, [business?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -89,9 +95,10 @@ export function ServicesManager() {
           image_url: imageUrl || null,
         });
     if (error) {
-      alert('Error al guardar el servicio');
+      showNotification('error', 'Error al guardar el servicio');
       return;
     }
+    showNotification('success', editing ? 'Servicio actualizado' : 'Servicio creado');
     setShowDialog(false);
     loadServices();
   };
@@ -103,7 +110,7 @@ export function ServicesManager() {
       is_active: !s.is_active,
     });
     if (error) {
-      alert('Error al cambiar estado del servicio');
+      showNotification('error', 'Error al cambiar estado');
       return;
     }
     loadServices();
@@ -116,9 +123,10 @@ export function ServicesManager() {
       service_id: id,
     });
     if (error) {
-      alert('Error al eliminar el servicio');
+      showNotification('error', 'Error al eliminar el servicio');
       return;
     }
+    showNotification('success', 'Servicio eliminado');
     loadServices();
   };
 
@@ -136,6 +144,16 @@ export function ServicesManager() {
           <Button onClick={openNew} size="sm" className="transition-all duration-200"><Plus className="w-4 h-4 sm:mr-1.5" /><span className="hidden sm:inline">Nuevo servicio</span></Button>
         </div>
       </div>
+
+      {notification && (
+        <div className={`rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+          notification.type === 'success'
+            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+            : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+        }`}>
+          {notification.message}
+        </div>
+      )}
 
       <Card className="shadow-[0_8px_30px_rgba(0,0,0,.05)] rounded-2xl border-border/60">
         <CardContent className="p-0">
