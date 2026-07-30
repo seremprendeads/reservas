@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { corsHeaders, jsonSuccess, jsonError } from "../_shared/auth.ts";
+import { corsHeaders } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -10,19 +10,26 @@ Deno.serve(async (req: Request) => {
     const { name, phone, message } = await req.json();
 
     if (!name || !phone || !message) {
-      return jsonError("Completá todos los campos", 400);
+      return new Response(
+        JSON.stringify({ error: "Completá todos los campos" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev";
+    const TO_EMAIL = Deno.env.get("TO_EMAIL") || "seremprendeads@gmail.com";
 
     if (!RESEND_API_KEY) {
-      return jsonError("Resend no configurado", 500);
+      return new Response(
+        JSON.stringify({ error: "Resend no configurado" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const payload = {
       from: FROM_EMAIL,
-      to: "seremprende@gmail.com",
+      to: TO_EMAIL,
       subject: `Soporte BookingBio - ${name}`,
       html: `
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
@@ -52,14 +59,23 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!emailRes.ok) {
-      const error = await emailRes.text();
-      console.error("Resend error:", error);
-      return jsonError(`Error al enviar: ${error}`);
+      const errorText = await emailRes.text();
+      console.error("Resend error:", emailRes.status, errorText);
+      return new Response(
+        JSON.stringify({ error: `Resend: ${emailRes.status} - ${errorText.slice(0, 200)}` }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    return jsonSuccess({ sent: true });
+    return new Response(
+      JSON.stringify({ success: true, sent: true }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (err) {
     console.error("send-support-email error:", err);
-    return jsonError("Error interno");
+    return new Response(
+      JSON.stringify({ error: `Error interno: ${err instanceof Error ? err.message : err}` }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });

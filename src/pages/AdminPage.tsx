@@ -393,7 +393,8 @@ export function AdminPage() {
                   });
                   setSupportSending(false);
                   if (fnError) {
-                    setSupportError(fnError.message || 'Error al enviar. Intentalo de nuevo.');
+                    const msg = (fnError as Record<string, string>).error || fnError.message || 'Error al enviar. Intentalo de nuevo.';
+                    setSupportError(msg);
                     return;
                   }
                   setSupportSent(true);
