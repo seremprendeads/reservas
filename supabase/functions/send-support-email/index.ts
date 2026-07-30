@@ -34,7 +34,7 @@ Deno.serve(async (req: Request) => {
     const payload = {
       from: FROM_EMAIL,
       to: TO_EMAIL,
-      subject: `[${ticketNum}] Soporte BookingBio - ${name}`,
+      subject: `Soporte | BookingBio - [${ticketNum}]`,
       html: `
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
           <div style="background: #059669; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
