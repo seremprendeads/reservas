@@ -70,44 +70,55 @@ export function ServicesManager() {
 
   const save = async () => {
     if (!name.trim() || !price || !business?.id) return;
-    if (editing) {
-      await authInvoke('admin-manage-services', {
-        action: 'update',
-        service_id: editing.id,
-        name: name.trim(),
-        description: description.trim(),
-        price: parseFloat(price),
-        currency,
-        image_url: imageUrl || null,
-      });
-    } else {
-      await authInvoke('admin-manage-services', {
-        action: 'create',
-        name: name.trim(),
-        description: description.trim(),
-        price: parseFloat(price),
-        currency,
-        image_url: imageUrl || null,
-      });
+    const { error } = editing
+      ? await authInvoke('admin-manage-services', {
+          action: 'update',
+          service_id: editing.id,
+          name: name.trim(),
+          description: description.trim(),
+          price: parseFloat(price),
+          currency,
+          image_url: imageUrl || null,
+        })
+      : await authInvoke('admin-manage-services', {
+          action: 'create',
+          name: name.trim(),
+          description: description.trim(),
+          price: parseFloat(price),
+          currency,
+          image_url: imageUrl || null,
+        });
+    if (error) {
+      alert('Error al guardar el servicio');
+      return;
     }
     setShowDialog(false);
     loadServices();
   };
 
   const toggleActive = async (s: Service) => {
-    await authInvoke('admin-manage-services', {
+    const { error } = await authInvoke('admin-manage-services', {
       action: 'toggle_active',
       service_id: s.id,
       is_active: !s.is_active,
     });
+    if (error) {
+      alert('Error al cambiar estado del servicio');
+      return;
+    }
     loadServices();
   };
 
   const remove = async (id: string) => {
-    await authInvoke('admin-manage-services', {
+    if (!window.confirm('¿Eliminar este servicio? No se puede deshacer.')) return;
+    const { error } = await authInvoke('admin-manage-services', {
       action: 'delete',
       service_id: id,
     });
+    if (error) {
+      alert('Error al eliminar el servicio');
+      return;
+    }
     loadServices();
   };
 
