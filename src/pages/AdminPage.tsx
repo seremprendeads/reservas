@@ -24,6 +24,7 @@ import { useAdminData } from './admin/useAdminData';
 import { useSubscription, FreePlanBanner } from '../modules/subscription';
 import { SuspendedScreen } from '../modules/subscription';
 import { CalendarIntegrations } from '../modules/calendar-integration';
+import { AiAssistant } from '../modules/ai-assistant';
 
 export function AdminPage() {
   const {
@@ -444,6 +445,8 @@ export function AdminPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AiAssistant />
 
     </div>
   );

@@ -2,6 +2,17 @@ import { useState, useEffect, useRef } from 'react';
 import { useBusiness } from '../../contexts/BusinessContext';
 import * as session from '../../lib/admin-session';
 
+const TRIAL_END_FALLBACK = new Date(2026, 6, 31, 9, 0, 0);
+
+function getTrialEndDate(): Date {
+  const stored = session.getTrialEndsAt();
+  if (stored) {
+    const d = new Date(stored);
+    if (!isNaN(d.getTime())) return d;
+  }
+  return TRIAL_END_FALLBACK;
+}
+
 export function useAdminAuth() {
   const { setBusinessById } = useBusiness();
   const [loggedIn, setLoggedIn] = useState(session.isLoggedIn);
@@ -34,9 +45,8 @@ export function useAdminAuth() {
     if (!loggedIn) return;
 
     const checkTrial = () => {
-      const now = new Date();
-      const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0, 0);
-      const diffMs = endDate.getTime() - now.getTime();
+      const endDate = getTrialEndDate();
+      const diffMs = endDate.getTime() - Date.now();
       const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
       setTrialDaysLeft(days > 0 ? days : 0);
@@ -55,8 +65,7 @@ export function useAdminAuth() {
   useEffect(() => {
     if (!loggedIn) return;
     const update = () => {
-      const now = new Date();
-      const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0, 0);
+      const endDate = getTrialEndDate();
       const diff = Math.max(0, endDate.getTime() - Date.now());
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
