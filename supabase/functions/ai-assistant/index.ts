@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { authenticateToken, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
+import { createServiceClient, jsonSuccess, jsonError, corsHeaders } from "../_shared/auth.ts";
 import { callGemini } from "../_shared/gemini.ts";
 
 const SYSTEM_PROMPT = `Sos "BookingBot", un asistente IA experto en la plataforma BookingBio (Reservas Única). Ayudás a dueños de negocios a configurar y entender su sistema de reservas online, tienda, landing page, bio, y más.
@@ -134,12 +134,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const auth = await authenticateToken(req);
-    if ("error" in auth) {
-      return jsonUnauthorized();
-    }
-
-    const { messages, businessType }: RequestBody = await req.json();
+    const { messages, businessType, businessId }: RequestBody & { businessId?: string } = await req.json();
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return jsonError("Mensajes requeridos", 400);
@@ -150,16 +145,22 @@ Deno.serve(async (req: Request) => {
       return jsonError("El último mensaje debe ser del usuario", 400);
     }
 
-    const supabase = createServiceClient();
-    const { data: biz } = await supabase
-      .from("businesses")
-      .select("name, slug, plan, is_trial")
-      .eq("id", auth.businessId)
-      .maybeSingle();
-
-    const businessContext = biz
-      ? `Negocio: ${biz.name} (${biz.slug}) | Plan: ${biz.plan}${biz.is_trial ? " (Trial)" : ""}`
-      : "";
+    let businessContext = "";
+    if (businessId) {
+      try {
+        const supabase = createServiceClient();
+        const { data: biz } = await supabase
+          .from("businesses")
+          .select("name, slug, plan, is_trial")
+          .eq("id", businessId)
+          .maybeSingle();
+        if (biz) {
+          businessContext = `Negocio: ${biz.name} (${biz.slug}) | Plan: ${biz.plan}${biz.is_trial ? " (Trial)" : ""}`;
+        }
+      } catch {
+        // silent - continue without context
+      }
+    }
 
     const contextPrompt = businessType
       ? `El negocio es del rubro: ${businessType}.`

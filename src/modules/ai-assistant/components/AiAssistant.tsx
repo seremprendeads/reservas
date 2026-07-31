@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bot, Send, Loader2 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
-import { getToken } from '../../../lib/admin-session';
+import { useBusiness } from '../../../contexts/BusinessContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
 
 type Message = {
@@ -15,6 +15,7 @@ const WELCOME: Message = {
 };
 
 export function AiAssistant() {
+  const { business } = useBusiness();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState('');
@@ -38,14 +39,15 @@ export function AiAssistant() {
     setLoading(true);
 
     try {
-      const token = getToken();
       const { data, error: fnError } = await supabase.functions.invoke('ai-assistant', {
-        body: { messages: [...messages.slice(1), userMsg] },
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: { messages: [...messages.slice(1), userMsg], businessId: business?.id },
       });
 
-      if (fnError || !data?.reply) {
-        throw new Error(fnError?.message || 'Error al obtener respuesta');
+      if (fnError) {
+        throw new Error(fnError.message);
+      }
+      if (!data?.reply) {
+        throw new Error('Error al obtener respuesta');
       }
 
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
