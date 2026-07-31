@@ -79,7 +79,7 @@ export function AiAssistant() {
             </div>
           </DialogHeader>
 
-          <div className="flex h-[420px] flex-col gap-3 overflow-y-auto p-5">
+          <div className="flex h-[340px] flex-col gap-3 overflow-y-auto p-5">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
