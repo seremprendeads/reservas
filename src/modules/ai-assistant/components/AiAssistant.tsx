@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Loader2 } from 'lucide-react';
+import { Bot, Send, Loader2 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { getToken } from '../../../lib/admin-session';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -62,31 +63,23 @@ export function AiAssistant() {
     }
   };
 
-  const pad = (n: number) => String(n).padStart(2, '0');
-
   return (
     <>
-      {open && (
-        <div className="fixed bottom-44 right-6 z-50 flex w-[380px] flex-col rounded-2xl border border-border bg-card shadow-2xl dark:bg-gray-900 animate-in slide-in-from-bottom-4 duration-200 max-[420px]:right-2 max-[420px]:w-[calc(100vw-16px)]">
-          <div className="flex items-center justify-between rounded-t-2xl border-b border-border bg-gradient-to-r from-primary/10 to-primary/5 px-5 py-4">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg rounded-2xl p-0 gap-0 overflow-hidden">
+          <DialogHeader className="border-b border-border bg-gradient-to-r from-primary/10 to-primary/5 px-6 py-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">
                 <Bot className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">BookingBot</p>
-                <p className="text-[11px] text-muted-foreground">Asistente IA</p>
+                <DialogTitle className="text-left text-base">BookingBot</DialogTitle>
+                <p className="text-xs text-muted-foreground font-medium">Asistente IA</p>
               </div>
             </div>
-            <button
-              onClick={() => setOpen(false)}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+          </DialogHeader>
 
-          <div className="flex h-[420px] flex-col gap-3 overflow-y-auto p-4">
+          <div className="flex h-[420px] flex-col gap-3 overflow-y-auto p-5">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
@@ -117,10 +110,10 @@ export function AiAssistant() {
           </div>
 
           {error && (
-            <p className="px-4 pb-1 text-xs text-red-500">{error}</p>
+            <p className="px-5 pb-1 text-xs text-red-500">{error}</p>
           )}
 
-          <div className="flex items-end gap-2 border-t border-border p-4">
+          <div className="flex items-end gap-2 border-t border-border p-5">
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -137,16 +130,16 @@ export function AiAssistant() {
               <Send className="h-4 w-4" />
             </button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen(true)}
         className="group fixed bottom-24 right-6 z-50 flex items-center gap-2"
         title="BookingBot"
       >
         <span className="hidden rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white shadow-lg transition-all duration-200 group-hover:block dark:bg-gray-100 dark:text-gray-900">
-          {open ? 'Cerrar' : 'BookingBot'}
+          BookingBot
         </span>
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/30 transition-all duration-200 hover:scale-110 hover:shadow-xl hover:shadow-violet-500/40">
           <Bot className="h-6 w-6" />
