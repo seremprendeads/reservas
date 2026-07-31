@@ -67,7 +67,7 @@ export function AiAssistant() {
   return (
     <>
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 flex w-[380px] flex-col rounded-2xl border border-border bg-card shadow-2xl dark:bg-gray-900 animate-in slide-in-from-bottom-4 duration-200 max-[420px]:right-2 max-[420px]:w-[calc(100vw-16px)]">
+        <div className="fixed bottom-44 right-6 z-50 flex w-[380px] flex-col rounded-2xl border border-border bg-card shadow-2xl dark:bg-gray-900 animate-in slide-in-from-bottom-4 duration-200 max-[420px]:right-2 max-[420px]:w-[calc(100vw-16px)]">
           <div className="flex items-center justify-between rounded-t-2xl border-b border-border bg-gradient-to-r from-primary/10 to-primary/5 px-5 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15">
@@ -142,7 +142,7 @@ export function AiAssistant() {
 
       <button
         onClick={() => setOpen(!open)}
-        className="group fixed bottom-6 right-6 z-50 flex items-center gap-2"
+        className="group fixed bottom-24 right-6 z-50 flex items-center gap-2"
         title="BookingBot"
       >
         <span className="hidden rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white shadow-lg transition-all duration-200 group-hover:block dark:bg-gray-100 dark:text-gray-900">

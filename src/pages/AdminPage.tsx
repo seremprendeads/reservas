@@ -340,7 +340,7 @@ export function AdminPage() {
 
       <button
         onClick={() => setSupportOpen(true)}
-        className="group fixed bottom-6 right-6 z-50 flex items-center gap-2 hidden lg:flex"
+        className="group fixed bottom-6 right-6 z-50 hidden items-center gap-2 lg:flex"
         title="Soporte"
       >
         <span className="hidden rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white shadow-lg transition-all duration-200 group-hover:block dark:bg-gray-100 dark:text-gray-900">
