@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { Business } from '../../../../lib/supabase';
-import type { SubscriptionInfo, SubscriptionConfig, SubscriptionStatus } from '../types';
+import type { SubscriptionInfo, SubscriptionConfig, SubscriptionStatus, ModuleId } from '../types';
 import { DEFAULT_SUBSCRIPTION_CONFIG, getEnabledModules } from '../lib/constants';
 
 interface UseSubscriptionOptions {
@@ -30,10 +30,11 @@ function deriveStatus(business: Business | null, warningDays: number, trialDurat
   if (business.is_trial) {
     const trialEnd = getTrialEnd(business, trialDurationMinutes);
     if (!trialEnd) return 'trial';
+    if (trialEnd.getTime() <= Date.now()) return 'suspended';
     const daysLeft = Math.ceil(
       (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
-    if (daysLeft <= 0) return 'cancelled';
+    if (daysLeft <= 0) return 'suspended';
     if (daysLeft <= warningDays) return 'expiring';
     return 'trial';
   }
@@ -64,10 +65,12 @@ export function useSubscription({ business, config: configOverrides }: UseSubscr
       status === 'suspended' ||
       (status === 'cancelled' && config.read_only_when_cancelled);
 
-    const enabledModules = getEnabledModules(
-      business?.plan || 'free',
-      business?.is_trial || false
-    );
+    const enabledModules = status === 'suspended'
+      ? ['bio' as ModuleId]
+      : getEnabledModules(
+          business?.plan || 'free',
+          business?.is_trial || false
+        );
 
     return {
       status,
