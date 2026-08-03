@@ -115,7 +115,7 @@ export function AdminPage() {
               onClick={() => handleNavigate('profile')}
               className="inline-flex h-11 items-center justify-center rounded-xl bg-red-600 px-6 text-sm font-bold text-white shadow hover:bg-red-700"
             >
-              Activar Plan / Ver Planes
+              ACTUALIZAR PLAN
             </button>
           </div>
         </div>
@@ -316,7 +316,7 @@ export function AdminPage() {
               onClick={() => handleNavigate('profile')}
               className="bg-white text-red-600 px-3 py-1 rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors shadow"
             >
-              Activar Plan / Ver Planes
+              ACTUALIZAR PLAN
             </button>
           </div>
         )}
