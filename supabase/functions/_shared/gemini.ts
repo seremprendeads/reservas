@@ -10,7 +10,7 @@ export async function callGemini(
     throw new Error('GEMINI_API_KEY not configured');
   }
 
-  const modelName = model || Deno.env.get('GEMINI_MODEL') || 'gemini-2.0-flash';
+  const modelName = model || Deno.env.get('GEMINI_MODEL') || 'gemini-1.5-flash';
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
 
   const body: Record<string, unknown> = {
