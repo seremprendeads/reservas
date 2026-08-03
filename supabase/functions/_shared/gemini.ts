@@ -23,7 +23,7 @@ export async function callGemini(
   };
 
   if (systemInstruction) {
-    body.systemInstruction = { parts: [{ text: systemInstruction }] };
+    body.system_instruction = { parts: [{ text: systemInstruction }] };
   }
 
   const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
