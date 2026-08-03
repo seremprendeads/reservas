@@ -15,7 +15,8 @@ Deno.serve(async (req: Request) => {
     const { name: newName, newEmail, newPassword, avatar_url } = await req.json();
 
     const supabase = createServiceClient();
-    const email = auth.admin.email;
+    const cleanEmail = auth.admin.email ? auth.admin.email.trim().toLowerCase() : "";
+    const cleanNewEmail = newEmail ? newEmail.trim().toLowerCase() : null;
 
     const updates: Record<string, string> = {};
     if (newName !== undefined && newName !== null) {
@@ -25,21 +26,21 @@ Deno.serve(async (req: Request) => {
       updates.name = newName.trim();
     }
 
-    if (newEmail !== undefined && newEmail !== null && newEmail !== email) {
-      if (!newEmail.includes('@')) {
+    if (cleanNewEmail && cleanNewEmail !== cleanEmail) {
+      if (!cleanNewEmail.includes('@')) {
         return jsonError("Email inválido", 400);
       }
       const { data: existing } = await supabase
         .from("admin_users")
         .select("id")
-        .eq("email", newEmail.trim())
+        .ilike("email", cleanNewEmail)
         .neq("id", auth.admin.id)
         .maybeSingle();
 
       if (existing) {
         return jsonError("El email ya está en uso por otro administrador", 400);
       }
-      updates.email = newEmail.trim();
+      updates.email = cleanNewEmail;
     }
 
     if (avatar_url !== undefined && avatar_url !== null) {
@@ -59,12 +60,22 @@ Deno.serve(async (req: Request) => {
       if (newPassword.length < 6) {
         return jsonError("La nueva contraseña debe tener al menos 6 caracteres", 400);
       }
-      const targetEmail = newEmail?.trim() || email;
-      const { error: pwError } = await supabase.rpc("update_admin_password_direct", {
-        p_email: targetEmail,
+
+      // Try update_admin_password_by_id first using admin ID directly
+      const { error: pwByIdError } = await supabase.rpc("update_admin_password_by_id", {
+        p_id: auth.admin.id,
         p_new_password: newPassword,
       });
-      if (pwError) throw pwError;
+
+      if (pwByIdError) {
+        // Fallback to update_admin_password_direct
+        const targetEmail = cleanNewEmail || cleanEmail;
+        const { error: pwError } = await supabase.rpc("update_admin_password_direct", {
+          p_email: targetEmail,
+          p_new_password: newPassword,
+        });
+        if (pwError) throw pwError;
+      }
     }
 
     return jsonSuccess();

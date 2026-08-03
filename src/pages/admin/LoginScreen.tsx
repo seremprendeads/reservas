@@ -20,22 +20,23 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
     e.preventDefault();
     setError('');
     setLoading(true);
+    const cleanEmail = email.trim().toLowerCase();
     try {
       const { data, error: fnError } = await supabase.functions.invoke('admin-login', {
-        body: { email, password },
+        body: { email: cleanEmail, password },
       });
       if (fnError || !data?.success) {
         setError('Email o contraseña incorrectos');
       } else {
 
         saveLoginSession({
-          email,
+          email: cleanEmail,
           token: data.token,
           name: data.name || '',
           businessId: data.business_id,
           trialEndsAt: data.trial_ends_at,
         });
-        onLogin(email, data.token);
+        onLogin(cleanEmail, data.token);
       }
     } catch {
       setError('Error al conectar con el servidor');
@@ -49,9 +50,10 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
     setError('');
     setSuccess('');
     setLoading(true);
+    const cleanEmail = email.trim().toLowerCase();
     try {
       const { data } = await supabase.functions.invoke('admin-forgot-password', {
-        body: { email: email.trim() },
+        body: { email: cleanEmail },
       });
       if (data?.temp_password) {
         setSuccess(`Tu contraseña temporal es: ${data.temp_password}. Usala para ingresar.`);

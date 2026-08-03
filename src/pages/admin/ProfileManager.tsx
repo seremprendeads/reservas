@@ -63,11 +63,14 @@ export function ProfileManager({
   const handleSave = async () => {
     setError('');
 
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanAdminEmail = adminEmail.trim().toLowerCase();
+
     if (!name.trim()) {
       setError('El nombre es obligatorio');
       return;
     }
-    if (!email.trim() || !email.includes('@')) {
+    if (!cleanEmail || !cleanEmail.includes('@')) {
       setError('Ingresá un email válido');
       return;
     }
@@ -95,7 +98,7 @@ export function ProfileManager({
 
       const { data, error: fnError } = await authInvoke('admin-update-profile', {
         name: name.trim(),
-        newEmail: email.trim() !== adminEmail ? email.trim() : null,
+        newEmail: cleanEmail !== cleanAdminEmail ? cleanEmail : null,
         newPassword: newPassword || null,
       });
 
@@ -104,10 +107,10 @@ export function ProfileManager({
         return;
       }
 
-      setSessionEmail(email.trim());
+      setSessionEmail(cleanEmail);
       setSessionName(name.trim());
 
-      onProfileUpdated(name.trim(), email.trim());
+      onProfileUpdated(name.trim(), cleanEmail);
       onRefresh();
       showSuccess('Perfil actualizado correctamente');
       setNewPassword('');

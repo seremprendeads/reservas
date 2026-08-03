@@ -23,12 +23,14 @@ Deno.serve(async (req: Request) => {
       return jsonError("La contraseña debe tener al menos 6 caracteres", 400);
     }
 
+    const cleanEmail = (email || "").trim().toLowerCase();
+
     const supabase = createServiceClient();
 
     const { data: existing } = await supabase
       .from("admin_users")
       .select("id")
-      .eq("email", email)
+      .ilike("email", cleanEmail)
       .maybeSingle();
 
     if (existing) {
@@ -36,7 +38,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const { error } = await supabase.rpc("create_admin_user", {
-      p_email: email,
+      p_email: cleanEmail,
       p_password: password,
       p_name: name,
     });

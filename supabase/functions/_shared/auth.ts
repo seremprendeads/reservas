@@ -55,11 +55,12 @@ export async function authenticateToken(req: Request): Promise<
 // Legacy: password-based auth (used only by admin-login and admin-register)
 export async function authenticateAdmin(email: string, password: string) {
   const supabase = createServiceClient();
+  const cleanEmail = (email || "").trim().toLowerCase();
 
   const { data: admin, error: adminError } = await supabase
     .from("admin_users")
     .select("id, email, name, password_hash, business_id")
-    .eq("email", email)
+    .ilike("email", cleanEmail)
     .maybeSingle();
 
   if (adminError || !admin) {

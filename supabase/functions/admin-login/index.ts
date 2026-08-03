@@ -14,7 +14,8 @@ Deno.serve(async (req: Request) => {
       return jsonError("Email y contraseña requeridos", 400);
     }
 
-    const auth = await authenticateAdmin(email, password);
+    const cleanEmail = (email || "").trim().toLowerCase();
+    const auth = await authenticateAdmin(cleanEmail, password);
     if ('error' in auth) {
       return jsonUnauthorized();
     }

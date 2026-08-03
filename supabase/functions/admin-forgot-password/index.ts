@@ -18,12 +18,13 @@ Deno.serve(async (req: Request) => {
       return jsonError("Email requerido", 400);
     }
 
+    const cleanEmail = (email || "").trim().toLowerCase();
     const supabase = createServiceClient();
 
     const { data: admin } = await supabase
       .from("admin_users")
       .select("id, name, email")
-      .eq("email", email)
+      .ilike("email", cleanEmail)
       .maybeSingle();
 
     if (!admin) {
@@ -32,12 +33,19 @@ Deno.serve(async (req: Request) => {
 
     const tempPassword = generateTempPassword();
 
-    const { error: updateError } = await supabase.rpc("update_admin_password_direct", {
-      p_email: email,
+    // Try update_admin_password_by_id first
+    const { error: pwByIdError } = await supabase.rpc("update_admin_password_by_id", {
+      p_id: admin.id,
       p_new_password: tempPassword,
     });
 
-    if (updateError) throw updateError;
+    if (pwByIdError) {
+      const { error: updateError } = await supabase.rpc("update_admin_password_direct", {
+        p_email: admin.email,
+        p_new_password: tempPassword,
+      });
+      if (updateError) throw updateError;
+    }
 
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "noreply@bookingbio.com";
