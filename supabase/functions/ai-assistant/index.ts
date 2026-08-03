@@ -162,7 +162,7 @@ Deno.serve(async (req: Request) => {
       const text = lastMsg.content.toLowerCase();
       
       if (text.includes('hola') || text.includes('buenas') || text.includes('saludos')) {
-        reply = '¡Hola! Soy BookingBot 🤖 ¿En qué puedo ayudarte hoy a configurar tu negocio o tus reservas?';
+        reply = '¡Hola! Soy BookingBot 🤖 ¿En qué te ayudo hoy con tu negocio, tus textos para la landing page o la configuración?';
       } else if (text.includes('color') || text.includes('branding') || text.includes('logo') || text.includes('paleta') || text.includes('codigo') || text.includes('numero') || text.includes('#') || text.includes('spa') || text.includes('barberia') || text.includes('dental') || text.includes('estetica') || text.includes('belleza')) {
         reply = 'Aquí tenés las paletas de colores profesionales con sus códigos HEX exactos para copiar y pegar en tu panel de Apariencia:\n\n' +
           '🌿 **Spa / Belleza:**\n' +
@@ -186,16 +186,18 @@ Deno.serve(async (req: Request) => {
           '• Verde Salvia: `#DCEDC8`\n' +
           '• Azul Sereno: `#E1F5FE`\n' +
           '• Arena Suave: `#FFE0B2`';
-      } else if (text.includes('seo') || text.includes('landing') || text.includes('google')) {
+      } else if (text.includes('seo') || text.includes('posicionamiento') || text.includes('google')) {
         reply = 'Para mejorar el SEO de tu landing page:\n\n1. Ingresá a la sección de SEO en tu panel de administración.\n2. Definí un título claro (máx 60 caracteres) y una meta descripción atractiva.\n3. Añadí palabras clave relacionadas con tu servicio.\n\nPara SEO avanzado (posicionamiento orgánico a largo plazo), recomendamos sumar contenido regular o consultar con un especialista.';
-      } else if (text.includes('reserva') || text.includes('turno') || text.includes('calendario')) {
+      } else if (text.includes('reserva') || text.includes('turno') || text.includes('calendario') || text.includes('horario')) {
         reply = 'El módulo de Reservas te permite:\n\n• Recibir turnos online en tu link público (/reservas/:slug).\n• Configurar tus horarios de atención y bloquear fechas.\n• Gestionar la lista de espera y ver el historial de clientes.\n• Sincronizar tus turnos con Google Calendar.';
       } else if (text.includes('tienda') || text.includes('producto') || text.includes('pagos') || text.includes('mercado pago')) {
         reply = 'El módulo de Tienda te permite publicar productos físicos o digitales con carrito de compras y pedidos. Podés integrarlo con Mercado Pago desde la configuración de pagos para cobros automáticos.';
       } else if (text.includes('bio') || text.includes('linktree')) {
         reply = 'El módulo Bio es tu página de enlaces estilo Linktree (en /:slug/bio) para centralizar todas tus redes sociales, WhatsApp y links importantes.';
+      } else if (text.includes('escribir') || text.includes('texto') || text.includes('redactar') || text.includes('copy') || text.includes('eslogan') || text.includes('landing') || text.includes('palabra') || text.includes('faq') || text.includes('preguntas') || text.includes('descripcion') || text.includes('ayudar')) {
+        reply = '¡Claro que sí! ¡Me encanta redactar! Pasame tus palabras clave, el nombre de tu negocio o lo que ofrecés, y te redacto textos profesionales y persuasivos para tu landing page (títulos, secciones "Sobre nosotros", descripciones de servicios o preguntas frecuentes). ¡Decime qué querés redactar y lo armamos!';
       } else {
-        reply = `Entiendo tu consulta sobre "${lastMsg.content}". En BookingBio podés gestionar reservas, tu tienda online, tu landing page, tu Link-in-Bio y tus integraciones de calendario y pagos desde un mismo lugar. ¿Te gustaría que te guíe en alguna configuración específica (colores, horarios, servicios o SEO)?`;
+        reply = `¡Por supuesto! Como tu asistente de BookingBio, no solo te ayudo con la plataforma, sino también a redactar textos, ideas de contenido, eslóganes y copywriting persuasivo para tu landing page.\n\nContame qué necesitás redactar o qué palabras clave tenés, ¡y te armo una propuesta al instante!`;
       }
     }
 
