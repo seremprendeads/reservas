@@ -160,7 +160,8 @@ Deno.serve(async (req: Request) => {
     });
   } catch (err) {
     console.error("ai-assistant error:", err);
-    return new Response(JSON.stringify({ error: "Error al procesar la consulta" }), {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

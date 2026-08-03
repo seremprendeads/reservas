@@ -44,7 +44,10 @@ export function AiAssistant() {
       });
 
       if (fnError) {
-        throw new Error(fnError.message);
+        throw new Error(data?.error || fnError.message);
+      }
+      if (data?.error) {
+        throw new Error(data.error);
       }
       if (!data?.reply) {
         throw new Error('Error al obtener respuesta');
