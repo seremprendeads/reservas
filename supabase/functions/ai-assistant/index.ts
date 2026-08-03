@@ -163,8 +163,29 @@ Deno.serve(async (req: Request) => {
       
       if (text.includes('hola') || text.includes('buenas') || text.includes('saludos')) {
         reply = '¡Hola! Soy BookingBot 🤖 ¿En qué puedo ayudarte hoy a configurar tu negocio o tus reservas?';
-      } else if (text.includes('color') || text.includes('branding') || text.includes('logo') || text.includes('paleta')) {
-        reply = 'Para elegir colores y branding ideales según tu rubro:\n\n• Barbería/Peluquería: Negro, gris, dorado, rojo oscuro.\n• Spa/Belleza: Tonos pastel, verde menta, lavanda, blanco.\n• Clínica dental: Blanco, celeste, turquesa, gris claro.\n• Gimnasio: Negro, rojo, naranja, gris.\n• Psicólogo: Verde salvia, azul sereno, tonos tierra.\n\nPodes configurarlo desde el panel en la sección de Apariencia.';
+      } else if (text.includes('color') || text.includes('branding') || text.includes('logo') || text.includes('paleta') || text.includes('codigo') || text.includes('numero') || text.includes('#') || text.includes('spa') || text.includes('barberia') || text.includes('dental') || text.includes('estetica') || text.includes('belleza')) {
+        reply = 'Aquí tenés las paletas de colores profesionales con sus códigos HEX exactos para copiar y pegar en tu panel de Apariencia:\n\n' +
+          '🌿 **Spa / Belleza:**\n' +
+          '• Verde Menta (Principal): `#E8F5E9`\n' +
+          '• Lavanda Pastel (Acento): `#F3E5F5`\n' +
+          '• Rosa Pálido: `#FCE4EC`\n' +
+          '• Fondo / Tarjetas: `#FFFFFF` / `#FAFAFA`\n\n' +
+          '💈 **Barbería / Peluquería:**\n' +
+          '• Negro Mate: `#111111`\n' +
+          '• Dorado Elegante: `#D4AF37`\n' +
+          '• Gris Grafito: `#222222`\n\n' +
+          '🦷 **Clínica Dental:**\n' +
+          '• Celeste Limpio: `#E3F2FD`\n' +
+          '• Turquesa Profesional: `#00ACC1`\n' +
+          '• Blanco Clínico: `#FFFFFF`\n\n' +
+          '💪 **Gimnasio / Fitness:**\n' +
+          '• Negro Carbón: `#0A0A0A`\n' +
+          '• Rojo Energía: `#E53935`\n' +
+          '• Gris Deportivo: `#212121`\n\n' +
+          '🧠 **Psicología / Salud Mental:**\n' +
+          '• Verde Salvia: `#DCEDC8`\n' +
+          '• Azul Sereno: `#E1F5FE`\n' +
+          '• Arena Suave: `#FFE0B2`';
       } else if (text.includes('seo') || text.includes('landing') || text.includes('google')) {
         reply = 'Para mejorar el SEO de tu landing page:\n\n1. Ingresá a la sección de SEO en tu panel de administración.\n2. Definí un título claro (máx 60 caracteres) y una meta descripción atractiva.\n3. Añadí palabras clave relacionadas con tu servicio.\n\nPara SEO avanzado (posicionamiento orgánico a largo plazo), recomendamos sumar contenido regular o consultar con un especialista.';
       } else if (text.includes('reserva') || text.includes('turno') || text.includes('calendario')) {
