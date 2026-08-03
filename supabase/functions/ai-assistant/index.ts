@@ -162,42 +162,36 @@ Deno.serve(async (req: Request) => {
       const text = lastMsg.content.toLowerCase();
       
       if (text.includes('hola') || text.includes('buenas') || text.includes('saludos')) {
-        reply = '¡Hola! Soy BookingBot 🤖 ¿En qué te ayudo hoy con tu negocio, tus textos para la landing page o la configuración?';
+        reply = '¡Hola! Soy BookingBot 🤖 ¿En qué te ayudo hoy con tu negocio? Puedo guiarte paso a paso con la configuración, redactar textos para tu landing, o darte ideas.';
       } else if (text.includes('color') || text.includes('branding') || text.includes('logo') || text.includes('paleta') || text.includes('codigo') || text.includes('numero') || text.includes('#') || text.includes('spa') || text.includes('barberia') || text.includes('dental') || text.includes('estetica') || text.includes('belleza')) {
-        reply = 'Aquí tenés las paletas de colores profesionales con sus códigos HEX exactos para copiar y pegar en tu panel de Apariencia:\n\n' +
-          '🌿 **Spa / Belleza:**\n' +
-          '• Verde Menta (Principal): `#E8F5E9`\n' +
-          '• Lavanda Pastel (Acento): `#F3E5F5`\n' +
-          '• Rosa Pálido: `#FCE4EC`\n' +
-          '• Fondo / Tarjetas: `#FFFFFF` / `#FAFAFA`\n\n' +
-          '💈 **Barbería / Peluquería:**\n' +
-          '• Negro Mate: `#111111`\n' +
-          '• Dorado Elegante: `#D4AF37`\n' +
-          '• Gris Grafito: `#222222`\n\n' +
-          '🦷 **Clínica Dental:**\n' +
-          '• Celeste Limpio: `#E3F2FD`\n' +
-          '• Turquesa Profesional: `#00ACC1`\n' +
-          '• Blanco Clínico: `#FFFFFF`\n\n' +
-          '💪 **Gimnasio / Fitness:**\n' +
-          '• Negro Carbón: `#0A0A0A`\n' +
-          '• Rojo Energía: `#E53935`\n' +
-          '• Gris Deportivo: `#212121`\n\n' +
-          '🧠 **Psicología / Salud Mental:**\n' +
-          '• Verde Salvia: `#DCEDC8`\n' +
-          '• Azul Sereno: `#E1F5FE`\n' +
-          '• Arena Suave: `#FFE0B2`';
+        reply = 'Aquí tenés los códigos HEX exactos para copiar y pegar en tu panel de Apariencia:\n\n' +
+          '🌿 **Spa / Belleza:** Menta `#E8F5E9` | Lavanda `#F3E5F5` | Rosa `#FCE4EC`\n' +
+          '💈 **Barbería:** Negro `#111111` | Dorado `#D4AF37` | Gris `#222222`\n' +
+          '🦷 **Dental:** Celeste `#E3F2FD` | Turquesa `#00ACC1` | Blanco `#FFFFFF`\n' +
+          '💪 **Gimnasio:** Negro `#0A0A0A` | Rojo `#E53935` | Gris `#212121`\n' +
+          '🧠 **Psicología:** Salvia `#DCEDC8` | Azul `#E1F5FE` | Arena `#FFE0B2`';
+      } else if (text.includes('horario') || text.includes('disponibilidad') || text.includes('bloquear') || text.includes('fecha')) {
+        reply = '🕒 **Cómo configurar tus horarios y bloquear fechas paso a paso:**\n\n' +
+          '1. En tu panel de administración, hacé clic en **"Disponibilidad"** en el menú lateral.\n' +
+          '2. Seleccioná los días de la semana que abrís y definí tus horarios de apertura y cierre (ej: 09:00 a 18:00).\n' +
+          '3. Si querés **bloquear días específicos** (como vacaciones o feriados), andá a la sección de fechas bloqueadas o calendario y agregá el día que no trabajás para que nadie pueda reservar.\n\n¿Querés que te ayude con algo más de la agenda?';
+      } else if (text.includes('servicio') || text.includes('crear servicio') || text.includes('precio')) {
+        reply = '💼 **Cómo crear o editar tus servicios paso a paso:**\n\n' +
+          '1. Entrá a **"Servicios"** en el menú de administración.\n' +
+          '2. Hacé clic en **"Nuevo Servicio"**.\n' +
+          '3. Completá el nombre (ej: "Masaje relajante"), la duración en minutos, el precio y una foto opcional.\n' +
+          '4. Guardá los cambios y ya aparecerán automáticamente en tu página pública de reservas.';
       } else if (text.includes('seo') || text.includes('posicionamiento') || text.includes('google')) {
-        reply = 'Para mejorar el SEO de tu landing page:\n\n1. Ingresá a la sección de SEO en tu panel de administración.\n2. Definí un título claro (máx 60 caracteres) y una meta descripción atractiva.\n3. Añadí palabras clave relacionadas con tu servicio.\n\nPara SEO avanzado (posicionamiento orgánico a largo plazo), recomendamos sumar contenido regular o consultar con un especialista.';
-      } else if (text.includes('reserva') || text.includes('turno') || text.includes('calendario') || text.includes('horario')) {
-        reply = 'El módulo de Reservas te permite:\n\n• Recibir turnos online en tu link público (/reservas/:slug).\n• Configurar tus horarios de atención y bloquear fechas.\n• Gestionar la lista de espera y ver el historial de clientes.\n• Sincronizar tus turnos con Google Calendar.';
-      } else if (text.includes('tienda') || text.includes('producto') || text.includes('pagos') || text.includes('mercado pago')) {
-        reply = 'El módulo de Tienda te permite publicar productos físicos o digitales con carrito de compras y pedidos. Podés integrarlo con Mercado Pago desde la configuración de pagos para cobros automáticos.';
-      } else if (text.includes('bio') || text.includes('linktree')) {
-        reply = 'El módulo Bio es tu página de enlaces estilo Linktree (en /:slug/bio) para centralizar todas tus redes sociales, WhatsApp y links importantes.';
+        reply = '🔍 **Cómo configurar el SEO de tu Landing Page paso a paso:**\n\n' +
+          '1. Entá a tu panel de administración y abri el editor de **Landing Page**.\n' +
+          '2. Buscá la pestaña o sección de **SEO y Marketing**.\n' +
+          '3. Ingresá un **Título SEO** atractivo (máximo 60 caracteres) que incluya tu servicio y ciudad.\n' +
+          '4. Redactá una **Meta Descripción** (máximo 160 caracteres) explicando qué ofrecés y por qué te deben elegir.\n' +
+          '5. Guardá los cambios. ¡Listo para Google!';
       } else if (text.includes('escribir') || text.includes('texto') || text.includes('redactar') || text.includes('copy') || text.includes('eslogan') || text.includes('landing') || text.includes('palabra') || text.includes('faq') || text.includes('preguntas') || text.includes('descripcion') || text.includes('ayudar')) {
-        reply = '¡Claro que sí! ¡Me encanta redactar! Pasame tus palabras clave, el nombre de tu negocio o lo que ofrecés, y te redacto textos profesionales y persuasivos para tu landing page (títulos, secciones "Sobre nosotros", descripciones de servicios o preguntas frecuentes). ¡Decime qué querés redactar y lo armamos!';
+        reply = '¡Por supuesto! Para redactar el texto perfecto para tu landing page, pasame:\n\n1. El nombre de tu negocio y rubro.\n2. Tus servicios principales.\n3. Algunas palabras clave o el tono que te gusta (cercano, formal, moderno).\n\n¡Escribímelo acá abajo y te redacto los títulos, subtítulos y la sección "Sobre nosotros" al instante!';
       } else {
-        reply = `¡Por supuesto! Como tu asistente de BookingBio, no solo te ayudo con la plataforma, sino también a redactar textos, ideas de contenido, eslóganes y copywriting persuasivo para tu landing page.\n\nContame qué necesitás redactar o qué palabras clave tenés, ¡y te armo una propuesta al instante!`;
+        reply = `¡Claro que sí! Estoy acá para guiarte paso a paso. Contame específicamente qué querés hacer (por ejemplo: configurar tus horarios, crear un servicio, armar los textos de tu landing page o elegir colores) y te explico exactamente dónde hacer clic en tu panel.`;
       }
     }
 
