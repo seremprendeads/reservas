@@ -13,18 +13,16 @@ export async function callGemini(
   const modelName = model || Deno.env.get('GEMINI_MODEL') || 'gemini-1.5-flash';
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
 
+  const finalPrompt = systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt;
+
   const body: Record<string, unknown> = {
-    contents: [{ parts: [{ text: prompt }] }],
+    contents: [{ parts: [{ text: finalPrompt }] }],
     generationConfig: {
       temperature: 0.7,
       topP: 0.9,
       maxOutputTokens: 4096,
     },
   };
-
-  if (systemInstruction) {
-    body.system_instruction = { parts: [{ text: systemInstruction }] };
-  }
 
   const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
     method: 'POST',

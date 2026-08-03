@@ -151,9 +151,9 @@ Deno.serve(async (req: Request) => {
       `${m.role === "user" ? "Usuario" : "BookingBot"}: ${m.content}`
     ).join("\n");
 
-    const fullPrompt = `${contextPrompt ? `${contextPrompt}\n\n` : ""}${chatHistory ? `Historial:\n${chatHistory}\n\n` : ""}Usuario: ${lastMsg.content}`;
+    const fullPrompt = `${SYSTEM_PROMPT}\n\n${contextPrompt ? `${contextPrompt}\n\n` : ""}${chatHistory ? `Historial:\n${chatHistory}\n\n` : ""}Usuario: ${lastMsg.content}`;
 
-    const geminiResult = await callGemini(fullPrompt, SYSTEM_PROMPT);
+    const geminiResult = await callGemini(fullPrompt);
     return new Response(JSON.stringify({ reply: geminiResult.text.trim() }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
