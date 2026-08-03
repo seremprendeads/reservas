@@ -109,7 +109,7 @@ export function AdminPage() {
           <div className="max-w-md rounded-2xl bg-red-50 p-8 border border-red-200 shadow-sm">
             <h3 className="text-lg font-bold text-red-800 mb-2">Módulo bloqueado por suspensión</h3>
             <p className="text-sm text-red-600 mb-6">
-              Tu período de prueba de 14 días ha finalizado. Durante la suspensión, solo tenés acceso al Módulo Bio en modo gratuito (máx 3 links y sin imagen de fondo). Activá un plan para desbloquear reservas, tienda y landing.
+              Tu período de prueba de 14 días ha finalizado. Durante la suspensión, solo tenés acceso al Módulo Bio en modo gratuito. Activá un plan para desbloquear reservas, tienda y landing.
             </p>
             <button
               onClick={() => handleNavigate('profile')}
@@ -311,7 +311,7 @@ export function AdminPage() {
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden pb-16 lg:pb-0">
         {subscription.status === 'suspended' && (
           <div className="bg-red-600 text-white px-4 py-2.5 text-xs font-bold text-center flex items-center justify-center gap-3 shadow-md z-40">
-            <span>🔴 [ESTADO: SUSPENDIDO / TRIAL VENCIDO] El período de prueba de 14 días ha finalizado. Acceso restringido al Módulo Bio (máx 3 links, sin imagen de fondo).</span>
+            <span>🔴 [ESTADO: SUSPENDIDO / TRIAL VENCIDO] El período de prueba de 14 días ha finalizado. Acceso restringido al Módulo Bio Gratuito.</span>
             <button
               onClick={() => handleNavigate('profile')}
               className="bg-white text-red-600 px-3 py-1 rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors shadow"
