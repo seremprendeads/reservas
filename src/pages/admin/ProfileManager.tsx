@@ -85,7 +85,7 @@ export function ProfileManager({
 
     setSaving(true);
     try {
-      if (bizName.trim() && business?.id) {
+      if (bizName.trim() && bizName.trim() !== business?.name && business?.id) {
         const { data: bizRes, error: bizFnError } = await authInvoke('admin-update-business', {
           name: bizName.trim(),
         });
