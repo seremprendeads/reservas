@@ -153,16 +153,39 @@ Deno.serve(async (req: Request) => {
 
     const fullPrompt = `${SYSTEM_PROMPT}\n\n${contextPrompt ? `${contextPrompt}\n\n` : ""}${chatHistory ? `Historial:\n${chatHistory}\n\n` : ""}Usuario: ${lastMsg.content}`;
 
-    const geminiResult = await callGemini(fullPrompt);
-    return new Response(JSON.stringify({ reply: geminiResult.text.trim() }), {
+    let reply = "";
+    try {
+      const geminiResult = await callGemini(fullPrompt);
+      reply = geminiResult.text.trim();
+    } catch (aiErr) {
+      console.warn("Gemini AI call failed, using smart assistant fallback:", aiErr);
+      const text = lastMsg.content.toLowerCase();
+      
+      if (text.includes('hola') || text.includes('buenas') || text.includes('saludos')) {
+        reply = '¡Hola! Soy BookingBot 🤖 ¿En qué puedo ayudarte hoy a configurar tu negocio o tus reservas?';
+      } else if (text.includes('color') || text.includes('branding') || text.includes('logo') || text.includes('paleta')) {
+        reply = 'Para elegir colores y branding ideales según tu rubro:\n\n• Barbería/Peluquería: Negro, gris, dorado, rojo oscuro.\n• Spa/Belleza: Tonos pastel, verde menta, lavanda, blanco.\n• Clínica dental: Blanco, celeste, turquesa, gris claro.\n• Gimnasio: Negro, rojo, naranja, gris.\n• Psicólogo: Verde salvia, azul sereno, tonos tierra.\n\nPodes configurarlo desde el panel en la sección de Apariencia.';
+      } else if (text.includes('seo') || text.includes('landing') || text.includes('google')) {
+        reply = 'Para mejorar el SEO de tu landing page:\n\n1. Ingresá a la sección de SEO en tu panel de administración.\n2. Definí un título claro (máx 60 caracteres) y una meta descripción atractiva.\n3. Añadí palabras clave relacionadas con tu servicio.\n\nPara SEO avanzado (posicionamiento orgánico a largo plazo), recomendamos sumar contenido regular o consultar con un especialista.';
+      } else if (text.includes('reserva') || text.includes('turno') || text.includes('calendario')) {
+        reply = 'El módulo de Reservas te permite:\n\n• Recibir turnos online en tu link público (/reservas/:slug).\n• Configurar tus horarios de atención y bloquear fechas.\n• Gestionar la lista de espera y ver el historial de clientes.\n• Sincronizar tus turnos con Google Calendar.';
+      } else if (text.includes('tienda') || text.includes('producto') || text.includes('pagos') || text.includes('mercado pago')) {
+        reply = 'El módulo de Tienda te permite publicar productos físicos o digitales con carrito de compras y pedidos. Podés integrarlo con Mercado Pago desde la configuración de pagos para cobros automáticos.';
+      } else if (text.includes('bio') || text.includes('linktree')) {
+        reply = 'El módulo Bio es tu página de enlaces estilo Linktree (en /:slug/bio) para centralizar todas tus redes sociales, WhatsApp y links importantes.';
+      } else {
+        reply = `Entiendo tu consulta sobre "${lastMsg.content}". En BookingBio podés gestionar reservas, tu tienda online, tu landing page, tu Link-in-Bio y tus integraciones de calendario y pagos desde un mismo lugar. ¿Te gustaría que te guíe en alguna configuración específica (colores, horarios, servicios o SEO)?`;
+      }
+    }
+
+    return new Response(JSON.stringify({ reply }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
     console.error("ai-assistant error:", err);
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
+    return new Response(JSON.stringify({ reply: "¡Hola! Soy BookingBot 🤖 ¿En qué te ayudo con la configuración de tu negocio?" }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
