@@ -131,11 +131,12 @@ Deno.serve(async (req: Request) => {
         const supabase = createServiceClient();
         const { data: biz } = await supabase
           .from("businesses")
-          .select("name, slug, plan")
+          .select("name, slug, plan, is_trial, trial_ends_at, is_active")
           .eq("id", businessId)
           .maybeSingle();
         if (biz) {
-          businessInfo = `Información del negocio actual:\n- Nombre: ${biz.name}\n- Slug: ${biz.slug}\n- Plan: ${biz.plan}\n`;
+          const isSuspended = !biz.is_active || (biz.is_trial && biz.trial_ends_at && new Date(biz.trial_ends_at).getTime() <= Date.now());
+          businessInfo = `Información del negocio actual:\n- Nombre: ${biz.name}\n- Slug: ${biz.slug}\n- Plan: ${biz.plan}\n- Estado: ${isSuspended ? "SUSPENDIDO / TRIAL VENCIDO (Acceso restringido a Módulo Bio Gratuito)" : "Activo / En prueba"}\n`;
         }
       } catch (e) {
         console.error("Error fetching business for ai-assistant:", e);
@@ -162,7 +163,7 @@ Deno.serve(async (req: Request) => {
       const text = lastMsg.content.toLowerCase();
       
       if (text.includes('hola') || text.includes('buenas') || text.includes('saludos')) {
-        reply = '¡Hola! Soy BookingBot 🤖 ¿En qué te ayudo hoy con tu negocio? Puedo guiarte paso a paso con la configuración, redactar textos para tu landing, o darte ideas.';
+        reply = '¡Hola! Soy BookingBot 🤖 ¿En qué te ayudo hoy con tu negocio? Si tu período de prueba finalizó, recordá que podés hacer clic en **ACTUALIZAR PLAN** para desbloquear todas las funciones.';
       } else if (text.includes('color') || text.includes('branding') || text.includes('logo') || text.includes('paleta') || text.includes('codigo') || text.includes('numero') || text.includes('#') || text.includes('spa') || text.includes('barberia') || text.includes('dental') || text.includes('estetica') || text.includes('belleza')) {
         reply = 'Aquí tenés los códigos HEX exactos para copiar y pegar en tu panel de Apariencia:\n\n' +
           '🌿 **Spa / Belleza:** Menta `#E8F5E9` | Lavanda `#F3E5F5` | Rosa `#FCE4EC`\n' +

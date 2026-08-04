@@ -11,7 +11,7 @@ export async function callGemini(
   }
 
   const modelName = model || Deno.env.get('GEMINI_MODEL') || 'gemini-1.5-flash';
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
+  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent`;
 
   const finalPrompt = systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt;
 

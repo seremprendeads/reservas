@@ -81,7 +81,15 @@ export function useAdminNav(
           },
         ];
 
-    return [...core, ...modules, ...tail];
+    const bioItem = modules.find(m => m.id === 'bio');
+    const otherModules = modules.filter(m => m.id !== 'bio');
+
+    return [
+      ...(bioItem ? [bioItem] : []),
+      ...core,
+      ...otherModules,
+      ...tail,
+    ];
   }, [waitingList, deletedBookings, moduleNavItems, enabledModules]);
 
   const coreTitles: Record<string, string> = {

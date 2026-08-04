@@ -311,7 +311,7 @@ export function AdminPage() {
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden pb-16 lg:pb-0">
         {subscription.status === 'suspended' && (
           <div className="bg-red-600 text-white px-4 py-2.5 text-xs font-bold text-center flex items-center justify-center gap-3 shadow-md z-40">
-            <span>🔴 [ESTADO: SUSPENDIDO / TRIAL VENCIDO] El período de prueba de 14 días ha finalizado. Acceso restringido al Módulo Bio Gratuito.</span>
+            <span>🔴 [ESTADO: SUSPENDIDO / TRIAL VENCIDO] El período de prueba de 14 días ha finalizado. Acceso al Módulo Bio Gratuito.</span>
             <button
               onClick={() => handleNavigate('profile')}
               className="bg-white text-red-600 px-3 py-1 rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors shadow"
