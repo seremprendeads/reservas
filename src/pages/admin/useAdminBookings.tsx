@@ -56,8 +56,12 @@ export function useAdminBookings({ businessId, onProfileLoaded, setConfirmModal 
       if (blockedRes.data) setBlockedDates(blockedRes.data);
       if (brandingRes.data) setBranding(brandingRes.data);
 
-      const { data: wlData } = await authInvoke('admin-get-waiting-list', {});
-      if (wlData?.success) setWaitingList(wlData.data || []);
+      try {
+        const { data: wlData, error: wlError } = await authInvoke('admin-get-waiting-list', {});
+        if (!wlError && wlData?.success) setWaitingList(wlData.data || []);
+      } catch {
+        // silent catch for restricted or unauthorized modules during trial expiry / suspension
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
