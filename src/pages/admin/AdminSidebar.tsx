@@ -126,7 +126,7 @@ export function AdminSidebar({
               )}
             >
               {getItemById('bio')?.icon}
-              {!collapsed && <span className="flex-1 text-left font-bold">Bio Principal</span>}
+              {!collapsed && <span className="flex-1 text-left font-bold">Bio links</span>}
             </button>
           )}
 
