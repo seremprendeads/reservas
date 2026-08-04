@@ -13,7 +13,7 @@ interface NavItem {
 const NAV_GROUPS: { id: string; label: string; icon: React.ReactNode; ids: string[] }[] = [
   { id: 'gestion', label: 'Gestión', icon: <LayoutDashboard className="h-4 w-4" />, ids: ['dashboard', 'calendar', 'bookings', 'clients', 'waiting'] },
   { id: 'negocio', label: 'Negocio', icon: <Package className="h-4 w-4" />, ids: ['availability', 'services', 'shop'] },
-  { id: 'presencia', label: 'Presencia', icon: <Sparkles className="h-4 w-4" />, ids: ['bio', 'landing', 'appearance'] },
+  { id: 'presencia', label: 'Presencia', icon: <Sparkles className="h-4 w-4" />, ids: ['landing', 'appearance'] },
   { id: 'sistema', label: 'Sistema', icon: <Settings className="h-4 w-4" />, ids: ['integrations', 'payments', 'profile', 'whatsapp', 'trash'] },
 ];
 
@@ -114,6 +114,22 @@ export function AdminSidebar({
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-3 space-y-1.5">
+          {getItemById('bio') && (
+            <button
+              onClick={() => { onNavigate('bio'); onSidebarClose(); }}
+              className={cn(
+                'flex w-full items-center rounded-2xl text-base font-display transition-all duration-200 mb-2',
+                collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3',
+                currentView === 'bio'
+                  ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+                  : 'bg-primary/10 text-primary hover:bg-primary/20'
+              )}
+            >
+              {getItemById('bio')?.icon}
+              {!collapsed && <span className="flex-1 text-left font-bold">Bio Principal</span>}
+            </button>
+          )}
+
           {NAV_GROUPS.map(group => {
             const isOpen = openGroups[group.id];
             const hasActive = group.ids.some(id => currentView === id);
