@@ -30,12 +30,10 @@ function deriveStatus(business: Business | null, warningDays: number, trialDurat
   if (business.is_trial) {
     const trialEnd = getTrialEnd(business, trialDurationMinutes);
     if (!trialEnd) return 'trial';
-    if (trialEnd.getTime() <= Date.now()) return 'suspended';
     const daysLeft = Math.ceil(
       (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
-    if (daysLeft <= 0) return 'suspended';
-    if (daysLeft <= warningDays) return 'expiring';
+    if (daysLeft <= warningDays && daysLeft > 0) return 'expiring';
     return 'trial';
   }
   return 'active';
@@ -65,12 +63,10 @@ export function useSubscription({ business, config: configOverrides }: UseSubscr
       status === 'suspended' ||
       (status === 'cancelled' && config.read_only_when_cancelled);
 
-    const enabledModules = status === 'suspended'
-      ? ['bio' as ModuleId]
-      : getEnabledModules(
-          business?.plan || 'free',
-          business?.is_trial || false
-        );
+    const enabledModules = getEnabledModules(
+      business?.plan || 'free',
+      business?.is_trial || false
+    );
 
     return {
       status,
