@@ -23,7 +23,7 @@ import { AdminModals } from './admin/AdminModals';
 import { useAdminData } from './admin/useAdminData';
 import { useSubscription, FreePlanBanner } from '../modules/subscription';
 import { CalendarIntegrations } from '../modules/calendar-integration';
-import { AiAssistant } from '../modules/ai-assistant';
+// import { AiAssistant } from '../modules/ai-assistant';
 import type { AdminTab } from '../modules/landing/admin/lib/constants';
 
 export function AdminPage() {
@@ -465,7 +465,7 @@ export function AdminPage() {
         </DialogContent>
       </Dialog>
 
-      <AiAssistant />
+      {/* <AiAssistant /> */}
 
     </div>
   );
