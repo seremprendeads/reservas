@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { LogOut, Sun, Moon, ExternalLink, ChevronDown, PanelLeftClose, PanelLeftOpen, LayoutDashboard, Package, Sparkles, Settings } from 'lucide-react';
+import { LogOut, Sun, Moon, ExternalLink, ChevronDown, PanelLeftClose, PanelLeftOpen, LayoutDashboard, Package, Sparkles, Settings, Heart } from 'lucide-react';
 import { Avatar } from '../../components/ui/avatar';
 import { cn } from '../../lib/utils';
+import { ADMIN_TABS, type AdminTab } from '../../modules/landing/admin/lib/constants';
 
 interface NavItem {
   id: string;
@@ -15,6 +16,12 @@ const NAV_GROUPS: { id: string; label: string; icon: React.ReactNode; ids: strin
   { id: 'negocio', label: 'Negocio', icon: <Package className="h-4 w-4" />, ids: ['availability', 'services', 'shop'] },
   { id: 'presencia', label: 'Presencia', icon: <Sparkles className="h-4 w-4" />, ids: ['landing', 'appearance'] },
   { id: 'sistema', label: 'Sistema', icon: <Settings className="h-4 w-4" />, ids: ['integrations', 'payments', 'profile', 'whatsapp', 'trash'] },
+];
+
+const SIDEBAR_GROUPS = [
+  { id: 'secciones', label: 'Secciones', icon: Sparkles, tabs: ['hero', 'about', 'about_text', 'main_service', 'services', 'why'] as AdminTab[] },
+  { id: 'engagement', label: 'Engagement', icon: Heart, tabs: ['gallery', 'banner', 'shop_invite', 'testimonials', 'faq', 'cta', 'map', 'popup'] as AdminTab[] },
+  { id: 'config', label: 'Configuración', icon: Settings, tabs: ['general', 'menu', 'design', 'seo_marketing', 'footer'] as AdminTab[] },
 ];
 
 interface AdminSidebarProps {
@@ -31,6 +38,8 @@ interface AdminSidebarProps {
   darkMode: boolean;
   onToggleDarkMode: () => void;
   onLogout: () => void;
+  landingActiveTab?: AdminTab | null;
+  setLandingActiveTab?: (tab: AdminTab) => void;
 }
 
 export function AdminSidebar({
@@ -47,6 +56,8 @@ export function AdminSidebar({
   darkMode,
   onToggleDarkMode,
   onLogout,
+  landingActiveTab,
+  setLandingActiveTab,
 }: AdminSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -54,6 +65,11 @@ export function AdminSidebar({
     negocio: false,
     presencia: false,
     sistema: false,
+  });
+  const [openLandingGroups, setOpenLandingGroups] = useState<Record<string, boolean>>({
+    secciones: false,
+    engagement: false,
+    config: false,
   });
 
   const toggleGroup = (id: string) => {
@@ -163,6 +179,82 @@ export function AdminSidebar({
                       const item = getItemById(id);
                       if (!item) return null;
                       const isActive = currentView === id;
+                      if (id === 'landing') {
+                        return (
+                          <div key={item.id} className="space-y-1">
+                            <button
+                              onClick={() => {
+                                onNavigate(item.id);
+                                // CAMBIO: no abre ningún tab al entrar a Landing Page
+                                onSidebarClose();
+                              }}
+                              className={cn(
+                                'flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-base font-display transition-all duration-200',
+                                isActive
+                                  ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20 font-bold'
+                                  : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                              )}>
+                              {item.icon}
+                              <span className="flex-1 text-left">{item.label}</span>
+                            </button>
+                            {isActive && !collapsed && (
+                              <div className="pl-4 pr-1 py-1 space-y-2 border-l border-primary/20 ml-4 mt-1">
+                                {SIDEBAR_GROUPS.map(subGroup => {
+                                  const isSubOpen = openLandingGroups[subGroup.id];
+                                  const SubGroupIcon = subGroup.icon;
+                                  return (
+                                    <div key={subGroup.id} className="space-y-1">
+                                      <button
+                                        onClick={() => setOpenLandingGroups(prev => ({ ...prev, [subGroup.id]: !prev[subGroup.id] }))}
+                                        className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground py-1 px-2 rounded-lg transition-colors"
+                                      >
+                                        <div className="flex items-center gap-1.5">
+                                          <SubGroupIcon className="h-3 w-3" />
+                                          <span>{subGroup.label}</span>
+                                        </div>
+                                        <ChevronDown className={cn(
+                                          'h-3 w-3 transition-transform duration-200',
+                                          isSubOpen && 'rotate-180'
+                                        )} />
+                                      </button>
+                                      {isSubOpen && (
+                                        <div className="pl-3 space-y-0.5">
+                                          {subGroup.tabs.map(tabId => {
+                                            const tab = ADMIN_TABS.find(t => t.id === tabId);
+                                            if (!tab) return null;
+                                            const TabIcon = tab.icon;
+                                            const isTabActive = landingActiveTab === tabId;
+                                            return (
+                                              <button
+                                                key={tabId}
+                                                onClick={() => {
+                                                  if (setLandingActiveTab) {
+                                                    setLandingActiveTab(tabId);
+                                                  }
+                                                  onSidebarClose();
+                                                }}
+                                                className={cn(
+                                                  'flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-display transition-all duration-200',
+                                                  isTabActive
+                                                    ? 'bg-primary/10 text-primary font-medium'
+                                                    : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                                                )}
+                                              >
+                                                <TabIcon className="h-3.5 w-3.5 shrink-0" />
+                                                <span className="truncate text-left flex-1">{tab.label}</span>
+                                              </button>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
                       return (
                         <button
                           key={item.id}

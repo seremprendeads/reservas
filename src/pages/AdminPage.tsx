@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, LayoutDashboard, Mail, MessageCircle } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, Mail } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Booking, supabase } from '../lib/supabase';
 import { setName as setSessionName, setAvatar as setSessionAvatar } from '../lib/admin-session';
@@ -22,9 +22,9 @@ import { AdminHeader } from './admin/AdminHeader';
 import { AdminModals } from './admin/AdminModals';
 import { useAdminData } from './admin/useAdminData';
 import { useSubscription, FreePlanBanner } from '../modules/subscription';
-import { SuspendedScreen } from '../modules/subscription';
 import { CalendarIntegrations } from '../modules/calendar-integration';
 import { AiAssistant } from '../modules/ai-assistant';
+import type { AdminTab } from '../modules/landing/admin/lib/constants';
 
 export function AdminPage() {
   const {
@@ -81,7 +81,7 @@ export function AdminPage() {
     isFreePlan,
   } = useAdminData();
 
-  const { subscription, config: subConfig } = useSubscription({ business });
+  const { config: subConfig } = useSubscription({ business });
 
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportSent, setSupportSent] = useState(false);
@@ -89,9 +89,15 @@ export function AdminPage() {
   const [supportError, setSupportError] = useState('');
   const [supportTicket, setSupportTicket] = useState('');
   const [prevView, setPrevView] = useState<string | null>(null);
+  // landingActiveTab controlado desde AdminPage y pasado tanto al sidebar como a LandingAdmin
+  const [landingActiveTab, setLandingActiveTab] = useState<AdminTab | null>(null);
+
+  // Acepta string para compatibilidad con DashboardView/AdminSidebar props,
+  // y castea al tipo que espera setView internamente.
   const handleNavigate = (newView: string) => {
     setPrevView(view);
-    setView(newView);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setView(newView as any);
   };
 
   const showSuccess = (msg: string) => {
@@ -109,7 +115,7 @@ export function AdminPage() {
         upcomingBookings={upcomingBookings}
         paidBookings={paidBookings}
         pendingPayments={pendingPayments}
-        onNavigate={(newView: string) => handleNavigate(newView)}
+        onNavigate={handleNavigate}
         onSelectBooking={(booking: Booking) => {
           setSelectedBooking(booking);
           handleNavigate('detail');
@@ -126,7 +132,7 @@ export function AdminPage() {
             upcomingBookings={upcomingBookings}
             paidBookings={paidBookings}
             pendingPayments={pendingPayments}
-            onNavigate={(newView: string) => handleNavigate(newView)}
+            onNavigate={handleNavigate}
             onSelectBooking={(booking: Booking) => {
               setSelectedBooking(booking);
               handleNavigate('detail');
@@ -169,7 +175,7 @@ export function AdminPage() {
             availability={availability}
             blockedDates={blockedDates}
             onRefresh={loadData}
-            onUpdateStatus={updateBookingStatus}
+            onUpdateStatus={(id, status) => updateBookingStatus(id, status as Booking['booking_status'])}
             onDelete={deleteBooking}
           />
         );
@@ -233,7 +239,14 @@ export function AdminPage() {
         if (!mod) return null;
         const ModuleComponent = mod.component;
         if (view === 'bio') return <ModuleComponent adminEmail={adminEmail} />;
-        if (view === 'landing') return <ModuleComponent business={business} />;
+        // CAMBIO CLAVE: se pasa activeTab y setActiveTab a LandingAdmin
+        if (view === 'landing') return (
+          <ModuleComponent
+            business={business}
+            activeTab={landingActiveTab}
+            setActiveTab={setLandingActiveTab}
+          />
+        );
         return <ModuleComponent />;
       }
       case 'trash':
@@ -285,6 +298,12 @@ export function AdminPage() {
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(!darkMode)}
         onLogout={handleLogout}
+        // CAMBIO CLAVE: conectar estado de tab con el sidebar
+        landingActiveTab={landingActiveTab}
+        setLandingActiveTab={(tab) => {
+          setLandingActiveTab(landingActiveTab === tab ? null : tab);
+          handleNavigate('landing');
+        }}
       />
 
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden pb-16 lg:pb-0">

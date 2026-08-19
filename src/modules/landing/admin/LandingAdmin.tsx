@@ -1,14 +1,11 @@
 import { useState } from 'react';
-import { Eye, Save, Loader2, Globe, PanelLeftClose } from 'lucide-react';
+import { Eye, Save, Loader2, Globe } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Card, CardContent } from '../../../components/ui/card';
 import { supabase, type Business } from '../../../lib/supabase';
-import { DEFAULT_THEME } from '../config';
-import { SECTION_DEFINITIONS } from '../../types';
 import { ADMIN_TABS, type AdminTab } from './lib/constants';
 import { useLandingCrud } from './hooks/useLandingCrud';
 import { useLandingUpload } from './hooks/useLandingUpload';
-import { Sidebar } from './components/Sidebar';
 import { PreviewPanel } from './components/PreviewPanel';
 import { GeneralTab } from './tabs/GeneralTab';
 import { MenuTab } from './tabs/MenuTab';
@@ -32,9 +29,11 @@ import { SeoMarketingTab } from './tabs/SeoMarketingTab';
 
 interface Props {
   business: Business | null;
+  activeTab?: AdminTab | null;
+  setActiveTab?: (tab: AdminTab | null) => void;
 }
 
-export function LandingAdmin({ business }: Props) {
+export function LandingAdmin({ business, activeTab: externalActiveTab, setActiveTab: externalSetActiveTab }: Props) {
   const {
     landing, sections, theme, template, visibleSections, logoUrl, slug,
     loading, saving, saveMessage,
@@ -44,14 +43,14 @@ export function LandingAdmin({ business }: Props) {
 
   const { uploadingImage, uploadError, clearUploadError, fileInputRef, handleImageUpload, triggerUpload } = useLandingUpload({ business, setLogoUrl, setSections });
 
-  const [activeTab, setActiveTab] = useState<AdminTab | null>(null);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    secciones: false, engagement: false, config: false,
-  });
-  const [panelCollapsed, setPanelCollapsed] = useState(
-    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
-  );
-  const [contentCollapsed, setContentCollapsed] = useState(false);
+  const [localActiveTab, setLocalActiveTab] = useState<AdminTab | null>(null);
+  const activeTab = externalActiveTab !== undefined ? externalActiveTab : localActiveTab;
+  const setActiveTab = externalSetActiveTab ?? setLocalActiveTab;
+
+  const handleSaveAndClose = async () => {
+    await handleSave();
+    setActiveTab(null);
+  };
 
   if (loading) {
     return (
@@ -97,7 +96,7 @@ export function LandingAdmin({ business }: Props) {
             Landing Page
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Creá una landing page profesional para tu negocio
+            {activeTab ? ADMIN_TABS.find(t => t.id === activeTab)?.label : 'Seleccioná una sección desde el menú'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -112,117 +111,102 @@ export function LandingAdmin({ business }: Props) {
       </div>
 
       <div className="flex gap-8">
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={(tab) => { setActiveTab(tab); setContentCollapsed(false); }}
-          panelCollapsed={panelCollapsed}
-          setPanelCollapsed={setPanelCollapsed}
-          openGroups={openGroups}
-          setOpenGroups={setOpenGroups}
-        />
 
-        {activeTab && !contentCollapsed ? (
-        <div className="w-full lg:w-[420px] shrink-0">
-          <Card className="shadow-[0_8px_30px_rgba(0,0,0,.05)]">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="font-display">
-                {ADMIN_TABS.find(t => t.id === activeTab)?.label}
-              </CardTitle>
-              <button
-                onClick={() => setContentCollapsed(true)}
-                className="rounded-xl px-2 py-2 text-sm text-muted-foreground hover:bg-muted/40 hover:text-accent-foreground transition-all duration-200"
-                title="Colapsar panel"
-              >
-                <PanelLeftClose className="h-4 w-4" />
-              </button>
-            </CardHeader>
-            <CardContent key={activeTab} className="space-y-5">
-              {activeTab === 'general' && (
-                <GeneralTab
-                  slug={slug} setSlug={setSlug}
-                  template={template} setTemplate={setTemplate}
-                  visibleSections={visibleSections} toggleVisibleSection={toggleVisibleSection}
-                  logoUrl={logoUrl} triggerUpload={triggerUpload}
-                  uploadingImage={uploadingImage}
-                  sections={sections} updateSection={updateSection}
-                />
-              )}
-              {activeTab === 'menu' && (
-                <MenuTab sections={sections} updateSection={updateSection} />
-              )}
-              {activeTab === 'hero' && (
-                <HeroTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
-              )}
-              {activeTab === 'about' && (
-                <AboutTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
-              )}
-              {activeTab === 'about_text' && (
-                <AboutTextTab sections={sections} updateSection={updateSection} />
-              )}
-              {activeTab === 'main_service' && (
-                <MainServiceTab sections={sections} updateSection={updateSection} />
-              )}
-              {activeTab === 'services' && (
-                <ServicesTab sections={sections} updateSection={updateSection} />
-              )}
-              {activeTab === 'why' && (
-                <WhyChooseUsTab sections={sections} updateSection={updateSection} />
-              )}
-              {activeTab === 'gallery' && (
-                <GalleryTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
-              )}
-              {activeTab === 'banner' && (
-                <BannerTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
-              )}
-              {activeTab === 'shop_invite' && (
-                <ShopInviteTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
-              )}
-              {activeTab === 'testimonials' && (
-                <TestimonialsTab sections={sections} updateSection={updateSection} />
-              )}
-              {activeTab === 'faq' && (
-                <FaqTab sections={sections} updateSection={updateSection} />
-              )}
-              {activeTab === 'cta' && (
-                <CtaTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
-              )}
-              {activeTab === 'map' && (
-                <MapTab sections={sections} updateSection={updateSection} />
-              )}
-              {activeTab === 'popup' && (
-                <PopupTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
-              )}
-              {activeTab === 'seo_marketing' && (
-                <SeoMarketingTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
-              )}
-              {activeTab === 'footer' && (
-                <FooterTab sections={sections} updateSection={updateSection} />
-              )}
-              {activeTab === 'design' && (
-                <DesignTab theme={theme} updateTheme={updateTheme} businessId={business?.id || ''} />
-              )}
-            </CardContent>
-          </Card>
+        {/* Panel de edición — solo visible cuando hay tab activo */}
+        {activeTab && (
+          <div className="w-full lg:w-[420px] shrink-0">
+            <Card className="shadow-[0_8px_30px_rgba(0,0,0,.05)]">
+              <CardContent key={activeTab} className="space-y-5 pt-5">
+                {activeTab === 'general' && (
+                  <GeneralTab
+                    slug={slug} setSlug={setSlug}
+                    template={template} setTemplate={setTemplate}
+                    visibleSections={visibleSections} toggleVisibleSection={toggleVisibleSection}
+                    logoUrl={logoUrl} triggerUpload={triggerUpload}
+                    uploadingImage={uploadingImage}
+                    sections={sections} updateSection={updateSection}
+                  />
+                )}
+                {activeTab === 'menu' && (
+                  <MenuTab sections={sections} updateSection={updateSection} />
+                )}
+                {activeTab === 'hero' && (
+                  <HeroTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                )}
+                {activeTab === 'about' && (
+                  <AboutTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                )}
+                {activeTab === 'about_text' && (
+                  <AboutTextTab sections={sections} updateSection={updateSection} />
+                )}
+                {activeTab === 'main_service' && (
+                  <MainServiceTab sections={sections} updateSection={updateSection} />
+                )}
+                {activeTab === 'services' && (
+                  <ServicesTab sections={sections} updateSection={updateSection} />
+                )}
+                {activeTab === 'why' && (
+                  <WhyChooseUsTab sections={sections} updateSection={updateSection} />
+                )}
+                {activeTab === 'gallery' && (
+                  <GalleryTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                )}
+                {activeTab === 'banner' && (
+                  <BannerTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                )}
+                {activeTab === 'shop_invite' && (
+                  <ShopInviteTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                )}
+                {activeTab === 'testimonials' && (
+                  <TestimonialsTab sections={sections} updateSection={updateSection} />
+                )}
+                {activeTab === 'faq' && (
+                  <FaqTab sections={sections} updateSection={updateSection} />
+                )}
+                {activeTab === 'cta' && (
+                  <CtaTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                )}
+                {activeTab === 'map' && (
+                  <MapTab sections={sections} updateSection={updateSection} />
+                )}
+                {activeTab === 'popup' && (
+                  <PopupTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                )}
+                {activeTab === 'seo_marketing' && (
+                  <SeoMarketingTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                )}
+                {activeTab === 'footer' && (
+                  <FooterTab sections={sections} updateSection={updateSection} />
+                )}
+                {activeTab === 'design' && (
+                  <DesignTab theme={theme} updateTheme={updateTheme} businessId={business?.id || ''} />
+                )}
+              </CardContent>
+            </Card>
 
-          <div className="flex items-center justify-between mt-5">
-            <p className="text-xs text-muted-foreground">
-              {landing?.status === 'published' ? (
-                <span className="text-emerald-600 font-medium">● Publicada</span>
-              ) : (
-                <span className="text-amber-600 font-medium">● Borrador</span>
-              )}
-            </p>
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={handleSave} disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
-                Guardar
-              </Button>
+            <div className="flex items-center justify-between mt-5">
+              <p className="text-xs text-muted-foreground">
+                {landing?.status === 'published' ? (
+                  <span className="text-emerald-600 font-medium">● Publicada</span>
+                ) : (
+                  <span className="text-amber-600 font-medium">● Borrador</span>
+                )}
+              </p>
+              <div className="flex gap-3">
+                <Button variant="ghost" onClick={() => setActiveTab(null)} disabled={saving}>
+                  Cerrar
+                </Button>
+                <Button variant="outline" onClick={handleSaveAndClose} disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+                  Guardar
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-        ) : null}
+        )}
 
-        <div className={`flex-1 min-w-0 ${activeTab && !contentCollapsed ? 'hidden lg:block' : ''}`}>
+        {/* Vista previa — ocupa todo el espacio restante */}
+        <div className="flex-1 min-w-0">
           <Card className="lg:sticky lg:top-4 shadow-[0_8px_30px_rgba(0,0,0,.05)]">
             <CardContent className="p-0 overflow-hidden">
               <div className="bg-muted/30 px-6 py-3 border-b">
@@ -234,6 +218,7 @@ export function LandingAdmin({ business }: Props) {
             </CardContent>
           </Card>
         </div>
+
       </div>
     </div>
   );
