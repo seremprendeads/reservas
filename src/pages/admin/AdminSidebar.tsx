@@ -87,14 +87,14 @@ export function AdminSidebar({
     <>
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-[55] bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={onSidebarClose}
         />
       )}
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-card transition-all duration-300 ease-in-out lg:static lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-[60] flex flex-col border-r border-border bg-card transition-all duration-300 ease-in-out lg:static lg:translate-x-0',
           collapsed ? 'w-[72px]' : 'w-72',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}>
