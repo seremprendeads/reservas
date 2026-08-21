@@ -15,10 +15,121 @@ export function createServiceClient() {
   );
 }
 
+// ============================================================================
+// SUBSCRIPTION GUARD
+// Verifica server-side que el negocio tiene acceso activo (trial vigente o plan pago).
+// TRIAL_DAYS = 18 días para prospección directa beta.
+// Devuelve null si el acceso está OK, o un objeto de error si debe bloquearse.
+// ============================================================================
+
+export const TRIAL_DAYS = 18;
+
+export type AccessStatus =
+  | { allowed: true }
+  | { allowed: false; reason: "suspended" | "trial_expired" | "business_not_found"; message: string };
+
+export async function checkBusinessAccess(businessId: string): Promise<AccessStatus> {
+  const supabase = createServiceClient();
+  const { data: biz } = await supabase
+    .from("businesses")
+    .select("is_active, is_trial, trial_ends_at, plan")
+    .eq("id", businessId)
+    .maybeSingle();
+
+  if (!biz) {
+    return { allowed: false, reason: "business_not_found", message: "Negocio no encontrado" };
+  }
+
+  if (!biz.is_active) {
+    return { allowed: false, reason: "suspended", message: "Cuenta suspendida. Contactá soporte." };
+  }
+
+  // Si está en trial, verificar vencimiento usando el servidor (Date.now() en Edge Function, no en el browser)
+  if (biz.is_trial) {
+    if (!biz.trial_ends_at) {
+      // Sin fecha de fin → acceso OK (negocio muy nuevo, el trigger debería haberla seteado)
+      return { allowed: true };
+    }
+    const trialEnd = new Date(biz.trial_ends_at);
+    if (trialEnd.getTime() <= Date.now()) {
+      return {
+        allowed: false,
+        reason: "trial_expired",
+        message: `Tu período de prueba de ${TRIAL_DAYS} días ha vencido. Elegí un plan para continuar.`,
+      };
+    }
+  }
+
+  // Plan pago activo (is_trial = false, is_active = true) → acceso OK
+  return { allowed: true };
+}
+
+// ============================================================================
+// MASTER ADMIN AUTH
+// Completamente separado de authenticateToken/authenticateAdmin.
+// Usa MASTER_JWT_SECRET distinto de JWT_SECRET.
+// Un JWT de tenant no puede pasar este check (secrets diferentes).
+// Un JWT de master no puede pasar authenticateToken (mismo motivo).
+// ============================================================================
+
+export interface MasterTokenPayload {
+  sub: string;    // master_admin id
+  email: string;
+  role: "master"; // literal fijo — nunca viene del cliente
+  iat: number;
+  exp: number;
+}
+
+export async function authenticateMaster(req: Request): Promise<
+  | { master: { id: string; email: string; name: string } }
+  | { error: string; status: 401 }
+> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return { error: "No autorizado", status: 401 as const };
+  }
+
+  const token = authHeader.slice(7);
+  const secret = Deno.env.get("MASTER_JWT_SECRET");
+  if (!secret) {
+    console.error("MASTER_JWT_SECRET not configured");
+    return { error: "Configuración incorrecta", status: 401 as const };
+  }
+
+  // Verificar con MASTER_JWT_SECRET — un token de tenant (firmado con JWT_SECRET)
+  // fallará aquí con firma inválida. No hay forma de cruzarlos.
+  const { verifyToken: verify } = await import("./jwt.ts");
+  const raw = await verify(token, secret);
+  if (!raw) {
+    return { error: "Token inválido o expirado", status: 401 as const };
+  }
+
+  // Verificar que el payload tiene role: "master"
+  // Esto previene que un payload de tenant (sin role) pase aunque la firma fuera válida
+  const payload = raw as unknown as MasterTokenPayload;
+  if (payload.role !== "master") {
+    return { error: "No autorizado", status: 401 as const };
+  }
+
+  // DB lookup fresco — verificar que el master existe y está activo
+  const supabase = createServiceClient();
+  const { data: master } = await supabase
+    .from("master_admins")
+    .select("id, email, name, is_active")
+    .eq("id", payload.sub)
+    .maybeSingle();
+
+  if (!master || !master.is_active) {
+    return { error: "No autorizado", status: 401 as const };
+  }
+
+  return { master: { id: master.id, email: master.email, name: master.name } };
+}
+
 // Verify JWT token from Authorization header
 export async function authenticateToken(req: Request): Promise<
-  { admin: { id: string; email: string; name: string | null; business_id: string | null }; businessId: string } |
-  { error: string; status: 401 }
+  | { admin: { id: string; email: string; name: string | null; business_id: string | null }; businessId: string }
+  | { error: string; status: 401 }
 > {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
@@ -49,6 +160,12 @@ export async function authenticateToken(req: Request): Promise<
     return { error: "Usuario no encontrado", status: 401 as const };
   }
 
+  // Si el admin no tiene business_id asignado, rechazar en lugar de asignar automáticamente.
+  // Un admin sin negocio debe completar el flujo /create-business.
+  if (!admin.business_id) {
+    return { error: "No tenés un negocio asociado. Completá el registro en /create-business.", status: 401 as const };
+  }
+
   return { admin, businessId: admin.business_id as string };
 }
 
@@ -76,28 +193,10 @@ export async function authenticateAdmin(email: string, password: string) {
     return { error: "No autorizado", status: 401 as const };
   }
 
-  // If admin doesn't have a business_id, assign to the first active business
+  // ELIMINADO: el fallback que asignaba automáticamente el primer negocio activo.
+  // Si el admin no tiene business_id, retorna error claro. Debe completar /create-business.
   if (!admin.business_id) {
-    const { data: defaultBusiness } = await supabase
-      .from("businesses")
-      .select("id")
-      .eq("is_active", true)
-      .order("created_at")
-      .limit(1)
-      .maybeSingle();
-
-    if (defaultBusiness) {
-      const { error: updateError } = await supabase
-        .from("admin_users")
-        .update({ business_id: defaultBusiness.id })
-        .eq("id", admin.id);
-
-      if (updateError) {
-        console.error("Error assigning business:", updateError);
-      }
-
-      admin.business_id = defaultBusiness.id;
-    }
+    return { error: "No tenés un negocio asociado. Completá el registro desde el panel.", status: 401 as const };
   }
 
   return { admin, businessId: admin.business_id as string };
@@ -118,6 +217,13 @@ export function jsonError(error: string, status = 500) {
 
 export function jsonUnauthorized() {
   return jsonError("No autorizado", 401);
+}
+
+export function jsonAccessDenied(message: string) {
+  return new Response(JSON.stringify({ success: false, error: message, access_denied: true }), {
+    status: 403,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }
 
 // Simple in-memory rate limiter (per-instance, not distributed)

@@ -74,7 +74,7 @@ const SYSTEM_PROMPT = `Sos "BookingBot", un asistente IA experto en la plataform
 - Webhook de Mercado Pago para confirmar pagos automáticamente
 
 ### PLANES Y SUSCRIPCIÓN
-- Trial gratis 14 días
+- Trial gratis 18 días
 - Planes: Free (solo bio), Basic (bio+landing+reservas), Pro (+tienda), Enterprise (+SEO)
 - Periodo de gracia de 15 días después de la suspensión
 - Si el plan es Free, solo tiene acceso a Bio

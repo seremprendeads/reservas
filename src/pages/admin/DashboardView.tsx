@@ -52,7 +52,7 @@ export function DashboardView({
                   </div>
                   <div className="text-center sm:text-left">
                     <p className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white/90">
-                      Período de prueba · 14 días
+                      Período de prueba · 18 días
                     </p>
                     <p className="text-[10px] sm:text-xs text-white/60 mt-0.5 sm:mt-1">
                       {isUrgent ? '¡Quedan pocos días!' : 'Disfrutá todas las funcionalidades'}

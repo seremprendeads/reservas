@@ -13,20 +13,28 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // MULTI-TENANT TYPES
 // ============================================================================
 
+// Duración del trial para la beta de prospección directa.
+// El backend (Edge Functions) es la fuente de verdad para este valor.
+// El frontend lo usa solo para UI informativa — nunca para decisiones de acceso.
+export const TRIAL_DAYS = 18;
+
 export type Business = {
   id: string;
   name: string;
   slug: string;
-  owner_email: string;
+  // owner_email NO se incluye: no lo expone la vista public_businesses ni debe llegar al cliente
   logo_url: string | null;
   is_active: boolean;
-  plan: string;
-  is_trial: boolean;
-  trial_ends_at: string | null;
+  // Campos sensibles: opcionales porque la vista pública no los expone.
+  // Solo se populan cuando se carga el negocio post-login (admin panel).
+  plan?: string;
+  is_trial?: boolean;
+  trial_ends_at?: string | null;
   timezone: string;
   currency: string;
-  created_at: string;
-  updated_at: string;
+  language?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 // ============================================================================

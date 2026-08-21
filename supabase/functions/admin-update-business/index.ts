@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { authenticateToken, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
+import { authenticateToken, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, jsonAccessDenied, checkBusinessAccess, corsHeaders } from "../_shared/auth.ts";
 
 function slugify(name: string): string {
   return name
@@ -22,6 +22,11 @@ Deno.serve(async (req: Request) => {
     const auth = await authenticateToken(req);
     if ("error" in auth) {
       return jsonUnauthorized();
+    }
+
+    const access = await checkBusinessAccess(auth.businessId);
+    if (!access.allowed) {
+      return jsonAccessDenied(access.message);
     }
 
     const { name } = await req.json();

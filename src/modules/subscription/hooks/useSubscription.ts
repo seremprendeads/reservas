@@ -3,6 +3,12 @@ import type { Business } from '../../../../lib/supabase';
 import type { SubscriptionInfo, SubscriptionConfig, SubscriptionStatus, ModuleId } from '../types';
 import { DEFAULT_SUBSCRIPTION_CONFIG, getEnabledModules } from '../lib/constants';
 
+// ⚠️  IMPORTANTE — SEGURIDAD:
+// Los cálculos de este hook son ÚNICAMENTE para la UI (banners, contadores, mensajes).
+// NO son la fuente de verdad para control de acceso.
+// La validación real de trial y plan ocurre en el BACKEND (Edge Functions via checkBusinessAccess).
+// Un usuario que manipule su reloj o sessionStorage solo afecta la UI — el backend lo bloqueará igual.
+
 interface UseSubscriptionOptions {
   business: Business | null;
   config?: Partial<SubscriptionConfig>;

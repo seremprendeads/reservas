@@ -5,6 +5,7 @@ import { ShopPage } from './modules/shop/pages/ShopPage';
 import { BioPage } from './modules/bio/pages/BioPage';
 import { LandingPage } from './modules/landing/pages/LandingPage';
 import { CreateBusinessPage } from './pages/CreateBusinessPage';
+import { MasterAdminPage } from './pages/master/MasterAdminPage';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BusinessProvider } from './contexts/BusinessContext';
 
@@ -14,6 +15,9 @@ function App() {
       <ThemeProvider>
         <BrowserRouter>
           <Routes>
+            {/* Master Admin - propietario BookingBio - separado de /admin */}
+            <Route path="/master-admin" element={<MasterAdminPage />} />
+
             {/* Admin panel - must be before catch-all */}
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/seremprende-entendo-administrativo" element={<AdminPage />} />

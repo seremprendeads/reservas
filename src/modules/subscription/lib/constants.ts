@@ -1,5 +1,11 @@
 import type { SubscriptionConfig, ModuleId } from '../types';
 
+// Duración del trial para la beta de prospección directa.
+// Debe coincidir con TRIAL_DAYS en supabase/functions/_shared/auth.ts y
+// la función SQL set_trial_end_date() (migración 20260820000000).
+// La fuente de verdad es el backend — este valor es solo para mensajes de UI.
+export const TRIAL_DAYS = 18;
+
 export const DEFAULT_SUBSCRIPTION_CONFIG: SubscriptionConfig = {
   show_trial_banner: true,
   show_expiring_popup: true,

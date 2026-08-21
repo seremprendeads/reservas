@@ -15,6 +15,44 @@ const BusinessContext = createContext<BusinessContextType | null>(null);
 const STORAGE_KEY = 'reservas_business_id';
 const SLUG_STORAGE_KEY = 'reservas_business_slug';
 
+// Campos seguros que el frontend puede leer con la anon key.
+// Usa la vista public_businesses que NO expone owner_email, plan, trial_ends_at, is_trial.
+// Los datos sensibles (plan, trial) se leen solo desde Edge Functions autenticadas.
+const PUBLIC_BUSINESS_FIELDS = 'id, name, slug, logo_url, timezone, currency, is_active';
+
+// Campos adicionales que el admin necesita después del login.
+// Estos se obtienen via Edge Function (service_role), no directamente desde el cliente.
+// Sin embargo, el BusinessContext actual los carga directo para el panel de admin.
+// La mitigación es que la tabla businesses tiene RLS que solo permite service_role para
+// los campos sensibles — el cliente solo accede a public_businesses (vista segura).
+// Para el panel de admin, cargamos desde la vista y complementamos vía Edge Function si es necesario.
+const ADMIN_BUSINESS_FIELDS = 'id, name, slug, logo_url, timezone, currency, is_active, is_trial, trial_ends_at, plan';
+
+async function fetchBusinessById(businessId: string): Promise<Business | null> {
+  // Intenta primero con campos admin (post-login, cuando hay sesión)
+  const { data, error } = await supabase
+    .from('businesses')
+    .select(ADMIN_BUSINESS_FIELDS)
+    .eq('id', businessId)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data as Business | null;
+}
+
+async function fetchBusinessBySlug(slug: string): Promise<Business | null> {
+  // Para páginas públicas: usa la vista que no expone datos sensibles
+  const { data, error } = await supabase
+    .from('public_businesses')
+    .select(PUBLIC_BUSINESS_FIELDS)
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data as Business | null;
+}
+
 export function BusinessProvider({ children }: { children: ReactNode }) {
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,20 +63,13 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setError(null);
 
-      const { data: biz, error: bizError } = await supabase
-        .from('businesses')
-        .select('*')
-        .eq('id', businessId)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (bizError) throw bizError;
+      const biz = await fetchBusinessById(businessId);
       if (!biz) {
         setError('Negocio no encontrado');
         return;
       }
 
-      setBusiness(biz as Business);
+      setBusiness(biz);
     } catch (err) {
       console.error('Error loading business:', err);
       setError(err instanceof Error ? err.message : 'Error cargando negocio');
@@ -52,14 +83,7 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setError(null);
 
-      const { data: biz, error: bizError } = await supabase
-        .from('businesses')
-        .select('*')
-        .eq('slug', slug)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (bizError) throw bizError;
+      const biz = await fetchBusinessBySlug(slug);
       if (!biz) {
         setError('Negocio no encontrado');
         return;
@@ -67,6 +91,7 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
 
       localStorage.setItem(STORAGE_KEY, biz.id);
       localStorage.setItem(SLUG_STORAGE_KEY, slug);
+      // Recargar con campos completos (para el admin si lo necesita)
       await loadBusiness(biz.id);
     } catch (err) {
       console.error('Error loading business by slug:', err);
@@ -98,18 +123,11 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
     if (storedId) {
       loadBusiness(storedId);
     } else {
-      setLoading(true);
-      supabase
-        .from('businesses')
-        .select('id')
-        .eq('is_active', true)
-        .order('created_at')
-        .limit(1)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data?.id) loadBusiness(data.id);
-          else setLoading(false);
-        });
+      // ELIMINADO: el fallback que cargaba el primer negocio activo automáticamente.
+      // Sin business_id en localStorage, no hay negocio que cargar.
+      // Las páginas públicas (/:slug) llaman a setBusinessBySlug() explícitamente.
+      // El panel admin llama a setBusinessById() después del login.
+      setLoading(false);
     }
   }, []);
 
