@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '../../lib/supabase';
 import { masterGetToken, masterGetName, masterGetEmail, masterClearSession } from '../../lib/master-session';
 import { ShieldCheck, Users, Clock, Ban, CheckCircle, LogOut, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '../../components/ui/button';
@@ -32,13 +31,30 @@ interface Tenant {
 type ActionType = 'suspend' | 'reactivate' | 'change_plan' | 'extend_trial';
 
 const PLANS = ['free', 'basic', 'pro', 'enterprise'];
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-function authHeaders() {
-  return { Authorization: `Bearer ${masterGetToken()}` };
-}
-
+// Supabase valida el Authorization header con su JWT propio antes de pasarlo a la Edge Function.
+// Para que llegue nuestro token master, enviamos la anon key en el header "apikey"
+// (que satisface la validación de Supabase) y el token master en Authorization.
+// La Edge Function usa solo el Authorization header para authenticateMaster().
 async function invokeMaster(fn: string, body: Record<string, unknown>) {
-  return supabase.functions.invoke(fn, { body, headers: authHeaders() });
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/${fn}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${masterGetToken()}`,
+      },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) return { data: null, error: data };
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: err };
+  }
 }
 
 export function MasterDashboard({ onLogout }: { onLogout: () => void }) {

@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 import { masterSaveSession } from '../../lib/master-session';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 interface Props {
   onLogin: () => void;
@@ -24,11 +26,18 @@ export function MasterLoginScreen({ onLogin }: Props) {
     setLoading(true);
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('master-login', {
-        body: { email: email.trim().toLowerCase(), password },
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/master-login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
 
-      if (fnError || !data?.success) {
+      const data = await res.json();
+
+      if (!res.ok || !data?.success) {
         setError('Credenciales incorrectas');
         return;
       }
