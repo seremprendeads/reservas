@@ -20,7 +20,7 @@ function App() {
 
             {/* Admin panel - must be before catch-all */}
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="/seremprende-entendo-administrativo" element={<AdminPage />} />
+            <Route path="/bookingclient-administracion-bio" element={<AdminPage />} />
             <Route path="/create-business" element={<CreateBusinessPage />} />
             
             {/* Public booking page */}
