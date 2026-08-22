@@ -236,18 +236,18 @@ CREATE POLICY "Anon write shop_order_items" ON shop_order_items
   FOR ALL
   TO anon, authenticated
   USING (
-    business_id IS NOT NULL
-    AND EXISTS (
-      SELECT 1 FROM businesses
-      WHERE businesses.id = shop_order_items.business_id
+    EXISTS (
+      SELECT 1 FROM shop_orders
+      JOIN businesses ON businesses.id = shop_orders.business_id
+      WHERE shop_orders.id = shop_order_items.order_id
         AND businesses.is_active = true
     )
   )
   WITH CHECK (
-    business_id IS NOT NULL
-    AND EXISTS (
-      SELECT 1 FROM businesses
-      WHERE businesses.id = business_id
+    EXISTS (
+      SELECT 1 FROM shop_orders
+      JOIN businesses ON businesses.id = shop_orders.business_id
+      WHERE shop_orders.id = order_id
         AND businesses.is_active = true
     )
   );
