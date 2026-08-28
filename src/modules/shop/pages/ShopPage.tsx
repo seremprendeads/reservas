@@ -35,7 +35,6 @@ function ShopMarketingPopup() {
         className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-300 flex flex-col"
         style={{ backgroundColor: config.overlay_color || '#111827' }}
       >
-        {/* Cruz pegada al card */}
         <button
           onClick={close}
           className="absolute top-3 right-3 z-[10000] flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white transition-all hover:bg-black/50"
@@ -43,7 +42,6 @@ function ShopMarketingPopup() {
           <X className="h-4 w-4" />
         </button>
 
-        {/* Texto arriba */}
         {(config.title || config.subtitle || config.description) && (
           <div className="px-6 pt-8 pb-4 text-center">
             {config.title && (
@@ -64,14 +62,12 @@ function ShopMarketingPopup() {
           </div>
         )}
 
-        {/* Imagen de Canva en el centro */}
         {config.image_url && (
           <div className="w-full">
             <img src={config.image_url} alt="" className="w-full object-cover" />
           </div>
         )}
 
-        {/* Botón abajo */}
         {config.button_text && (
           <div className="px-6 py-5 text-center">
             
@@ -87,4 +83,3 @@ function ShopMarketingPopup() {
       </div>
     </div>
   );
-}
