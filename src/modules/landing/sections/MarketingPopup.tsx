@@ -45,52 +45,60 @@ export function MarketingPopup({ popup, theme, headingStyle, bodyStyle }: Market
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={close}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      <button
-        onClick={close}
-        className="absolute top-6 right-6 z-[10000] flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-lg transition-all hover:bg-white hover:scale-110"
+      <div
+        onClick={e => e.stopPropagation()}
+        className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-300 flex flex-col"
+        style={{ backgroundColor: popup.overlay_color || theme.primary_color }}
       >
-        <X className="h-5 w-5" />
-      </button>
+        {/* Cruz pegada al card */}
+        <button
+          onClick={close}
+          className="absolute top-3 right-3 z-[10000] flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white transition-all hover:bg-black/50"
+        >
+          <X className="h-4 w-4" />
+        </button>
 
-      <div onClick={e => e.stopPropagation()} className="relative w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-300">
-        {popup.image_url && (
-          <div className="absolute inset-0">
-            <img src={popup.image_url} alt="" className="h-full w-full object-cover" />
-            <div className="absolute inset-0" style={{ backgroundColor: popup.overlay_color, opacity: popup.overlay_opacity / 100 }} />
+        {/* Texto arriba */}
+        {(popup.title || popup.subtitle || popup.description) && (
+          <div className="px-6 pt-8 pb-4 text-center">
+            {popup.title && (
+              <h3 style={{ ...headingStyle, color: '#ffffff', fontWeight: 700 }} className="text-xl sm:text-2xl mb-1">
+                {popup.title}
+              </h3>
+            )}
+            {popup.subtitle && (
+              <p style={{ ...bodyStyle, color: 'rgba(255,255,255,0.85)' }} className="text-sm sm:text-base">
+                {popup.subtitle}
+              </p>
+            )}
+            {popup.description && (
+              <p style={{ ...bodyStyle, color: 'rgba(255,255,255,0.7)' }} className="text-xs leading-relaxed mt-1">
+                {popup.description}
+              </p>
+            )}
           </div>
         )}
 
-        {!popup.image_url && (
-          <div className="absolute inset-0" style={{ backgroundColor: popup.overlay_color || theme.primary_color }} />
+        {/* Imagen de Canva en el centro */}
+        {popup.image_url && (
+          <div className="w-full">
+            <img src={popup.image_url} alt="" className="w-full object-cover" />
+          </div>
         )}
 
-        <div className="relative z-10 p-8 sm:p-10 pt-12 text-center">
-          {popup.title && (
-            <h3 style={{ ...headingStyle, color: '#ffffff', fontWeight: 600 }} className="text-2xl sm:text-3xl mb-2">
-              {popup.title}
-            </h3>
-          )}
-          {popup.subtitle && (
-            <p style={{ ...bodyStyle, color: 'rgba(255,255,255,0.8)' }} className="text-sm sm:text-base mb-4">
-              {popup.subtitle}
-            </p>
-          )}
-          {popup.description && (
-            <p style={{ ...bodyStyle, color: 'rgba(255,255,255,0.7)' }} className="text-sm leading-relaxed mb-6">
-              {popup.description}
-            </p>
-          )}
-          {popup.button_text && (
-            <a
+        {/* Botón abajo */}
+        {popup.button_text && (
+          <div className="px-6 py-5 text-center">
+            
               href={popup.button_url || '#'}
               onClick={close}
-              className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-sm font-bold text-white uppercase tracking-wider transition-all duration-200 hover:shadow-lg active:scale-[0.97]"
-              style={{ backgroundColor: theme.button_color || theme.primary_color }}
+              className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-sm font-bold text-white uppercase tracking-wider transition-all duration-200 hover:shadow-lg hover:opacity-90 active:scale-[0.97]"
+              style={{ backgroundColor: theme.button_color || theme.primary_color, filter: 'brightness(1.2)' }}
             >
               {popup.button_text}
             </a>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
