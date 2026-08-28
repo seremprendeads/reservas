@@ -87,14 +87,9 @@ export function MarketingPopup({ popup, theme, headingStyle, bodyStyle }: Market
         )}
 
         {/* Botón abajo */}
-        {popup.button_text && (
+         {popup.button_text && (
           <div className="px-6 py-5 text-center">
-            
-              href={popup.button_url || '#'}
-              onClick={close}
-              className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-sm font-bold text-white uppercase tracking-wider transition-all duration-200 hover:shadow-lg hover:opacity-90 active:scale-[0.97]"
-              style={{ backgroundColor: theme.button_color || theme.primary_color, filter: 'brightness(1.2)' }}
-            >
+            <a href={popup.button_url || '#'} onClick={close} className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-sm font-bold text-white uppercase tracking-wider transition-all duration-200 hover:shadow-lg hover:opacity-90 active:scale-[0.97]" style={{ backgroundColor: theme.button_color || theme.primary_color, filter: 'brightness(1.2)' }}>
               {popup.button_text}
             </a>
           </div>
