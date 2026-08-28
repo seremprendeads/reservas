@@ -68,7 +68,7 @@ function ShopMarketingPopup() {
           </div>
         )}
 
-        {config.button_text && (
+       {config.button_text && (
           <div className="px-6 py-5 text-center">
             
               href={config.button_url || '#'}
