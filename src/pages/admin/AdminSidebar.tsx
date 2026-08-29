@@ -114,7 +114,7 @@ export function AdminSidebar({
           <button
             onClick={onToggleDarkMode}
             title={darkMode ? 'Modo claro' : 'Modo oscuro'}
-            className="shrink-0 rounded-xl p-2 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all duration-200"
+                       className="lg:hidden shrink-0 rounded-xl p-2 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all duration-200"
           >
             {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
