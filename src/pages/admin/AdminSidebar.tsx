@@ -111,10 +111,11 @@ export function AdminSidebar({
               <span className="text-xs text-muted-foreground truncate block mt-0.5">{adminName || adminEmail}</span>
             </div>
           )}
+          {/* Sol solo visible en mobile */}
           <button
             onClick={onToggleDarkMode}
             title={darkMode ? 'Modo claro' : 'Modo oscuro'}
-            className="shrink-0 rounded-xl p-2 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all duration-200"
+            className="lg:hidden shrink-0 rounded-xl p-2 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all duration-200"
           >
             {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
@@ -185,7 +186,6 @@ export function AdminSidebar({
                             <button
                               onClick={() => {
                                 onNavigate(item.id);
-                                // CAMBIO: no abre ningún tab al entrar a Landing Page
                                 onSidebarClose();
                               }}
                               className={cn(
@@ -206,7 +206,7 @@ export function AdminSidebar({
                                     <div key={subGroup.id} className="space-y-1">
                                       <button
                                         onClick={() => setOpenLandingGroups(prev => ({ ...prev, [subGroup.id]: !prev[subGroup.id] }))}
-                                        className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground py-1 px-2 rounded-lg transition-colors"
+                                        className="flex w-full items-center justify-between text-xs font-semibold tracking-wider text-muted-foreground hover:text-foreground py-1 px-2 rounded-lg transition-colors"
                                       >
                                         <div className="flex items-center gap-1.5">
                                           <SubGroupIcon className="h-3 w-3" />
@@ -290,7 +290,7 @@ export function AdminSidebar({
         {/* Link a Booking Page */}
         {!collapsed ? (
           <div className="border-t border-border px-3 py-2">
-            <a
+            
               href={`/${businessSlug || '...'}/reservas`}
               target="_blank"
               rel="noopener noreferrer"
@@ -303,7 +303,7 @@ export function AdminSidebar({
           </div>
         ) : (
           <div className="border-t border-border px-3 py-2">
-            <a
+            
               href={`/${businessSlug || '...'}/reservas`}
               target="_blank"
               rel="noopener noreferrer"
