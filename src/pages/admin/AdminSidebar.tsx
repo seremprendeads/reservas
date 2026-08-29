@@ -206,7 +206,7 @@ export function AdminSidebar({
                                     <div key={subGroup.id} className="space-y-1">
                                       <button
                                         onClick={() => setOpenLandingGroups(prev => ({ ...prev, [subGroup.id]: !prev[subGroup.id] }))}
-                                        className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground py-1 px-2 rounded-lg transition-colors"
+                                        className="flex w-full items-center justify-between text-xs font-semibold tracking-wider text-muted-foreground hover:text-foreground py-1 px-2 rounded-lg transition-colors"
                                       >
                                         <div className="flex items-center gap-1.5">
                                           <SubGroupIcon className="h-3 w-3" />
