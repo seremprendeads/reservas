@@ -20,9 +20,7 @@ interface HeaderProps {
 export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOpen, handleSmoothScroll, headingStyle, bodyStyle, landing, isPreview }: HeaderProps) {
   const headerBg = (() => {
     if (ts.headerStyle === 'solid') {
-      return scrolled
-        ? theme.bg_color
-        : theme.bg_color;
+      return scrolled ? theme.bg_color : theme.bg_color;
     }
     if (ts.headerStyle === 'gradient') {
       return scrolled
@@ -39,6 +37,9 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
   })();
 
   const isTransparent = ts.headerStyle === 'transparent' && !scrolled;
+
+  const formatLabel = (label: string) =>
+    label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
 
   return (
     <header className={`${isPreview ? 'absolute' : 'fixed'} top-0 left-0 right-0 z-50 transition-all duration-200 ${scrolled ? 'shadow-[0_1px_20px_rgba(0,0,0,0.06)]' : ''} ${scrolled ? 'backdrop-blur-xl' : ''}`}
@@ -76,7 +77,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
               <a key={i} href={item.href} onClick={handleSmoothScroll}
                 style={{ ...bodyStyle, color: headerTextColor }}
                 className="px-4 py-2 text-sm font-medium opacity-60 hover:opacity-100 transition-all duration-150 rounded-lg hover:bg-black/[0.03]">
-                {item.label}
+                {formatLabel(item.label)}
               </a>
             ))}
             {s.header.cta_text && (
@@ -112,7 +113,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
               <a key={i} href={item.href} onClick={handleSmoothScroll}
                 style={{ color: theme.text_color, ...bodyStyle }}
                 className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-black/[0.03] transition-colors">
-                {item.label}
+                {formatLabel(item.label)}
               </a>
             ))}
             {s.header.cta_text && (

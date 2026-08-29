@@ -23,11 +23,12 @@ export function AdminHeader({
 }: AdminHeaderProps) {
   return (
     <header className="flex h-16 items-center gap-4 border-b border-border bg-card/80 backdrop-blur-sm px-4 lg:px-8">
-      <button
-        onClick={onMenuClick}
-        className="lg:hidden rounded-2xl p-2 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors duration-200">
-        <Menu className="h-5 w-5" />
-      </button>
+        <button
+          onClick={onToggleDarkMode}
+          title={darkMode ? 'Modo claro' : 'Modo oscuro'}
+          className="lg:hidden rounded-xl p-2 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all duration-200">
+          {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
 
       <div className="flex items-center gap-3">
         <h1 className="text-xl font-display">{title}</h1>
