@@ -6,6 +6,7 @@ import { BioPage } from './modules/bio/pages/BioPage';
 import { LandingPage } from './modules/landing/pages/LandingPage';
 import { CreateBusinessPage } from './pages/CreateBusinessPage';
 import { MasterAdminPage } from './pages/master/MasterAdminPage';
+import { AcceptInvitePage } from './pages/AcceptInvitePage';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BusinessProvider } from './contexts/BusinessContext';
 
@@ -34,6 +35,9 @@ function App() {
             {/* Bio - public */}
             <Route path="/:slug/bio" element={<BioPage />} />
             
+            {/* Invitación de negocio */}
+            <Route path="/invite/:token" element={<AcceptInvitePage />} />
+
             {/* Landing page - catch-all: / or /:slug */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/:slug" element={<LandingPage />} />

@@ -9,7 +9,7 @@ export const TRIAL_DAYS = 18;
 export const DEFAULT_SUBSCRIPTION_CONFIG: SubscriptionConfig = {
   show_trial_banner: true,
   show_expiring_popup: true,
-  days_before_expiry_warning: 5,
+  days_before_expiry_warning: 8,
   trial_duration_minutes: 0,
   suspended_message: 'Tu suscripción está suspendida. Para continuar usando el sistema, renová tu plan.',
   support_whatsapp: '',
@@ -35,10 +35,13 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 export const PLAN_MODULES: Record<string, ModuleId[]> = {
+  // trial: acceso completo a todos los módulos durante el período de prueba
   trial: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
+  // free: solo bio, sin premium — estado post-trial sin membresía activa
   free: ['bio'],
-  basic: ['bio', 'landing', 'reservas'],
+  // pro: plan pago estándar
   pro: ['bio', 'landing', 'reservas', 'shop'],
+  // enterprise: plan pago avanzado
   enterprise: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
 };
 

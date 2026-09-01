@@ -1,8 +1,9 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { authenticateMaster, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
 
-// Planes válidos — deben coincidir con el enum del DB
-const VALID_PLANS = ["free", "basic", "pro", "enterprise"];
+// Planes válidos — DEBEN coincidir con el CHECK constraint de businesses.plan en la DB.
+// Migración 20260901000000_commercial_cycle.sql define: free | pro | enterprise
+const VALID_PLANS = ["free", "pro", "enterprise"];
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {

@@ -14,7 +14,7 @@ Deno.serve(async (req: Request) => {
 
     const access = await checkBusinessAccess(auth.businessId);
     if (!access.allowed) {
-      return jsonAccessDenied(access.message);
+      return jsonAccessDenied(access.message, "reason" in access ? access.reason : undefined);
     }
 
     const { name: newName, newEmail, newPassword, avatar_url } = await req.json();
@@ -81,6 +81,12 @@ Deno.serve(async (req: Request) => {
         });
         if (pwError) throw pwError;
       }
+
+      // Al cambiar la contraseña, marcar que ya no es temporal
+      await supabase
+        .from("admin_users")
+        .update({ must_change_password: false })
+        .eq("id", auth.admin.id);
     }
 
     return jsonSuccess();

@@ -20,11 +20,23 @@ export function BioPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
+  const [isPremium, setIsPremium] = useState(true); // asume premium hasta verificar
+
   useEffect(() => {
     if (!slug) return;
     (async () => {
-      const { data: biz } = await supabase.from('businesses').select('id').eq('slug', slug).eq('is_active', true).maybeSingle();
+      const { data: biz } = await supabase
+        .from('businesses')
+        .select('id, plan, is_trial, trial_ends_at')
+        .eq('slug', slug)
+        .eq('is_active', true)
+        .maybeSingle();
       if (!biz) { setNotFound(true); setLoading(false); return; }
+
+      // Determinar si tiene acceso premium (trial activo O plan pago)
+      const trialActive = biz.is_trial && (!biz.trial_ends_at || new Date(biz.trial_ends_at) > new Date());
+      const paidPlan = !biz.is_trial && biz.plan !== 'free';
+      setIsPremium(trialActive || paidPlan);
 
       const { data: p } = await supabase.from('bio_profiles').select('*').eq('business_id', biz.id).eq('is_active', true).maybeSingle();
       if (!p) { setNotFound(true); setLoading(false); return; }
@@ -67,11 +79,18 @@ export function BioPage() {
     );
   }
 
-  const bgStyle: React.CSSProperties = profile.bg_type === 'gradient'
+  // En plan free: solo color sólido (sin gradiente ni imagen de fondo)
+  // La configuración premium se conserva en DB pero no se aplica en la vista pública
+  const effectiveBgType = isPremium ? profile.bg_type : 'solid';
+  const bgStyle: React.CSSProperties = effectiveBgType === 'gradient'
     ? { background: `linear-gradient(135deg, ${profile.bg_gradient_from}, ${profile.bg_gradient_to})` }
-    : profile.bg_type === 'image' && profile.bg_image_url
+    : effectiveBgType === 'image' && profile.bg_image_url
     ? { background: `url(${profile.bg_image_url}) center/cover no-repeat`, backgroundColor: profile.bg_solid_color }
     : { background: profile.bg_solid_color };
+
+  // En plan free: máximo 3 links visibles
+  // Los links extra siguen en DB, simplemente no se muestran hasta que vuelvan a tener un plan
+  const visibleLinks = isPremium ? links : links.slice(0, 3);
 
   const overlayOpacity = (profile.bg_opacity ?? 0) / 100;
 
@@ -157,7 +176,7 @@ const socialLinks = [
 
         {/* Links */}
         <div className="w-full mt-8 space-y-4">
-          {links.map((link, i) => {
+          {visibleLinks.map((link, i) => {
             const isTienda = /tienda|shop/i.test(link.title);
             const bgColor = link.color || (isTienda && bookingBgColor) || profile.primary_color;
             return (

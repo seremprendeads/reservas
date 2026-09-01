@@ -26,7 +26,7 @@ export const TRIAL_DAYS = 18;
 
 export type AccessStatus =
   | { allowed: true }
-  | { allowed: false; reason: "suspended" | "trial_expired" | "business_not_found"; message: string };
+  | { allowed: false; reason: "suspended" | "trial_expired" | "business_not_found" | "free_plan"; message: string };
 
 export async function checkBusinessAccess(businessId: string): Promise<AccessStatus> {
   const supabase = createServiceClient();
@@ -60,7 +60,19 @@ export async function checkBusinessAccess(businessId: string): Promise<AccessSta
     }
   }
 
-  // Plan pago activo (is_trial = false, is_active = true) → acceso OK
+  // Plan free post-trial: solo la bio está disponible.
+  // Las Edge Functions de reservas, shop, landing, branding, etc. deben ser bloqueadas.
+  // La Edge Function admin-update-bio usa checkBioAccess (no checkBusinessAccess),
+  // por lo que este bloqueo no afecta a la bio.
+  if (!biz.is_trial && biz.plan === "free") {
+    return {
+      allowed: false,
+      reason: "free_plan",
+      message: "Tu período de prueba terminó. Solo tenés acceso a la Bio gratuita. Elegí un plan para continuar.",
+    };
+  }
+
+  // Plan pago activo (is_trial = false, plan != 'free', is_active = true) → acceso OK
   return { allowed: true };
 }
 
@@ -176,7 +188,7 @@ export async function authenticateAdmin(email: string, password: string) {
 
   const { data: admin, error: adminError } = await supabase
     .from("admin_users")
-    .select("id, email, name, password_hash, business_id")
+    .select("id, email, name, password_hash, business_id, must_change_password")
     .ilike("email", cleanEmail)
     .maybeSingle();
 
@@ -219,8 +231,32 @@ export function jsonUnauthorized() {
   return jsonError("No autorizado", 401);
 }
 
-export function jsonAccessDenied(message: string) {
-  return new Response(JSON.stringify({ success: false, error: message, access_denied: true }), {
+// ============================================================================
+// checkBioAccess
+// La bio está disponible en TODOS los planes, incluyendo free.
+// Solo se bloquea si la cuenta está suspendida (is_active = false).
+// ============================================================================
+export async function checkBioAccess(businessId: string): Promise<AccessStatus> {
+  const supabase = createServiceClient();
+  const { data: biz } = await supabase
+    .from("businesses")
+    .select("is_active")
+    .eq("id", businessId)
+    .maybeSingle();
+
+  if (!biz) {
+    return { allowed: false, reason: "business_not_found", message: "Negocio no encontrado" };
+  }
+
+  if (!biz.is_active) {
+    return { allowed: false, reason: "suspended", message: "Cuenta suspendida. Contactá soporte." };
+  }
+
+  return { allowed: true };
+}
+
+export function jsonAccessDenied(message: string, reason?: string) {
+  return new Response(JSON.stringify({ success: false, error: message, access_denied: true, reason: reason || "access_denied" }), {
     status: 403,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });

@@ -14,7 +14,7 @@ Deno.serve(async (req: Request) => {
 
     const access = await checkBusinessAccess(auth.businessId);
     if (!access.allowed) {
-      return jsonAccessDenied(access.message);
+      return jsonAccessDenied(access.message, "reason" in access ? access.reason : undefined);
     }
 
     const { action, service_id, name, description, price, currency, image_url, is_active } = await req.json();

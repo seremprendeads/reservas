@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { authenticateToken, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, jsonAccessDenied, checkBusinessAccess, corsHeaders } from "../_shared/auth.ts";
+import { authenticateToken, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, jsonAccessDenied, checkBioAccess, corsHeaders } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -10,9 +10,9 @@ Deno.serve(async (req: Request) => {
     const auth = await authenticateToken(req);
     if ("error" in auth) return jsonUnauthorized();
 
-    const access = await checkBusinessAccess(auth.businessId);
+    const access = await checkBioAccess(auth.businessId);
     if (!access.allowed) {
-      return jsonAccessDenied(access.message);
+      return jsonAccessDenied(access.message, "reason" in access ? access.reason : undefined);
     }
 
     const supabase = createServiceClient();
