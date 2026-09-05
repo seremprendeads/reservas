@@ -13,7 +13,7 @@ import { useImageUpload } from '../../hooks/useImageUpload';
 
 export function ServicesManager() {
   const { business } = useBusiness();
-  const { uploading: uploadingImg, imgInputRef, handleFileChange } = useImageUpload({
+  const { uploading: uploadingImg, fileInputRef: imgInputRef, handleFileChange } = useImageUpload({
     bucket: 'branding',
     pathPrefix: business?.id || 'default',
     filePrefix: 'service',
