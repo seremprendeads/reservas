@@ -8,6 +8,10 @@ import { authInvoke } from './helpers';
 
 const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
+// Horario por defecto para los días que todavía no existen en la base
+const DEFAULT_START = '09:00';
+const DEFAULT_END = '18:00';
+
 export function AvailabilityManager({
   availability, blockedDates, onRefresh, showSuccess
 }: {
@@ -16,6 +20,24 @@ export function AvailabilityManager({
   onRefresh: () => void;
   showSuccess: (msg: string) => void;
 }) {
+  // Los negocios nuevos se crean SIN filas en availability_settings, así que
+  // el panel quedaba completamente vacío y no había forma de cargar horarios.
+  // Acá se arman siempre los 7 días: los que existen en la base se muestran
+  // con sus datos, y los que faltan aparecen inactivos con el horario por
+  // defecto. Al guardarlos, la Edge Function crea la fila.
+  const allDays: AvailabilitySetting[] = Array.from({ length: 7 }, (_, i) => {
+    const existente = availability.find(a => a.day_of_week === i);
+    if (existente) return existente;
+    return {
+      id: `sin-guardar-${i}`,
+      business_id: '',
+      day_of_week: i,
+      start_time: DEFAULT_START,
+      end_time: DEFAULT_END,
+      is_active: false,
+    } as AvailabilitySetting;
+  });
+
   const [editingDay, setEditingDay] = useState<number | null>(null);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
@@ -77,7 +99,7 @@ export function AvailabilityManager({
           <CardDescription>Configurá los horarios de atención por día</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {availability.map((day) => (
+          {allDays.map((day) => (
             <div key={day.id} className="rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:bg-muted/40">
               {editingDay === day.day_of_week ? (
                 <div className="space-y-3">
@@ -110,7 +132,9 @@ export function AvailabilityManager({
                   <div className="flex items-center gap-3">
                     <div className={`h-2.5 w-2.5 rounded-full ${day.is_active ? 'bg-emerald-500' : 'bg-red-500'}`} />
                     <span className="font-medium">{DAYS[day.day_of_week]}</span>
-                    <span className="text-sm text-muted-foreground">{day.start_time.slice(0, 5)} — {day.end_time.slice(0, 5)}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {day.is_active ? `${day.start_time.slice(0, 5)} — ${day.end_time.slice(0, 5)}` : 'Cerrado'}
+                    </span>
                   </div>
                   <Button onClick={() => startEditing(day)} variant="ghost" size="icon">
                     <Edit className="h-4 w-4" />
