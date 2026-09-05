@@ -43,7 +43,7 @@ export function useAdminNav(
             badge: waitingList.filter(w => w.estado === 'pendiente').length || undefined,
           },
           { id: 'availability', label: 'Disponibilidad', icon: <Clock className="h-5 w-5" /> },
-          { id: 'services', label: 'Servicios', icon: <Package className="h-5 w-5" /> },
+          { id: 'services', label: 'Reservas de servicios', icon: <Package className="h-5 w-5" /> },
         ];
 
     const moduleViewToModuleId: Record<string, ModuleId> = {
@@ -72,7 +72,6 @@ export function useAdminNav(
         ]
       : [
           { id: 'integrations', label: 'Integraciones', icon: <Plug className="h-5 w-5" /> },
-          { id: 'appearance', label: 'Apariencia Reservas', icon: <Palette className="h-5 w-5" /> },
           { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
           { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquareText className="h-5 w-5" /> },
           {
@@ -99,9 +98,9 @@ export function useAdminNav(
     clients: 'Clientes',
     waiting: 'Lista de Espera',
     availability: 'Disponibilidad',
-    services: 'Servicios',
+    services: 'Reservas de servicios',
     integrations: 'Integraciones',
-    appearance: 'Apariencia Reservas',
+    appearance: 'Reservas de servicios',
     payments: 'Pagos',
     profile: 'Perfil',
     whatsapp: 'WhatsApp',

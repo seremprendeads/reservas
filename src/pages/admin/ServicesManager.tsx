@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ExternalLink, CalendarCheck, Plus, Edit, Trash2, X, Check } from 'lucide-react';
+import { ExternalLink, CalendarCheck, Plus, Edit, Trash2, X, Check, Package, Palette } from 'lucide-react';
 import { supabase, Service } from '../../lib/supabase';
 import { compressImage } from '../../lib/image-utils';
 import { Button } from '../../components/ui/button';
@@ -11,8 +11,11 @@ import { useBusiness } from '../../contexts/BusinessContext';
 import { authInvoke } from './helpers';
 import { useImageUpload } from '../../hooks/useImageUpload';
 
-export function ServicesManager() {
+type ServicesTab = 'servicios' | 'apariencia';
+
+export function ServicesManager({ appearanceSlot }: { appearanceSlot?: React.ReactNode } = {}) {
   const { business } = useBusiness();
+  const [activeTab, setActiveTab] = useState<ServicesTab>('servicios');
   const { uploading: uploadingImg, fileInputRef: imgInputRef, handleFileChange } = useImageUpload({
     bucket: 'branding',
     pathPrefix: business?.id || 'default',
@@ -135,16 +138,42 @@ export function ServicesManager() {
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold font-display">Servicios</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">Administrá los servicios que ofrecés</p>
+          <h2 className="text-xl sm:text-2xl font-bold font-display">Reservas de servicios</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            {activeTab === 'servicios'
+              ? 'Administrá los servicios que ofrecés'
+              : 'Personalizá cómo se ve tu página de reservas'}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <a href={`/${business?.slug || '...'}/reservas`} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="sm" className="gap-1.5 transition-all duration-200"><ExternalLink className="w-3.5 h-3.5" />Ver servicios</Button>
+            <Button variant="outline" size="sm" className="gap-1.5 transition-all duration-200"><ExternalLink className="w-3.5 h-3.5" />Ver reservas</Button>
           </a>
-          <Button onClick={openNew} size="sm" className="transition-all duration-200"><Plus className="w-4 h-4 sm:mr-1.5" /><span className="hidden sm:inline">Nuevo servicio</span></Button>
+          {activeTab === 'servicios' && (
+            <Button onClick={openNew} size="sm" className="transition-all duration-200"><Plus className="w-4 h-4 sm:mr-1.5" /><span className="hidden sm:inline">Nuevo servicio</span></Button>
+          )}
         </div>
       </div>
+
+      {/* Pestañas: Servicios y Apariencia viven en la misma pantalla */}
+      <div className="flex gap-1 bg-muted/50 p-1 rounded-xl">
+        {([
+          { id: 'servicios' as const, label: 'Servicios', icon: <Package className="w-4 h-4" /> },
+          { id: 'apariencia' as const, label: 'Apariencia', icon: <Palette className="w-4 h-4" /> },
+        ]).map(t => (
+          <button key={t.id} onClick={() => setActiveTab(t.id)}
+            className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all flex-1 justify-center ${
+              activeTab === t.id ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+            }`}>
+            {t.icon}<span>{t.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'apariencia' ? (
+        appearanceSlot ?? null
+      ) : (
+      <>
 
       {notification && (
         <div className={`rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
@@ -197,6 +226,9 @@ export function ServicesManager() {
         </CardContent>
       </Card>
 
+      </>
+      )}
+
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-h-[85vh] flex flex-col">
           <DialogHeader className="shrink-0">
@@ -206,25 +238,25 @@ export function ServicesManager() {
           {/* flex-1 + overflow-y-auto: si el contenido no entra, scrollea acá
               adentro y el footer con Guardar queda siempre visible. */}
           <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <label className="text-sm font-medium">Nombre</label>
               <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Corte de cabello" className="h-10 rounded-xl" />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <label className="text-sm font-medium">Descripción (opcional)</label>
               <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ej: Corte y peinado completo" className="h-10 rounded-xl" />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
+              <div className="space-y-3">
                 <label className="text-sm font-medium">Precio</label>
                 <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="1500" className="h-10 rounded-xl" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-3">
                 <label className="text-sm font-medium">Moneda</label>
                 <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="ARS" className="h-10 rounded-xl" />
               </div>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <label className="text-sm font-medium">Imagen (opcional)</label>
               <div className="flex items-center gap-3">
                 <Button type="button" variant="outline" size="sm" className="transition-all duration-200" onClick={() => imgInputRef.current?.click()} disabled={uploadingImg}>

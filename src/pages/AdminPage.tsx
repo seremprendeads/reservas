@@ -221,16 +221,22 @@ export function AdminPage() {
             }}
           />
         );
+      // 'appearance' ya no es una vista propia del menú: se muestra como
+      // pestaña dentro de "Reservas de servicios". Se mantiene el case por si
+      // algo navega a esa vista desde otro lado.
       case 'appearance':
+      case 'services':
         return (
-          <AppearanceManager
-            branding={branding}
-            onRefresh={loadData}
-            showSuccess={showSuccess}
+          <ServicesManager
+            appearanceSlot={
+              <AppearanceManager
+                branding={branding}
+                onRefresh={loadData}
+                showSuccess={showSuccess}
+              />
+            }
           />
         );
-      case 'services':
-        return <ServicesManager />;
       case 'payments':
       case 'shop':
       case 'bio':
