@@ -83,10 +83,10 @@ export function BioPage() {
   // La configuración premium se conserva en DB pero no se aplica en la vista pública
   const effectiveBgType = isPremium ? profile.bg_type : 'solid';
 
-  // La imagen de fondo se dibuja en capas aparte (ver más abajo), no como
-  // background del contenedor. Motivo: el contenedor ocupa todo el ancho de
-  // la pantalla y crece con el contenido, así que en PC/notebook `cover`
-  // agrandaba la foto muchísimo para cubrir 1920px y se veía deformada.
+  // La imagen se dibuja en capas aparte. El contenedor ocupa todo el ancho de
+  // la pantalla, así que en PC `cover` agrandaba la foto para cubrir 1920px y
+  // la deformaba. Ahora la foto va en una columna centrada y los costados se
+  // rellenan con bg_solid_color (configurable en Apariencia).
   const showBgImage = effectiveBgType === 'image' && !!profile.bg_image_url;
 
   const bgStyle: React.CSSProperties = effectiveBgType === 'gradient'
@@ -137,16 +137,10 @@ const socialLinks = [
     <div className="min-h-screen relative" style={bgStyle}>
       {showBgImage && (
         <>
-          {/* Relleno de los costados en pantallas anchas: color sólido.
-              Se controla desde Apariencia → "Color de fondo".
-              En celular esta capa queda tapada por la foto. */}
-          <div
-            className="fixed inset-0 z-0"
-            style={{ background: profile.bg_solid_color }}
-          />
-          {/* Foto nítida, centrada y con ancho acotado.
-              `fixed` la ata al alto de la ventana: aunque la bio tenga muchos
-              enlaces y la página se alargue, el encuadre no se estira. */}
+          {/* Relleno de los costados en pantallas anchas */}
+          <div className="fixed inset-0 z-0" style={{ background: profile.bg_solid_color }} />
+          {/* Foto centrada, con ancho acotado. `fixed` la ata al alto de la
+              ventana: aunque la bio tenga muchos enlaces, no se estira. */}
           <div
             className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-0"
             style={{ background: `url(${profile.bg_image_url}) center/cover no-repeat` }}

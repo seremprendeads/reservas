@@ -718,14 +718,22 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     ))}
                   </div>
                 </div>
-                {profile?.bg_type === 'solid' && (
+                {(profile?.bg_type === 'solid' || profile?.bg_type === 'image') && (
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Color de fondo</label>
+                    <label className="text-sm font-medium">
+                      {profile?.bg_type === 'image' ? 'Color de los costados' : 'Color de fondo'}
+                    </label>
+                    {profile?.bg_type === 'image' && (
+                      <p className="text-xs text-muted-foreground">
+                        Rellena los laterales en pantallas anchas (PC y notebook).
+                        En celular no se ve porque la imagen ocupa todo el ancho.
+                      </p>
+                    )}
                     <div className="flex items-center gap-3">
-                      <input type="color" value={profile.bg_solid_color}
+                      <input type="color" value={profile?.bg_solid_color || '#ffffff'}
                         onChange={e => { handleFieldChange('bg_solid_color', e.target.value); debouncedSave(); }}
                         className="h-10 w-10 rounded-lg border cursor-pointer" />
-                      <Input value={profile.bg_solid_color}
+                      <Input value={profile?.bg_solid_color || '#ffffff'}
                         onChange={e => { handleFieldChange('bg_solid_color', e.target.value); debouncedSave(); }}
                         className="w-32 font-mono text-sm" />
                     </div>
@@ -939,6 +947,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
             <div className="mx-auto max-w-[280px]">
               <div className="rounded-[2.5rem] border-[6px] border-gray-900 bg-gray-900 overflow-hidden shadow-2xl">
                 <div className="rounded-[2rem] overflow-hidden relative" style={{
+                  backgroundColor: profile?.bg_solid_color || '#ffffff',
                   background: profile?.bg_type === 'gradient'
                     ? `linear-gradient(135deg, ${profile.bg_gradient_from}, ${profile.bg_gradient_to})`
                     : profile?.bg_type === 'image' && profile.bg_image_url
