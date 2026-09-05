@@ -82,10 +82,17 @@ export function BioPage() {
   // En plan free: solo color sólido (sin gradiente ni imagen de fondo)
   // La configuración premium se conserva en DB pero no se aplica en la vista pública
   const effectiveBgType = isPremium ? profile.bg_type : 'solid';
+
+  // La imagen de fondo se dibuja en capas aparte (ver más abajo), no como
+  // background del contenedor. Motivo: el contenedor ocupa todo el ancho de
+  // la pantalla y crece con el contenido, así que en PC/notebook `cover`
+  // agrandaba la foto muchísimo para cubrir 1920px y se veía deformada.
+  const showBgImage = effectiveBgType === 'image' && !!profile.bg_image_url;
+
   const bgStyle: React.CSSProperties = effectiveBgType === 'gradient'
     ? { background: `linear-gradient(135deg, ${profile.bg_gradient_from}, ${profile.bg_gradient_to})` }
-    : effectiveBgType === 'image' && profile.bg_image_url
-    ? { background: `url(${profile.bg_image_url}) center/cover no-repeat`, backgroundColor: profile.bg_solid_color }
+    : showBgImage
+    ? { backgroundColor: profile.bg_solid_color }
     : { background: profile.bg_solid_color };
 
   // En plan free: máximo 3 links visibles
@@ -128,8 +135,29 @@ const socialLinks = [
 
   return (
     <div className="min-h-screen relative" style={bgStyle}>
+      {showBgImage && (
+        <>
+          {/* Relleno de los costados en pantallas anchas: la misma foto,
+              difuminada. En celular queda tapada por la capa nítida. */}
+          <div
+            className="fixed inset-0 z-0"
+            style={{
+              background: `url(${profile.bg_image_url}) center/cover no-repeat`,
+              filter: 'blur(28px)',
+              transform: 'scale(1.15)',
+            }}
+          />
+          {/* Foto nítida, centrada y con ancho acotado.
+              `fixed` la ata al alto de la ventana: aunque la bio tenga muchos
+              enlaces y la página se alargue, el encuadre no se estira. */}
+          <div
+            className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-0"
+            style={{ background: `url(${profile.bg_image_url}) center/cover no-repeat` }}
+          />
+        </>
+      )}
       {overlayOpacity > 0 && (
-        <div className="absolute inset-0 bg-black" style={{ opacity: overlayOpacity }} />
+        <div className="fixed inset-0 z-0 bg-black" style={{ opacity: overlayOpacity }} />
       )}
       <meta property="og:title" content={profile.name} />
       <meta property="og:description" content={profile.description} />
