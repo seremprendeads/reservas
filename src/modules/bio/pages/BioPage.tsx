@@ -137,15 +137,12 @@ const socialLinks = [
     <div className="min-h-screen relative" style={bgStyle}>
       {showBgImage && (
         <>
-          {/* Relleno de los costados en pantallas anchas: la misma foto,
-              difuminada. En celular queda tapada por la capa nítida. */}
+          {/* Relleno de los costados en pantallas anchas: color sólido.
+              Se controla desde Apariencia → "Color de fondo".
+              En celular esta capa queda tapada por la foto. */}
           <div
             className="fixed inset-0 z-0"
-            style={{
-              background: `url(${profile.bg_image_url}) center/cover no-repeat`,
-              filter: 'blur(28px)',
-              transform: 'scale(1.15)',
-            }}
+            style={{ background: profile.bg_solid_color }}
           />
           {/* Foto nítida, centrada y con ancho acotado.
               `fixed` la ata al alto de la ventana: aunque la bio tenga muchos
