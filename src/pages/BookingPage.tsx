@@ -40,7 +40,7 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
                 </div>
               )}
               {s.image_url && (
-                <img src={s.image_url} alt={s.name} className="w-full h-36 object-cover" />
+                <img src={s.image_url} alt={s.name} className="w-full h-auto" />
               )}
               <div className="p-8 flex flex-col flex-1 items-center">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: isSelected ? 'var(--booking-primary)' : 'var(--booking-primary)20' }}>
