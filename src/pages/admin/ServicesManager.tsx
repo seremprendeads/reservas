@@ -198,31 +198,33 @@ export function ServicesManager() {
       </Card>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className="max-h-[85vh] flex flex-col">
+          <DialogHeader className="shrink-0">
             <DialogTitle>{editing ? 'Editar servicio' : 'Nuevo servicio'}</DialogTitle>
             <DialogDescription>Completá los datos del servicio</DialogDescription>
           </DialogHeader>
-          <div className="space-y-5">
-            <div className="space-y-3">
+          {/* flex-1 + overflow-y-auto: si el contenido no entra, scrollea acá
+              adentro y el footer con Guardar queda siempre visible. */}
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Nombre</label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Corte de cabello" className="h-12 rounded-xl" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Corte de cabello" className="h-10 rounded-xl" />
             </div>
-            <div className="space-y-3">
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Descripción (opcional)</label>
-              <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ej: Corte y peinado completo" className="h-12 rounded-xl" />
+              <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ej: Corte y peinado completo" className="h-10 rounded-xl" />
             </div>
-            <div className="grid grid-cols-2 gap-5">
-              <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
                 <label className="text-sm font-medium">Precio</label>
-                <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="1500" className="h-12 rounded-xl" />
+                <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="1500" className="h-10 rounded-xl" />
               </div>
-              <div className="space-y-3">
+              <div className="space-y-1.5">
                 <label className="text-sm font-medium">Moneda</label>
-                <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="ARS" className="h-12 rounded-xl" />
+                <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="ARS" className="h-10 rounded-xl" />
               </div>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Imagen (opcional)</label>
               <div className="flex items-center gap-3">
                 <Button type="button" variant="outline" size="sm" className="transition-all duration-200" onClick={() => imgInputRef.current?.click()} disabled={uploadingImg}>
@@ -236,11 +238,11 @@ export function ServicesManager() {
                 <p className="text-xs text-destructive mt-1">{imgError}</p>
               )}
               {imageUrl && (
-                <img src={imageUrl} alt="Preview" className="mt-2 h-20 w-32 rounded-xl object-cover border border-border/60" />
+                <img src={imageUrl} alt="Preview" className="mt-2 h-16 w-24 rounded-xl object-cover border border-border/60" />
               )}
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="shrink-0 pt-2">
             <Button variant="outline" className="transition-all duration-200" onClick={() => setShowDialog(false)}>Cancelar</Button>
             <Button onClick={save} disabled={!name.trim() || !price} className="transition-all duration-200">Guardar</Button>
           </DialogFooter>
