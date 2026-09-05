@@ -447,6 +447,13 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                   </div>
                 </div>
                 <div className="space-y-2">
+                  <label className="text-sm font-medium">Nombre</label>
+                  <Input defaultValue={profile?.name || ''} key={profile?.id || 'new-name'}
+                    onChange={e => handleFieldChange('name', e.target.value)} onBlur={saveDraft}
+                    placeholder="Nombre de tu negocio" />
+                  <p className="text-xs text-muted-foreground">Es el título que aparece arriba en tu bio</p>
+                </div>
+                <div className="space-y-2">
                   <label className="text-sm font-medium">Descripción</label>
                   <textarea defaultValue={profile?.description || ''} key={profile?.id || 'new-desc'}
                     onChange={e => handleFieldChange('description', e.target.value)} onBlur={saveDraft}
