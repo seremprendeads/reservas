@@ -968,7 +968,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                       </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-lg" style={profile?.title_color ? { color: profile.title_color } : undefined}>{profile?.name || 'Tu negocio'}</h3>
+                      <h3 className="font-sans font-bold text-lg" style={profile?.title_color ? { color: profile.title_color } : undefined}>{profile?.name || 'Tu negocio'}</h3>
                       {profile?.description && <p className="text-xs mt-1" style={profile?.description_color ? { color: profile.description_color, opacity: 0.8 } : { opacity: 0.7 }}>{profile.description}</p>}
                       {profile?.city && <p className="text-xs mt-1" style={profile?.description_color ? { color: profile.description_color, opacity: 0.6 } : { opacity: 0.5 }}>{profile.city}</p>}
                     </div>

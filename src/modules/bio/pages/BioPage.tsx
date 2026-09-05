@@ -168,7 +168,7 @@ const socialLinks = [
         )}
 
         {/* Name */}
-        <h1 className="text-2xl font-bold tracking-tight" style={profile.title_color ? { color: profile.title_color } : undefined}>{profile.name}</h1>
+        <h1 className="font-sans text-2xl font-bold tracking-tight" style={profile.title_color ? { color: profile.title_color } : undefined}>{profile.name}</h1>
 
         {/* Description */}
         {profile.description && (
