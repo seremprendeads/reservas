@@ -20,7 +20,7 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
   const gridCols = services.length <= 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 w-full">
-      <h2 className="text-2xl font-bold text-booking-text mb-2 text-center font-display">Elegí tu servicio</h2>
+      <h2 className="font-sans text-2xl font-bold text-booking-text mb-2 text-center">Elegí tu servicio</h2>
       <p className="text-sm text-booking-caption mb-8 text-center">Seleccioná el servicio que querés reservar</p>
       <div className={`${isSingle ? 'flex flex-wrap justify-center' : `grid ${gridCols}`} gap-6`}>
         {services.map((s) => {
@@ -182,7 +182,7 @@ function BookingContent() {
               </div>
             )}
             <div>
-              <span className="text-xl font-bold font-display" style={{ color: textColor }}>{title}</span>
+              <span className="font-sans text-xl font-bold" style={{ color: textColor }}>{title}</span>
               {subtitle && <p className="text-sm" style={{ color: mutedColor }}>{subtitle}</p>}
             </div>
           </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -190,9 +190,13 @@ function BookingContent() {
             href="/tienda"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
             style={{
-              backgroundColor: primaryColor,
-              color: '#ffffff',
-              boxShadow: `0 2px 8px ${primaryColor}40`,
+              // Antes usaba primaryColor de fondo, el mismo color del encabezado,
+              // así que el botón se camuflaba y parecía texto suelto.
+              // Fondo translúcido + borde: contrasta con cualquier color de header.
+              backgroundColor: 'rgba(255,255,255,0.18)',
+              color: textColor,
+              border: `1px solid ${textColor}55`,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
             }}
           >
             Tienda
