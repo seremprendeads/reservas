@@ -462,7 +462,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
         <FooterSection
           footer={s.footer}
           menuItems={s.header.menu_items || []}
-          logoUrl={landing.logo_url}
+          logoUrl={s.header.logo_image_url || landing.logo_url}
           slug={landing.slug}
           theme={theme}
           ts={ts}
