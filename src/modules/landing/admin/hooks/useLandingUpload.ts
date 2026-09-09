@@ -53,6 +53,8 @@ export function useLandingUpload({ business, setLogoUrl, setSections }: UseLandi
 
       if (target === 'logo') {
         setLogoUrl(publicUrl);
+      } else if (target === 'header_logo') {
+        setSections(prev => ({ ...prev, header: { ...prev.header, logo_image_url: publicUrl } }));
       } else if (target === 'hero_image') {
         setSections(prev => ({ ...prev, hero: { ...prev.hero, image_url: publicUrl } }));
       } else if (target === 'hero_presentation') {

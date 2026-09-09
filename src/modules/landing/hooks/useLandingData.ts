@@ -1,109 +1,128 @@
-import { useState, useRef, useCallback } from 'react';
-import { supabase, type Business } from '../../../../lib/supabase';
-import { compressImage } from '../../../../lib/image-utils';
-import { useImageUpload } from '../../../../hooks/useImageUpload';
-import type { LandingSections } from '../../types';
-import { normalizeImages } from '../../lib/landing-utils';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { supabase } from '../../../lib/supabase';
+import { useBusiness } from '../../../contexts/BusinessContext';
+import type {
+  LandingPage as LandingPageType,
+  LandingSections,
+  LandingTheme,
+  LandingTemplate,
+  LandingSEO,
+} from '../types';
+import { DEFAULT_SECTIONS, DEFAULT_THEME, TEMPLATE_STYLES } from '../config';
 
-interface UseLandingUploadOptions {
-  business: Business | null;
-  setLogoUrl: (v: string) => void;
-  setSections: React.Dispatch<React.SetStateAction<LandingSections>>;
+export type TemplateStyles = typeof TEMPLATE_STYLES[LandingTemplate];
+
+const FONT_GOOGLE_MAP: Record<string, string> = {
+  'Inter': 'Inter:wght@400;500;600;700;800',
+  'Manrope': 'Manrope:wght@400;500;600;700;800',
+  'Plus Jakarta Sans': 'Plus+Jakarta+Sans:wght@400;500;600;700;800',
+  'Instrument Sans': 'Instrument+Sans:wght@400;500;600;700;800',
+  'Geist': 'Geist:wght@400;500;600;700;800',
+  'Dancing Script': 'Dancing+Script:wght@400;500;600;700',
+};
+
+function getGoogleFontsUrl(...fonts: string[]) {
+  const families = new Set<string>();
+  for (const f of fonts) {
+    const mapped = FONT_GOOGLE_MAP[f];
+    if (mapped) families.add(mapped);
+  }
+  if (families.size === 0) return null;
+  return `https://fonts.googleapis.com/css2?${[...families].map(f => `family=${f}`).join('&')}&display=swap`;
 }
 
-interface UseLandingUploadResult {
-  uploadingImage: string | null;
-  uploadError: string | null;
-  clearUploadError: () => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
-  triggerUpload: (target: string) => void;
+interface UseLandingDataOptions {
+  initialData?: LandingPageType;
 }
 
-export function useLandingUpload({ business, setLogoUrl, setSections }: UseLandingUploadOptions): UseLandingUploadResult {
-  const [uploadingImage, setUploadingImage] = useState<string | null>(null);
-  const [localUploadError, setLocalUploadError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadTargetRef = useRef<string>('');
-  const {
-    clearError,
-  } = useImageUpload({
-    bucket: 'branding',
-    pathPrefix: '',
-    filePrefix: 'landing',
-    compress: (file) => compressImage(file, { maxWidth: 1920, maxHeight: 1080 }),
-  });
+interface UseLandingDataResult {
+  landing: LandingPageType | null;
+  loading: boolean;
+  notFound: boolean;
+  s: LandingSections;
+  theme: LandingTheme;
+  seo: LandingSEO;
+  ts: TemplateStyles;
+  visibleSections: string[];
+  hasSection: (key: string) => boolean;
+  headingStyle: React.CSSProperties;
+  bodyStyle: React.CSSProperties;
+}
 
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !business?.id) return;
-    const target = uploadTargetRef.current;
-    if (!target) return;
-    setUploadingImage(target);
-    setLocalUploadError(null);
-    try {
-      const path = `${business.id}/landing-${target}-${Date.now()}.webp`;
-      const blob = await compressImage(file, { maxWidth: 1920, maxHeight: 1080 });
-      const { error } = await supabase.storage.from('branding').upload(path, blob, {
-        upsert: false, contentType: 'image/webp',
-      });
-      if (error) throw new Error(error.message || 'Error al subir imagen al servidor');
-      const { data: urlData } = supabase.storage.from('branding').getPublicUrl(path);
-      const publicUrl = (urlData?.publicUrl || '') + `?t=${Date.now()}`;
+export function useLandingData({ initialData }: UseLandingDataOptions = {}): UseLandingDataResult {
+  const { slug: urlSlug } = useParams<{ slug: string }>();
+  const { business } = useBusiness();
+  const slug = urlSlug || business?.slug;
 
-      if (target === 'logo') {
-        setLogoUrl(publicUrl);
-      } else if (target === 'header_logo') {
-        setSections(prev => ({ ...prev, header: { ...prev.header, logo_image_url: publicUrl } }));
-      } else if (target === 'hero_image') {
-        setSections(prev => ({ ...prev, hero: { ...prev.hero, image_url: publicUrl } }));
-      } else if (target === 'hero_presentation') {
-        setSections(prev => ({ ...prev, hero: { ...prev.hero, presentation_image_url: publicUrl } }));
-      } else if (target === 'hero_bg_image') {
-        setSections(prev => ({ ...prev, hero: { ...prev.hero, background_image: publicUrl } }));
-      } else if (target === 'hero_cover_image') {
-        setSections(prev => ({ ...prev, hero: { ...prev.hero, cover_image: publicUrl } }));
-      } else if (target === 'about_image') {
-        setSections(prev => ({ ...prev, about: { ...prev.about, image_url: publicUrl } }));
-      } else if (target === 'cta_image') {
-        setSections(prev => ({ ...prev, cta: { ...prev.cta, image_url: publicUrl } }));
-      } else if (target === 'banner_image') {
-        setSections(prev => ({ ...prev, banner: { ...prev.banner, image_url: publicUrl } }));
-      } else if (target === 'popup_image') {
-        setSections(prev => ({ ...prev, popup: { ...prev.popup, image_url: publicUrl } }));
-      } else if (target === 'shop_invite_image') {
-        setSections(prev => ({ ...prev, shop_invite: { ...prev.shop_invite, image_url: publicUrl } }));
-      } else if (target.startsWith('gallery_')) {
-        const idx = parseInt(target.split('_')[1]);
-        setSections(prev => {
-          const normalized = normalizeImages(prev.gallery.images);
-          const newImages = [...normalized];
-          newImages[idx] = { url: publicUrl, title: newImages[idx]?.title || '', description: newImages[idx]?.description || '' };
-          return { ...prev, gallery: { ...prev.gallery, images: newImages } };
-        });
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al subir imagen';
-      setLocalUploadError(msg);
-      console.error('Upload error:', err);
-    } finally {
-      setUploadingImage(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+  const [landing, setLanding] = useState<LandingPageType | null>(initialData || null);
+  const [loading, setLoading] = useState(!initialData);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (initialData) {
+      setLanding(initialData);
     }
-  }, [business?.id, setLogoUrl, setSections, clearError]);
+  }, [initialData]);
 
-  const triggerUpload = useCallback((target: string) => {
-    uploadTargetRef.current = target;
-    setLocalUploadError(null);
-    fileInputRef.current?.click();
-  }, []);
+  useEffect(() => {
+    if (initialData) return;
+    if (!slug) return;
+    setLoading(true);
+    supabase
+      .from('landing_pages')
+      .select('*')
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error || !data) {
+          setNotFound(true);
+        } else {
+          setLanding(data as unknown as LandingPageType);
+        }
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [slug, initialData]);
+
+  useEffect(() => {
+    if (!landing) return;
+    const theme = landing.theme as LandingTheme;
+    const fonts = [theme.font_heading, theme.font_body, 'Dancing Script'];
+    const url = getGoogleFontsUrl(...fonts);
+    if (!url) return;
+    const existing = document.querySelector(`link[href="${url}"]`);
+    if (existing) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = url;
+    document.head.appendChild(link);
+  }, [landing]);
+
+  const s = { ...((landing?.sections as LandingSections) || DEFAULT_SECTIONS), banner: ((landing?.sections as any)?.banner) || DEFAULT_SECTIONS.banner, map: ((landing?.sections as any)?.map) || DEFAULT_SECTIONS.map, popup: { ...DEFAULT_SECTIONS.popup, ...((landing?.sections as any)?.popup) }, shop_invite: { ...DEFAULT_SECTIONS.shop_invite, ...((landing?.sections as any)?.shop_invite) }, seo_marketing: { ...DEFAULT_SECTIONS.seo_marketing, ...((landing?.sections as any)?.seo_marketing), general: { ...DEFAULT_SECTIONS.seo_marketing.general, ...((landing?.sections as any)?.seo_marketing?.general) }, social: { ...DEFAULT_SECTIONS.seo_marketing.social, ...((landing?.sections as any)?.seo_marketing?.social) }, pixel_analytics: { ...DEFAULT_SECTIONS.seo_marketing.pixel_analytics, ...((landing?.sections as any)?.seo_marketing?.pixel_analytics) }, schema: { ...DEFAULT_SECTIONS.seo_marketing.schema, ...((landing?.sections as any)?.seo_marketing?.schema) }, sitemap: { ...DEFAULT_SECTIONS.seo_marketing.sitemap, ...((landing?.sections as any)?.seo_marketing?.sitemap) }, verification: { ...DEFAULT_SECTIONS.seo_marketing.verification, ...((landing?.sections as any)?.seo_marketing?.verification) }, performance: { ...DEFAULT_SECTIONS.seo_marketing.performance, ...((landing?.sections as any)?.seo_marketing?.performance) } }, about_text: { ...DEFAULT_SECTIONS.about_text, ...((landing?.sections as any)?.about_text) }, footer: { ...DEFAULT_SECTIONS.footer, ...((landing?.sections as any)?.footer) } };
+  const theme = { ...DEFAULT_THEME, ...((landing?.theme as LandingTheme) || {}) } as LandingTheme;
+  const seo = (landing?.seo as LandingSEO) || { title: '', description: '', og_image: null };
+  const template = (landing?.template as LandingTemplate) || 'creative';
+  const ts = TEMPLATE_STYLES[template] || TEMPLATE_STYLES.creative;
+  const visibleSections = landing?.visible_sections || [];
+
+  const hasSection = (key: string) => visibleSections.includes(key);
+
+  const headingStyle: React.CSSProperties = { fontFamily: `'${theme.font_heading}', sans-serif` };
+  const bodyStyle: React.CSSProperties = { fontFamily: `'${theme.font_body}', sans-serif` };
 
   return {
-    uploadingImage,
-    uploadError: localUploadError,
-    clearUploadError: () => setLocalUploadError(null),
-    fileInputRef,
-    handleImageUpload,
-    triggerUpload,
+    landing,
+    loading,
+    notFound,
+    s,
+    theme,
+    seo,
+    ts,
+    visibleSections,
+    hasSection,
+    headingStyle,
+    bodyStyle,
   };
 }
