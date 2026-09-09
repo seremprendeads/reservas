@@ -128,7 +128,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   />
                 )}
                 {activeTab === 'menu' && (
-                  <MenuTab sections={sections} updateSection={updateSection} />
+                  <MenuTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
                 )}
                 {activeTab === 'hero' && (
                   <HeroTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />

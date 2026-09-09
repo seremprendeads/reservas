@@ -12,9 +12,9 @@ interface SidebarProps {
 }
 
 const SIDEBAR_GROUPS = [
-  { id: 'secciones', label: 'Secciones', icon: Sparkles, tabs: ['hero', 'about', 'about_text', 'main_service', 'services', 'why'] as AdminTab[] },
+  { id: 'secciones', label: 'Secciones', icon: Sparkles, tabs: ['menu', 'hero', 'about', 'about_text', 'main_service', 'services', 'why'] as AdminTab[] },
   { id: 'engagement', label: 'Engagement', icon: Heart, tabs: ['gallery', 'banner', 'shop_invite', 'testimonials', 'faq', 'cta', 'map', 'popup'] as AdminTab[] },
-  { id: 'config', label: 'Configuración', icon: Settings, tabs: ['general', 'menu', 'design', 'seo_marketing', 'footer'] as AdminTab[] },
+  { id: 'config', label: 'Configuración', icon: Settings, tabs: ['general', 'design', 'seo_marketing', 'footer'] as AdminTab[] },
 ];
 
 export function Sidebar({ activeTab, setActiveTab, panelCollapsed, setPanelCollapsed, openGroups, setOpenGroups }: SidebarProps) {

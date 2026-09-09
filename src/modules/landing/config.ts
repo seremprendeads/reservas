@@ -25,6 +25,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
     cta_text: 'Reservar Turno',
     logo_title: '',
     logo_description: '',
+    logo_image_url: null,
   },
   hero: {
     hero_template: 'centered',

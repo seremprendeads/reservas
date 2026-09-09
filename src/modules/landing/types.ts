@@ -21,6 +21,7 @@ export interface LandingSections {
     cta_text: string;
     logo_title: string;
     logo_description: string;
+    logo_image_url: string | null;
   };
   hero: {
     hero_template: string;

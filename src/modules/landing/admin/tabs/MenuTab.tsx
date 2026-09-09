@@ -5,11 +5,13 @@ import type { LandingSections } from '../../types';
 
 interface MenuTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  triggerUpload: (t: string) => void; uploadingImage: string | null;
 }
 
-export function MenuTab({ sections, updateSection }: MenuTabProps) {
+export function MenuTab({ sections, updateSection, triggerUpload, uploadingImage }: MenuTabProps) {
   const header = sections.header;
   const menuItems = header.menu_items || [];
+  const logoImage = header.logo_image_url || '';
 
   const addItem = () => {
     updateSection('header', { ...header, menu_items: [...menuItems, { label: '', href: '' }] });
@@ -22,9 +24,43 @@ export function MenuTab({ sections, updateSection }: MenuTabProps) {
     items[i] = { ...items[i], [field]: value };
     updateSection('header', { ...header, menu_items: items });
   };
+  const removeLogoImage = () => {
+    updateSection('header', { ...header, logo_image_url: null });
+  };
 
   return (
     <div className="space-y-5">
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-foreground">Logo perfil del nav</label>
+        <div className="flex items-center gap-4">
+          {logoImage ? (
+            <img src={logoImage} alt="Logo del nav" className="h-14 w-14 rounded-full object-cover border" />
+          ) : (
+            <div className="h-14 w-14 rounded-full border border-dashed bg-muted/30" />
+          )}
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => triggerUpload('header_logo')}
+              disabled={!!uploadingImage}
+              className="inline-flex items-center justify-center rounded-xl text-sm font-medium ring-offset-background transition-all duration-200 border border-input bg-background hover:bg-muted/40 hover:text-accent-foreground h-11 px-4 py-2"
+            >
+              {uploadingImage === 'header_logo' ? 'Subiendo...' : logoImage ? 'Cambiar logo' : 'Subir logo'}
+            </button>
+            {logoImage && (
+              <button
+                onClick={removeLogoImage}
+                className="text-xs text-destructive hover:underline text-left px-1"
+              >
+                Quitar logo del nav
+              </button>
+            )}
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Si no cargás una imagen acá, el nav usa el logo general de Configuración → General.
+        </p>
+      </div>
+
       <div className="space-y-3">
         <label className="text-sm font-medium text-foreground">Logo</label>
         <Input value={header.logo_title} onChange={e => updateSection('header', { ...header, logo_title: e.target.value })} placeholder="Nombre del logo" className="h-12 rounded-xl" />

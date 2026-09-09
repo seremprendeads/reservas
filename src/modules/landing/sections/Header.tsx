@@ -38,6 +38,8 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
 
   const isTransparent = ts.headerStyle === 'transparent' && !scrolled;
 
+  const navLogoUrl = s.header.logo_image_url || landing.logo_url;
+
   const formatLabel = (label: string) =>
     label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
 
@@ -52,8 +54,8 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
         <div className="flex items-center justify-between h-16 sm:h-[72px]">
           {/* Logo */}
           <a href="#inicio" onClick={handleSmoothScroll} className="flex items-center gap-3 shrink-0">
-            {landing.logo_url ? (
-              <img src={landing.logo_url} alt="" className="h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover" />
+            {navLogoUrl ? (
+              <img src={navLogoUrl} alt="" className="h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover" />
             ) : (
               <span style={{ ...headingStyle, color: headerTextColor, fontWeight: 500 }} className="text-lg tracking-tight">
                 {landing.slug}
