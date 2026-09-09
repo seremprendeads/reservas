@@ -28,8 +28,13 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
         <div className="absolute inset-0" style={{ backgroundColor: data.background_color }} />
       )}
       <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div className="text-center sm:text-left">
+        {/* Mobile: columna simple → texto, imagen, botones.
+            Desktop (lg+): grilla 2x2 → texto y botones en la columna izquierda,
+            imagen ocupando ambas filas a la derecha. */}
+        <div className="flex flex-col gap-10 lg:grid lg:grid-cols-2 lg:grid-rows-[auto_auto] lg:gap-x-16 lg:gap-y-8">
+
+          {/* TEXTO */}
+          <div className="text-center sm:text-left lg:col-start-1 lg:row-start-1 lg:self-end">
             <h1 style={{ ...headingStyle, color: hasBgImage ? '#ffffff' : theme.text_color, fontWeight: 700 }} className="text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight mb-8">
               {data.title}
             </h1>
@@ -37,35 +42,14 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
               {data.subtitle}
             </p>
             {data.description && (
-              <p style={{ ...bodyStyle, color: hasBgImage ? 'rgba(255,255,255,0.5)' : '#888888' }} className="text-lg sm:text-xl mb-10 leading-relaxed">
+              <p style={{ ...bodyStyle, color: hasBgImage ? 'rgba(255,255,255,0.5)' : '#888888' }} className="text-lg sm:text-xl leading-relaxed">
                 {data.description}
               </p>
             )}
-            {!data.description && <div className="mb-10" />}
-            <div className="flex flex-col sm:flex-row gap-4">
-              {data.primary_button_text && (
-                <a
-                  href={data.primary_button_url || '#contacto'}
-                  onClick={handleSmoothScroll}
-                  className={`inline-flex items-center justify-center px-8 py-4 ${theme.button_border_radius} font-medium text-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]`}
-                  style={{ backgroundColor: theme.button_color, color: '#ffffff' }}
-                >
-                  {data.primary_button_text}
-                </a>
-              )}
-              {data.secondary_button_text && (
-                <a
-                  href={data.secondary_button_url || '#nosotros'}
-                  onClick={handleSmoothScroll}
-                  className={`inline-flex items-center justify-center px-8 py-4 ${theme.button_border_radius} font-medium text-lg transition-all duration-200 border-2 ${hasBgImage ? 'border-white/25 text-white hover:border-white/50 hover:bg-white/[0.05]' : ''}`}
-                  style={!hasBgImage ? { borderColor: `${theme.primary_color}40`, color: theme.primary_color } : undefined}
-                >
-                  {data.secondary_button_text}
-                </a>
-              )}
-            </div>
           </div>
-          <div className="relative">
+
+          {/* IMAGEN */}
+          <div className="relative lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:self-center">
             {data.cover_image ? (
               <img
                 src={data.cover_image}
@@ -82,6 +66,31 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
               </div>
             )}
           </div>
+
+          {/* BOTONES */}
+          <div className="flex flex-col sm:flex-row gap-4 lg:col-start-1 lg:row-start-2 lg:self-start">
+            {data.primary_button_text && (
+              <a
+                href={data.primary_button_url || '#contacto'}
+                onClick={handleSmoothScroll}
+                className={`inline-flex items-center justify-center px-8 py-4 ${theme.button_border_radius} font-medium text-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]`}
+                style={{ backgroundColor: theme.button_color, color: '#ffffff' }}
+              >
+                {data.primary_button_text}
+              </a>
+            )}
+            {data.secondary_button_text && (
+              <a
+                href={data.secondary_button_url || '#nosotros'}
+                onClick={handleSmoothScroll}
+                className={`inline-flex items-center justify-center px-8 py-4 ${theme.button_border_radius} font-medium text-lg transition-all duration-200 border-2 ${hasBgImage ? 'border-white/25 text-white hover:border-white/50 hover:bg-white/[0.05]' : ''}`}
+                style={!hasBgImage ? { borderColor: `${theme.primary_color}40`, color: theme.primary_color } : undefined}
+              >
+                {data.secondary_button_text}
+              </a>
+            )}
+          </div>
+
         </div>
       </div>
     </section>
