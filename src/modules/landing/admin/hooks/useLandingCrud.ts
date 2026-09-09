@@ -67,6 +67,10 @@ export function useLandingCrud({ business }: UseLandingCrudOptions): UseLandingC
           banner: (loadedSections as any).banner || DEFAULT_SECTIONS.banner,
           map: (loadedSections as any).map || DEFAULT_SECTIONS.map,
           about_text: { ...DEFAULT_SECTIONS.about_text, ...((loadedSections as any).about_text) },
+          dividers: {
+            hero_about: { ...DEFAULT_SECTIONS.dividers.hero_about, ...((loadedSections as any).dividers?.hero_about) },
+            cta_footer: { ...DEFAULT_SECTIONS.dividers.cta_footer, ...((loadedSections as any).dividers?.cta_footer) },
+          },
         });
         setTheme({ ...DEFAULT_THEME, ...(data.theme as unknown as LandingTheme) });
         setTemplate((data.template as LandingTemplate) || 'creative');

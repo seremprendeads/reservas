@@ -21,7 +21,7 @@ const NAV_GROUPS: { id: string; label: string; icon: React.ReactNode; ids: strin
 const SIDEBAR_GROUPS = [
   { id: 'secciones', label: 'Secciones', icon: Sparkles, tabs: ['hero', 'about', 'about_text', 'main_service', 'services', 'why'] as AdminTab[] },
   { id: 'engagement', label: 'Engagement', icon: Heart, tabs: ['gallery', 'banner', 'shop_invite', 'testimonials', 'faq', 'cta', 'map', 'popup'] as AdminTab[] },
-  { id: 'config', label: 'Configuración', icon: Settings, tabs: ['general', 'menu', 'design', 'seo_marketing', 'footer'] as AdminTab[] },
+  { id: 'config', label: 'Configuración', icon: Settings, tabs: ['general', 'menu', 'design', 'dividers', 'seo_marketing', 'footer'] as AdminTab[] },
 ];
 
 interface AdminSidebarProps {

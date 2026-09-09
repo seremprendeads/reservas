@@ -1,4 +1,5 @@
 import type { LandingTemplate, LandingSections, LandingTheme } from './types';
+import { DEFAULT_DIVIDER_SHAPE, DIVIDER_DEFAULT_HEIGHT } from './lib/dividers';
 
 export const TEMPLATES: { id: LandingTemplate; name: string; description: string; icon: string }[] = [
   { id: 'creative', name: 'Creativa', description: 'Tatuadores, fotógrafos, artistas y diseñadores.', icon: '▲' },
@@ -227,6 +228,20 @@ export const DEFAULT_SECTIONS: LandingSections = {
     logo_title: '',
     logo_description: '',
     frases: '',
+  },
+  dividers: {
+    hero_about: {
+      enabled: false,
+      shape: DEFAULT_DIVIDER_SHAPE,
+      height: DIVIDER_DEFAULT_HEIGHT,
+      flip: false,
+    },
+    cta_footer: {
+      enabled: false,
+      shape: DEFAULT_DIVIDER_SHAPE,
+      height: DIVIDER_DEFAULT_HEIGHT,
+      flip: false,
+    },
   },
 };
 

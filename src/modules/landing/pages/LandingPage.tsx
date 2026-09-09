@@ -32,6 +32,7 @@ import { FloatingWhatsApp } from '../components/FloatingWhatsApp';
 import { MarketingPopup } from '../sections/MarketingPopup';
 import { ShopInviteSection } from '../sections/ShopInviteSection';
 import { Header } from '../sections/Header';
+import { SectionDivider } from '../components/SectionDivider';
 import { useModuleAccess, ModuleBlockedScreen } from '../../subscription';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -281,6 +282,11 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
         </>
       )}
 
+      {/* ─── SEPARADOR HERO → NOSOTROS ─── */}
+      {hasSection('hero') && (
+        <SectionDivider divider={s.dividers?.hero_about} color={theme.bg_color} />
+      )}
+
       {/* ─── ABOUT ─── */}
       {hasSection('about') && s.about.description && (
         <AboutSection
@@ -446,6 +452,11 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
         />
       )}
 
+      {/* ─── SEPARADOR CTA → FOOTER ─── */}
+      {hasSection('footer') && (
+        <SectionDivider divider={s.dividers?.cta_footer} color={theme.footer_bg_color} />
+      )}
+
       {/* ─── FOOTER ─── */}
       {hasSection('footer') && (
         <FooterSection
@@ -478,4 +489,3 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
     </div>
   );
 }
-

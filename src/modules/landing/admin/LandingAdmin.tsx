@@ -26,6 +26,7 @@ import { DesignTab } from './tabs/DesignTab';
 import { PopupTab } from './tabs/PopupTab';
 import { ShopInviteTab } from './tabs/ShopInviteTab';
 import { SeoMarketingTab } from './tabs/SeoMarketingTab';
+import { DividersTab } from './tabs/DividersTab';
 
 interface Props {
   business: Business | null;
@@ -180,6 +181,9 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                 )}
                 {activeTab === 'design' && (
                   <DesignTab theme={theme} updateTheme={updateTheme} businessId={business?.id || ''} />
+                )}
+                {activeTab === 'dividers' && (
+                  <DividersTab sections={sections} updateSection={updateSection} />
                 )}
               </CardContent>
             </Card>

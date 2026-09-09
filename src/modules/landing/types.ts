@@ -1,3 +1,5 @@
+import type { DividerShapeId } from './lib/dividers';
+
 export type LandingTemplate = 'creative';
 
 export interface LandingPage {
@@ -13,6 +15,17 @@ export interface LandingPage {
   seo: LandingSEO;
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * Configuración de un separador entre dos secciones.
+ * Los colores NO se guardan acá: se derivan del theme en tiempo de render.
+ */
+export interface LandingDivider {
+  enabled: boolean;
+  shape: DividerShapeId;
+  height: number;
+  flip: boolean;
 }
 
 export interface LandingSections {
@@ -214,6 +227,10 @@ export interface LandingSections {
       cache_ttl: string;
       cdn_enabled: boolean;
     };
+  };
+  dividers: {
+    hero_about: LandingDivider;
+    cta_footer: LandingDivider;
   };
 }
 
