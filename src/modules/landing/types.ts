@@ -257,7 +257,7 @@ export interface LandingSEO {
 
 export const SECTION_DEFINITIONS = [
   { key: 'header', label: 'Header', icon: 'Menu' as const },
-  { key: 'hero', label: 'Hero', icon: 'Sparkles' as const },
+  { key: 'hero', label: 'Cabecera Presentación', icon: 'Sparkles' as const },
   { key: 'about', label: 'Nosotros', icon: 'Info' as const },
   { key: 'about_text', label: 'Texto Nosotros', icon: 'AlignLeft' as const },
   { key: 'main_service', label: 'Servicio Principal', icon: 'Star' as const },

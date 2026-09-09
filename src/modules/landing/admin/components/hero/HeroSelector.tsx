@@ -16,7 +16,7 @@ const TEMPLATE_ICONS: Record<HeroTemplate, typeof Layout> = {
 export function HeroSelector({ value, onChange }: HeroSelectorProps) {
   return (
     <div className="space-y-5">
-      <label className="text-sm font-medium text-foreground">Plantilla Hero</label>
+      <label className="text-sm font-medium text-foreground">Estilo de cabecera</label>
       <div className="grid grid-cols-1 gap-3">
         {(Object.keys(HERO_TEMPLATE_LABELS) as HeroTemplate[]).map(template => {
           const Icon = TEMPLATE_ICONS[template];

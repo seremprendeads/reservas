@@ -30,9 +30,9 @@ export interface HeroVideoData extends HeroBaseData {
 export type HeroData = HeroCenteredData | HeroImageData | HeroVideoData;
 
 export const HERO_TEMPLATE_LABELS: Record<HeroTemplate, string> = {
-  centered: 'Hero Centrado',
-  image: 'Hero con Imagen',
-  video: 'Hero con Video',
+  centered: 'Centrada',
+  image: 'Con Imagen',
+  video: 'Con Video',
 };
 
 export const HERO_TEMPLATE_DESCRIPTIONS: Record<HeroTemplate, string> = {

@@ -29,7 +29,7 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
       )}
       <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div>
+          <div className="text-center sm:text-left">
             <h1 style={{ ...headingStyle, color: hasBgImage ? '#ffffff' : theme.text_color, fontWeight: 700 }} className="text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight mb-8">
               {data.title}
             </h1>

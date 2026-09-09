@@ -23,7 +23,7 @@ export type AdminTab = 'general' | 'menu' | 'hero' | 'about' | 'about_text' | 'm
 export const ADMIN_TABS: { id: AdminTab; label: string; icon: typeof Sparkles }[] = [
   { id: 'general', label: 'General', icon: Settings },
   { id: 'menu', label: 'Menú', icon: Settings },
-  { id: 'hero', label: 'Hero', icon: Sparkles },
+  { id: 'hero', label: 'Cabecera Presentación', icon: Sparkles },
   { id: 'about', label: 'Nosotros', icon: Info },
   { id: 'about_text', label: 'Texto Nosotros', icon: AlignLeft },
   { id: 'main_service', label: 'Servicio Principal', icon: Star },
