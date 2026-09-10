@@ -24,24 +24,6 @@ export function PopupTab({ sections, updateSection, triggerUpload, uploadingImag
       </label>
       <Separator />
       <div>
-        <label className="text-sm font-medium text-foreground">Título</label>
-        <Input value={p.title} onChange={e => updateSection('popup', { ...p, title: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="¡Oferta especial!" />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-foreground">Subtítulo</label>
-        <Input value={p.subtitle} onChange={e => updateSection('popup', { ...p, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="No te pierdas nuestras promociones" />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-foreground">Descripción</label>
-        <textarea
-          value={p.description}
-          onChange={e => updateSection('popup', { ...p, description: e.target.value })}
-          className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm min-h-[80px] resize-none"
-          placeholder="Describí tu oferta o promoción..."
-        />
-      </div>
-      <Separator />
-      <div>
         <label className="text-sm font-medium text-foreground">Texto del botón</label>
         <Input value={p.button_text} onChange={e => updateSection('popup', { ...p, button_text: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Ver oferta" />
       </div>
