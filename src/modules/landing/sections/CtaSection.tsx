@@ -27,7 +27,7 @@ export function CtaSection({ cta, logoUrl, theme, ts, headingStyle, bodyStyle, h
       )}
       <div className="max-w-3xl mx-auto text-center relative z-10">
         {logoUrl && (
-          <img src={logoUrl} alt="" className="h-20 w-20 rounded-full object-cover mx-auto mb-8" />
+          <img src={logoUrl} alt="" className="h-28 w-28 sm:h-36 sm:w-36 rounded-full object-cover mx-auto mb-8" />
         )}
         <h2 style={{ ...headingStyle, color: '#ffffff', fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight mb-6">
           {cta.title}
