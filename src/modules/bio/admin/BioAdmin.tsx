@@ -943,7 +943,6 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
         {/* Right: Preview */}
         <div className="lg:col-span-2">
           <div className="sticky top-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Vista previa</p>
             <div className="mx-auto max-w-[280px]">
               <div className="rounded-[2.5rem] border-[6px] border-gray-900 bg-gray-900 overflow-hidden shadow-2xl">
                 <div className="rounded-[2rem] overflow-hidden relative" style={{
