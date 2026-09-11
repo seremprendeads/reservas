@@ -27,7 +27,7 @@ import { CalendarIntegrations } from '../modules/calendar-integration';
 import type { AdminTab } from '../modules/landing/admin/lib/constants';
 
 // Plan gratuito (prueba vencida sin renovar): solo estas secciones del panel.
-const FREE_PLAN_ALLOWED_VIEWS = ['bio', 'profile', 'integrations'];
+const FREE_PLAN_ALLOWED_VIEWS = ['bio', 'profile'];
 
 export function AdminPage() {
   const {
