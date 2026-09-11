@@ -19,7 +19,7 @@ export const adminModules: AdminModuleEntry[] = [
   {
     id: 'shop',
     component: ShopAdmin,
-    navLabel: 'Tienda',
+    navLabel: 'Tienda Simple',
     navIcon: <ShoppingCart className="h-5 w-5" />,
     viewTitle: 'Tienda',
     navPosition: 7,
