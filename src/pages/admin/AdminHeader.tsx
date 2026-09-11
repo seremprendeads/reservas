@@ -10,6 +10,8 @@ interface AdminHeaderProps {
   darkMode: boolean;
   onToggleDarkMode: () => void;
   businessSlug?: string;
+  // false en plan gratuito: la página de reservas no está disponible
+  showBookingLink?: boolean;
 }
 
 export function AdminHeader({
@@ -20,6 +22,7 @@ export function AdminHeader({
   darkMode,
   onToggleDarkMode,
   businessSlug,
+  showBookingLink = true,
 }: AdminHeaderProps) {
   return (
     <header className="flex h-16 items-center gap-4 border-b border-border bg-card/80 backdrop-blur-sm px-4 lg:px-8">
@@ -42,6 +45,7 @@ export function AdminHeader({
           {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
 
+        {showBookingLink && (
         <a
           href={`/${businessSlug || '...'}/reservas`}
           target="_blank"
@@ -50,8 +54,9 @@ export function AdminHeader({
           <ExternalLink className="h-4 w-4" />
           <span>Página de Reservas</span>
         </a>
+        )}
 
-        <Separator orientation="vertical" className="h-8 hidden sm:block" />
+        {showBookingLink && <Separator orientation="vertical" className="h-8 hidden sm:block" />}
 
         <div className="flex items-center gap-2.5">
           <Avatar fallback={adminName.charAt(0).toUpperCase() || 'A'} src={adminAvatar || null} className="h-8 w-8" />

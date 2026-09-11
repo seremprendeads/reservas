@@ -300,6 +300,7 @@ export function AdminPage() {
         adminEmail={adminEmail}
         businessName={business?.name || ''}
         businessSlug={business?.slug || ''}
+        showBookingLink={!isFreePlan}
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(!darkMode)}
         onLogout={handleLogout}
@@ -320,6 +321,7 @@ export function AdminPage() {
           darkMode={darkMode}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
           businessSlug={business?.slug}
+          showBookingLink={!isFreePlan}
         />
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">

@@ -35,6 +35,8 @@ interface AdminSidebarProps {
   adminEmail: string;
   businessName: string;
   businessSlug: string;
+  // false en plan gratuito: la página de reservas no está disponible
+  showBookingLink?: boolean;
   darkMode: boolean;
   onToggleDarkMode: () => void;
   onLogout: () => void;
@@ -53,6 +55,7 @@ export function AdminSidebar({
   adminEmail,
   businessName,
   businessSlug,
+  showBookingLink = true,
   darkMode,
   onToggleDarkMode,
   onLogout,
@@ -289,8 +292,8 @@ export function AdminSidebar({
           })}
         </nav>
 
-        {/* Link a Booking Page */}
-        {!collapsed ? (
+        {/* Link a Booking Page (oculto en plan gratuito) */}
+        {!showBookingLink ? null : !collapsed ? (
           <div className="border-t border-border px-3 py-2">
             <a
               href={`/${businessSlug || '...'}/reservas`}
