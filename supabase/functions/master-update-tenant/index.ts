@@ -2,8 +2,9 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { authenticateMaster, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
 
 // Planes válidos — DEBEN coincidir con el CHECK constraint de businesses.plan en la DB.
-// Migración 20260901000000_commercial_cycle.sql define: free | pro | enterprise
-const VALID_PLANS = ["free", "pro", "enterprise"];
+// free = Free Bio Standard · bio_pro = Bio Pro · bio_reservas = Bio Pro + Reservas
+// bio_reservas_web = Bio Pro + Reservas + Sitio web · enterprise = Todo completo · pro = anterior
+const VALID_PLANS = ["free", "bio_pro", "bio_reservas", "bio_reservas_web", "pro", "enterprise"];
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {

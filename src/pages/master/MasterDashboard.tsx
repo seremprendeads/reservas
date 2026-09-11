@@ -37,8 +37,19 @@ interface InviteResult {
 
 type ActionType = 'suspend' | 'reactivate' | 'change_plan' | 'extend_trial';
 
-// Enum de planes — debe coincidir con CHECK constraint de la DB
-const PLANS = ['free', 'pro', 'enterprise'];
+// Enum de planes — debe coincidir con CHECK constraint de la DB y con
+// VALID_PLANS de la Edge Function master-update-tenant.
+// 'pro' es el plan anterior: se puede ver pero ya no se ofrece al cambiar.
+const PLAN_LABELS: Record<string, string> = {
+  free: '1 · Free Bio Standard',
+  bio_pro: '2 · Bio Pro',
+  bio_reservas: '3 · Bio Pro + Reservas',
+  bio_reservas_web: '4 · Bio Pro + Reservas + Sitio web',
+  enterprise: '5 · Todo completo',
+  pro: 'Pro (plan anterior)',
+};
+const PLANS = ['free', 'bio_pro', 'bio_reservas', 'bio_reservas_web', 'enterprise'];
+const planLabel = (plan: string) => PLAN_LABELS[plan] || plan;
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
@@ -360,7 +371,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
               <CardContent className="flex flex-wrap gap-4">
                 {Object.entries(stats.plans).map(([plan, count]) => (
                   <div key={plan} className="flex items-center gap-2">
-                    <span className="text-sm font-medium capitalize text-foreground">{plan}</span>
+                    <span className="text-sm font-medium text-foreground">{planLabel(plan)}</span>
                     <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">{count}</span>
                   </div>
                 ))}
@@ -439,7 +450,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
                               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor}`}>
                                 {statusLabel}
                               </span>
-                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full capitalize">{t.plan}</span>
+                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{planLabel(t.plan)}</span>
                             </div>
                             <p className="text-xs text-foreground/50 mt-0.5 truncate">{t.owner_email} · /{t.slug}</p>
                           </div>
@@ -457,7 +468,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
                               <div><span className="font-medium">ID:</span> <span className="font-mono">{t.id}</span></div>
                               <div><span className="font-medium">Creado:</span> {formatDate(t.created_at)}</div>
                               <div><span className="font-medium">Trial vence:</span> {formatDate(t.trial_ends_at)}</div>
-                              <div><span className="font-medium">Plan:</span> {t.plan}</div>
+                              <div><span className="font-medium">Plan:</span> {planLabel(t.plan)}</div>
                             </div>
 
                             <div className="flex flex-wrap gap-2">
@@ -484,7 +495,9 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
                                   onChange={(e) => setSelectedPlan(prev => ({ ...prev, [t.id]: e.target.value }))}
                                   className="text-xs border border-border rounded px-2 py-1.5 bg-background"
                                 >
-                                  {PLANS.map(p => <option key={p} value={p}>{p}</option>)}
+                                                  {/* Si el negocio tiene un plan anterior (ej. pro), mostrarlo para no perderlo */}
+                                  {!PLANS.includes(t.plan) && <option value={t.plan}>{planLabel(t.plan)}</option>}
+                                  {PLANS.map(p => <option key={p} value={p}>{planLabel(p)}</option>)}
                                 </select>
                                 <Button variant="outline" size="sm" disabled={!!actionLoading}
                                   onClick={() => handleAction(t.id, 'change_plan', selectedPlan[t.id] || t.plan)}>
