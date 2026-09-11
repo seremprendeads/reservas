@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../..
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Separator } from '../../components/ui/separator';
 import { useBusiness } from '../../contexts/BusinessContext';
+import { useModuleAccess } from '../../modules/subscription';
 import { LegalFooterLinks } from '../../components/legal/LegalFooterLinks';
 import { authInvoke } from './helpers';
 import {
@@ -28,6 +29,9 @@ function toFields(raw: Partial<Record<keyof LegalInfoFields, string | null>> | n
 
 export function LegalInfoSection({ adminEmail, showSuccess }: { adminEmail: string; showSuccess: (msg: string) => void }) {
   const { business } = useBusiness();
+  const { isModuleEnabled } = useModuleAccess();
+  // Solo se exige CUIT si el negocio cobra online
+  const sellsOnline = isModuleEnabled('reservas') || isModuleEnabled('shop');
   const [form, setForm] = useState<LegalInfoFields>(EMPTY_LEGAL_INFO);
   const [saved, setSaved] = useState<LegalInfoFields>(EMPTY_LEGAL_INFO);
   const [loading, setLoading] = useState(true);
@@ -62,7 +66,10 @@ export function LegalInfoSection({ adminEmail, showSuccess }: { adminEmail: stri
     return () => { active = false; };
   }, [adminEmail]);
 
-  const missing = useMemo(() => getMissingLegalFields(business?.name, saved), [business?.name, saved]);
+  const missing = useMemo(
+    () => getMissingLegalFields(business?.name, saved, sellsOnline),
+    [business?.name, saved, sellsOnline],
+  );
 
   const update = (key: keyof LegalInfoFields, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -162,7 +169,7 @@ export function LegalInfoSection({ adminEmail, showSuccess }: { adminEmail: stri
           </div>
 
           {field('legal_name', 'Titular o razón social', 'Juan Pérez o Ejemplo S.R.L.')}
-          {field('tax_id', 'CUIT', '20-12345678-9')}
+          {field('tax_id', sellsOnline ? 'CUIT' : 'CUIT (opcional)', '20-12345678-9')}
           {field('address', 'Domicilio', 'Av. Corrientes 1234, piso 2')}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

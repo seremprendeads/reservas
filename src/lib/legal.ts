@@ -91,10 +91,18 @@ export const LEGAL_REQUIRED_FIELDS: { key: keyof LegalInfoFields; label: string 
   { key: 'contact_email', label: 'Email de contacto' },
 ];
 
-export function getMissingLegalFields(businessName: string | null | undefined, info: LegalInfoFields): string[] {
+// El CUIT solo se exige a los negocios que cobran online (reservas o tienda):
+// ahí la normativa de comercio electrónico pide identificar al titular.
+// Un negocio con solo Bio o Sitio web puede cargarlo, pero no se le reclama.
+export function getMissingLegalFields(
+  businessName: string | null | undefined,
+  info: LegalInfoFields,
+  sellsOnline = true,
+): string[] {
   const missing: string[] = [];
   if (!businessName?.trim()) missing.push('Nombre del negocio');
   for (const f of LEGAL_REQUIRED_FIELDS) {
+    if (f.key === 'tax_id' && !sellsOnline) continue;
     if (!info[f.key]?.trim()) missing.push(f.label);
   }
   return missing;
