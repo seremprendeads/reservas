@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, LayoutDashboard, Mail } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Booking, supabase } from '../lib/supabase';
@@ -25,6 +25,9 @@ import { useSubscription, FreePlanBanner } from '../modules/subscription';
 import { CalendarIntegrations } from '../modules/calendar-integration';
 // import { AiAssistant } from '../modules/ai-assistant';
 import type { AdminTab } from '../modules/landing/admin/lib/constants';
+
+// Plan gratuito (prueba vencida sin renovar): solo estas secciones del panel.
+const FREE_PLAN_ALLOWED_VIEWS = ['bio', 'profile', 'integrations'];
 
 export function AdminPage() {
   const {
@@ -92,6 +95,13 @@ export function AdminPage() {
   // landingActiveTab controlado desde AdminPage y pasado tanto al sidebar como a LandingAdmin
   const [landingActiveTab, setLandingActiveTab] = useState<AdminTab | null>(null);
 
+  // Si el plan es gratuito y la vista actual no está permitida, llevar a Bio links.
+  useEffect(() => {
+    if (isFreePlan && !FREE_PLAN_ALLOWED_VIEWS.includes(view)) {
+      setView('bio');
+    }
+  }, [isFreePlan, view, setView]);
+
   // Acepta string para compatibilidad con DashboardView/AdminSidebar props,
   // y castea al tipo que espera setView internamente.
   const handleNavigate = (newView: string) => {
@@ -107,20 +117,9 @@ export function AdminPage() {
   const renderView = () => {
     if (!business) return null;
 
-    const freePlanAllowedViews = ['dashboard', 'bio', 'profile', 'calendar', 'integrations'];
-    if (isFreePlan && !freePlanAllowedViews.includes(view)) {
-      return <DashboardView
-        trialCountdown={trialCountdown}
-        todaysBookings={todaysBookings}
-        upcomingBookings={upcomingBookings}
-        paidBookings={paidBookings}
-        pendingPayments={pendingPayments}
-        onNavigate={handleNavigate}
-        onSelectBooking={(booking: Booking) => {
-          setSelectedBooking(booking);
-          handleNavigate('detail');
-        }}
-      />;
+    // Plan gratuito: vistas no permitidas no se renderizan (el useEffect redirige a Bio).
+    if (isFreePlan && !FREE_PLAN_ALLOWED_VIEWS.includes(view)) {
+      return null;
     }
 
     switch (view) {
@@ -332,7 +331,7 @@ export function AdminPage() {
           <button
             onClick={() => {
               if (prevView) { handleNavigate(prevView); }
-              else { handleNavigate('dashboard'); }
+              else { handleNavigate(isFreePlan ? 'bio' : 'dashboard'); }
             }}
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
@@ -343,7 +342,7 @@ export function AdminPage() {
           <span className="text-xs text-gray-500 font-bold">by bookingBio</span>
 
           <button
-            onClick={() => handleNavigate('dashboard')}
+            onClick={() => handleNavigate(isFreePlan ? 'bio' : 'dashboard')}
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <LayoutDashboard className="h-5 w-5" />

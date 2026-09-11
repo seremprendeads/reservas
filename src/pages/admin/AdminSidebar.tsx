@@ -147,6 +147,8 @@ export function AdminSidebar({
           )}
 
           {NAV_GROUPS.map(group => {
+            // No mostrar grupos sin secciones disponibles (ej. Gestión en plan gratuito)
+            if (!group.ids.some(id => getItemById(id))) return null;
             const isOpen = openGroups[group.id];
             const hasActive = group.ids.some(id => currentView === id);
             return (

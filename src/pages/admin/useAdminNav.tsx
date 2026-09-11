@@ -28,11 +28,9 @@ export function useAdminNav(
   const navItems: NavItem[] = useMemo(() => {
     const isFreePlan = enabledModules.length === 1 && enabledModules[0] === 'bio';
 
+    // Plan gratuito (prueba vencida sin renovar): sin Gestión (Principal, Calendario).
     const core: NavItem[] = isFreePlan
-      ? [
-          { id: 'dashboard', label: 'Principal', icon: <LayoutDashboard className="h-5 w-5" /> },
-          { id: 'calendar', label: 'Calendario', icon: <Calendar className="h-5 w-5" /> },
-        ]
+      ? []
       : [
           { id: 'dashboard', label: 'Principal', icon: <LayoutDashboard className="h-5 w-5" /> },
           { id: 'calendar', label: 'Calendario', icon: <Calendar className="h-5 w-5" /> },
