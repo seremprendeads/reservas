@@ -26,6 +26,15 @@ export const LEGAL_DOCS: { key: LegalDocKey; label: string; title: string }[] = 
   { key: 'condiciones', label: 'Condiciones de reserva', title: 'Condiciones de reserva' },
 ];
 
+// Módulos del negocio según su plan. Los documentos solo describen lo que el
+// negocio realmente tiene: un plan Bio Pro no menciona reservas ni tienda.
+export type LegalModules = { reservas: boolean; shop: boolean; landing: boolean };
+
+// Las condiciones de reserva solo aplican si el negocio vende o toma turnos.
+export function availableLegalDocs(m: LegalModules) {
+  return LEGAL_DOCS.filter((d) => d.key !== 'condiciones' || m.reservas || m.shop);
+}
+
 export function legalPath(slug: string, doc: LegalDocKey): string {
   return `/${encodeURIComponent(slug)}/${doc}`;
 }
@@ -65,6 +74,9 @@ export type PublicLegalInfo = {
   contact_email: string | null;
   phone: string | null;
   updated_at: string | null;
+  has_reservas: boolean;
+  has_shop: boolean;
+  has_landing: boolean;
 };
 
 // Datos necesarios para considerar completa la información legal.

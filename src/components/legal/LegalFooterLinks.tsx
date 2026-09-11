@@ -1,6 +1,6 @@
 import { useEffect, useState, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { LEGAL_DOCS, legalPath, fetchPublicSlugById } from '../../lib/legal';
+import { LEGAL_DOCS, availableLegalDocs, legalPath, fetchPublicSlugById, fetchPublicLegalInfo } from '../../lib/legal';
 
 interface LegalFooterLinksProps {
   // Slug del negocio. Se usa directamente si no hay businessId.
@@ -16,6 +16,7 @@ interface LegalFooterLinksProps {
 
 export function LegalFooterLinks({ slug, businessId, className = '', style, linkClassName = '', newTab = false }: LegalFooterLinksProps) {
   const [resolvedSlug, setResolvedSlug] = useState<string | null>(null);
+  const [docs, setDocs] = useState(LEGAL_DOCS);
 
   useEffect(() => {
     let active = true;
@@ -28,11 +29,25 @@ export function LegalFooterLinks({ slug, businessId, className = '', style, link
   }, [businessId]);
 
   const finalSlug = resolvedSlug || slug;
+
+  // Los documentos que aplican dependen del plan del negocio
+  useEffect(() => {
+    let active = true;
+    if (!finalSlug) return;
+    fetchPublicLegalInfo(finalSlug)
+      .then((info) => {
+        if (!active || !info) return;
+        setDocs(availableLegalDocs({ reservas: info.has_reservas, shop: info.has_shop, landing: info.has_landing }));
+      })
+      .catch(() => { /* ante un error se muestran todos los enlaces */ });
+    return () => { active = false; };
+  }, [finalSlug]);
+
   if (!finalSlug) return null;
 
   return (
     <nav aria-label="Información legal" className={`flex flex-wrap items-center gap-x-2 gap-y-1 ${className}`} style={style}>
-      {LEGAL_DOCS.map((doc, i) => (
+      {docs.map((doc, i) => (
         <Fragment key={doc.key}>
           {i > 0 && <span aria-hidden="true" style={{ opacity: 0.4 }}>|</span>}
           <Link

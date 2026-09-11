@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import {
   LEGAL_DOCS,
+  availableLegalDocs,
   LEGAL_TEMPLATE_UPDATED_AT,
   fetchPublicLegalInfo,
   legalPath,
@@ -27,7 +28,11 @@ export function LegalPage({ doc }: { doc: LegalDocKey }) {
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
 
-  const current = LEGAL_DOCS.find((d) => d.key === doc) || LEGAL_DOCS[0];
+  // Documentos que aplican al negocio según su plan
+  const docs = info
+    ? availableLegalDocs({ reservas: info.has_reservas, shop: info.has_shop, landing: info.has_landing })
+    : LEGAL_DOCS;
+  const current = docs.find((d) => d.key === doc) || docs[0];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -110,8 +115,8 @@ export function LegalPage({ doc }: { doc: LegalDocKey }) {
 
         <nav aria-label="Documentos legales" className="max-w-3xl mx-auto px-5 sm:px-8 pb-4">
           <div className="flex gap-2 overflow-x-auto">
-            {LEGAL_DOCS.map((d) => {
-              const active = d.key === doc;
+            {docs.map((d) => {
+              const active = d.key === current.key;
               return (
                 <Link
                   key={d.key}
@@ -136,7 +141,8 @@ export function LegalPage({ doc }: { doc: LegalDocKey }) {
           <p className="mt-3 text-sm text-muted-foreground">Última actualización: {lastUpdated(info.updated_at)}</p>
 
           <div className="mt-8">
-            <LegalDocument doc={doc} d={info} />
+            {/* current.key: si el plan no incluye el documento pedido, se muestra el primero disponible */}
+            <LegalDocument doc={current.key} d={info} />
           </div>
 
           <section className="mt-12 rounded-2xl border bg-card p-6 sm:p-8">
