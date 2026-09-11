@@ -38,10 +38,17 @@ export const PLAN_MODULES: Record<string, ModuleId[]> = {
   // trial: acceso completo a todos los módulos durante el período de prueba
   trial: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
   // free: solo bio, sin premium — estado post-trial sin membresía activa
+  // (Plan 1 · Free Bio Standard)
   free: ['bio'],
+  // Plan 2 · Bio Pro: bio premium (enlaces ilimitados, fondo con imagen/degradado)
+  bio_pro: ['bio'],
+  // Plan 3 · Bio Pro + Reservas
+  bio_reservas: ['bio', 'reservas'],
+  // Plan 4 · Bio Pro + Reservas + Sitio web
+  bio_reservas_web: ['bio', 'reservas', 'landing'],
   // pro: plan pago estándar
   pro: ['bio', 'landing', 'reservas', 'shop'],
-  // enterprise: plan pago avanzado
+  // enterprise: plan pago avanzado (Plan 5 · Todo completo)
   enterprise: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
 };
 
