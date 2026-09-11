@@ -21,10 +21,9 @@ export function FreePlanBanner({ supportUrl }: FreePlanBannerProps) {
             Actualizá tu membresía para volver a activar:
           </p>
           <ul className="mb-4 ml-1 space-y-1 text-sm text-amber-700 dark:text-amber-300">
-            <li>• Landing</li>
+            <li>• Sitio web</li>
             <li>• Reservas</li>
-            <li>• Shop</li>
-            <li>• SEO</li>
+            <li>• Mini tienda</li>
           </ul>
           {supportUrl && (
             <a
