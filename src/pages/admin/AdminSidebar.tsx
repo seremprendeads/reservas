@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { LogOut, Sun, Moon, ExternalLink, ChevronDown, PanelLeftClose, PanelLeftOpen, LayoutDashboard, Package, Sparkles, Settings, Heart } from 'lucide-react';
 import { Avatar } from '../../components/ui/avatar';
 import { cn } from '../../lib/utils';
@@ -13,7 +13,7 @@ interface NavItem {
 
 const NAV_GROUPS: { id: string; label: string; icon: React.ReactNode; ids: string[] }[] = [
   { id: 'gestion', label: 'Gestión', icon: <LayoutDashboard className="h-4 w-4" />, ids: ['dashboard', 'calendar', 'bookings', 'clients', 'waiting'] },
-  { id: 'negocio', label: 'Negocio', icon: <Package className="h-4 w-4" />, ids: ['availability', 'services', 'shop'] },
+  { id: 'negocio', label: 'Negocio', icon: <Package className="h-4 w-4" />, ids: ['availability', 'services'] },
   { id: 'presencia', label: 'Presencia', icon: <Sparkles className="h-4 w-4" />, ids: ['landing'] },
   { id: 'sistema', label: 'Sistema', icon: <Settings className="h-4 w-4" />, ids: ['profile', 'whatsapp', 'payments', 'integrations', 'trash'] },
 ];
@@ -86,6 +86,28 @@ export function AdminSidebar({
 
   const getItemById = (id: string) => navItems.find(item => item.id === id);
 
+  // Acceso directo fuera de los grupos, con el mismo estilo que Bio links (ej. Tienda)
+  const renderStandalone = (id: string) => {
+    const item = getItemById(id);
+    if (!item) return null;
+    return (
+      <button
+        onClick={() => { onNavigate(id); onSidebarClose(); }}
+        title={collapsed ? item.label : undefined}
+        className={cn(
+          'flex w-full items-center rounded-2xl text-base font-display transition-all duration-200 my-2',
+          collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3',
+          currentView === id
+            ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+            : 'bg-primary/10 text-primary hover:bg-primary/20'
+        )}
+      >
+        {item.icon}
+        {!collapsed && <span className="flex-1 text-left font-bold">{item.label}</span>}
+      </button>
+    );
+  };
+
   return (
     <>
       {sidebarOpen && (
@@ -150,12 +172,18 @@ export function AdminSidebar({
           )}
 
           {NAV_GROUPS.map(group => {
+            // Tienda va sola, después de Presencia y antes de Sistema
+            const standaloneBefore = group.id === 'sistema' ? renderStandalone('shop') : null;
             // No mostrar grupos sin secciones disponibles (ej. Gestión en plan gratuito)
-            if (!group.ids.some(id => getItemById(id))) return null;
+            if (!group.ids.some(id => getItemById(id))) {
+              return standaloneBefore ? <Fragment key={group.id}>{standaloneBefore}</Fragment> : null;
+            }
             const isOpen = openGroups[group.id];
             const hasActive = group.ids.some(id => currentView === id);
             return (
-              <div key={group.id}>
+              <Fragment key={group.id}>
+              {standaloneBefore}
+              <div>
                 <button
                   onClick={() => toggleGroup(group.id)}
                   title={collapsed ? group.label : undefined}
@@ -288,6 +316,7 @@ export function AdminSidebar({
                   </div>
                 )}
               </div>
+              </Fragment>
             );
           })}
         </nav>
