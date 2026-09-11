@@ -210,6 +210,7 @@ export function AdminPage() {
             avatarUrl={adminAvatar}
             onRefresh={loadData}
             showSuccess={showSuccess}
+            showLegalInfo={!isFreePlan}
             onProfileUpdated={(name: string, _email: string) => {
               setAdminName(name);
               setSessionName(name);

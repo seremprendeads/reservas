@@ -13,7 +13,7 @@ import { useImageUpload } from '../../hooks/useImageUpload';
 import { LegalInfoSection } from './LegalInfoSection';
 
 export function ProfileManager({
-  adminEmail, adminName, avatarUrl, onRefresh, showSuccess, onProfileUpdated, onAvatarChange
+  adminEmail, adminName, avatarUrl, onRefresh, showSuccess, onProfileUpdated, onAvatarChange, showLegalInfo = true
 }: {
   adminEmail: string;
   adminName: string;
@@ -22,6 +22,8 @@ export function ProfileManager({
   showSuccess: (msg: string) => void;
   onProfileUpdated: (name: string, email: string) => void;
   onAvatarChange: (url: string) => void;
+  // false en plan gratuito: los datos legales son para Sitio web, Reservas y Mini tienda
+  showLegalInfo?: boolean;
 }) {
   const { business, refreshBusiness } = useBusiness();
   const [bizName, setBizName] = useState(business?.name || '');
@@ -235,7 +237,7 @@ export function ProfileManager({
       </Card>
 
       {/* Datos legales del negocio: alimentan /:slug/privacidad, /:slug/cookies y /:slug/condiciones */}
-      <LegalInfoSection adminEmail={adminEmail} showSuccess={showSuccess} />
+      {showLegalInfo && <LegalInfoSection adminEmail={adminEmail} showSuccess={showSuccess} />}
     </div>
   );
 }
