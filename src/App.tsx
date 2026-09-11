@@ -9,6 +9,7 @@ import { MasterAdminPage } from './pages/master/MasterAdminPage';
 import { AcceptInvitePage } from './pages/AcceptInvitePage';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BusinessProvider } from './contexts/BusinessContext';
+import { LegalPage } from './pages/legal/LegalPage';
 
 function App() {
   return (
@@ -35,6 +36,11 @@ function App() {
             {/* Bio - public */}
             <Route path="/:slug/bio" element={<BioPage />} />
             
+            {/* Documentos legales del negocio - public (antes del catch-all /:slug) */}
+            <Route path="/:slug/privacidad" element={<LegalPage doc="privacidad" />} />
+            <Route path="/:slug/cookies" element={<LegalPage doc="cookies" />} />
+            <Route path="/:slug/condiciones" element={<LegalPage doc="condiciones" />} />
+
             {/* Invitación de negocio */}
             <Route path="/invite/:token" element={<AcceptInvitePage />} />
 

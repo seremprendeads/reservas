@@ -1,5 +1,6 @@
 import { MapPin, Phone, Mail, Instagram, Facebook } from 'lucide-react';
 import type { LandingSections, LandingTheme } from '../types';
+import { LegalFooterLinks } from '../../../components/legal/LegalFooterLinks';
 
 type TemplateStyles = { buttonRadius: string; cardRadius: string };
 
@@ -40,6 +41,9 @@ interface FooterSectionProps {
   menuItems: { label: string; href: string }[];
   logoUrl: string | null;
   slug: string;
+  // Id del negocio dueño de la landing: se usa para resolver el slug de las páginas legales.
+  businessId?: string | null;
+  legalLinksNewTab?: boolean;
   theme: LandingTheme;
   ts: TemplateStyles;
   headingStyle: React.CSSProperties;
@@ -47,7 +51,7 @@ interface FooterSectionProps {
   handleSmoothScroll: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-export function FooterSection({ footer, menuItems, logoUrl, slug, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: FooterSectionProps) {
+export function FooterSection({ footer, menuItems, logoUrl, slug, businessId, legalLinksNewTab, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: FooterSectionProps) {
   const footerBgColor = theme.footer_bg_color;
   const footerTextColor = theme.footer_text_color;
 
@@ -188,6 +192,13 @@ export function FooterSection({ footer, menuItems, logoUrl, slug, theme, ts, hea
           <p style={{ ...bodyStyle, opacity: 0.3 }} className="text-sm">
             {footer.copyright || `\u00A9 ${new Date().getFullYear()} ${slug}. Todos los derechos reservados.`}
           </p>
+          <LegalFooterLinks
+            slug={slug}
+            businessId={businessId}
+            newTab={legalLinksNewTab}
+            className="justify-center mt-3 text-sm"
+            style={{ ...bodyStyle, color: footerTextColor, opacity: 0.5 }}
+          />
         </div>
       </div>
     </footer>

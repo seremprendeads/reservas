@@ -9,6 +9,7 @@ import { MapPin, Check, Store, Tag } from 'lucide-react';
 import { supabase, Branding, Service } from '../lib/supabase';
 import { useBusiness } from '../contexts/BusinessContext';
 import { useModuleAccess, ModuleBlockedScreen } from '../modules/subscription';
+import { LegalFooterLinks } from '../components/legal/LegalFooterLinks';
 
 function formatPrice(amount: number, currency: string) {
   return `$${amount.toLocaleString('es-AR')} ${currency}`;
@@ -269,6 +270,10 @@ function BookingContent() {
               by BookingBio
             </a>
           </div>
+        </div>
+        {/* Enlaces legales del negocio */}
+        <div className="max-w-6xl mx-auto px-6 mt-3">
+          <LegalFooterLinks slug={slug || business?.slug} className="text-xs" style={{ color: captionColor }} />
         </div>
       </footer>
     </div>

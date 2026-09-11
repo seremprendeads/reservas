@@ -6,6 +6,7 @@ import { Product, Category, CartItem } from '../types';
 import { CartProvider, useCart } from '../contexts/CartContext';
 import { ProductImageSlider } from '../components/ProductImageSlider';
 import { useModuleAccess, ModuleBlockedScreen } from '../../subscription';
+import { LegalFooterLinks } from '../../../components/legal/LegalFooterLinks';
 
 declare global {
   interface Window {
@@ -276,6 +277,10 @@ function ShopPageContent() {
                 by BookingBio
               </a>
             </div>
+          </div>
+          {/* Enlaces legales del negocio (mismo negocio cuyos productos se muestran) */}
+          <div className="max-w-6xl mx-auto px-6 mt-3">
+            <LegalFooterLinks slug={business?.slug} className="text-xs text-gray-400" linkClassName="hover:text-gray-200" />
           </div>
         </footer>
     </div>

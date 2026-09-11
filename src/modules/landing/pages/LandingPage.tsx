@@ -34,6 +34,7 @@ import { ShopInviteSection } from '../sections/ShopInviteSection';
 import { Header } from '../sections/Header';
 import { SectionDivider } from '../components/SectionDivider';
 import { useModuleAccess, ModuleBlockedScreen } from '../../subscription';
+import { LegalFooterLinks } from '../../../components/legal/LegalFooterLinks';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Star, Wrench, Palette, Zap, Shield, Clock, Heart, Award, CheckCircle,
@@ -464,12 +465,27 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           menuItems={s.header.menu_items || []}
           logoUrl={s.header.logo_image_url || landing.logo_url}
           slug={landing.slug}
+          businessId={isPreview ? null : landing.business_id}
+          legalLinksNewTab={isPreview}
           theme={theme}
           ts={ts}
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
           handleSmoothScroll={handleSmoothScroll}
         />
+      )}
+
+      {/* ─── ENLACES LEGALES si el footer está oculto ─── */}
+      {!hasSection('footer') && (
+        <div className="px-5 py-6" style={{ backgroundColor: theme.footer_bg_color }}>
+          <LegalFooterLinks
+            slug={landing.slug}
+            businessId={isPreview ? null : landing.business_id}
+            newTab={isPreview}
+            className="justify-center text-sm"
+            style={{ ...bodyStyle, color: theme.footer_text_color, opacity: 0.6 }}
+          />
+        </div>
       )}
 
       {/* ─── MARKETING POPUP ─── */}

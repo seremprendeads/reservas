@@ -10,6 +10,7 @@ import { useBusiness } from '../../contexts/BusinessContext';
 import { authInvoke } from './helpers';
 import { setEmail as setSessionEmail, setName as setSessionName } from '../../lib/admin-session';
 import { useImageUpload } from '../../hooks/useImageUpload';
+import { LegalInfoSection } from './LegalInfoSection';
 
 export function ProfileManager({
   adminEmail, adminName, avatarUrl, onRefresh, showSuccess, onProfileUpdated, onAvatarChange
@@ -123,7 +124,7 @@ export function ProfileManager({
   };
 
   return (
-    <div className="mx-auto max-w-xl">
+    <div className="mx-auto max-w-xl space-y-6">
       <Card className="shadow-[0_8px_30px_rgba(0,0,0,.05)]">
         <CardHeader>
           <CardTitle className="font-display">Mi Perfil</CardTitle>
@@ -232,6 +233,9 @@ export function ProfileManager({
           </div>
         </CardContent>
       </Card>
+
+      {/* Datos legales del negocio: alimentan /:slug/privacidad, /:slug/cookies y /:slug/condiciones */}
+      <LegalInfoSection adminEmail={adminEmail} showSuccess={showSuccess} />
     </div>
   );
 }
