@@ -1,3 +1,4 @@
+import { whatsappLink } from '../lib/plans';
 import { useState, useEffect } from 'react';
 
 const STORAGE_KEY = 'suspended_deadline';
@@ -82,7 +83,7 @@ export function SuspendedScreen({ message, supportWhatsapp, supportEmail, paymen
         )}
         <div className="flex flex-col gap-3">
           <a
-            href={paymentButtonUrl || '#prices'}
+            href={paymentButtonUrl || whatsappLink('Hola! Mi cuenta de BookingBio esta suspendida y necesito ayuda.')}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-6 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition-all duration-200 hover:from-red-700 hover:to-orange-600 hover:shadow-xl active:scale-[0.97]"

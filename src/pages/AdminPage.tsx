@@ -22,7 +22,6 @@ import { AdminHeader } from './admin/AdminHeader';
 import { AdminModals } from './admin/AdminModals';
 import { useAdminData } from './admin/useAdminData';
 import { useSubscription, FreePlanBanner, UpgradePopup, UpgradeBanner, TrialBanner } from '../modules/subscription';
-import { TRIAL_DAYS } from '../modules/subscription/lib/constants';
 import { CalendarIntegrations } from '../modules/calendar-integration';
 // import { AiAssistant } from '../modules/ai-assistant';
 import type { AdminTab } from '../modules/landing/admin/lib/constants';
@@ -87,14 +86,13 @@ export function AdminPage() {
     enabledModules,
   } = useAdminData();
 
-  const { subscription, config: subConfig } = useSubscription({ business });
+  const { config: subConfig } = useSubscription({ business });
 
   // ── Embudo de conversión ────────────────────────────────────────────────
-  // Prueba: el contador se ve siempre; el popup recién del día 5, para no
-  // presionar apenas entra pero sí dejar margen antes del vencimiento.
-  const diasRestantes = subscription.days_until_expiry ?? TRIAL_DAYS;
-  const diasUsados = TRIAL_DAYS - diasRestantes;
-  const mostrarPopupPrueba = isTrial && diasUsados >= 5;
+  // El contador de días ya lo muestra DashboardView (banner naranja/violeta).
+  // Acá solo se decide el popup y el banner de upgrade.
+  // En prueba el popup aparece desde el día 1, una vez por sesión.
+  const mostrarPopupPrueba = isTrial;
   // Prueba vencida sin contratar: el popup aparece en cada ingreso.
   const mostrarPopupFree = isFreePlan;
   // Ya contrató un plan pago: banner fijo con los planes superiores.
@@ -141,7 +139,6 @@ export function AdminPage() {
       case 'dashboard':
         return (
           <DashboardView
-            trialCountdown={trialCountdown}
             todaysBookings={todaysBookings}
             upcomingBookings={upcomingBookings}
             paidBookings={paidBookings}
@@ -337,7 +334,7 @@ export function AdminPage() {
         />
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">
-          {isTrial && <TrialBanner daysRemaining={diasRestantes} />}
+          {isTrial && <TrialBanner trialCountdown={trialCountdown} />}
           {isFreePlan && <FreePlanBanner supportUrl={subConfig.payment_button_url} />}
           {mostrarBannerUpgrade && <UpgradeBanner enabledModules={enabledModules} />}
           {renderView()}
