@@ -5,7 +5,7 @@ import { BookingForm } from '../components/BookingForm';
 import { Payment } from '../components/Payment';
 import { Confirmation } from '../components/Confirmation';
 import { BookingProvider, useBooking } from '../contexts/BookingContext';
-import { MapPin, Check, Store, Tag } from 'lucide-react';
+import { MapPin, Check, Store, Tag, Clock, XCircle } from 'lucide-react';
 import { supabase, Branding, Service } from '../lib/supabase';
 import { useBusiness } from '../contexts/BusinessContext';
 import { useModuleAccess, ModuleBlockedScreen } from '../modules/subscription';
@@ -70,6 +70,66 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
   );
 }
 
+// ============================================================================
+// Pantalla de vuelta desde Mercado Pago.
+//
+// Al pagar, MP redirige a /<slug>/reservas?pago=exito|error|pendiente&codigo=XXX
+// Esa vuelta ocurre en una pestaña nueva, así que el contexto de la reserva ya
+// no existe: no se puede reusar <Confirmation />, que depende de él. Por eso
+// esta pantalla se arma solo con lo que viene en la URL.
+// ============================================================================
+function ResultadoPago({ estado, codigo, slug }: { estado: string; codigo: string | null; slug?: string }) {
+  const config = {
+    exito: {
+      icono: <Check className="h-8 w-8 text-emerald-600" />,
+      fondo: 'bg-emerald-50',
+      titulo: '¡Pago confirmado!',
+      texto: 'Tu turno quedó reservado. Vas a recibir la confirmación por email.',
+    },
+    pendiente: {
+      icono: <Clock className="h-8 w-8 text-amber-600" />,
+      fondo: 'bg-amber-50',
+      titulo: 'Pago pendiente',
+      texto: 'Mercado Pago todavía está procesando el pago. Cuando se acredite, tu turno se confirma solo.',
+    },
+    error: {
+      icono: <XCircle className="h-8 w-8 text-red-600" />,
+      fondo: 'bg-red-50',
+      titulo: 'No se pudo completar el pago',
+      texto: 'El pago no se procesó, así que el turno no quedó reservado. Podés intentar de nuevo.',
+    },
+  }[estado] ?? {
+    icono: <Clock className="h-8 w-8 text-gray-500" />,
+    fondo: 'bg-gray-50',
+    titulo: 'Estado del pago',
+    texto: 'No pudimos determinar el estado del pago. Consultá con el negocio.',
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-sm">
+        <div className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full ${config.fondo}`}>
+          {config.icono}
+        </div>
+        <h1 className="text-xl font-semibold text-gray-900">{config.titulo}</h1>
+        <p className="mt-2 text-sm leading-relaxed text-gray-600">{config.texto}</p>
+        {codigo && (
+          <div className="mt-5 rounded-xl bg-gray-50 px-4 py-3">
+            <p className="text-xs uppercase tracking-wider text-gray-500">Código de reserva</p>
+            <p className="mt-1 font-mono text-lg font-semibold text-gray-900">{codigo}</p>
+          </div>
+        )}
+        <a
+          href={slug ? `/${slug}/reservas` : '/reservas'}
+          className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-gray-900 px-5 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
+        >
+          {estado === 'error' ? 'Intentar de nuevo' : 'Volver'}
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function BookingContent() {
   const { step, setStep, bookingData, setSelectedService } = useBooking();
   const { slug } = useParams<{ slug: string }>();
@@ -86,6 +146,13 @@ function BookingContent() {
 
   if (business && !isModuleEnabled('reservas')) {
     return <ModuleBlockedScreen moduleId="reservas" />;
+  }
+
+  // Vuelta desde Mercado Pago: se muestra el resultado en lugar del flujo.
+  const params = new URLSearchParams(window.location.search);
+  const estadoPago = params.get('pago');
+  if (estadoPago) {
+    return <ResultadoPago estado={estadoPago} codigo={params.get('codigo')} slug={slug} />;
   }
 
   useEffect(() => {
