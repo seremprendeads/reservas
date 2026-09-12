@@ -10,4 +10,5 @@ export { FreePlanBanner } from './components/FreePlanBanner';
 export { UpgradeBanner } from './components/UpgradeBanner';
 export { UpgradePopup } from './components/UpgradePopup';
 export type { SubscriptionInfo, SubscriptionConfig, SubscriptionStatus, ModuleId } from './types';
-export { DEFAULT_SUBSCRIPTION_CONFIG, STATUS_LABELS, STATUS_COLORS, PLAN_MODULES, getEnabledModules } from './lib/constants';
+export { DEFAULT_SUBSCRIPTION_CONFIG, STATUS_LABELS, STATUS_COLORS, PLAN_MODULES, TRIAL_DAYS, getEnabledModules } from './lib/constants';
+export { PLAN_CARDS, PLAN_LINKS, SUPPORT_WHATSAPP, whatsappLink, linkDePlan, nivelActual } from './lib/plans';

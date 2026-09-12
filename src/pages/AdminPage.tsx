@@ -21,7 +21,8 @@ import { AdminSidebar } from './admin/AdminSidebar';
 import { AdminHeader } from './admin/AdminHeader';
 import { AdminModals } from './admin/AdminModals';
 import { useAdminData } from './admin/useAdminData';
-import { useSubscription, FreePlanBanner, UpgradePopup } from '../modules/subscription';
+import { useSubscription, FreePlanBanner, UpgradePopup, UpgradeBanner, TrialBanner } from '../modules/subscription';
+import { TRIAL_DAYS } from '../modules/subscription/lib/constants';
 import { CalendarIntegrations } from '../modules/calendar-integration';
 // import { AiAssistant } from '../modules/ai-assistant';
 import type { AdminTab } from '../modules/landing/admin/lib/constants';
@@ -86,7 +87,19 @@ export function AdminPage() {
     enabledModules,
   } = useAdminData();
 
-  const { config: subConfig } = useSubscription({ business });
+  const { subscription, config: subConfig } = useSubscription({ business });
+
+  // ── Embudo de conversión ────────────────────────────────────────────────
+  // Prueba: el contador se ve siempre; el popup recién del día 5, para no
+  // presionar apenas entra pero sí dejar margen antes del vencimiento.
+  const diasRestantes = subscription.days_until_expiry ?? TRIAL_DAYS;
+  const diasUsados = TRIAL_DAYS - diasRestantes;
+  const mostrarPopupPrueba = isTrial && diasUsados >= 5;
+  // Prueba vencida sin contratar: el popup aparece en cada ingreso.
+  const mostrarPopupFree = isFreePlan;
+  // Ya contrató un plan pago: banner fijo con los planes superiores.
+  // El plan completo no ve nada (UpgradeBanner devuelve null si no hay opciones).
+  const mostrarBannerUpgrade = !isTrial && !isFreePlan;
 
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportSent, setSupportSent] = useState(false);
@@ -324,7 +337,9 @@ export function AdminPage() {
         />
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">
+          {isTrial && <TrialBanner daysRemaining={diasRestantes} />}
           {isFreePlan && <FreePlanBanner supportUrl={subConfig.payment_button_url} />}
+          {mostrarBannerUpgrade && <UpgradeBanner enabledModules={enabledModules} />}
           {renderView()}
         </main>
 
@@ -352,12 +367,13 @@ export function AdminPage() {
         </nav>
       </div>
 
-      {/* Popup de planes: una vez por sesión, salvo en trial o Todo completo */}
-      {!isTrial && (
+      {/* Popup de planes: del día 5 de prueba (1 vez por sesión) y siempre en free */}
+      {(mostrarPopupPrueba || mostrarPopupFree) && (
         <UpgradePopup
           enabledModules={enabledModules}
           isFreePlan={isFreePlan}
-          supportUrl={subConfig.payment_button_url}
+          isTrial={isTrial}
+          alwaysShow={mostrarPopupFree}
         />
       )}
 
