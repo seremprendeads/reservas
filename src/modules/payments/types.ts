@@ -23,6 +23,8 @@ export type PaymentProviderConfig = {
   description: string;
   icon: string;
   color: string;
+  /** ID del video de YouTube con el tutorial de conexión. Vacío = no se muestra. */
+  tutorialYoutubeId?: string;
   fields: PaymentField[];
   helpUrl: string;
   helpLabel: string;

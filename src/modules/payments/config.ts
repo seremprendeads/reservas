@@ -14,6 +14,10 @@ export const PAYMENT_PROVIDERS: PaymentProviderConfig[] = [
     ],
     helpUrl: 'https://www.mercadopago.com.ar/developers/en/docs/your-integrations/credentials',
     helpLabel: 'Cómo obtener mis credenciales',
+    // PROVISORIO: video de ejemplo para ver el diseño.
+    // Reemplazar por el ID del tutorial propio. En una URL como
+    // https://www.youtube.com/watch?v=AbC123xyz_0  el ID es AbC123xyz_0
+    tutorialYoutubeId: 'jNQXAC9IVRw',
   },
   {
     slug: 'stripe',

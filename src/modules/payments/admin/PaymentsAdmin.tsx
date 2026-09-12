@@ -235,6 +235,28 @@ function ProviderCard({
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {config.tutorialYoutubeId && (
+            <div className="rounded-xl border border-border bg-muted/40 p-3 sm:p-4">
+              <p className="mb-3 text-sm font-medium text-foreground">
+                Tutorial: cómo conectar {config.name} paso a paso
+              </p>
+              {/* aspect-video mantiene el 16:9 en cualquier ancho, sin trucos de padding */}
+              <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${config.tutorialYoutubeId}?rel=0`}
+                  title={`Tutorial de conexión con ${config.name}`}
+                  loading="lazy"
+                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="h-full w-full border-0"
+                />
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Seguí el video con tu cuenta de {config.name} abierta en otra pestaña.
+              </p>
+            </div>
+          )}
+
           {config.fields.map((field) => (
             <div key={field.key}>
               <label className="mb-1.5 block text-sm font-medium">{field.label}</label>
