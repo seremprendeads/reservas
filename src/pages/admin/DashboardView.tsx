@@ -34,7 +34,7 @@ export function DashboardView({
         if (days <= 0 && hours <= 0 && minutes <= 0 && seconds <= 0) return null;
 
         const isUrgent = days <= 2;
-        const totalTrialMs = 14 * 24 * 60 * 60 * 1000;
+        const totalTrialMs = 18 * 24 * 60 * 60 * 1000;
         const remainingMs = days * 86400000 + hours * 3600000 + minutes * 60000 + seconds * 1000;
         const progress = Math.max(0, Math.min(100, ((totalTrialMs - remainingMs) / totalTrialMs) * 100));
 

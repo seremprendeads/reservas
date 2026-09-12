@@ -69,14 +69,20 @@ export function useSubscription({ business, config: configOverrides }: UseSubscr
       status === 'suspended' ||
       (status === 'cancelled' && config.read_only_when_cancelled);
 
+    // Regla comercial: si la prueba vence sin haber elegido un plan, la cuenta
+    // queda en Free, sin importar con qué plan se la haya creado.
+    const trialEnd = getTrialEnd(business, config.trial_duration_minutes);
+    const trialExpired = !!business?.is_trial && !!trialEnd && trialEnd.getTime() <= Date.now();
+
+    const effectivePlan = trialExpired ? 'free' : (business?.plan || 'free');
     const enabledModules = getEnabledModules(
-      business?.plan || 'free',
-      business?.is_trial || false
+      effectivePlan,
+      trialExpired ? false : (business?.is_trial || false)
     );
 
     return {
       status,
-      plan: business?.plan || 'free',
+      plan: effectivePlan,
       trial_ends_at: business?.trial_ends_at || null,
       days_until_expiry: daysUntilExpiry,
       is_blocked: isBlocked,
