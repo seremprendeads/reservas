@@ -12,7 +12,7 @@ Deno.serve(async (req: Request) => {
       return jsonUnauthorized();
     }
 
-    const access = await checkBusinessAccess(auth.businessId);
+    const access = await checkBusinessAccess(auth.businessId, "reservas");
     if (!access.allowed) {
       return jsonAccessDenied(access.message, "reason" in access ? access.reason : undefined);
     }

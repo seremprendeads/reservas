@@ -28,7 +28,26 @@ export type AccessStatus =
   | { allowed: true }
   | { allowed: false; reason: "suspended" | "trial_expired" | "business_not_found" | "free_plan"; message: string };
 
-export async function checkBusinessAccess(businessId: string): Promise<AccessStatus> {
+// Módulos que incluye cada plan. Debe coincidir con PLAN_MODULES en
+// src/modules/subscription/lib/constants.ts y con business_has_module() en la DB.
+//   free / bio_pro / starter → bio
+//   bio_reservas             → bio, reservas
+//   bio_reservas_web         → bio, reservas, landing
+//   pro (anterior)           → bio, reservas, landing, shop
+//   enterprise               → todo (Plan 5 · Todo completo)
+const PLAN_MODULES: Record<string, string[]> = {
+  free: ["bio"],
+  starter: ["bio"],
+  bio_pro: ["bio"],
+  bio_reservas: ["bio", "reservas"],
+  bio_reservas_web: ["bio", "reservas", "landing"],
+  pro: ["bio", "reservas", "landing", "shop"],
+  enterprise: ["bio", "reservas", "landing", "shop", "seo", "landing_shop"],
+};
+
+// modulo: si se indica, además del acceso general se verifica que el plan lo incluya.
+// Sin ese parámetro el comportamiento es el de siempre (cualquier plan pago pasa).
+export async function checkBusinessAccess(businessId: string, modulo?: string): Promise<AccessStatus> {
   const supabase = createServiceClient();
   const { data: biz } = await supabase
     .from("businesses")
@@ -72,7 +91,18 @@ export async function checkBusinessAccess(businessId: string): Promise<AccessSta
     };
   }
 
-  // Plan pago activo (is_trial = false, plan != 'free', is_active = true) → acceso OK
+  // Plan pago activo: verificar que incluya el módulo pedido
+  if (modulo && !biz.is_trial) {
+    const modules = PLAN_MODULES[biz.plan] || PLAN_MODULES.free;
+    if (!modules.includes(modulo)) {
+      return {
+        allowed: false,
+        reason: "free_plan",
+        message: "Esta sección no está incluida en tu plan. Actualizá tu membresía para activarla.",
+      };
+    }
+  }
+
   return { allowed: true };
 }
 
