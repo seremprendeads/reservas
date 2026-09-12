@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   User, Link as LinkIcon, Palette, BarChart3, QrCode, Plus, Trash2,
   GripVertical, ExternalLink, Copy, Check, Loader2, Eye, EyeOff,
-  Download, Upload, X, RotateCcw,
+  Download, Upload, X, RotateCcw, AlertTriangle,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
@@ -62,11 +62,13 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [bioThemeId, setBioThemeId] = useState('');
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bgInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const profileRef = useRef<BioProfile | null>(null);
 
   const loadProfile = useCallback(async () => {
@@ -138,6 +140,27 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     });
   };
 
+  // Muestra un aviso de error y lo oculta solo a los 6 segundos.
+  const mostrarError = (msg: string) => {
+    setSaveError(msg);
+    if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+    errorTimerRef.current = setTimeout(() => setSaveError(null), 6000);
+  };
+
+  // admin-update-bio devuelve HTTP 200 con { success: false, error } cuando algo falla,
+  // porque supabase.functions.invoke manda toda respuesta no-2xx a `error` y deja
+  // `data` en undefined — el mensaje nunca llegaría al cliente.
+  // Las respuestas OK NO siempre traen el campo `success` (jsonSuccess({ link }) devuelve
+  // solo { link }), por eso se compara contra false explícitamente y nunca con !result.success.
+  const falloDe = (
+    result: { success?: boolean; error?: string } | null | undefined,
+    error: unknown
+  ): string | null => {
+    if (result?.success === false) return result.error || 'No se pudo guardar.';
+    if (error) return 'No se pudo guardar. Revisá tu conexión e intentá de nuevo.';
+    return null;
+  };
+
   const saveDraft = async () => {
     const fields = { ...draftRef.current };
     draftRef.current = {};
@@ -168,9 +191,10 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     setSaving(true);
     try {
       if (p.id) {
-        const { error } = await authInvoke('admin-update-bio', { action: 'save_profile', profile: toSave });
-        if (error) {
-          showSuccess('Error al guardar: ' + error);
+        const { data: result, error } = await authInvoke('admin-update-bio', { action: 'save_profile', profile: toSave });
+        const fallo = falloDe(result, error);
+        if (fallo) {
+          mostrarError(fallo);
           return;
         }
       } else {
@@ -178,7 +202,12 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
           action: 'create_profile',
           profile: { ...toSave, name: p.name },
         });
-        if (!error && result?.profile) {
+        const fallo = falloDe(result, error);
+        if (fallo) {
+          mostrarError(fallo);
+          return;
+        }
+        if (result?.profile) {
           profileRef.current = result.profile;
           setProfile(result.profile);
         }
@@ -349,23 +378,44 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
       action: 'add_link',
       link: { profile_id: p.id, title, url, icon, sort_order: links.length },
     });
-    if (!error && result?.link) setLinks(prev => [...prev, result.link]);
+    const fallo = falloDe(result, error);
+    if (fallo) {
+      mostrarError(fallo);
+      return; // el diálogo queda abierto para que no se pierda lo escrito
+    }
+    if (result?.link) setLinks(prev => [...prev, result.link]);
     setShowAddLink(false);
   };
 
   const updateLink = async (id: string, fields: Partial<BioLink>) => {
-    await authInvoke('admin-update-bio', { action: 'update_link', linkId: id, link: fields });
+    const { data: result, error } = await authInvoke('admin-update-bio', { action: 'update_link', linkId: id, link: fields });
+    const fallo = falloDe(result, error);
+    if (fallo) {
+      mostrarError(fallo);
+      return;
+    }
     setLinks(prev => prev.map(l => l.id === id ? { ...l, ...fields } : l));
     setEditingLink(null);
   };
 
   const removeLink = async (id: string) => {
-    await authInvoke('admin-update-bio', { action: 'delete_link', linkId: id });
+    const { data: result, error } = await authInvoke('admin-update-bio', { action: 'delete_link', linkId: id });
+    const fallo = falloDe(result, error);
+    if (fallo) {
+      mostrarError(fallo);
+      return;
+    }
     setLinks(prev => prev.filter(l => l.id !== id));
   };
 
   const toggleLink = async (id: string, isActive: boolean) => {
-    await authInvoke('admin-update-bio', { action: 'update_link', linkId: id, link: { is_active: isActive } });
+    const { data: result, error } = await authInvoke('admin-update-bio', { action: 'update_link', linkId: id, link: { is_active: isActive } });
+    const fallo = falloDe(result, error);
+    if (fallo) {
+      // No se toca la lista: el enlace queda como estaba y el aviso explica por qué.
+      mostrarError(fallo);
+      return;
+    }
     setLinks(prev => prev.map(l => l.id === id ? { ...l, is_active: isActive } : l));
   };
 
@@ -381,6 +431,24 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      {/* Aviso de error: se muestra sobre todo el panel y se va solo a los 6 segundos */}
+      {saveError && (
+        <div className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2">
+          <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-lg dark:border-amber-800/40 dark:bg-amber-950">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+            <p className="flex-1 text-sm leading-relaxed text-amber-900 dark:text-amber-100">{saveError}</p>
+            <button
+              type="button"
+              onClick={() => setSaveError(null)}
+              aria-label="Cerrar aviso"
+              className="shrink-0 rounded-md p-1 text-amber-700 transition-colors hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-900"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
