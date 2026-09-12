@@ -1,5 +1,5 @@
 import { useState, Fragment } from 'react';
-import { LogOut, Sun, Moon, ExternalLink, ChevronDown, PanelLeftClose, PanelLeftOpen, LayoutDashboard, Sparkles, Settings, Heart } from 'lucide-react';
+import { LogOut, Sun, Moon, ChevronDown, PanelLeftClose, PanelLeftOpen, LayoutDashboard, Sparkles, Settings, Heart } from 'lucide-react';
 import { Avatar } from '../../components/ui/avatar';
 import { cn } from '../../lib/utils';
 import { ADMIN_TABS, type AdminTab } from '../../modules/landing/admin/lib/constants';
@@ -33,9 +33,6 @@ interface AdminSidebarProps {
   adminAvatar: string;
   adminEmail: string;
   businessName: string;
-  businessSlug: string;
-  // false en plan gratuito: la página de reservas no está disponible
-  showBookingLink?: boolean;
   darkMode: boolean;
   onToggleDarkMode: () => void;
   onLogout: () => void;
@@ -53,8 +50,6 @@ export function AdminSidebar({
   adminAvatar,
   adminEmail,
   businessName,
-  businessSlug,
-  showBookingLink = true,
   darkMode,
   onToggleDarkMode,
   onLogout,
@@ -318,35 +313,6 @@ export function AdminSidebar({
             );
           })}
         </nav>
-
-        {/* Link a Booking Page (oculto en plan gratuito) */}
-        {!showBookingLink ? null : !collapsed ? (
-          <div className="border-t border-border px-3 py-2">
-            <a
-              href={`/${businessSlug || '...'}/reservas`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-base font-display text-muted-foreground transition-all duration-200 hover:bg-muted/40 hover:text-foreground"
-              onClick={onSidebarClose}
-            >
-              <ExternalLink className="h-4 w-4" />
-              <span>Página de reserva</span>
-            </a>
-          </div>
-        ) : (
-          <div className="border-t border-border px-3 py-2">
-            <a
-              href={`/${businessSlug || '...'}/reservas`}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Página de reserva"
-              className="flex items-center justify-center rounded-2xl px-2 py-3 text-base font-display text-muted-foreground transition-all duration-200 hover:bg-muted/40 hover:text-foreground"
-              onClick={onSidebarClose}
-            >
-              <ExternalLink className="h-4 w-4" />
-            </a>
-          </div>
-        )}
 
         {/* Footer */}
         <div className="border-t border-border p-3">

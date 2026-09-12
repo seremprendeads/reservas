@@ -1,6 +1,5 @@
-import { Menu, ExternalLink, Sun, Moon } from 'lucide-react';
+import { Menu, Sun, Moon } from 'lucide-react';
 import { Avatar } from '../../components/ui/avatar';
-import { Separator } from '../../components/ui/separator';
 
 interface AdminHeaderProps {
   title: string;
@@ -9,9 +8,6 @@ interface AdminHeaderProps {
   adminAvatar: string;
   darkMode: boolean;
   onToggleDarkMode: () => void;
-  businessSlug?: string;
-  // false en plan gratuito: la página de reservas no está disponible
-  showBookingLink?: boolean;
 }
 
 export function AdminHeader({
@@ -21,8 +17,6 @@ export function AdminHeader({
   adminAvatar,
   darkMode,
   onToggleDarkMode,
-  businessSlug,
-  showBookingLink = true,
 }: AdminHeaderProps) {
   return (
     <header className="flex h-16 items-center gap-4 border-b border-border bg-card/80 backdrop-blur-sm px-4 lg:px-8">
@@ -47,18 +41,6 @@ export function AdminHeader({
           {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
 
-        {showBookingLink && (
-        <a
-          href={`/${businessSlug || '...'}/reservas`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden sm:inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm text-muted-foreground transition-all duration-200 hover:bg-muted/40 hover:text-foreground">
-          <ExternalLink className="h-4 w-4" />
-          <span>Página de Reservas</span>
-        </a>
-        )}
-
-        {showBookingLink && <Separator orientation="vertical" className="h-8 hidden sm:block" />}
 
         <div className="flex items-center gap-2.5">
           <Avatar fallback={adminName.charAt(0).toUpperCase() || 'A'} src={adminAvatar || null} className="h-8 w-8" />
