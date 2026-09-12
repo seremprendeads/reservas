@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createServiceClient, jsonSuccess, jsonError, corsHeaders, checkRateLimit } from "../_shared/auth.ts";
+import { descifrar } from "../_shared/crypto.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -44,18 +45,29 @@ Deno.serve(async (req: Request) => {
       .eq("status", "connected")
       .maybeSingle();
 
-    // Fallback to env variable if no business-specific config
-    const MP_ACCESS_TOKEN = mpConfig?.access_token || Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
+    // El token está cifrado en la base (AES-GCM). Se descifra solo acá, en memoria.
+    const tokenDelNegocio = await descifrar(mpConfig?.access_token);
+    const MP_ACCESS_TOKEN = tokenDelNegocio || Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
 
     if (!MP_ACCESS_TOKEN) {
       return jsonError("Mercado Pago no configurado", 500);
     }
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const successUrl = `${SUPABASE_URL}/functions/v1/payment-success?booking_code=${bookingCode}`;
-    const failureUrl = `${SUPABASE_URL}/functions/v1/payment-failure?booking_code=${bookingCode}`;
-    const pendingUrl = `${SUPABASE_URL}/functions/v1/payment-pending?booking_code=${bookingCode}`;
-    const notificationUrl = `${SUPABASE_URL}/functions/v1/mercadopago-webhook`;
+
+    // Las back_urls apuntaban a /functions/v1/payment-success y similares, que
+    // NO EXISTEN: el cliente terminaba en un 404 despues de pagar. Ahora vuelven
+    // a la pagina de reservas del negocio, con el resultado en la query.
+    const siteUrl = (Deno.env.get("SITE_URL") || req.headers.get("origin") || "").replace(/\/$/, "");
+    const volverA = (estado: string) =>
+      `${siteUrl}/${business_slug}/reservas?pago=${estado}&codigo=${bookingCode}`;
+    const successUrl = volverA("exito");
+    const failureUrl = volverA("error");
+    const pendingUrl = volverA("pendiente");
+
+    // El negocio viaja en la URL de notificacion: sin eso, el webhook no sabe
+    // de quien es el pago y no puede elegir con que clave validar la firma.
+    const notificationUrl = `${SUPABASE_URL}/functions/v1/mercadopago-webhook?negocio=${business.id}`;
 
     // Get service name and validate price if service_id provided
     let serviceName = "Turno reservado";
@@ -89,12 +101,15 @@ Deno.serve(async (req: Request) => {
         name: name,
         email: email,
       },
-      back_urls: {
-        success: successUrl,
-        failure: failureUrl,
-        pending: pendingUrl,
-      },
-      auto_return: "approved",
+      // Si no se pudo determinar el dominio del sitio, se omiten las back_urls
+      // y auto_return: Mercado Pago rechaza la preferencia entera si son invalidas.
+      // Sin ellas el pago funciona igual, solo que no redirige al volver.
+      ...(siteUrl
+        ? {
+            back_urls: { success: successUrl, failure: failureUrl, pending: pendingUrl },
+            auto_return: "approved",
+          }
+        : {}),
       notification_url: notificationUrl,
       external_reference: bookingCode,
       statement_descriptor: "RESERVA",

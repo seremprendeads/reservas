@@ -1,44 +1,84 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/auth.ts";
+import { descifrar } from "../_shared/crypto.ts";
 
-// Verify MercadoPago webhook signature (HMAC-SHA256)
-async function verifyMpSignature(
-  body: string,
+// ============================================================================
+// Webhook de Mercado Pago.
+//
+// QUE ESTABA MAL ANTES:
+//
+// 1. La firma se calculaba sobre el cuerpo entero del mensaje. Mercado Pago NO
+//    firma el cuerpo: firma un "manifest" armado con tres datos sueltos
+//    (id del recurso, x-request-id y timestamp). Con el calculo viejo, TODA
+//    notificacion se rechazaba con 401 y ninguna sena confirmaba el turno.
+//
+// 2. Usaba una unica clave global (MP_WEBHOOK_SECRET). Cada cliente conecta SU
+//    propia cuenta de Mercado Pago, y MP genera una clave distinta por
+//    integracion. Una sola clave global no puede validar 50 firmas distintas.
+//    Ahora la clave sale de payment_providers.webhook_secret, por negocio.
+//
+// 3. Para saber de que negocio era el pago, probaba el token de CADA cliente
+//    conectado contra la API de MP: una llamada por negocio, en cada aviso.
+//    Ahora el negocio viaja en la URL de notificacion (?negocio=<id>), que
+//    arma create-payment. Una sola consulta, y ademas permite elegir con que
+//    clave validar ANTES de confiar en nada del mensaje.
+// ============================================================================
+
+/**
+ * Valida la firma de Mercado Pago.
+ *
+ * Cabecera x-signature:  ts=<timestamp>,v1=<hash>
+ * Manifest firmado:      id:<data.id>;request-id:<x-request-id>;ts:<ts>;
+ * Algoritmo:             HMAC-SHA256 con la clave secreta, resultado en hex.
+ */
+async function validarFirmaMp(
+  dataId: string,
+  requestId: string | null,
   signatureHeader: string | null,
   secret: string
 ): Promise<boolean> {
   if (!signatureHeader) return false;
 
-  const parts: Record<string, string> = {};
-  for (const part of signatureHeader.split(";")) {
-    const [key, value] = part.split("=");
-    if (key && value) parts[key.trim()] = value.trim();
+  const partes: Record<string, string> = {};
+  for (const parte of signatureHeader.split(",")) {
+    const i = parte.indexOf("=");
+    if (i === -1) continue;
+    partes[parte.slice(0, i).trim()] = parte.slice(i + 1).trim();
   }
 
-  const ts = parts["ts"];
-  const v1 = parts["v1"];
+  const ts = partes["ts"];
+  const v1 = partes["v1"];
   if (!ts || !v1) return false;
 
-  // Check timestamp is within 5 minutes
-  const diff = Math.abs(Date.now() - parseInt(ts));
-  if (diff > 5 * 60 * 1000) return false;
+  // Ventana de 5 minutos contra reenvio de mensajes viejos.
+  if (Math.abs(Date.now() - parseInt(ts) * 1000) > 5 * 60 * 1000) {
+    // MP manda el ts en segundos; algunas integraciones lo mandan en ms.
+    if (Math.abs(Date.now() - parseInt(ts)) > 5 * 60 * 1000) return false;
+  }
 
-  // Verify HMAC signature
+  // MP indica pasar el id en minusculas si es alfanumerico.
+  const idNormalizado = dataId.toLowerCase();
+  const manifest = `id:${idNormalizado};request-id:${requestId ?? ""};ts:${ts};`;
+
   const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
+  const clave = await crypto.subtle.importKey(
     "raw",
     encoder.encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"]
   );
-  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(body));
-  const expectedV1 = Array.from(new Uint8Array(signature))
+  const firma = await crypto.subtle.sign("HMAC", clave, encoder.encode(manifest));
+  const esperado = Array.from(new Uint8Array(firma))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
-  return v1 === expectedV1;
+  // Comparacion de tiempo constante: no cortar en la primera diferencia.
+  if (esperado.length !== v1.length) return false;
+  let dif = 0;
+  for (let i = 0; i < esperado.length; i++) dif |= esperado.charCodeAt(i) ^ v1.charCodeAt(i);
+  return dif === 0;
 }
 
 Deno.serve(async (req: Request) => {
@@ -47,30 +87,27 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    const url = new URL(req.url);
     const bodyText = await req.text();
-    const body = JSON.parse(bodyText);
+    const body = bodyText ? JSON.parse(bodyText) : {};
 
-    if (body.type !== "payment") {
+    // MP manda varios tipos de aviso; solo interesan los de pago.
+    const tipo = body.type || url.searchParams.get("type");
+    if (tipo !== "payment") {
       return new Response("OK", { status: 200 });
     }
 
-    const paymentId = body.data?.id;
+    // El id puede venir en la query (data.id) o en el cuerpo.
+    const paymentId = url.searchParams.get("data.id") || body.data?.id;
     if (!paymentId) {
       return new Response("No payment ID", { status: 200 });
     }
 
-    // Verify webhook signature — REQUIRED, never accept without it
-    const webhookSecret = Deno.env.get("MP_WEBHOOK_SECRET");
-    if (!webhookSecret) {
-      console.error("MP_WEBHOOK_SECRET not configured — rejecting webhook");
-      return new Response("Webhook secret not configured", { status: 500 });
-    }
-
-    const signatureHeader = req.headers.get("x-signature");
-    const isValid = await verifyMpSignature(bodyText, signatureHeader, webhookSecret);
-    if (!isValid) {
-      console.error("Invalid MP webhook signature");
-      return new Response("Invalid signature", { status: 401 });
+    // De que negocio es este aviso. Lo pone create-payment en notification_url.
+    const negocioId = url.searchParams.get("negocio");
+    if (!negocioId) {
+      console.error("Webhook sin parametro negocio — preferencia creada antes del arreglo");
+      return new Response("Missing business", { status: 200 });
     }
 
     const supabase = createClient(
@@ -78,51 +115,54 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Find the booking to get business_id
-    const bookingCode = body.data?.id ? null : null; // will be set after payment lookup
-
-    // First: look up the booking from external_reference in the payment
-    // But we need the MP token to fetch the payment first.
-    // We can't look up the booking without the payment details,
-    // so we need to find the business first.
-    // Strategy: fetch payment with each business's token until we find a match,
-    // or use the payment_id to find the booking directly.
-
-    // Actually: the payment external_reference contains the booking code.
-    // We need to fetch the payment to get external_reference.
-    // But we need a valid MP token to do that.
-
-    // Solution: look up all connected MP providers and try each token
-    const { data: providers } = await supabase
+    const { data: prov } = await supabase
       .from("payment_providers")
-      .select("business_id, access_token")
+      .select("business_id, access_token, webhook_secret")
+      .eq("business_id", negocioId)
       .eq("provider", "mercadopago")
-      .eq("status", "connected");
+      .eq("status", "connected")
+      .maybeSingle();
 
-    if (!providers || providers.length === 0) {
-      console.error("No connected MP providers found");
-      return new Response("No MP providers", { status: 200 });
+    if (!prov) {
+      console.error("Negocio sin Mercado Pago conectado:", negocioId);
+      return new Response("No MP provider", { status: 200 });
     }
 
-    let payment: Record<string, unknown> | null = null;
-    let matchedBusinessId: string | null = null;
+    // Clave del negocio; si no cargo la suya, se prueba la global como respaldo.
+    const webhookSecret = (await descifrar(prov.webhook_secret))
+      || Deno.env.get("MP_WEBHOOK_SECRET");
 
-    for (const prov of providers) {
-      if (!prov.access_token) continue;
-      const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-        headers: { Authorization: `Bearer ${prov.access_token}` },
-      });
-      if (res.ok) {
-        payment = await res.json();
-        matchedBusinessId = prov.business_id;
-        break;
-      }
+    if (!webhookSecret) {
+      console.error("Sin clave de webhook para el negocio:", negocioId);
+      return new Response("Webhook secret not configured", { status: 200 });
     }
 
-    if (!payment || !matchedBusinessId) {
-      console.error("Could not fetch payment from MP API");
+    const firmaValida = await validarFirmaMp(
+      String(paymentId),
+      req.headers.get("x-request-id"),
+      req.headers.get("x-signature"),
+      webhookSecret
+    );
+    if (!firmaValida) {
+      console.error("Firma invalida para el negocio:", negocioId);
+      return new Response("Invalid signature", { status: 401 });
+    }
+
+    // Recien despues de validar la firma se consulta el pago real.
+    const accessToken = await descifrar(prov.access_token);
+    if (!accessToken) {
+      console.error("Negocio sin access token:", negocioId);
+      return new Response("No access token", { status: 200 });
+    }
+
+    const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!res.ok) {
+      console.error("No se pudo leer el pago en MP:", res.status);
       return new Response("Payment fetch failed", { status: 200 });
     }
+    const payment = await res.json();
 
     if (payment.status !== "approved") {
       return new Response("Payment not approved", { status: 200 });
@@ -133,34 +173,27 @@ Deno.serve(async (req: Request) => {
       return new Response("No external reference", { status: 200 });
     }
 
-    // Find the booking
     const { data: existingBooking, error: findError } = await supabase
       .from("bookings")
       .select("id, business_id, booking_date, booking_time, customer_name, booking_code, payment_status")
       .eq("booking_code", extRef)
+      .eq("business_id", prov.business_id)
       .maybeSingle();
 
     if (findError) throw findError;
 
     if (!existingBooking) {
-      console.error("Booking not found for code:", extRef);
+      console.error("Reserva no encontrada para el codigo:", extRef);
       return new Response("Booking not found", { status: 200 });
     }
 
     const businessId = existingBooking.business_id;
 
-    // Idempotency: skip if already processed
+    // Idempotencia: MP reintenta los avisos, no procesar dos veces.
     if (existingBooking.payment_status === "approved") {
       return new Response("Already processed", { status: 200 });
     }
 
-    // Verify the payment belongs to this business
-    if (matchedBusinessId !== businessId) {
-      console.error("Payment business mismatch:", matchedBusinessId, "!=", businessId);
-      return new Response("Business mismatch", { status: 200 });
-    }
-
-    // Update the booking
     const { data: booking, error } = await supabase
       .from("bookings")
       .update({
@@ -176,7 +209,7 @@ Deno.serve(async (req: Request) => {
 
     if (error) throw error;
 
-    // Send notification to business owner via ntfy
+    // Aviso al duenio del negocio via ntfy
     if (booking) {
       const ntfyEnabled = Deno.env.get("NTFY_ENABLED");
       const ntfyTopic = Deno.env.get(`NTFY_TOPIC_${businessId.replace(/-/g, "_")}`)
