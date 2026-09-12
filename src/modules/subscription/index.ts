@@ -7,5 +7,6 @@ export { SuspendedGuard } from './components/SuspendedGuard';
 export { PaymentButton } from './components/PaymentButton';
 export { ModuleBlockedScreen } from './components/ModuleBlockedScreen';
 export { FreePlanBanner } from './components/FreePlanBanner';
+export { UpgradeBanner } from './components/UpgradeBanner';
 export type { SubscriptionInfo, SubscriptionConfig, SubscriptionStatus, ModuleId } from './types';
 export { DEFAULT_SUBSCRIPTION_CONFIG, STATUS_LABELS, STATUS_COLORS, PLAN_MODULES, getEnabledModules } from './lib/constants';

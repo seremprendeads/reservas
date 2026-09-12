@@ -10,7 +10,7 @@ export type { View, NavItem };
 
 export function useAdminData() {
   const { business } = useBusiness();
-  const { enabledModules, isFreePlan } = useModuleAccess();
+  const { enabledModules, isFreePlan, isTrial } = useModuleAccess();
   const [view, setView] = useState<View>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void }>({ open: false, message: '', onConfirm: () => {} });
@@ -85,6 +85,7 @@ export function useAdminData() {
     navItems: nav.navItems,
     currentViewTitle,
     isFreePlan,
+    isTrial,
     enabledModules,
   };
 }

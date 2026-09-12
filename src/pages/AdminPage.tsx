@@ -21,7 +21,7 @@ import { AdminSidebar } from './admin/AdminSidebar';
 import { AdminHeader } from './admin/AdminHeader';
 import { AdminModals } from './admin/AdminModals';
 import { useAdminData } from './admin/useAdminData';
-import { useSubscription, FreePlanBanner } from '../modules/subscription';
+import { useSubscription, FreePlanBanner, UpgradeBanner } from '../modules/subscription';
 import { CalendarIntegrations } from '../modules/calendar-integration';
 // import { AiAssistant } from '../modules/ai-assistant';
 import type { AdminTab } from '../modules/landing/admin/lib/constants';
@@ -82,6 +82,8 @@ export function AdminPage() {
     navItems,
     currentViewTitle,
     isFreePlan,
+    isTrial,
+    enabledModules,
   } = useAdminData();
 
   const { config: subConfig } = useSubscription({ business });
@@ -326,7 +328,9 @@ export function AdminPage() {
         />
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">
-          {isFreePlan && <FreePlanBanner supportUrl={subConfig.payment_button_url} />}
+          {isFreePlan
+            ? <FreePlanBanner supportUrl={subConfig.payment_button_url} />
+            : !isTrial && <UpgradeBanner enabledModules={enabledModules} supportUrl={subConfig.payment_button_url} />}
           {renderView()}
         </main>
 
