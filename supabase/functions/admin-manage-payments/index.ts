@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { authenticateToken, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, jsonAccessDenied, checkBusinessAccess, corsHeaders } from "../_shared/auth.ts";
+import { cifrar, descifrar } from "../_shared/crypto.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -40,9 +41,11 @@ Deno.serve(async (req: Request) => {
           {
             business_id: auth.businessId,
             provider,
-            access_token: credentials?.access_token || null,
+            // Se cifran los dos campos secretos. client_id y public_key no:
+            // son identificadores públicos, no credenciales.
+            access_token: await cifrar(credentials?.access_token),
             client_id: credentials?.client_id || null,
-            client_secret: credentials?.client_secret || null,
+            client_secret: await cifrar(credentials?.client_secret),
             wallet_address: credentials?.wallet_address || null,
             public_key: credentials?.public_key || null,
             updated_at: new Date().toISOString(),
@@ -66,24 +69,29 @@ Deno.serve(async (req: Request) => {
         return jsonError("Proveedor no configurado", 404);
       }
 
+      // Los secretos están cifrados en la base: se descifran solo acá, en memoria,
+      // para probar la conexión. Nunca se devuelven al navegador.
+      const accessToken = await descifrar(prov.access_token);
+      const clientSecret = await descifrar(prov.client_secret);
+
       let testResult = false;
       let testError = "";
 
       if (provider === "mercadopago") {
         try {
-          if (prov.access_token) {
+          if (accessToken) {
             const res = await fetch("https://api.mercadopago.com/users/me", {
-              headers: { Authorization: `Bearer ${prov.access_token}` },
+              headers: { Authorization: `Bearer ${accessToken}` },
             });
             testResult = res.ok;
             if (!res.ok) testError = `HTTP ${res.status}`;
-          } else if (prov.client_id && prov.client_secret) {
+          } else if (prov.client_id && clientSecret) {
             const res = await fetch("https://api.mercadopago.com/oauth/token", {
               method: "POST",
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
               body: new URLSearchParams({
                 client_id: prov.client_id,
-                client_secret: prov.client_secret,
+                client_secret: clientSecret,
                 grant_type: "client_credentials",
               }),
             });
@@ -98,7 +106,7 @@ Deno.serve(async (req: Request) => {
       } else if (provider === "stripe") {
         try {
           const res = await fetch("https://api.stripe.com/v1/balance", {
-            headers: { Authorization: `Bearer ${prov.access_token}` },
+            headers: { Authorization: `Bearer ${accessToken}` },
           });
           testResult = res.ok;
           if (!res.ok) testError = `HTTP ${res.status}`;
@@ -107,7 +115,7 @@ Deno.serve(async (req: Request) => {
         }
       } else if (provider === "paypal") {
         try {
-          const authStr = btoa(`${prov.client_id}:${prov.client_secret}`);
+          const authStr = btoa(`${prov.client_id}:${clientSecret}`);
           const res = await fetch("https://api-m.sandbox.paypal.com/v1/identity/platform/v1/merchant-info", {
             headers: { Authorization: `Basic ${authStr}` },
           });
