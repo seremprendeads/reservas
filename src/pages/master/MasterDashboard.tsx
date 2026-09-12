@@ -16,6 +16,8 @@ interface DashboardStats {
   upcoming_expirations: { id: string; trial_ends_at: string; days_left: number }[];
 }
 
+import { TrialTracking } from './TrialTracking';
+
 interface Tenant {
   id: string;
   name: string;
@@ -222,7 +224,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [view, setView] = useState<'dashboard' | 'tenants'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'tenants' | 'seguimiento'>('dashboard');
   const [showCreateInvite, setShowCreateInvite] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
@@ -321,7 +323,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
 
       {/* Nav */}
       <nav className="border-b border-border bg-card px-6 flex gap-1">
-        {(['dashboard', 'tenants'] as const).map((v) => (
+        {(['dashboard', 'tenants', 'seguimiento'] as const).map((v) => (
           <button
             key={v}
             onClick={() => { setView(v); setShowCreateInvite(false); }}
@@ -331,7 +333,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
                 : 'border-transparent text-foreground/60 hover:text-foreground'
             }`}
           >
-            {v === 'dashboard' ? 'Dashboard' : 'Profesionales'}
+            {v === 'dashboard' ? 'Dashboard' : v === 'tenants' ? 'Profesionales' : 'Seguimiento'}
           </button>
         ))}
       </nav>
@@ -518,6 +520,8 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
               </div>
             )}
           </>
+        ) : view === 'seguimiento' ? (
+          <TrialTracking tenants={tenants} planLabel={planLabel} />
         ) : null}
       </main>
     </div>
