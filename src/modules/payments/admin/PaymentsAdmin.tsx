@@ -278,6 +278,9 @@ function ProviderCard({
                   </button>
                 )}
               </div>
+              {field.hint && (
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{field.hint}</p>
+              )}
             </div>
           ))}
 

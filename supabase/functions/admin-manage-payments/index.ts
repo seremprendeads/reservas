@@ -41,11 +41,12 @@ Deno.serve(async (req: Request) => {
           {
             business_id: auth.businessId,
             provider,
-            // Se cifran los dos campos secretos. client_id y public_key no:
+            // Se cifran los tres campos secretos. client_id y public_key no:
             // son identificadores públicos, no credenciales.
             access_token: await cifrar(credentials?.access_token),
             client_id: credentials?.client_id || null,
             client_secret: await cifrar(credentials?.client_secret),
+            webhook_secret: await cifrar(credentials?.webhook_secret),
             wallet_address: credentials?.wallet_address || null,
             public_key: credentials?.public_key || null,
             updated_at: new Date().toISOString(),

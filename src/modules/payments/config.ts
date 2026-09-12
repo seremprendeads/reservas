@@ -11,6 +11,13 @@ export const PAYMENT_PROVIDERS: PaymentProviderConfig[] = [
       { key: 'access_token', label: 'Access Token', type: 'password', placeholder: 'APP_USR-...' },
       { key: 'client_id', label: 'Client ID (OAuth)', type: 'text', placeholder: '123456789...' },
       { key: 'client_secret', label: 'Client Secret (OAuth)', type: 'password', placeholder: '...' },
+      {
+        key: 'webhook_secret',
+        label: 'Clave secreta de notificaciones',
+        type: 'password',
+        placeholder: 'Se genera al configurar las notificaciones',
+        hint: 'En Mercado Pago: Tus integraciones → tu aplicación → Webhooks. Sin esta clave, los pagos no confirman el turno automáticamente.',
+      },
     ],
     helpUrl: 'https://www.mercadopago.com.ar/developers/en/docs/your-integrations/credentials',
     helpLabel: 'Cómo obtener mis credenciales',

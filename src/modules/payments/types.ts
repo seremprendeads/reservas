@@ -9,6 +9,7 @@ export type PaymentProvider = {
   access_token: string | null;
   client_id: string | null;
   client_secret: string | null;
+  webhook_secret: string | null;
   wallet_address: string | null;
   public_key: string | null;
   status: PaymentProviderStatus;
@@ -35,4 +36,6 @@ export type PaymentField = {
   label: string;
   type: 'password' | 'text';
   placeholder: string;
+  /** Texto de ayuda bajo el campo. Para los que no son obvios de encontrar. */
+  hint?: string;
 };
