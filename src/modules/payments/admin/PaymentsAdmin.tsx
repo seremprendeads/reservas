@@ -228,7 +228,7 @@ function ProviderCard({
 
   return (
     <>
-      <Card className="overflow-hidden">
+      <Card className={`overflow-hidden ${config.proximamente ? 'opacity-60' : ''}`}>
         <CardHeader className="pb-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -240,13 +240,24 @@ function ProviderCard({
                 <CardDescription className="mt-0.5 text-xs">{config.description}</CardDescription>
               </div>
             </div>
-            <Badge variant={isConnected ? 'success' : 'destructive'} className="shrink-0">
-              <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-red-500'}`} />
-              {isConnected ? 'Conectado' : 'No conectado'}
-            </Badge>
+            {config.proximamente ? (
+              <Badge variant="secondary" className="shrink-0">Próximamente</Badge>
+            ) : (
+              <Badge variant={isConnected ? 'success' : 'destructive'} className="shrink-0">
+                <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                {isConnected ? 'Conectado' : 'No conectado'}
+              </Badge>
+            )}
           </div>
         </CardHeader>
 
+        {config.proximamente ? (
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Todavía no está disponible. Por ahora podés cobrar con Mercado Pago.
+            </p>
+          </CardContent>
+        ) : (
         <CardContent className="space-y-4">
           {config.tutorialYoutubeId && (
             <div className="rounded-xl border border-border bg-muted/40 p-3 sm:p-4">
@@ -386,6 +397,7 @@ function ProviderCard({
             )}
           </div>
         </CardContent>
+        )}
       </Card>
 
       <Dialog open={showDisconnectDialog} onOpenChange={setShowDisconnectDialog}>

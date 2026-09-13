@@ -8,9 +8,11 @@ export const PAYMENT_PROVIDERS: PaymentProviderConfig[] = [
     icon: '💙',
     color: 'from-blue-500 to-blue-600',
     fields: [
+      // Client ID y Client Secret eran para OAuth, que no se usa. Iban siempre
+      // vacíos, confundían al cliente durante la instalación, y encima Chrome los
+      // leía como un par email/contraseña y los autocompletaba con las
+      // credenciales del admin. Se quitan hasta que exista el flujo OAuth.
       { key: 'access_token', label: 'Access Token', type: 'password', placeholder: 'APP_USR-...' },
-      { key: 'client_id', label: 'Client ID (OAuth)', type: 'text', placeholder: '123456789...' },
-      { key: 'client_secret', label: 'Client Secret (OAuth)', type: 'password', placeholder: '...' },
       {
         key: 'webhook_secret',
         label: 'Clave secreta de notificaciones',
@@ -28,6 +30,7 @@ export const PAYMENT_PROVIDERS: PaymentProviderConfig[] = [
   },
   {
     slug: 'stripe',
+    proximamente: true,
     name: 'Stripe',
     description: 'Gateway de pagos global. Aceptá tarjetas de todo el mundo con una integración moderna.',
     icon: '💜',
@@ -41,6 +44,7 @@ export const PAYMENT_PROVIDERS: PaymentProviderConfig[] = [
   },
   {
     slug: 'paypal',
+    proximamente: true,
     name: 'PayPal',
     description: 'Aceptá pagos internacionales con PayPal. Ideal para clientes fuera del país.',
     icon: '🟡',
@@ -54,6 +58,7 @@ export const PAYMENT_PROVIDERS: PaymentProviderConfig[] = [
   },
   {
     slug: 'crypto',
+    proximamente: true,
     name: 'Bitcoin / Criptomonedas',
     description: 'Preparado para integraciones futuras con BTCPay, Coinbase Commerce y más.',
     icon: '🟠',

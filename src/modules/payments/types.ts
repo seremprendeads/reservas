@@ -30,6 +30,8 @@ export type PaymentProviderConfig = {
   color: string;
   /** ID del video de YouTube con el tutorial de conexión. Vacío = no se muestra. */
   tutorialYoutubeId?: string;
+  /** Si es true, la tarjeta se muestra atenuada y no se puede configurar. */
+  proximamente?: boolean;
   fields: PaymentField[];
   helpUrl: string;
   helpLabel: string;
