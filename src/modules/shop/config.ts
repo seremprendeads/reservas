@@ -1,5 +1,5 @@
 export const PLAN_LIMITS = {
-  products: 20,
+  products: 12,
 };
 
 export const IMAGE_CONFIG = {
