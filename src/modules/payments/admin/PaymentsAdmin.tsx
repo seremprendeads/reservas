@@ -304,6 +304,13 @@ function ProviderCard({
                     placeholder={field.placeholder}
                     className="pr-20 font-mono text-xs"
                     autoFocus={!!editando[field.key]}
+                    // El navegador leía "Client ID" + "Client Secret" como un
+                    // formulario de login y autocompletaba el email y la contraseña
+                    // del admin. name aleatorio + autoComplete off lo evitan.
+                    name={`mp-${config.slug}-${field.key}-${Math.random().toString(36).slice(2, 8)}`}
+                    autoComplete="off"
+                    data-lpignore="true"
+                    data-form-type="other"
                   />
                   {field.type === 'password' && (
                     <button
