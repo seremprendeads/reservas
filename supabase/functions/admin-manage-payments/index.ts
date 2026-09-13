@@ -25,13 +25,26 @@ Deno.serve(async (req: Request) => {
     if (action === "list") {
       const { data, error } = await supabase
         .from("payment_providers")
-        .select("id, business_id, provider, status, client_id, public_key, wallet_address, last_tested_at, created_at, updated_at")
+        .select("id, business_id, provider, status, client_id, public_key, wallet_address, last_tested_at, created_at, updated_at, access_token, client_secret, webhook_secret")
         .eq("business_id", auth.businessId)
         .order("provider");
 
       if (error) throw error;
 
-      return jsonSuccess({ success: true, providers: data || [] });
+      // Los secretos NUNCA salen al navegador. Solo se informa si están cargados,
+      // para que el panel pueda mostrar "configurado" en lugar de un campo vacío
+      // que hace creer al cliente que no se guardó nada.
+      const providers = (data || []).map((p) => {
+        const { access_token, client_secret, webhook_secret, ...publico } = p;
+        return {
+          ...publico,
+          has_access_token: !!access_token,
+          has_client_secret: !!client_secret,
+          has_webhook_secret: !!webhook_secret,
+        };
+      });
+
+      return jsonSuccess({ success: true, providers });
     }
 
     if (action === "save") {

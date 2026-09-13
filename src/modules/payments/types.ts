@@ -13,6 +13,10 @@ export type PaymentProvider = {
   wallet_address: string | null;
   public_key: string | null;
   status: PaymentProviderStatus;
+  /** Indican si el secreto está cargado. El contenido nunca llega al navegador. */
+  has_access_token?: boolean;
+  has_client_secret?: boolean;
+  has_webhook_secret?: boolean;
   last_tested_at: string | null;
   created_at: string;
   updated_at: string;

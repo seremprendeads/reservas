@@ -108,14 +108,27 @@ function ProviderCard({
   const [disconnecting, setDisconnecting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
+  // Campos guardados que el usuario eligió reemplazar. Mientras no estén acá,
+  // se muestran como "configurado" y bloqueados.
+  const [editando, setEditando] = useState<Record<string, boolean>>({});
+
+  // Qué secretos están cargados en la base. La función informa solo el sí/no.
+  const guardado: Record<string, boolean> = {
+    access_token: !!provider?.has_access_token,
+    client_secret: !!provider?.has_client_secret,
+    webhook_secret: !!provider?.has_webhook_secret,
+  };
+  const estaConfigurado = (key: string) => guardado[key] && !editando[key];
+  const hayAlgoGuardado = Object.values(guardado).some(Boolean);
 
   useEffect(() => {
     if (provider) {
       const initial: Record<string, string> = {};
       config.fields.forEach((f) => {
-        initial[f.key] = provider[f.key as keyof PaymentProvider] as string || '';
+        initial[f.key] = (provider[f.key as keyof PaymentProvider] as string) || '';
       });
       setFields(initial);
+      setEditando({}); // al recargar, los guardados vuelven a mostrarse como configurados
     }
   }, [provider, config.fields]);
 
@@ -260,24 +273,49 @@ function ProviderCard({
           {config.fields.map((field) => (
             <div key={field.key}>
               <label className="mb-1.5 block text-sm font-medium">{field.label}</label>
-              <div className="relative">
-                <Input
-                  type={field.type === 'password' && !showToken ? 'password' : 'text'}
-                  value={fields[field.key] || ''}
-                  onChange={(e) => setFields({ ...fields, [field.key]: e.target.value })}
-                  placeholder={field.placeholder}
-                  className="pr-20 font-mono text-xs"
-                />
-                {field.type === 'password' && (
-                  <button
+              {estaConfigurado(field.key) ? (
+                // Ya hay un valor guardado. Se muestran puntos para que se note
+                // que está cargado, sin traer el secreto al navegador.
+                <div className="flex items-center gap-2">
+                  <div className="flex h-10 flex-1 items-center gap-2 rounded-md border border-input bg-muted/50 px-3">
+                    <CheckCircle className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                    <span className="select-none font-mono text-xs tracking-[0.2em] text-muted-foreground">
+                      ••••••••••••••••••••
+                    </span>
+                  </div>
+                  <Button
                     type="button"
-                    onClick={() => setShowToken(!showToken)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditando({ ...editando, [field.key]: true });
+                      setFields({ ...fields, [field.key]: '' });
+                    }}
                   >
-                    {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                )}
-              </div>
+                    Cambiar
+                  </Button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <Input
+                    type={field.type === 'password' && !showToken ? 'password' : 'text'}
+                    value={fields[field.key] || ''}
+                    onChange={(e) => setFields({ ...fields, [field.key]: e.target.value })}
+                    placeholder={field.placeholder}
+                    className="pr-20 font-mono text-xs"
+                    autoFocus={!!editando[field.key]}
+                  />
+                  {field.type === 'password' && (
+                    <button
+                      type="button"
+                      onClick={() => setShowToken(!showToken)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                    >
+                      {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  )}
+                </div>
+              )}
               {field.hint && (
                 <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{field.hint}</p>
               )}
@@ -322,7 +360,7 @@ function ProviderCard({
             </Button>
 
             {config.slug !== 'crypto' && (
-              <Button size="sm" variant="outline" onClick={handleTest} disabled={testing || !hasAnyValue(fields)}>
+              <Button size="sm" variant="outline" onClick={handleTest} disabled={testing || (!hasAnyValue(fields) && !hayAlgoGuardado)}>
                 {testing ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
                 Probar conexión
               </Button>
