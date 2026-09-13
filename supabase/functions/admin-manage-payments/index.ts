@@ -35,18 +35,32 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === "save") {
+      // El formulario nunca recibe de vuelta los secretos guardados (no se
+      // devuelven al navegador), así que llega vacío en cada visita. Si se
+      // guardara tal cual, cada "Guardar" borraría las credenciales.
+      // Por eso: campo vacío = "no lo toques"; campo con valor = reemplazar.
+      const { data: actual } = await supabase
+        .from("payment_providers")
+        .select("access_token, client_secret, webhook_secret")
+        .eq("business_id", auth.businessId)
+        .eq("provider", provider)
+        .maybeSingle();
+
+      const conservarSiVacio = async (nuevo: string | undefined, guardado: string | null | undefined) => {
+        if (nuevo && nuevo.trim()) return await cifrar(nuevo.trim());
+        return guardado ?? null;
+      };
+
       const { error } = await supabase
         .from("payment_providers")
         .upsert(
           {
             business_id: auth.businessId,
             provider,
-            // Se cifran los tres campos secretos. client_id y public_key no:
-            // son identificadores públicos, no credenciales.
-            access_token: await cifrar(credentials?.access_token),
+            access_token: await conservarSiVacio(credentials?.access_token, actual?.access_token),
             client_id: credentials?.client_id || null,
-            client_secret: await cifrar(credentials?.client_secret),
-            webhook_secret: await cifrar(credentials?.webhook_secret),
+            client_secret: await conservarSiVacio(credentials?.client_secret, actual?.client_secret),
+            webhook_secret: await conservarSiVacio(credentials?.webhook_secret, actual?.webhook_secret),
             wallet_address: credentials?.wallet_address || null,
             public_key: credentials?.public_key || null,
             updated_at: new Date().toISOString(),
@@ -133,6 +147,10 @@ Deno.serve(async (req: Request) => {
           .update({ status: "connected", last_tested_at: new Date().toISOString() })
           .eq("business_id", auth.businessId)
           .eq("provider", provider);
+      } else {
+        // Sin esto, un fallo de conexión no deja rastro en los logs y hay que
+        // adivinar por qué el proveedor quedó en "disconnected".
+        console.error(`Prueba de conexión fallida — proveedor: ${provider}, motivo: ${testError || "sin detalle"}`);
       }
 
       return jsonSuccess({ success: testResult, error: testError || null });
