@@ -12,6 +12,7 @@ import { BookingFormCalendar } from './BookingFormCalendar';
 import { BlockedTimeModal } from './BlockedTimeModal';
 import { getToday, addDays, getWeekStart, getMonthStart, getMonthEnd, getDaySummary, filterBookings } from './calendarUtils';
 import { supabase } from '../../../lib/supabase';
+import { authInvoke } from '../helpers';
 import { useBusiness } from '../../../contexts/BusinessContext';
 
 interface CalendarPageProps {
@@ -136,21 +137,26 @@ export function CalendarPage({
   };
 
   const handleSaveBooking = async (bookingData: Partial<Booking>) => {
-    if (!business?.id) return;
-    const { data } = await supabase.from('bookings').insert({
-      business_id: business.id,
-      booking_code: `CAL-${Date.now().toString(36).toUpperCase()}`,
+    // Antes esto insertaba directo en bookings con la anon key y cerraba con
+    // .select('id'). Ese select obligaba a mantener abierta la lectura anonima
+    // de bookings. Ahora el turno lo crea admin-create-booking, que saca el
+    // business_id del JWT y genera el codigo en el servidor.
+    const { data, error } = await authInvoke('admin-create-booking', {
       customer_name: bookingData.customer_name || '',
       customer_phone: bookingData.customer_phone || '',
       customer_email: bookingData.customer_email || '',
       booking_date: bookingData.booking_date || currentDate,
       booking_time: bookingData.booking_time || '09:00',
-      payment_status: 'pending',
-      booking_status: 'pending',
       amount: bookingData.amount || 0,
       notas_admin: bookingData.notas_admin || null,
-    }).select('id').single();
-    if (data?.id) syncBookingToCalendar(data.id).catch(() => {});
+    });
+
+    if (error || !data?.success) {
+      alert('No se pudo crear el turno. Intentá de nuevo.');
+      return;
+    }
+
+    if (data.id) syncBookingToCalendar(data.id).catch(() => {});
     onRefresh();
   };
 
