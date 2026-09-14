@@ -324,6 +324,10 @@ export function AdminPage() {
       />
 
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden pb-16 lg:pb-0">
+        {/* Barra fina del período de prueba: va arriba del header y queda fija
+            porque el scroll ocurre dentro de <main>, no en esta columna. */}
+        {isTrial && <TrialBanner trialCountdown={trialCountdown} />}
+
         <AdminHeader
           title={currentViewTitle}
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
@@ -334,7 +338,6 @@ export function AdminPage() {
         />
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">
-          {isTrial && <TrialBanner trialCountdown={trialCountdown} />}
           {isFreePlan && <FreePlanBanner supportUrl={subConfig.payment_button_url} />}
           {mostrarBannerUpgrade && <UpgradeBanner enabledModules={enabledModules} />}
           {renderView()}
