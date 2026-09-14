@@ -13,6 +13,11 @@ import { PLAN_CARDS, linkDePlan, nivelActual } from '../lib/plans';
 //
 // En prueba y en free se ofrecen los cinco planes: el negocio no tiene ninguno
 // contratado. El catalogo y los enlaces viven en ../lib/plans.ts
+//
+// Estilo: mismo lenguaje visual que la barra del contador (TrialBanner) —
+// degradado naranja → violeta, texto blanco, tarjetas de vidrio (blanco
+// translucido) y boton rojo. Los colores propios de cada plan (p.bg, p.border,
+// p.button) quedan como acento fino en el borde superior de cada tarjeta.
 // ============================================================================
 
 const SESSION_KEY = 'bb_upgrade_popup_seen';
@@ -68,26 +73,26 @@ export function UpgradePopup({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={close}
       role="dialog"
       aria-modal="true"
       aria-label="Planes disponibles"
     >
       <div
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,.12)] sm:p-8"
+        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-gradient-to-br from-orange-500 via-purple-600 to-violet-600 p-6 shadow-[0_8px_30px_rgba(0,0,0,.35)] sm:p-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="font-display text-2xl text-gray-900">{titulo}</h2>
-            <p className="mt-1 text-sm text-gray-500">{bajada}</p>
+            <h2 className="font-display text-2xl text-white">{titulo}</h2>
+            <p className="mt-1 text-sm text-white/75">{bajada}</p>
           </div>
           <button
             type="button"
             onClick={close}
             aria-label="Cerrar"
-            className="-mr-2 -mt-2 shrink-0 rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300"
+            className="-mr-2 -mt-2 shrink-0 rounded-full p-2 text-white/70 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <X className="h-5 w-5" />
           </button>
@@ -97,21 +102,22 @@ export function UpgradePopup({
           {options.map((p) => (
             <div
               key={p.key}
-              className="flex flex-col rounded-xl border p-4"
-              style={{ backgroundColor: p.bg, borderColor: p.border }}
+              className="flex flex-col overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm"
             >
-              <p className="text-sm font-semibold leading-snug text-gray-900">{p.name}</p>
-              <p className="mt-1 mb-4 flex-1 text-xs leading-5 text-gray-600">{p.detail}</p>
-              <a
-                href={linkDePlan(p)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={close}
-                className="inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold text-white transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
-                style={{ backgroundColor: p.button }}
-              >
-                Lo quiero
-              </a>
+              <div className="h-1 w-full" style={{ backgroundColor: p.button }} />
+              <div className="flex flex-1 flex-col p-4">
+                <p className="text-sm font-semibold leading-snug text-white">{p.name}</p>
+                <p className="mt-1 mb-4 flex-1 text-xs leading-5 text-white/70">{p.detail}</p>
+                <a
+                  href={linkDePlan(p)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={close}
+                  className="inline-flex h-10 items-center justify-center rounded-xl border border-red-500 bg-red-600 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-red-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
+                >
+                  Lo quiero
+                </a>
+              </div>
             </div>
           ))}
         </div>
@@ -119,7 +125,7 @@ export function UpgradePopup({
         <button
           type="button"
           onClick={close}
-          className="mt-5 w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+          className="mt-5 w-full rounded-xl border border-white/30 px-4 py-2.5 text-sm font-medium text-white/85 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
         >
           {isTrial ? 'Seguir probando' : 'Seguir con mi plan actual'}
         </button>
