@@ -176,17 +176,17 @@ export function Calendar() {
       if (blockedRes.data) setBlockedDates(blockedRes.data.map((b: BlockedDate) => b.date));
       if (settingsRes.data) setSettings(settingsRes.data);
 
-      const today = new Date();
-      const bookingsRes = await supabase
-        .from('bookings')
-        .select('booking_date, booking_time, booking_status')
-        .eq('business_id', business.id)
-        .gte('booking_date', today.toISOString().split('T')[0])
-        .in('booking_status', ['confirmed', 'pending']);
+      // Antes esto leia la tabla bookings con la anon key. Ahora pasa por
+      // public-booked-slots, que devuelve unicamente fecha y hora ocupadas,
+      // sin ningun dato del cliente que reservo. El corte "desde hoy" ahora
+      // lo aplica el servidor.
+      const { data: slotsRes } = await supabase.functions.invoke('public-booked-slots', {
+        body: { business_id: business.id },
+      });
 
-      if (bookingsRes.data) {
+      if (slotsRes?.slots) {
         const bookingMap = new Map<string, Set<string>>();
-        bookingsRes.data.forEach((booking: Pick<Booking, 'booking_date' | 'booking_time'>) => {
+        slotsRes.slots.forEach((booking: Pick<Booking, 'booking_date' | 'booking_time'>) => {
   const date = booking.booking_date;
   const times = bookingMap.get(date) || new Set();
   // Normalizar formato HH:MM:SS → HH:MM
