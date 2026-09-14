@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { supabase, Booking, AvailabilitySetting, BlockedDate, Branding, WaitingListItem } from '../../lib/supabase';
+import { Booking, AvailabilitySetting, BlockedDate, Branding, WaitingListItem } from '../../lib/supabase';
 import { authInvoke } from './helpers';
 import { syncBookingToCalendar } from '../../modules/calendar-integration';
 import * as session from '../../lib/admin-session';
@@ -26,12 +26,13 @@ export function useAdminBookings({ businessId, onProfileLoaded, setConfirmModal 
     if (!businessId) return;
     setLoading(true);
     try {
-      const [bookingsRes, availRes, blockedRes, , brandingRes, profileRes] = await Promise.all([
-        supabase.from('bookings').select('*').eq('business_id', businessId).order('booking_date', { ascending: true }),
-        supabase.from('availability_settings').select('*').eq('business_id', businessId).order('day_of_week'),
-        supabase.from('blocked_dates').select('*').eq('business_id', businessId).order('date'),
-        supabase.from('settings').select('*').eq('business_id', businessId).maybeSingle(),
-        supabase.from('branding').select('*').eq('business_id', businessId).maybeSingle(),
+      // Antes acá había cinco lecturas directas con la anon key (bookings,
+      // availability_settings, blocked_dates, settings y branding), filtradas
+      // por un businessId que venía del cliente. Ahora las cinco pasan por
+      // admin-get-panel-data, que deduce el negocio del JWT y nunca acepta un
+      // business_id del cliente.
+      const [panelRes, profileRes] = await Promise.all([
+        authInvoke('admin-get-panel-data', {}),
         authInvoke('get-admin-profile'),
       ]);
 
@@ -42,19 +43,24 @@ export function useAdminBookings({ businessId, onProfileLoaded, setConfirmModal 
         onProfileLoaded(profile.name ?? null, profile.avatar_url ?? null);
       }
 
-      if (bookingsRes.data) {
-        const active = bookingsRes.data.filter((b) => !b.deleted_at);
-        const deleted = bookingsRes.data.filter((b) => !!b.deleted_at);
-        setBookings(active);
-        setDeletedBookings(deleted);
-        setSelectedBooking(prev => {
-          if (!prev) return null;
-          return active.find((b) => b.id === prev.id) || prev;
-        });
+      const panel = panelRes.data;
+      if (panelRes.error || !panel?.success) {
+        throw new Error('Error al cargar los datos del panel');
       }
-      if (availRes.data) setAvailability(availRes.data);
-      if (blockedRes.data) setBlockedDates(blockedRes.data);
-      if (brandingRes.data) setBranding(brandingRes.data);
+
+      const allBookings: Booking[] = panel.bookings || [];
+      const active = allBookings.filter((b) => !b.deleted_at);
+      const deleted = allBookings.filter((b) => !!b.deleted_at);
+      setBookings(active);
+      setDeletedBookings(deleted);
+      setSelectedBooking(prev => {
+        if (!prev) return null;
+        return active.find((b) => b.id === prev.id) || prev;
+      });
+
+      setAvailability(panel.availability || []);
+      setBlockedDates(panel.blocked_dates || []);
+      setBranding(panel.branding ?? null);
 
       try {
         const { data: wlData, error: wlError } = await authInvoke('admin-get-waiting-list', {});
