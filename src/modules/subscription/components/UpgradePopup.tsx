@@ -15,9 +15,9 @@ import { PLAN_CARDS, linkDePlan, nivelActual } from '../lib/plans';
 // contratado. El catalogo y los enlaces viven en ../lib/plans.ts
 //
 // Estilo: mismo lenguaje visual que la barra del contador (TrialBanner) —
-// degradado naranja → violeta, texto blanco, tarjetas de vidrio (blanco
-// translucido) y boton rojo. Los colores propios de cada plan (p.bg, p.border,
-// p.button) quedan como acento fino en el borde superior de cada tarjeta.
+// degradado naranja → violeta con texto blanco en el encabezado. Las tarjetas
+// van en blanco solido con texto gris oscuro para maxima legibilidad, boton
+// rojo, y el color propio de cada plan (p.button) como acento fino arriba.
 // ============================================================================
 
 const SESSION_KEY = 'bb_upgrade_popup_seen';
@@ -102,12 +102,12 @@ export function UpgradePopup({
           {options.map((p) => (
             <div
               key={p.key}
-              className="flex flex-col overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm"
+              className="flex flex-col overflow-hidden rounded-xl border border-white/30 bg-white shadow-sm"
             >
               <div className="h-1 w-full" style={{ backgroundColor: p.button }} />
               <div className="flex flex-1 flex-col p-4">
-                <p className="text-sm font-semibold leading-snug text-white">{p.name}</p>
-                <p className="mt-1 mb-4 flex-1 text-xs leading-5 text-white/70">{p.detail}</p>
+                <p className="text-sm font-semibold leading-snug text-gray-900">{p.name}</p>
+                <p className="mt-1 mb-4 flex-1 text-xs leading-5 text-gray-600">{p.detail}</p>
                 <a
                   href={linkDePlan(p)}
                   target="_blank"
@@ -125,7 +125,7 @@ export function UpgradePopup({
         <button
           type="button"
           onClick={close}
-          className="mt-5 w-full rounded-xl border border-white/30 px-4 py-2.5 text-sm font-medium text-white/85 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+          className="mt-5 w-full rounded-xl border border-white/30 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
         >
           {isTrial ? 'Seguir probando' : 'Seguir con mi plan actual'}
         </button>
