@@ -17,7 +17,8 @@ import { PLAN_CARDS, linkDePlan, nivelActual } from '../lib/plans';
 // Estilo: mismo lenguaje visual que la barra del contador (TrialBanner) —
 // degradado naranja → violeta con texto blanco en el encabezado. Las tarjetas
 // van en blanco solido con texto gris oscuro para maxima legibilidad, boton
-// rojo, y el color propio de cada plan (p.button) como acento fino arriba.
+// verde (bg-primary, el mismo del panel), y el color propio de cada plan
+// (p.button) como acento fino arriba.
 // ============================================================================
 
 const SESSION_KEY = 'bb_upgrade_popup_seen';
@@ -113,7 +114,7 @@ export function UpgradePopup({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={close}
-                  className="inline-flex h-10 items-center justify-center rounded-xl border border-red-500 bg-red-600 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-red-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
+                  className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:opacity-90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                 >
                   Lo quiero
                 </a>
