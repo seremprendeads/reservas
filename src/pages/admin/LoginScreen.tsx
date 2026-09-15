@@ -58,14 +58,13 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
     setLoading(true);
     const cleanEmail = email.trim().toLowerCase();
     try {
-      const { data } = await supabase.functions.invoke('admin-forgot-password', {
+      await supabase.functions.invoke('admin-forgot-password', {
         body: { email: cleanEmail },
       });
-      if (data?.temp_password) {
-        setSuccess(`Tu contraseña temporal es: ${data.temp_password}. Usala para ingresar.`);
-      } else {
-        setSuccess('Si el email existe, te enviamos una contraseña temporal. Revisá tu bandeja de entrada.');
-      }
+      // La contrasena temporal nunca se muestra en pantalla: solo llega por
+      // mail. Mostrarla acá permitiria que cualquiera la vea escribiendo el
+      // mail de otro, y ademas queda feo.
+      setSuccess('Si el email existe, te enviamos una contraseña temporal. Revisá tu bandeja de entrada.');
     } catch {
       setError('Error al enviar el email. Intentá de nuevo.');
     } finally {
