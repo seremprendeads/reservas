@@ -100,8 +100,13 @@ export function BioPage() {
   const visibleLinks = isPremium ? links : links.slice(0, 3);
 
   const overlayOpacity = (profile.bg_opacity ?? 0) / 100;
+  const overlayColor = profile.bg_overlay_color || '#000000';
 
-  const textColor = isLight(bgStyle.background as string) && overlayOpacity < 0.4 ? '#1f2937' : '#ffffff';
+  // Con la capa fuerte, lo que define la legibilidad es el color de la capa y
+  // no el fondo de abajo: con una capa blanca al 80% el texto blanco desaparece.
+  const textColor = overlayOpacity >= 0.5
+    ? (isLight(overlayColor) ? '#1f2937' : '#ffffff')
+    : (isLight(bgStyle.background as string) && overlayOpacity < 0.4 ? '#1f2937' : '#ffffff');
 
   function SocialIcon({ name }: { name: string }) {
   const cls = 'w-5 h-5';
@@ -148,7 +153,13 @@ const socialLinks = [
         </>
       )}
       {overlayOpacity > 0 && (
-        <div className="fixed inset-0 z-0 bg-black" style={{ opacity: overlayOpacity }} />
+        <div
+          className="fixed inset-0 z-0"
+          style={{
+            backgroundColor: overlayColor,
+            opacity: overlayOpacity,
+          }}
+        />
       )}
       <meta property="og:title" content={profile.name} />
       <meta property="og:description" content={profile.description} />

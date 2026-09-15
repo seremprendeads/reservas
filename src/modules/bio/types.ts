@@ -26,6 +26,7 @@ export type BioProfile = {
   bg_gradient_to: string;
   bg_image_url: string | null;
   bg_opacity: number;
+  bg_overlay_color: string;
   button_style: 'rounded' | 'pill' | 'square';
   button_shadow: boolean;
   is_active: boolean;
