@@ -496,7 +496,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
 
                               <Button variant="outline" size="sm" disabled={!!actionLoading}
                                 onClick={() => handleAction(t.id, 'extend_trial')}>
-                                {actionLoading === t.id + 'extend_trial' ? 'Extendiendo...' : 'Extender trial 18d'}
+                                {actionLoading === t.id + 'extend_trial' ? 'Extendiendo...' : 'Extender trial 16d'}
                               </Button>
 
                               <div className="flex items-center gap-2">

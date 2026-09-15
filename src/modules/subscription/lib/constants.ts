@@ -36,9 +36,8 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 export const PLAN_MODULES: Record<string, ModuleId[]> = {
-  // trial: durante la prueba solo Bio y Reservas. Landing y Tienda quedan
-  // apagados en la beta. Debe coincidir con business_has_module() en la DB.
-  trial: ['bio', 'reservas'],
+  // trial: acceso completo a todos los módulos durante el período de prueba
+  trial: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
   // free: solo bio, sin premium — estado post-trial sin membresía activa
   // (Plan 1 · Free Bio Standard)
   free: ['bio'],
@@ -51,7 +50,7 @@ export const PLAN_MODULES: Record<string, ModuleId[]> = {
   // pro: plan pago estándar
   pro: ['bio', 'landing', 'reservas', 'shop'],
   // enterprise: plan pago avanzado (Plan 5 · Todo completo)
-   trial: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
+  enterprise: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
 };
 
 export const DEFAULT_PLAN = 'free';
