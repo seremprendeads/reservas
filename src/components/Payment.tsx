@@ -25,16 +25,19 @@ export function Payment() {
 
     setChecking(true);
     try {
-      const { data: booking, error: fetchError } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('booking_code', bookingData.bookingCode)
-        .eq('business_id', business?.id || '')
-        .maybeSingle();
+      // Antes esto hacia select('*') sobre bookings con la anon key, asi que
+      // devolvia la reserva entera a cualquiera que tuviera el codigo. Ahora
+      // public-booking-status devuelve unicamente el estado del pago.
+      const { data: res, error: fetchError } = await supabase.functions.invoke('public-booking-status', {
+        body: {
+          business_id: business?.id || '',
+          booking_code: bookingData.bookingCode,
+        },
+      });
 
       if (fetchError) throw fetchError;
 
-      if (booking && booking.payment_status === 'approved') {
+      if (res?.payment_status === 'approved') {
         setPaymentStatus('approved');
         setStep('confirmation');
         return true;
