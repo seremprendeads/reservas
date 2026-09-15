@@ -51,7 +51,7 @@ export const PLAN_MODULES: Record<string, ModuleId[]> = {
   // pro: plan pago estándar
   pro: ['bio', 'landing', 'reservas', 'shop'],
   // enterprise: plan pago avanzado (Plan 5 · Todo completo)
-  enterprise: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
+   trial: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
 };
 
 export const DEFAULT_PLAN = 'free';
