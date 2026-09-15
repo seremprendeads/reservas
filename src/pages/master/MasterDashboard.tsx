@@ -52,6 +52,14 @@ const PLAN_LABELS: Record<string, string> = {
 };
 const PLANS = ['free', 'bio_pro', 'bio_reservas', 'bio_reservas_web', 'enterprise'];
 const planLabel = (plan: string) => PLAN_LABELS[plan] || plan;
+
+// Durante la prueba el campo `plan` queda en 'free' pero el acceso es completo,
+// asi que mostrar "1 · Free Bio Standard" engania. Mientras dure el trial se
+// muestra "Plan invitacion"; al vencer o al asignar un plan, se muestra el real.
+const planLabelFor = (t: { plan: string; is_trial: boolean; trial_ends_at: string | null }) => {
+  const vigente = t.is_trial && (!t.trial_ends_at || new Date(t.trial_ends_at).getTime() > Date.now());
+  return vigente ? 'Plan invitación · acceso completo' : planLabel(t.plan);
+};
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
@@ -452,7 +460,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
                               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor}`}>
                                 {statusLabel}
                               </span>
-                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{planLabel(t.plan)}</span>
+                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{planLabelFor(t)}</span>
                             </div>
                             <p className="text-xs text-foreground/50 mt-0.5 truncate">{t.owner_email} · /{t.slug}</p>
                           </div>
@@ -470,7 +478,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
                               <div><span className="font-medium">ID:</span> <span className="font-mono">{t.id}</span></div>
                               <div><span className="font-medium">Creado:</span> {formatDate(t.created_at)}</div>
                               <div><span className="font-medium">Trial vence:</span> {formatDate(t.trial_ends_at)}</div>
-                              <div><span className="font-medium">Plan:</span> {planLabel(t.plan)}</div>
+                              <div><span className="font-medium">Plan:</span> {planLabelFor(t)}</div>
                             </div>
 
                             <div className="flex flex-wrap gap-2">
