@@ -110,23 +110,20 @@ function ShopPageContent() {
       const { error: itemsError } = await supabase.from('shop_order_items').insert(orderItems);
       if (itemsError) throw itemsError;
 
-      const { data: prefData, error: prefError } = await supabase.functions.invoke('create-payment', {
+      // Antes esto llamaba a create-payment, que es la funcion de reservas y
+      // espera otros campos: respondia 400 y la compra ni arrancaba. Ahora va a
+      // create-shop-payment, que ademas recalcula el total en el servidor y
+      // guarda el preference_id por su cuenta.
+      const { data: prefData, error: prefError } = await supabase.functions.invoke('create-shop-payment', {
         body: {
-          title: `Compra en tienda - ${orderItems.map(i => i.product_name).join(', ')}`,
-          quantity: 1,
-          price: subtotal,
-          currency,
-          order_id: orderData.id,
-          customer_name: customerName.trim(),
-          customer_email: customerEmail.trim(),
-          customer_phone: customerPhone.trim(),
           business_slug: business?.slug,
+          order_id: orderData.id,
         },
       });
 
-      if (prefError || !prefData?.id) throw new Error('Error creating payment preference');
-
-      await supabase.from('shop_orders').update({ preference_id: prefData.id }).eq('id', orderData.id).eq('business_id', business?.id || '');
+      if (prefError || !prefData?.id) {
+        throw new Error(prefData?.error || 'No se pudo iniciar el pago. Intentá de nuevo.');
+      }
 
       setCheckoutInfo({ preferenceId: prefData.id, orderId: orderData.id });
       setView('checkout');
@@ -138,17 +135,19 @@ function ShopPageContent() {
   };
 
   const pollPayment = async (orderId: string) => {
+    // El stock ya no se descuenta acá: lo hace el webhook cuando el pago se
+    // aprueba. Antes, si el comprador cerraba la pestania, el stock no bajaba.
     const interval = setInterval(async () => {
-      const { data } = await supabase.from('shop_orders').select('payment_status').eq('id', orderId).eq('business_id', business?.id || '').single();
+      const { data } = await supabase.from('shop_orders').select('payment_status').eq('id', orderId).eq('business_id', business?.id || '').maybeSingle();
       if (data?.payment_status === 'approved') {
         clearInterval(interval);
         setOrderSuccess(true);
         clearCart();
-        for (const item of items) {
-          await supabase.rpc('decrement_stock', { p_product_id: item.product.id, p_quantity: item.quantity });
-        }
       }
     }, 5000);
+
+    // Se corta solo a los 10 minutos para no dejar el intervalo girando.
+    setTimeout(() => clearInterval(interval), 10 * 60 * 1000);
   };
 
   if (loading) {
