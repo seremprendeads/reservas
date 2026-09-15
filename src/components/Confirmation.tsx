@@ -102,11 +102,13 @@ export function Confirmation() {
         </div>
 
         <h1 className="text-3xl font-bold text-gray-800 mb-4 font-display">
-          Reserva confirmada
+          {bookingData.paymentStatus === 'approved' ? 'Reserva confirmada' : 'Reserva registrada'}
         </h1>
 
         <p className="text-gray-600 mb-8">
-          Tu turno ha sido reservado exitosamente. Guarda tu codigo de reserva.
+          {bookingData.paymentStatus === 'approved'
+            ? 'Tu turno ha sido reservado exitosamente. Guarda tu codigo de reserva.'
+            : `Tu turno quedó registrado y ${business?.name || 'el profesional'} te va a confirmar a la brevedad. Guarda tu codigo de reserva.`}
         </p>
 
         <div className="bg-booking-primary-light rounded-2xl p-6 mb-8">

@@ -6,7 +6,7 @@ import { useBusiness } from '../contexts/BusinessContext';
 import { useEffect } from 'react';
 
 export function BookingForm() {
-  const { bookingData, setCustomerInfo, setStep, setPaymentInfo } = useBooking();
+  const { bookingData, setCustomerInfo, setStep, setPaymentInfo, setPaymentStatus } = useBooking();
   const { business } = useBusiness();
   const [name, setName] = useState(bookingData.name);
   const [phone, setPhone] = useState(bookingData.phone);
@@ -89,6 +89,19 @@ export function BookingForm() {
 
       if (insertError) {
         throw new Error('Error al crear la reserva');
+      }
+
+      // ¿Este profesional tiene Mercado Pago conectado? Si no, la reserva queda
+      // pendiente y el la confirma desde el panel, sin pantalla de pago.
+      const { data: payRes } = await supabase.functions.invoke('public-payment-enabled', {
+        body: { business_slug: business.slug },
+      });
+
+      if (!payRes?.enabled) {
+        setPaymentInfo('', bookingCode, bookingData.amount, bookingData.currency);
+        setPaymentStatus('pending');
+        setStep('confirmation');
+        return;
       }
 
       const { data: preference, error: prefError } = await supabase.functions.invoke('create-payment', {
