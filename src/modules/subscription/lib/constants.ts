@@ -5,7 +5,7 @@ import { SUPPORT_WHATSAPP, whatsappLink } from './plans';
 // Debe coincidir con TRIAL_DAYS en supabase/functions/_shared/auth.ts y
 // la función SQL set_trial_end_date() (migración 20260820000000).
 // La fuente de verdad es el backend — este valor es solo para mensajes de UI.
-export const TRIAL_DAYS = 18;
+export const TRIAL_DAYS = 16;
 
 export const DEFAULT_SUBSCRIPTION_CONFIG: SubscriptionConfig = {
   show_trial_banner: true,
@@ -36,8 +36,9 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 export const PLAN_MODULES: Record<string, ModuleId[]> = {
-  // trial: acceso completo a todos los módulos durante el período de prueba
-  trial: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
+  // trial: durante la prueba solo Bio y Reservas. Landing y Tienda quedan
+  // apagados en la beta. Debe coincidir con business_has_module() en la DB.
+  trial: ['bio', 'reservas'],
   // free: solo bio, sin premium — estado post-trial sin membresía activa
   // (Plan 1 · Free Bio Standard)
   free: ['bio'],

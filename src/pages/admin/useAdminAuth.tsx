@@ -2,15 +2,16 @@ import { useState, useEffect, useRef } from 'react';
 import { useBusiness } from '../../contexts/BusinessContext';
 import * as session from '../../lib/admin-session';
 
-const TRIAL_END_FALLBACK = new Date(2026, 6, 31, 9, 0, 0);
-
-function getTrialEndDate(): Date {
+// Sin fecha de prueba guardada no inventamos ninguna. Antes habia una fecha
+// fija que ya paso, asi que a un cliente con plan pago (sin trial_ends_at) el
+// panel le mostraba 0 dias y le disparaba el aviso de prueba vencida al entrar.
+function getTrialEndDate(): Date | null {
   const stored = session.getTrialEndsAt();
   if (stored) {
     const d = new Date(stored);
     if (!isNaN(d.getTime())) return d;
   }
-  return TRIAL_END_FALLBACK;
+  return null;
 }
 
 export function useAdminAuth() {
@@ -46,6 +47,11 @@ export function useAdminAuth() {
 
     const checkTrial = () => {
       const endDate = getTrialEndDate();
+      if (!endDate) {
+        // Cliente con plan pago: no hay cuenta regresiva ni aviso.
+        setTrialDaysLeft(null);
+        return;
+      }
       const diffMs = endDate.getTime() - Date.now();
       const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
@@ -66,6 +72,9 @@ export function useAdminAuth() {
     if (!loggedIn) return;
     const update = () => {
       const endDate = getTrialEndDate();
+      // Sin fecha de prueba (cliente con plan pago) no hay cuenta regresiva:
+      // se deja el contador como esta en vez de forzarlo a cero.
+      if (!endDate) return;
       const diff = Math.max(0, endDate.getTime() - Date.now());
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
