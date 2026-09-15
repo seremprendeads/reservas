@@ -38,6 +38,9 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
           name: data.name || '',
           businessId: data.business_id,
           trialEndsAt: data.trial_ends_at,
+          // Si la clave sigue siendo la temporal de la invitacion, el panel
+          // muestra el cambio obligatorio antes de dejar entrar.
+          mustChangePassword: data.must_change_password === true,
         });
         onLogin(cleanEmail, data.token);
       }

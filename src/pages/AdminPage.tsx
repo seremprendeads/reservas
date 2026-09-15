@@ -5,6 +5,8 @@ import { Booking, supabase } from '../lib/supabase';
 import { setName as setSessionName, setAvatar as setSessionAvatar } from '../lib/admin-session';
 import { getModuleById } from '../lib/admin-registry';
 import { LoginScreen } from './admin/LoginScreen';
+import { ChangePasswordGate } from './admin/ChangePasswordGate';
+import * as adminSession from '../lib/admin-session';
 import { AvailabilityManager } from './admin/AvailabilityManager';
 import { ClientsManager } from './admin/ClientsManager';
 import { WhatsAppManager } from './admin/WhatsAppManager';
@@ -99,6 +101,9 @@ export function AdminPage() {
   // El plan completo no ve nada (UpgradeBanner devuelve null si no hay opciones).
   const mostrarBannerUpgrade = !isTrial && !isFreePlan;
 
+  // Clave temporal: se lee una sola vez al montar; la pantalla de cambio la
+  // limpia al guardar.
+  const [mustChangePassword, setMustChangePassword] = useState(() => adminSession.getMustChangePassword());
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportSent, setSupportSent] = useState(false);
   const [supportSending, setSupportSending] = useState(false);
@@ -284,6 +289,16 @@ export function AdminPage() {
 
   if (!loggedIn) {
     return <LoginScreen onLogin={handleLogin} />;
+  }
+
+  // Clave temporal de la invitacion: no se entra al panel sin cambiarla.
+  if (mustChangePassword) {
+    return (
+      <ChangePasswordGate
+        onDone={() => setMustChangePassword(false)}
+        onLogout={handleLogout}
+      />
+    );
   }
 
   if (loading) {

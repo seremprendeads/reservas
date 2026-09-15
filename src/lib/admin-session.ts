@@ -6,6 +6,7 @@ const KEYS = {
   avatar: 'admin_avatar',
   businessId: 'admin_business_id',
   trialEndsAt: 'admin_trial_ends_at',
+  mustChangePassword: 'admin_must_change_password',
 } as const;
 
 export function isLoggedIn(): boolean {
@@ -60,12 +61,24 @@ export function setTrialEndsAt(date: string): void {
   sessionStorage.setItem(KEYS.trialEndsAt, date);
 }
 
+// Contrasena temporal: admin-login devuelve must_change_password cuando la
+// clave es la que se entrego en la invitacion. Mientras sea true, el panel
+// muestra la pantalla de cambio obligatorio y no deja pasar.
+export function getMustChangePassword(): boolean {
+  return sessionStorage.getItem(KEYS.mustChangePassword) === '1';
+}
+
+export function clearMustChangePassword(): void {
+  sessionStorage.removeItem(KEYS.mustChangePassword);
+}
+
 export function saveLoginSession(data: {
   email: string;
   token: string;
   name?: string;
   businessId?: string;
   trialEndsAt?: string;
+  mustChangePassword?: boolean;
 }): void {
   sessionStorage.setItem(KEYS.loggedIn, '1');
   sessionStorage.setItem(KEYS.email, data.email);
@@ -77,6 +90,11 @@ export function saveLoginSession(data: {
   if (data.trialEndsAt) {
     sessionStorage.setItem(KEYS.trialEndsAt, data.trialEndsAt);
   }
+  if (data.mustChangePassword) {
+    sessionStorage.setItem(KEYS.mustChangePassword, '1');
+  } else {
+    sessionStorage.removeItem(KEYS.mustChangePassword);
+  }
 }
 
 export function clearSession(): void {
@@ -87,5 +105,6 @@ export function clearSession(): void {
   sessionStorage.removeItem(KEYS.avatar);
   sessionStorage.removeItem(KEYS.businessId);
   sessionStorage.removeItem(KEYS.trialEndsAt);
+  sessionStorage.removeItem(KEYS.mustChangePassword);
   localStorage.removeItem('reservas_business_id');
 }
