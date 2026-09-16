@@ -171,7 +171,7 @@ function ShopDashboard() {
       </Card>
       <Card className="transition-all duration-200 hover:shadow-premium-hover active:scale-[0.99]">
         <CardContent className="p-8">
-          <p className="text-4xl font-display tracking-tight text-foreground">${stats.totalRevenue.toLocaleString('es-AR')}</p>
+          <p className="text-3xl font-display tracking-tight text-foreground">${stats.totalRevenue.toLocaleString('es-AR')}</p>
           <p className="text-base text-muted-foreground mt-3">Ingresos totales</p>
         </CardContent>
       </Card>
@@ -349,7 +349,7 @@ function ProductsManager() {
                         {p.featured && <Badge className="text-[10px] sm:text-xs">Destacado</Badge>}
                       </div>
                       <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
-                        <span>${p.price.toLocaleString('es-AR')} {p.currency}</span>
+                        <span>${p.price.toLocaleString('es-AR')}</span>
                         <span>Stock: {p.stock}</span>
                         {p.sizes && p.sizes.length > 0 && <span className="truncate max-w-[120px] sm:max-w-none">Talles: {p.sizes.join(', ')}</span>}
                       </div>
@@ -589,7 +589,7 @@ function OrdersList() {
                 </div>
                 <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
                   <div className="text-right shrink-0">
-                    <p className="font-bold text-sm sm:text-base">${o.total.toLocaleString('es-AR')} {o.currency}</p>
+                    <p className="font-bold text-sm sm:text-base">${o.total.toLocaleString('es-AR')}</p>
                     <Badge variant={o.payment_status === 'approved' ? 'default' : o.payment_status === 'pending' ? 'secondary' : 'destructive'} className="text-[10px] sm:text-xs">
                       {o.payment_status === 'approved' ? 'Pagado' : o.payment_status === 'pending' ? 'Pendiente' : 'Rechazado'}
                     </Badge>
@@ -671,7 +671,7 @@ function ProductsTrash() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="font-medium text-sm sm:text-base truncate block">{p.name}</span>
-                    <span className="text-xs sm:text-sm text-muted-foreground">${p.price.toLocaleString('es-AR')} {p.currency}</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">${p.price.toLocaleString('es-AR')}</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                     <Button variant="outline" size="sm" onClick={() => restore(p)} title="Restaurar">

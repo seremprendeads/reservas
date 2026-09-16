@@ -65,7 +65,7 @@ export function BookingDetailView({
             </div>
             <div>
               <p className="mb-2.5 text-sm text-muted-foreground">Monto</p>
-              <p className="text-3xl font-display">${selectedBooking.amount.toLocaleString('es-AR')} ARS</p>
+              <p className="text-2xl font-display">${selectedBooking.amount.toLocaleString('es-AR')}</p>
             </div>
           </div>
 

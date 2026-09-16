@@ -87,11 +87,8 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
                   <span className="text-sm" style={{ color: CARD.textoSuave }}>
                     {duracion || 'Turno'}
                   </span>
-                  <span className="font-display text-2xl font-bold tabular-nums" style={{ color: CARD.texto }}>
+                  <span className="font-display text-xl font-bold tabular-nums" style={{ color: CARD.texto }}>
                     ${s.price.toLocaleString('es-AR')}
-                    <span className="text-xs font-normal ml-1.5" style={{ color: CARD.textoSuave }}>
-                      {s.currency}
-                    </span>
                   </span>
                 </div>
 

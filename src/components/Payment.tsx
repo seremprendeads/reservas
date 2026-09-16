@@ -232,8 +232,8 @@ export function Payment() {
           )}
           <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200">
             <span className="font-semibold text-gray-800">Total</span>
-            <span className="text-2xl font-bold text-booking-primary">
-              ${bookingData.amount.toLocaleString('es-AR')} {bookingData.currency}
+            <span className="text-xl font-bold text-booking-primary">
+              ${bookingData.amount.toLocaleString('es-AR')}
             </span>
           </div>
         </div>

@@ -252,7 +252,7 @@ export function BookingForm() {
             <div className="bg-gray-50 rounded-xl p-5 flex justify-between items-center">
               <span className="text-gray-700 font-medium">Total a pagar:</span>
               <span className="text-2xl font-bold text-booking-primary">
-                ${bookingData.amount.toLocaleString('es-AR')} {bookingData.currency}
+                ${bookingData.amount.toLocaleString('es-AR')}
               </span>
             </div>
           )}

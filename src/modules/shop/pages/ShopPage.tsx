@@ -16,8 +16,9 @@ declare global {
   }
 }
 
-function formatPrice(amount: number, currency: string) {
-  return `$${amount.toLocaleString('es-AR')} ${currency}`;
+// Sin la sigla de la moneda: el cliente final ya sabe en que paga.
+function formatPrice(amount: number) {
+  return `$${amount.toLocaleString('es-AR')}`;
 }
 
 function ShopPageContent() {
@@ -345,7 +346,7 @@ function ProductCard({ product, onView, onAddToCart }: { product: Product; onVie
             {product.sizes.length > 4 && <span className="text-[10px] px-2 py-0.5 rounded-lg" style={{ backgroundColor: 'var(--booking-primary-light)', color: 'var(--booking-primary)' }}>+{product.sizes.length - 4}</span>}
           </div>
         )}
-        <p className="text-xl font-bold mb-2 tracking-tight" style={{ color: 'var(--booking-primary)' }}>{formatPrice(product.price, product.currency)}</p>
+        <p className="text-xl font-bold mb-2 tracking-tight" style={{ color: 'var(--booking-primary)' }}>{formatPrice(product.price)}</p>
         <div className="flex items-center gap-2 mb-3">
           {product.stock > 10 ? (
             <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--booking-primary-light)', color: 'var(--booking-primary)' }}>En stock</span>
@@ -384,7 +385,7 @@ function DetailScreen({ product, onAddToCart, onBuyNow }: { product: Product; on
 
         <div>
           <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--booking-text)' }}>{product.name}</h1>
-          <p className="text-3xl font-bold mb-4 tracking-tight" style={{ color: 'var(--booking-primary)' }}>{formatPrice(product.price, product.currency)}</p>
+          <p className="text-2xl font-bold mb-4 tracking-tight" style={{ color: 'var(--booking-primary)' }}>{formatPrice(product.price)}</p>
 
           {product.stock > 0 ? (
             <p className="text-sm mb-4" style={{ color: 'var(--booking-text-muted)' }}>
@@ -436,7 +437,7 @@ function DetailScreen({ product, onAddToCart, onBuyNow }: { product: Product; on
   );
 }
 
-function CartScreen({ items, subtotal, currency, onUpdateQuantity, onRemoveItem, onClearCart,
+function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCart,
   customerName, setCustomerName, customerEmail, setCustomerEmail, customerPhone, setCustomerPhone,
   onStartCheckout, checkoutLoading, checkoutError
 }: {
@@ -478,7 +479,7 @@ function CartScreen({ items, subtotal, currency, onUpdateQuantity, onRemoveItem,
             <div className="flex-1 min-w-0">
               <h3 className="font-medium text-sm truncate" style={{ color: 'var(--booking-text)' }}>{item.product.name}</h3>
               {item.selected_size && <p className="text-xs" style={{ color: 'var(--booking-text-muted)' }}>Talle: {item.selected_size}</p>}
-              <p className="text-sm font-bold" style={{ color: 'var(--booking-primary)' }}>{formatPrice(item.product.price, item.product.currency)}</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--booking-primary)' }}>{formatPrice(item.product.price)}</p>
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1, item.selected_size)} className="p-1.5 rounded-lg hover:bg-accent transition-colors" style={{ color: 'var(--booking-text)' }}><Minus className="w-4 h-4" /></button>
@@ -493,7 +494,7 @@ function CartScreen({ items, subtotal, currency, onUpdateQuantity, onRemoveItem,
       <div className="p-5 rounded-2xl border mb-6" style={{ backgroundColor: 'var(--booking-card-bg)', borderColor: 'var(--booking-border)' }}>
         <div className="flex justify-between text-lg font-bold" style={{ color: 'var(--booking-text)' }}>
           <span>Total</span>
-          <span style={{ color: 'var(--booking-primary)' }}>{formatPrice(subtotal, currency)}</span>
+          <span style={{ color: 'var(--booking-primary)' }}>{formatPrice(subtotal)}</span>
         </div>
       </div>
 
@@ -522,7 +523,7 @@ function CartScreen({ items, subtotal, currency, onUpdateQuantity, onRemoveItem,
           <button onClick={onStartCheckout} disabled={checkoutLoading}
             className="w-full py-3.5 rounded-xl font-semibold text-white transition-colors disabled:opacity-50 hover:opacity-90"
             style={{ backgroundColor: 'var(--booking-primary)' }}>
-            {checkoutLoading ? 'Procesando...' : `Pagar ${formatPrice(subtotal, currency)}`}
+            {checkoutLoading ? 'Procesando...' : `Pagar ${formatPrice(subtotal)}`}
           </button>
         </div>
       )}

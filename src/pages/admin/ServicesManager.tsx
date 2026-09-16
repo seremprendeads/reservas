@@ -203,7 +203,7 @@ export function ServicesManager({ appearanceSlot }: { appearanceSlot?: React.Rea
                     </div>
                     {s.description && <p className="text-xs sm:text-sm text-muted-foreground truncate">{s.description}</p>}
                     <p className="text-xs sm:text-sm font-medium text-primary">
-                      ${s.price.toLocaleString('es-AR')} {s.currency}
+                      ${s.price.toLocaleString('es-AR')}
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2">
