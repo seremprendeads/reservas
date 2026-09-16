@@ -342,6 +342,9 @@ export function AdminPage() {
         {/* Barra fina del período de prueba: va arriba del header y queda fija
             porque el scroll ocurre dentro de <main>, no en esta columna. */}
         {isTrial && <TrialBanner trialCountdown={trialCountdown} />}
+        {/* Misma posicion y altura que la barra de prueba: cuando el negocio ya
+            tiene un plan pago, en ese lugar va la invitacion a subir. */}
+        {mostrarBannerUpgrade && <UpgradeBanner enabledModules={enabledModules} />}
 
         <AdminHeader
           title={currentViewTitle}
@@ -354,7 +357,6 @@ export function AdminPage() {
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">
           {isFreePlan && <FreePlanBanner supportUrl={subConfig.payment_button_url} />}
-          {mostrarBannerUpgrade && <UpgradeBanner enabledModules={enabledModules} />}
           {renderView()}
         </main>
 

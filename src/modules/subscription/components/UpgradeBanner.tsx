@@ -1,12 +1,17 @@
+import { Sparkles, ArrowRight } from 'lucide-react';
 import type { ModuleId } from '../types';
 import { PLAN_CARDS, linkDePlan, nivelActual } from '../lib/plans';
 
 // ============================================================================
-// Invitación a subir de plan, fija en el panel.
+// Invitación a subir de plan, como barra fija arriba del panel.
 //
 // Se muestra a los negocios que YA contrataron un plan pago menor al completo.
-// Ofrece solo los planes superiores al que tienen. El catálogo y los enlaces
-// viven en ../lib/plans.ts (fuente única, compartida con UpgradePopup).
+// Ocupa el mismo lugar y la misma altura que la barra del contador de prueba
+// (TrialBanner), pero con la paleta suave de las tarjetas de plan en vez del
+// naranja y violeta del contador: acá no hay urgencia, hay una oferta.
+//
+// El catálogo y los enlaces viven en ../lib/plans.ts (fuente única, compartida
+// con UpgradePopup).
 // ============================================================================
 
 interface UpgradeBannerProps {
@@ -18,27 +23,39 @@ export function UpgradeBanner({ enabledModules }: UpgradeBannerProps) {
   const options = PLAN_CARDS.filter((p) => p.level > level);
   if (options.length === 0) return null;
 
-  return (
-    <div className="mb-6 rounded-2xl border border-border bg-card p-5 sm:p-6">
-      <h3 className="font-display text-lg text-foreground">Tu plan puede crecer</h3>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Elegí la opción que mejor te sirva y te contamos cómo activarla.
-      </p>
+  // Se ofrece el escalón inmediato siguiente: es el más probable de contratar.
+  const siguiente = options[0];
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        {options.map((p) => (
-          <a
-            key={p.key}
-            href={linkDePlan(p)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block rounded-xl border p-4 text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            style={{ backgroundColor: p.bg, borderColor: p.border }}
-          >
-            <p className="text-sm font-semibold leading-snug text-gray-900">{p.name}</p>
-            <p className="mt-1 text-xs leading-5 text-gray-600">{p.detail}</p>
-          </a>
-        ))}
+  return (
+    <div
+      className="relative shrink-0 overflow-hidden border-b"
+      style={{
+        background: `linear-gradient(90deg, ${siguiente.bg} 0%, #F3EDFB 100%)`,
+        borderColor: siguiente.border,
+      }}
+    >
+      <div className="relative flex h-11 items-center gap-2 px-3 sm:gap-3 lg:px-8">
+        <Sparkles className="h-4 w-4 shrink-0" style={{ color: siguiente.button }} />
+
+        <p className="shrink-0 text-[11px] font-bold text-gray-800 sm:text-xs">
+          Tu plan<span className="hidden sm:inline"> puede crecer</span>
+        </p>
+
+        <span className="hidden truncate text-[11px] text-gray-600 md:inline">
+          {siguiente.name}
+        </span>
+
+        <a
+          href={linkDePlan(siguiente)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition-all duration-200 hover:opacity-90 active:scale-[0.97] sm:px-4 sm:text-xs"
+          style={{ backgroundColor: siguiente.button }}
+        >
+          <span className="hidden sm:inline">Ver cómo activarlo</span>
+          <span className="sm:hidden">Ver</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </a>
       </div>
     </div>
   );
