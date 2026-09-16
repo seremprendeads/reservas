@@ -55,11 +55,9 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
               }}>
 
               {s.image_url && (
-                // Proporcion fija: la foto entra entera, sin recortar, y todas
-                // las tarjetas quedan de la misma altura.
-                <div className="w-full aspect-[4/3] flex items-center justify-center overflow-hidden">
-                  <img src={s.image_url} alt={s.name} className="max-w-full max-h-full object-contain" />
-                </div>
+                // A todo el ancho del ticket y con la altura que la foto pida:
+                // se ve entera, sin recortar y sin crema a los costados.
+                <img src={s.image_url} alt={s.name} className="block w-full h-auto" />
               )}
 
               <div className="px-5 pt-5 pb-4 flex flex-col flex-1">
