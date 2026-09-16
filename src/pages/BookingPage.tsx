@@ -5,14 +5,18 @@ import { BookingForm } from '../components/BookingForm';
 import { Payment } from '../components/Payment';
 import { Confirmation } from '../components/Confirmation';
 import { BookingProvider, useBooking } from '../contexts/BookingContext';
-import { MapPin, Check, Store, Tag, Clock, XCircle } from 'lucide-react';
+import { MapPin, Check, Store, Clock, XCircle } from 'lucide-react';
 import { supabase, Branding, Service } from '../lib/supabase';
 import { useBusiness } from '../contexts/BusinessContext';
 import { useModuleAccess, ModuleBlockedScreen } from '../modules/subscription';
 import { LegalFooterLinks } from '../components/legal/LegalFooterLinks';
 
-function formatPrice(amount: number, currency: string) {
-  return `$${amount.toLocaleString('es-AR')} ${currency}`;
+function formatDuration(minutes: number) {
+  if (!minutes) return null;
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m ? `${h} h ${m} min` : `${h} h`;
 }
 
 function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (s: Service) => void }) {
@@ -23,42 +27,54 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
     <div className="max-w-4xl mx-auto px-4 py-8 w-full">
       <h2 className="font-sans text-2xl font-bold text-booking-text mb-2 text-center">Elegí tu servicio</h2>
       <p className="text-sm text-booking-caption mb-8 text-center">Seleccioná el servicio que querés reservar</p>
-      <div className={`${isSingle ? 'flex flex-wrap justify-center' : `grid ${gridCols}`} gap-6`}>
+      <div className={`${isSingle ? 'flex flex-wrap justify-center' : `grid ${gridCols}`} gap-5`}>
         {services.map((s) => {
           const isSelected = bookingData.service?.id === s.id;
+          const duracion = formatDuration(s.duration_minutes);
           return (
             <div key={s.id}
-              className={`relative text-center rounded-2xl transition-all duration-200 flex flex-col overflow-hidden ${
+              className={`relative rounded-md transition-colors duration-150 flex flex-col overflow-hidden border ${
                 isSingle ? 'w-full sm:max-w-md' : 'w-full'
-              } ${
-                isSelected
-                  ? 'border-2 border-booking-primary bg-booking-primary-light shadow-[0_8px_30px_rgba(0,0,0,.05)]'
-                  : 'bg-booking-card shadow-[0_8px_30px_rgba(0,0,0,.05)] hover:shadow-[0_12px_40px_rgba(0,0,0,.08)]'
-              }`}>
-              {isSelected && (
-                <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-booking-primary flex items-center justify-center z-10">
-                  <Check className="w-4 h-4 text-white" />
-                </div>
-              )}
+              }`}
+              style={{
+                backgroundColor: 'var(--booking-card-bg)',
+                borderColor: isSelected ? 'var(--booking-primary)' : 'var(--booking-border)',
+                boxShadow: isSelected ? '0 0 0 1px var(--booking-primary)' : 'none',
+              }}>
               {s.image_url && (
-                <img src={s.image_url} alt={s.name} className="w-full h-auto" />
+                <img src={s.image_url} alt={s.name} className="w-full h-40 object-cover" />
               )}
-              <div className="p-8 flex flex-col flex-1 items-center">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: isSelected ? 'var(--booking-primary)' : 'var(--booking-primary)20' }}>
-                  <Tag className="w-6 h-6" style={{ color: isSelected ? '#fff' : 'var(--booking-primary)' }} />
-                </div>
-                <h3 className="font-bold text-lg leading-tight mb-1 font-display" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text)' }}>{s.name}</h3>
+              <div className="p-5 flex flex-col flex-1">
+                <h3 className="font-display font-bold text-lg leading-snug" style={{ color: 'var(--booking-text)' }}>
+                  {s.name}
+                </h3>
                 {s.description && (
-                  <p className="text-sm mb-4" style={{ color: 'var(--booking-text-muted)' }}>{s.description}</p>
+                  <p className="text-sm mt-1.5 leading-relaxed" style={{ color: 'var(--booking-text-muted)' }}>
+                    {s.description}
+                  </p>
                 )}
-                <p className="text-xl font-bold mb-4" style={{ color: isSelected ? 'var(--booking-primary)' : 'var(--booking-text)' }}>
-                  {formatPrice(s.price, s.currency)}
-                </p>
-                <button onClick={() => onSelect(s)} className={`mt-auto w-full py-3 rounded-xl font-semibold transition-all duration-200 ${
-                  isSelected
-                    ? 'bg-booking-primary text-white cursor-default'
-                    : 'bg-booking-primary text-white hover:opacity-90'
-                }`}>
+
+                <div className="mt-5 pt-4 flex items-baseline justify-between gap-3 border-t"
+                  style={{ borderColor: 'var(--booking-border)' }}>
+                  <span className="text-sm" style={{ color: 'var(--booking-text-muted)' }}>
+                    {duracion || ''}
+                  </span>
+                  <span className="font-display text-2xl font-bold tabular-nums" style={{ color: 'var(--booking-text)' }}>
+                    ${s.price.toLocaleString('es-AR')}
+                    <span className="text-xs font-normal ml-1.5" style={{ color: 'var(--booking-text-muted)' }}>
+                      {s.currency}
+                    </span>
+                  </span>
+                </div>
+
+                <button onClick={() => onSelect(s)}
+                  disabled={isSelected}
+                  className="mt-4 w-full py-3 rounded-md text-sm font-semibold transition-opacity duration-150 disabled:cursor-default"
+                  style={{
+                    backgroundColor: isSelected ? 'transparent' : 'var(--booking-primary)',
+                    color: isSelected ? 'var(--booking-primary)' : '#fff',
+                    border: isSelected ? '1px solid var(--booking-primary)' : '1px solid transparent',
+                  }}>
                   {isSelected ? 'Seleccionado' : 'Elegir'}
                 </button>
               </div>
