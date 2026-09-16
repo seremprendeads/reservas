@@ -114,13 +114,53 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage }: Hero
               </Button>
               {data.cover_image && (
                 <>
-                  <img src={data.cover_image} alt="" className="h-16 w-16 rounded-xl object-cover border" />
+                  <img src={data.cover_image} alt="" className="h-16 w-16 rounded-xl object-cover border"
+                    style={{ objectPosition: data.cover_position || '50% 50%' }} />
                   <Button variant="ghost" size="sm" className="text-destructive" onClick={() => update('cover_image', null)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </>
               )}
             </div>
+
+            {/* Encuadre: el recuadro de la portada recorta la foto, asi que hay
+                que poder elegir que parte queda a la vista. Nueve posiciones,
+                que es lo que se entiende sin explicacion. */}
+            {data.cover_image && (
+              <div className="mt-4">
+                <label className="text-sm font-medium text-foreground mb-2 block">Encuadre de la imagen</label>
+                <div className="inline-grid grid-cols-3 gap-1">
+                  {[
+                    ['0% 0%', '50% 0%', '100% 0%'],
+                    ['0% 50%', '50% 50%', '100% 50%'],
+                    ['0% 100%', '50% 100%', '100% 100%'],
+                  ].flat().map((pos) => {
+                    const activo = (data.cover_position || '50% 50%') === pos;
+                    return (
+                      <button
+                        key={pos}
+                        type="button"
+                        // update() esta tipado solo con los campos comunes del
+                        // hero; cover_position es propio de la plantilla con
+                        // imagen, igual que cover_image.
+                        onClick={() => (update as (k: string, v: unknown) => void)('cover_position', pos)}
+                        className={`h-9 w-9 rounded-md border transition-colors ${
+                          activo ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted'
+                        }`}
+                        style={{
+                          backgroundImage: `url(${data.cover_image})`,
+                          backgroundSize: '300% 300%',
+                          backgroundPosition: pos,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Elegí qué parte de la foto querés que se vea. Útil cuando la portada te corta una cara.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

@@ -20,6 +20,9 @@ export interface HeroCenteredData extends HeroBaseData {
 export interface HeroImageData extends HeroBaseData {
   hero_template: 'image';
   cover_image: string | null;
+  // Que parte de la foto queda a la vista cuando el recuadro la recorta.
+  // Formato CSS object-position, ej. '50% 20%'. Por defecto, centrada.
+  cover_position?: string;
 }
 
 export interface HeroVideoData extends HeroBaseData {
@@ -59,7 +62,7 @@ export function createDefaultHeroData(template: HeroTemplate, existing?: Partial
     case 'centered':
       return { ...base, hero_template: 'centered' };
     case 'image':
-      return { ...base, hero_template: 'image', cover_image: null };
+      return { ...base, hero_template: 'image', cover_image: null, cover_position: '50% 50%' };
     case 'video':
       return { ...base, hero_template: 'video', video_url: '' };
   }

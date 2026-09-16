@@ -55,7 +55,7 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
                 src={data.cover_image}
                 alt={data.title}
                 className={`w-full ${ts.cardRadius} object-cover shadow-[0_8px_30px_rgba(0,0,0,0.08)]`}
-                style={{ maxHeight: '520px' }}
+                style={{ maxHeight: '520px', objectPosition: data.cover_position || '50% 50%' }}
               />
             ) : (
               <div
