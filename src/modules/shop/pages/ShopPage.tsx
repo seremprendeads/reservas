@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { Search, ShoppingCart, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Package, Check, X, MapPin } from 'lucide-react';
 import { supabase, ShopConfig } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
@@ -20,7 +21,12 @@ function formatPrice(amount: number, currency: string) {
 }
 
 function ShopPageContent() {
-  const { business } = useBusiness();
+  // La tienda tomaba el negocio solo de lo que hubiera quedado guardado en el
+  // navegador: al abrir el link compartido por primera vez, no habia negocio y
+  // la pagina se quedaba cargando para siempre. Ahora se resuelve por el slug
+  // de la direccion, como el resto de las paginas publicas.
+  const { slug } = useParams<{ slug: string }>();
+  const { business, setBusinessBySlug } = useBusiness();
   const { isModuleEnabled } = useModuleAccess();
   const { items, addItem, removeItem, updateQuantity, clearCart, itemCount, subtotal, currency } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
@@ -37,6 +43,24 @@ function ShopPageContent() {
   const [customerPhone, setCustomerPhone] = useState('');
   const [checkoutError, setCheckoutError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [negocioNoEncontrado, setNegocioNoEncontrado] = useState(false);
+
+  useEffect(() => {
+    if (!slug) return;
+    if (business?.slug === slug) return;
+    setBusinessBySlug(slug);
+  }, [slug, business?.slug, setBusinessBySlug]);
+
+  // Sin slug en la direccion y sin negocio guardado no hay tienda que mostrar.
+  // Se espera un momento por si el contexto todavia esta resolviendo.
+  useEffect(() => {
+    if (slug || business?.id) {
+      setNegocioNoEncontrado(false);
+      return;
+    }
+    const t = setTimeout(() => setNegocioNoEncontrado(true), 3000);
+    return () => clearTimeout(t);
+  }, [slug, business?.id]);
 
   useEffect(() => {
     if (!business?.id) return;
@@ -149,6 +173,20 @@ function ShopPageContent() {
     // Se corta solo a los 10 minutos para no dejar el intervalo girando.
     setTimeout(() => clearInterval(interval), 10 * 60 * 1000);
   };
+
+  if (negocioNoEncontrado) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: 'var(--booking-bg)' }}>
+        <div className="text-center max-w-sm">
+          <ShoppingBag className="w-10 h-10 mx-auto mb-4 opacity-40" style={{ color: 'var(--booking-text)' }} />
+          <p className="text-lg font-medium" style={{ color: 'var(--booking-text)' }}>Tienda no encontrada</p>
+          <p className="text-sm mt-2 opacity-70" style={{ color: 'var(--booking-text)' }}>
+            Revisá el enlace: la dirección tiene que incluir el nombre del negocio.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
