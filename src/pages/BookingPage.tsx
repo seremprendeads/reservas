@@ -11,6 +11,16 @@ import { useBusiness } from '../contexts/BusinessContext';
 import { useModuleAccess, ModuleBlockedScreen } from '../modules/subscription';
 import { LegalFooterLinks } from '../components/legal/LegalFooterLinks';
 
+// Paleta del ticket: recuadro crema con texto negro grisaceo. Se define acá y
+// no con las variables del tema porque el ticket tiene que leerse igual sobre
+// el fondo claro u oscuro que haya elegido el negocio.
+const CARD = {
+  fondo: '#F4EFE6',
+  borde: '#E2D9C9',
+  texto: '#23211E',
+  textoSuave: '#6E675D',
+};
+
 function formatDuration(minutes: number) {
   if (!minutes) return null;
   if (minutes < 60) return `${minutes} min`;
@@ -27,41 +37,61 @@ function ServiceCards({ services, onSelect }: { services: Service[]; onSelect: (
     <div className="max-w-4xl mx-auto px-4 py-8 w-full">
       <h2 className="font-sans text-2xl font-bold text-booking-text mb-2 text-center">Elegí tu servicio</h2>
       <p className="text-sm text-booking-caption mb-8 text-center">Seleccioná el servicio que querés reservar</p>
-      <div className={`${isSingle ? 'flex flex-wrap justify-center' : `grid ${gridCols}`} gap-5`}>
+      <div className={`${isSingle ? 'flex flex-wrap justify-center' : `grid ${gridCols}`} gap-6`}>
         {services.map((s) => {
           const isSelected = bookingData.service?.id === s.id;
           const duracion = formatDuration(s.duration_minutes);
           return (
+            // La tarjeta esta armada como un ticket: cuerpo arriba, perforacion
+            // al medio con muescas a los costados, y talon abajo con el precio.
             <div key={s.id}
-              className={`relative rounded-md transition-colors duration-150 flex flex-col overflow-hidden border ${
+              className={`relative rounded-md overflow-hidden flex flex-col transition-colors duration-150 border ${
                 isSingle ? 'w-full sm:max-w-md' : 'w-full'
               }`}
               style={{
-                backgroundColor: 'var(--booking-card-bg)',
-                borderColor: isSelected ? 'var(--booking-primary)' : 'var(--booking-border)',
+                backgroundColor: CARD.fondo,
+                borderColor: isSelected ? 'var(--booking-primary)' : CARD.borde,
                 boxShadow: isSelected ? '0 0 0 1px var(--booking-primary)' : 'none',
               }}>
+
               {s.image_url && (
-                <img src={s.image_url} alt={s.name} className="w-full h-40 object-cover" />
+                // Proporcion fija: la foto entra entera, sin recortar, y todas
+                // las tarjetas quedan de la misma altura.
+                <div className="w-full aspect-[4/3] flex items-center justify-center overflow-hidden">
+                  <img src={s.image_url} alt={s.name} className="max-w-full max-h-full object-contain" />
+                </div>
               )}
-              <div className="p-5 flex flex-col flex-1">
-                <h3 className="font-display font-bold text-lg leading-snug" style={{ color: 'var(--booking-text)' }}>
+
+              <div className="px-5 pt-5 pb-4 flex flex-col flex-1">
+                <h3 className="font-display font-bold text-lg leading-snug" style={{ color: CARD.texto }}>
                   {s.name}
                 </h3>
                 {s.description && (
-                  <p className="text-sm mt-1.5 leading-relaxed" style={{ color: 'var(--booking-text-muted)' }}>
+                  <p className="text-sm mt-1.5 leading-relaxed" style={{ color: CARD.textoSuave }}>
                     {s.description}
                   </p>
                 )}
+              </div>
 
-                <div className="mt-5 pt-4 flex items-baseline justify-between gap-3 border-t"
-                  style={{ borderColor: 'var(--booking-border)' }}>
-                  <span className="text-sm" style={{ color: 'var(--booking-text-muted)' }}>
-                    {duracion || ''}
+              {/* Perforacion */}
+              <div className="relative h-0">
+                <div className="absolute -left-2.5 -top-2.5 w-5 h-5 rounded-full"
+                  style={{ backgroundColor: 'var(--booking-bg)' }} />
+                <div className="absolute -right-2.5 -top-2.5 w-5 h-5 rounded-full"
+                  style={{ backgroundColor: 'var(--booking-bg)' }} />
+                <div className="absolute left-4 right-4 top-0 border-t border-dashed"
+                  style={{ borderColor: CARD.borde }} />
+              </div>
+
+              {/* Talon */}
+              <div className="px-5 pt-5 pb-5">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-sm" style={{ color: CARD.textoSuave }}>
+                    {duracion || 'Turno'}
                   </span>
-                  <span className="font-display text-2xl font-bold tabular-nums" style={{ color: 'var(--booking-text)' }}>
+                  <span className="font-display text-2xl font-bold tabular-nums" style={{ color: CARD.texto }}>
                     ${s.price.toLocaleString('es-AR')}
-                    <span className="text-xs font-normal ml-1.5" style={{ color: 'var(--booking-text-muted)' }}>
+                    <span className="text-xs font-normal ml-1.5" style={{ color: CARD.textoSuave }}>
                       {s.currency}
                     </span>
                   </span>
