@@ -33,6 +33,9 @@ export function AppearanceManager({
   const [bgImageUrl, setBgImageUrl] = useState(branding?.background_image_url || '');
   const [bgOpacity, setBgOpacity] = useState(branding?.bg_opacity ?? 80);
   const [overlayColor, setOverlayColor] = useState(branding?.overlay_color || branding?.background_color || '#111827');
+  // El encabezado tiene su propio color, separado del de las tarjetas y el pie.
+  // Antes se guardaba primaryColor, asi que el campo del panel no hacia nada.
+  const [headerColor, setHeaderColor] = useState(branding?.header_color || branding?.card_bg_color || '#1f2937');
   const [headerOpacity, setHeaderOpacity] = useState(branding?.header_opacity ?? 26);
   const [saving, setSaving] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
@@ -53,6 +56,7 @@ export function AppearanceManager({
 
   useEffect(() => {
     if (!branding) return;
+    setHeaderColor(branding.header_color || branding.card_bg_color || '#1f2937');
     setHeaderOpacity(branding.header_opacity ?? 26);
   }, [branding]);
 
@@ -115,7 +119,7 @@ export function AppearanceManager({
         background_image_url: bgImageUrl,
         bg_opacity: bgOpacity,
         overlay_color: overlayColor,
-        header_color: primaryColor,
+        header_color: headerColor,
         header_opacity: headerOpacity,
       };
 
@@ -218,7 +222,8 @@ export function AppearanceManager({
               {[
                 { label: 'Principal (botones, acentos)', value: primaryColor, set: setPrimaryColor },
                 { label: 'Fondo de página', value: bgColor, set: setBgColor },
-                { label: 'Encabezado y pie', value: cardBgColor, set: setCardBgColor },
+                { label: 'Encabezado', value: headerColor, set: setHeaderColor },
+                { label: 'Tarjetas y pie', value: cardBgColor, set: setCardBgColor },
                 { label: 'Títulos', value: textColor, set: setTextColor },
                 { label: 'Subtítulos', value: mutedColor, set: setMutedColor },
                 { label: 'Pasos e informativos', value: captionColor, set: setCaptionColor },
@@ -287,15 +292,35 @@ export function AppearanceManager({
             </CardContent>
           </Card>
 
+          {/* Transparencia de la barra superior */}
+          <Card>
+            <CardContent className="p-5 space-y-3">
+              <label className="text-xs font-medium text-foreground">
+                Transparencia del encabezado — {headerOpacity}%
+              </label>
+              <input type="range" min="0" max="100" value={headerOpacity}
+                onChange={(e) => setHeaderOpacity(Number(e.target.value))}
+                className="w-full cursor-pointer"
+                style={{ accentColor: primaryColor }} />
+              <div className="flex justify-between text-[10px] text-muted-foreground">
+                <span>Transparente</span><span>Opaco</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Se aplica al color de «Encabezado». En 0% la barra desaparece y se ve el fondo detrás.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Guardar */}
           <div className="flex gap-2">
-            <Button onClick={saveBranding} disabled={saving} size="lg" className="flex-1">
+            <Button onClick={saveBranding} disabled={saving} size="lg" className="flex-1 h-14 text-base font-semibold">
               {saving ? 'Guardando...' : 'Guardar apariencia'}
             </Button>
-            <Button variant="outline" size="lg" onClick={() => {
+            <Button variant="outline" size="lg" className="h-14 px-5" onClick={() => {
               setPrimaryColor('#059669'); setBgColor('#111827'); setCardBgColor('#1f2937');
               setTextColor('#ffffff'); setMutedColor('#e6e6e6'); setCaptionColor('#e6e6e6');
-              setOverlayColor('#111827'); setBgOpacity(80); setHeaderOpacity(26);
+              setOverlayColor('#111827'); setBgOpacity(80);
+              setHeaderColor('#1f2937'); setHeaderOpacity(26);
               setSelectedThemeId('');
             }} title="Restaurar valores predeterminados">
               <RotateCcw className="w-5 h-5" />
