@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-import { supabase, type Business } from '../../../../lib/supabase';
+import { type Business } from '../../../../lib/supabase';
+import { authInvoke } from '../../../../pages/admin/helpers';
 import type { LandingSections, LandingPage, LandingTheme, LandingTemplate } from '../../types';
 import { DEFAULT_SECTIONS, DEFAULT_THEME } from '../../config';
 import { SECTION_DEFINITIONS } from '../../types';
@@ -51,13 +52,11 @@ export function useLandingCrud({ business }: UseLandingCrudOptions): UseLandingC
     if (!business?.id) return;
     setLoading(true);
     try {
-      const { data } = await supabase
-        .from('landing_pages')
-        .select('*')
-        .eq('business_id', business.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Antes esto leia landing_pages con la clave publica, que dejaba ver los
+      // borradores de cualquier negocio. Ahora pasa por admin-manage-landing,
+      // que deduce el negocio del token.
+      const { data: res } = await authInvoke('admin-manage-landing', { action: 'get' });
+      const data = res?.landing as any;
 
       if (data) {
         setLanding(data as unknown as LandingPage);
@@ -112,38 +111,24 @@ export function useLandingCrud({ business }: UseLandingCrudOptions): UseLandingC
     setSaving(true);
     setSaveMessage(null);
     try {
-      if (landing?.id) {
-        const { data: updatedRows, error } = await supabase
-          .from('landing_pages')
-          .update({
-            sections, theme, template, visible_sections: visibleSections,
-            logo_url: logoUrl || null, slug, updated_at: new Date().toISOString(),
-          })
-          .eq('id', landing.id)
-          .select('id');
-        if (error) throw error;
-        if (!updatedRows || updatedRows.length === 0) {
-          throw new Error('No se pudo guardar. Verificá que las políticas de la tabla landing_pages estén configuradas (ejecutá el SQL de PASOS_CORRECCION_LANDING.txt)');
-        }
-        await loadLanding();
-        setSaveMessage({ type: 'success', text: 'Guardado correctamente' });
-        return landing.id;
-      } else {
-        const { data, error } = await supabase
-          .from('landing_pages')
-          .insert({
-            business_id: business.id,
-            slug: slug || business.slug,
-            sections, theme, template, visible_sections: visibleSections,
-            logo_url: logoUrl || null, status: 'draft',
-          })
-          .select('id')
-          .single();
-        if (error) throw error;
-        await loadLanding();
-        setSaveMessage({ type: 'success', text: 'Guardado correctamente' });
-        return data?.id || null;
+      // Guardar publica directo: no hay borrador ni boton aparte. Cada cambio
+      // queda online al instante. La funcion decide sola si crea o actualiza,
+      // buscando la landing por negocio, asi que el panel no manda ningun id.
+      const { data: res, error } = await authInvoke('admin-manage-landing', {
+        action: 'publish',
+        sections, theme, template,
+        visible_sections: visibleSections,
+        logo_url: logoUrl || null,
+        slug: slug || business.slug,
+      });
+
+      if (error || !res?.success) {
+        throw new Error('No se pudo guardar. Intentá de nuevo.');
       }
+
+      await loadLanding();
+      setSaveMessage({ type: 'success', text: 'Guardado y publicado' });
+      return res.id || null;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al guardar';
       setSaveMessage({ type: 'error', text: msg });
@@ -159,46 +144,17 @@ export function useLandingCrud({ business }: UseLandingCrudOptions): UseLandingC
     setSaving(true);
     setSaveMessage(null);
     try {
-      let targetId = landing?.id;
+      const { data: res, error } = await authInvoke('admin-manage-landing', {
+        action: 'publish',
+        sections, theme, template,
+        visible_sections: visibleSections,
+        logo_url: logoUrl || null,
+        slug: slug || business.slug,
+      });
 
-      if (targetId) {
-        const { data: updatedRows, error } = await supabase
-          .from('landing_pages')
-          .update({
-            sections, theme, template, visible_sections: visibleSections,
-            logo_url: logoUrl || null, slug, updated_at: new Date().toISOString(),
-          })
-          .eq('id', targetId)
-          .select('id');
-        if (error) throw error;
-        if (!updatedRows || updatedRows.length === 0) {
-          throw new Error('No se pudo guardar. Verificá que las políticas de la tabla landing_pages estén configuradas.');
-        }
-      } else {
-        const { data, error } = await supabase
-          .from('landing_pages')
-          .insert({
-            business_id: business.id,
-            slug: slug || business.slug,
-            sections, theme, template, visible_sections: visibleSections,
-            logo_url: logoUrl || null, status: 'draft',
-          })
-          .select('id')
-          .single();
-        if (error) throw error;
-        targetId = data?.id || null;
+      if (error || !res?.success) {
+        throw new Error('No se pudo publicar. Intentá de nuevo.');
       }
-
-      if (!targetId) {
-        setSaveMessage({ type: 'error', text: 'No se pudo guardar la landing. Intentá de nuevo.' });
-        return;
-      }
-
-      const { error: pubError } = await supabase
-        .from('landing_pages')
-        .update({ status: 'published', updated_at: new Date().toISOString() })
-        .eq('id', targetId);
-      if (pubError) throw pubError;
 
       await loadLanding();
       setSaveMessage({ type: 'success', text: 'Landing publicada correctamente' });
