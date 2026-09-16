@@ -179,7 +179,7 @@ export function Payment() {
   if (error) {
     return (
       <div className="max-w-xl mx-auto px-4">
-        <div className="p-8 text-center bg-white shadow-[0_8px_30px_rgba(0,0,0,.05)] rounded-2xl">
+        <div className="p-8 text-center bg-white border border-gray-200 rounded-lg">
           <div className="flex items-center justify-center w-16 h-16 mx-auto mb-5 bg-red-100 rounded-full">
             <XCircle className="w-8 h-8 text-red-600" />
           </div>
@@ -187,7 +187,7 @@ export function Payment() {
           <p className="mb-6 text-red-600">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-3.5 font-semibold text-white transition-all duration-200 bg-booking-primary rounded-xl hover:bg-booking-primary-hover"
+            className="w-full py-3.5 font-semibold text-white transition-all duration-200 bg-booking-primary rounded-md hover:bg-booking-primary-hover"
           >
             Intentar nuevamente
           </button>
@@ -198,7 +198,7 @@ export function Payment() {
 
   return (
     <div className="max-w-xl mx-auto px-4">
-      <div className="p-8 bg-white shadow-[0_8px_30px_rgba(0,0,0,.05)] rounded-2xl">
+      <div className="p-8 bg-white border border-gray-200 rounded-lg">
         <div className="mb-6 text-center">
           <div className="flex items-center justify-center w-16 h-16 mx-auto mb-5 rounded-full bg-booking-primary-light">
             <CreditCard className="w-8 h-8 text-booking-primary" />
@@ -209,7 +209,7 @@ export function Payment() {
           </p>
         </div>
 
-        <div className="p-5 mb-6 bg-gray-50 rounded-xl border border-gray-100">
+        <div className="p-5 mb-6 bg-gray-50 rounded-md border border-gray-200">
           <div className="flex items-center justify-between">
             <span className="text-gray-500 text-sm">Fecha</span>
             <span className="font-medium text-gray-800">
@@ -239,21 +239,50 @@ export function Payment() {
         </div>
 
         {checking && (
-          <div className="flex items-center gap-3 p-4 mb-6 border border-yellow-200 bg-yellow-50 rounded-xl">
+          <div className="flex items-center gap-3 p-4 mb-6 border border-yellow-200 bg-yellow-50 rounded-md">
             <Loader2 className="w-5 h-5 text-yellow-600 animate-spin" />
             <p className="text-yellow-700 text-sm">Verificando estado del pago...</p>
           </div>
         )}
 
+        {/* Metodo de pago: se nombra Mercado Pago y se aclara que no hace falta
+            tener cuenta, porque es la duda mas comun del cliente final. */}
         <div className="mb-4">
-          <p className="text-center text-xs text-gray-400 mb-3 font-medium uppercase tracking-wider">Elegí cómo pagar</p>
-          <div id="mercadopago_container" className="min-h-[80px]">
-            {!mpLoaded && (
-              <div className="py-6 text-center">
-                <Loader2 className="w-6 h-6 mx-auto mb-2 text-booking-primary animate-spin" />
-                <p className="text-gray-400 text-sm">Cargando opciones de pago...</p>
+          <div className="rounded-md border border-gray-200 overflow-hidden">
+            <div className="flex items-start gap-3 px-4 py-3.5 bg-gray-50 border-b border-gray-200">
+              <span className="mt-1 w-4 h-4 rounded-full border-[5px] border-booking-primary bg-white shrink-0" />
+              <div>
+                <p className="font-semibold text-gray-800 text-sm">Mercado Pago</p>
+                <p className="text-gray-500 text-sm mt-0.5 leading-snug">
+                  Pagá con tarjeta de crédito, débito o dinero en tu cuenta. No hace falta tener cuenta: podés usar tu email.
+                </p>
               </div>
-            )}
+            </div>
+
+            <div className="px-4 py-3 border-b border-gray-200">
+              <div className="flex flex-wrap gap-1.5">
+                {['Visa', 'Mastercard', 'American Express', 'Cabal', 'Naranja X'].map(marca => (
+                  <span key={marca}
+                    className="px-2 py-1 text-[11px] font-medium text-gray-600 bg-white border border-gray-200 rounded">
+                    {marca}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-4">
+              <div id="mercadopago_container" className="min-h-[80px]">
+                {!mpLoaded && (
+                  <div className="py-6 text-center">
+                    <Loader2 className="w-6 h-6 mx-auto mb-2 text-booking-primary animate-spin" />
+                    <p className="text-gray-400 text-sm">Cargando opciones de pago...</p>
+                  </div>
+                )}
+              </div>
+              <p className="text-center text-xs text-gray-400 mt-3">
+                Te llevamos a Mercado Pago para completar el pago.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -261,7 +290,7 @@ export function Payment() {
           <button
             onClick={checkPaymentStatus}
             disabled={checking}
-            className="flex items-center justify-center w-full gap-2 py-3.5 mt-2 font-medium text-gray-600 transition-all duration-200 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 disabled:opacity-50 text-sm"
+            className="flex items-center justify-center w-full gap-2 py-3.5 mt-2 font-medium text-gray-600 transition-all duration-200 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 disabled:opacity-50 text-sm"
           >
             {checking ? (
               <>
