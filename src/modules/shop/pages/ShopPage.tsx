@@ -628,16 +628,32 @@ function ShopMarketingPopup() {
     const config = shopConfig?.popup;
     if (!config?.enabled || sessionStorage.getItem('shop_popup_dismissed')) return;
 
-    const checkScroll = () => {
-      const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-      if (pct > 30) {
-        setVisible(true);
-        window.removeEventListener('scroll', checkScroll);
-      }
+    // Antes solo aparecia al pasar el 30% de scroll. En una tienda con pocos
+    // productos la pagina entra entera en pantalla, no hay scroll, y el popup
+    // no salia nunca. Ahora sale con lo que ocurra primero: el scroll o los
+    // 8 segundos en la pagina.
+    let temporizador: number | undefined;
+
+    const mostrar = () => {
+      setVisible(true);
+      window.removeEventListener('scroll', checkScroll);
+      if (temporizador) window.clearTimeout(temporizador);
     };
 
+    const checkScroll = () => {
+      const alto = document.documentElement.scrollHeight - window.innerHeight;
+      if (alto <= 0) return;
+      const pct = (window.scrollY / alto) * 100;
+      if (pct > 30) mostrar();
+    };
+
+    temporizador = window.setTimeout(mostrar, 8000);
     window.addEventListener('scroll', checkScroll, { passive: true });
-    return () => window.removeEventListener('scroll', checkScroll);
+
+    return () => {
+      window.removeEventListener('scroll', checkScroll);
+      if (temporizador) window.clearTimeout(temporizador);
+    };
   }, [shopConfig]);
 
   const config = shopConfig?.popup;
