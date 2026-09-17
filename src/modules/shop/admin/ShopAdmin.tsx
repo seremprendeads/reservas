@@ -138,10 +138,11 @@ function ShopDashboard() {
 
   useEffect(() => {
     if (!business?.id) return;
-    Promise.all([
-      supabase.from('shop_orders').select('total, created_at').eq('business_id', business.id).eq('payment_status', 'approved'),
-    ]).then(([ordersRes]) => {
-      const orders = ordersRes.data || [];
+    // Antes esto leia shop_orders con la clave publica, que exponia los datos
+    // de todos los compradores de todos los negocios.
+    authInvoke('admin-manage-shop', { action: 'list' }).then(({ data }) => {
+      type Venta = { total?: number; created_at?: string; payment_status?: string };
+      const orders: Venta[] = (data?.orders || []).filter((o: Venta) => o.payment_status === 'approved');
       const today = new Date().toISOString().slice(0, 10);
       const month = new Date().toISOString().slice(0, 7);
       setStats({
@@ -243,13 +244,15 @@ function ProductsManager() {
 
   const reload = () => {
     if (!business?.id) return;
-    supabase.from('shop_products').select('*').eq('business_id', business.id).is('deleted_at', null).order('sort_order').then(r => { if (r.data) setProducts(r.data); });
+    authInvoke('admin-manage-shop', { action: 'list' }).then(({ data }) => {
+      if (data?.products) setProducts(data.products);
+      if (data?.categories) setCategories(data.categories);
+    });
   };
 
   useEffect(() => {
     if (!business?.id) return;
     reload();
-    supabase.from('shop_categories').select('*').eq('business_id', business.id).order('sort_order').then(r => { if (r.data) setCategories(r.data); });
   }, [business?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openNew = () => {
@@ -267,15 +270,14 @@ function ProductsManager() {
   const save = async () => {
     if (!name.trim() || !price || !business?.id) return;
     setSaving(true);
-    const payload = { business_id: business.id, name: name.trim(), description: description.trim(), price: parseFloat(price), currency, stock: parseInt(stock) || 0, sku: sku.trim() || null, image: imageUrl || null, images: galleryImages, category_id: categoryId || null, featured, sizes };
+    const payload = { name: name.trim(), description: description.trim(), price: parseFloat(price), currency, stock: parseInt(stock) || 0, sku: sku.trim() || null, image: imageUrl || null, images: galleryImages, category_id: categoryId || null, featured, sizes };
     try {
-      if (editing) {
-        const { error } = await supabase.from('shop_products').update(payload).eq('id', editing.id).eq('business_id', business.id);
-        if (error) console.error('Error updating product:', error);
-      } else {
-        const { error } = await supabase.from('shop_products').insert(payload);
-        if (error) console.error('Error inserting product:', error);
-      }
+      const { data, error } = await authInvoke('admin-manage-shop', {
+        action: 'product_save',
+        id: editing ? editing.id : undefined,
+        product: payload,
+      });
+      if (error || !data?.success) console.error('Error al guardar el producto', error);
     } catch (e) {
       console.error('Save error:', e);
     }
@@ -289,12 +291,12 @@ function ProductsManager() {
       setShowLimitDialog(true);
       return;
     }
-    await supabase.from('shop_products').update({ is_active: !p.is_active }).eq('id', p.id).eq('business_id', business?.id || '');
+    await authInvoke('admin-manage-shop', { action: 'product_toggle', id: p.id, is_active: !p.is_active });
     setProducts(prev => prev.map(x => x.id === p.id ? { ...x, is_active: !x.is_active } : x));
   };
 
   const remove = async (p: Product) => {
-    await supabase.from('shop_products').update({ deleted_at: new Date().toISOString(), is_active: false }).eq('id', p.id).eq('business_id', business?.id || '');
+    await authInvoke('admin-manage-shop', { action: 'product_trash', id: p.id });
     setProducts(prev => prev.filter(x => x.id !== p.id));
   };
 
@@ -304,10 +306,11 @@ function ProductsManager() {
       return;
     }
     if (!business?.id) return;
-    const { data } = await supabase.from('shop_products').insert({
-      business_id: business.id, name: `${p.name} (copia)`, description: p.description, price: p.price, currency: p.currency, stock: 0, image: p.image, category_id: p.category_id, sizes: p.sizes || [],
-    }).select().single();
-    if (data) setProducts(prev => [...prev, data]);
+    const { data } = await authInvoke('admin-manage-shop', {
+      action: 'product_save',
+      product: { name: `${p.name} (copia)`, description: p.description, price: p.price, currency: p.currency, stock: 0, image: p.image, category_id: p.category_id, sizes: p.sizes || [] },
+    });
+    if (data?.success) reload();
   };
 
   const handleOldImageDelete = (oldUrl: string) => {
@@ -496,19 +499,23 @@ function CategoriesManager() {
 
   useEffect(() => {
     if (!business?.id) return;
-    supabase.from('shop_categories').select('*').eq('business_id', business.id).order('sort_order').then(r => { if (r.data) setCategories(r.data); });
+    authInvoke('admin-manage-shop', { action: 'list' }).then(({ data }) => {
+      if (data?.categories) setCategories(data.categories);
+    });
   }, [business?.id]);
 
   const save = async () => {
     if (!name.trim() || !business?.id) return;
-    await supabase.from('shop_categories').insert({ business_id: business.id, name: name.trim() });
+    await authInvoke('admin-manage-shop', { action: 'category_create', name: name.trim() });
     setName('');
     setShowDialog(false);
-    supabase.from('shop_categories').select('*').eq('business_id', business.id).order('sort_order').then(r => { if (r.data) setCategories(r.data); });
+    authInvoke('admin-manage-shop', { action: 'list' }).then(({ data }) => {
+      if (data?.categories) setCategories(data.categories);
+    });
   };
 
   const remove = async (id: string) => {
-    await supabase.from('shop_categories').delete().eq('id', id).eq('business_id', business?.id || '');
+    await authInvoke('admin-manage-shop', { action: 'category_delete', id });
     setCategories(prev => prev.filter(c => c.id !== id));
   };
 
@@ -559,15 +566,14 @@ function OrdersList() {
 
   useEffect(() => {
     if (!business?.id) return;
-    supabase.from('shop_orders').select('*').eq('business_id', business.id).order('created_at', { ascending: false }).then(r => {
-      if (r.data) setOrders(r.data);
+    authInvoke('admin-manage-shop', { action: 'list' }).then(({ data }) => {
+      if (data?.orders) setOrders(data.orders);
       setLoading(false);
     });
   }, [business?.id]);
 
   const removeOrder = async (o: Order) => {
-    await supabase.from('shop_order_items').delete().eq('order_id', o.id).eq('business_id', business?.id || '');
-    await supabase.from('shop_orders').delete().eq('id', o.id).eq('business_id', business?.id || '');
+    await authInvoke('admin-manage-shop', { action: 'order_delete', id: o.id });
     setOrders(prev => prev.filter(x => x.id !== o.id));
   };
 
@@ -615,14 +621,14 @@ function ProductsTrash() {
   const load = () => {
     if (!business?.id) return;
     setLoading(true);
-    supabase.from('shop_products').select('*').eq('business_id', business.id).not('deleted_at', 'is', null).order('deleted_at', { ascending: false })
-      .then(r => { setDeleted(r.data || []); setLoading(false); });
+    authInvoke('admin-manage-shop', { action: 'list' })
+      .then(({ data }) => { setDeleted(data?.trash || []); setLoading(false); });
   };
 
   useEffect(() => { load(); }, [business?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const restore = async (p: Product) => {
-    await supabase.from('shop_products').update({ deleted_at: null, is_active: true }).eq('id', p.id).eq('business_id', business?.id || '');
+    await authInvoke('admin-manage-shop', { action: 'product_restore', id: p.id });
     setDeleted(prev => prev.filter(x => x.id !== p.id));
   };
 
@@ -631,7 +637,7 @@ function ProductsTrash() {
     for (const img of (p.images || [])) {
       await deleteStorageFile(img, SHOP_STORAGE_BUCKET);
     }
-    await supabase.from('shop_products').delete().eq('id', p.id);
+    await authInvoke('admin-manage-shop', { action: 'product_purge', id: p.id });
     setDeleted(prev => prev.filter(x => x.id !== p.id));
   };
 
@@ -641,7 +647,7 @@ function ProductsTrash() {
       for (const img of (p.images || [])) {
         await deleteStorageFile(img, SHOP_STORAGE_BUCKET);
       }
-    await supabase.from('shop_products').delete().eq('id', p.id).eq('business_id', business?.id || '');
+    await authInvoke('admin-manage-shop', { action: 'product_purge', id: p.id });
     }
     setDeleted([]);
   };
