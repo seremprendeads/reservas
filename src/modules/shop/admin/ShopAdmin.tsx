@@ -824,7 +824,9 @@ function ShopPopupTab() {
           )}
 
           <div className="flex justify-end pt-2">
-            <Button onClick={save} disabled={saving}>
+            {/* Iba onClick={save}, asi que React le pasaba el evento del clic
+                como si fuera la configuracion y nunca se guardaba el popup. */}
+            <Button onClick={() => save(config)} disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : null}
               Guardar
             </Button>

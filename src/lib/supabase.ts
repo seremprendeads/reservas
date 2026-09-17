@@ -118,8 +118,10 @@ export type ShopPopupConfig = {
   description: string;
   button_text: string;
   button_url: string;
-  image_url: string;
+  // Puede quedar vacio si el negocio borra la imagen del popup.
+  image_url: string | null;
   overlay_color: string;
+  overlay_opacity: number;
 };
 
 export type ShopSocialEntry = {
