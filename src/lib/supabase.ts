@@ -16,7 +16,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Duración del trial para la beta de prospección directa.
 // El backend (Edge Functions) es la fuente de verdad para este valor.
 // El frontend lo usa solo para UI informativa — nunca para decisiones de acceso.
-export const TRIAL_DAYS = 18;
+export const TRIAL_DAYS = 16;
 
 export type Business = {
   id: string;

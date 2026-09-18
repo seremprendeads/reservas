@@ -7,7 +7,7 @@ import { TRIAL_DAYS } from '../lib/constants';
 //
 // Vivía dentro de DashboardView, así que solo se veía en la pantalla Principal.
 // Se movió a AdminPage para que acompañe al cliente en TODAS las secciones
-// del panel durante los 18 días.
+// del panel durante los 16 días.
 //
 // Ahora se monta ARRIBA del AdminHeader como barra fina de ancho completo:
 // una sola fila (icono + texto + contador + botón) y el progreso del trial
