@@ -88,6 +88,9 @@ export function BookingForm() {
         });
 
       if (insertError) {
+        if (insertError.code === '23505') {
+          throw new Error('Ese horario ya fue reservado por otra persona. Elegí otro horario.');
+        }
         throw new Error('Error al crear la reserva');
       }
 
@@ -129,7 +132,10 @@ export function BookingForm() {
       setStep('payment');
     } catch (error) {
       console.error('Error:', error);
-      setErrors({ submit: 'Error al procesar la reserva. Intenta nuevamente.' });
+      const message = error instanceof Error && error.message
+        ? error.message
+        : 'Error al procesar la reserva. Intenta nuevamente.';
+      setErrors({ submit: message });
     } finally {
       setLoading(false);
     }
