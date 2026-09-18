@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 
 // ============================================================================
 // Seguimiento de pruebas: una fila por profesional con su línea de tiempo
-// sobre los 18 días de prueba. Solo lectura, para monitorear el avance.
+// sobre los 16 días de prueba. Solo lectura, para monitorear el avance.
 // ============================================================================
 
-const TRIAL_DAYS = 18;
+const TRIAL_DAYS = 16;
 
 export interface TrialTenant {
   id: string;

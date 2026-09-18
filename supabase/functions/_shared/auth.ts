@@ -18,11 +18,11 @@ export function createServiceClient() {
 // ============================================================================
 // SUBSCRIPTION GUARD
 // Verifica server-side que el negocio tiene acceso activo (trial vigente o plan pago).
-// TRIAL_DAYS = 18 días para prospección directa beta.
+// TRIAL_DAYS = 16 días para prospección directa beta.
 // Devuelve null si el acceso está OK, o un objeto de error si debe bloquearse.
 // ============================================================================
 
-export const TRIAL_DAYS = 18;
+export const TRIAL_DAYS = 16;
 
 export type AccessStatus =
   | { allowed: true }

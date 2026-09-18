@@ -154,7 +154,7 @@ export function AcceptInvitePage() {
                   <li>Hacé clic en "Acceder al panel" aquí abajo</li>
                   <li>Ingresá con el email <strong>{state.email}</strong> y la contraseña que te dieron</li>
                   <li>El sistema te va a pedir que crees tu propia contraseña</li>
-                  <li>¡Listo! Tu período de prueba de 18 días comienza ahora</li>
+                  <li>¡Listo! Tu período de prueba de 16 días comienza ahora</li>
                 </ol>
               </AlertDescription>
             </Alert>

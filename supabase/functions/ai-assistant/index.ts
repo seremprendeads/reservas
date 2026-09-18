@@ -74,7 +74,7 @@ const SYSTEM_PROMPT = `Sos "BookingBot", un asistente IA experto en la plataform
 - Webhook de Mercado Pago para confirmar pagos automáticamente
 
 ### PLANES Y SUSCRIPCIÓN
-- Trial gratis 18 días
+- Trial gratis 16 días
 - Planes: Free (solo bio), Basic (bio+landing+reservas), Pro (+tienda), Enterprise (+SEO)
 - Periodo de gracia de 15 días después de la suspensión
 - Si el plan es Free, solo tiene acceso a Bio
@@ -98,9 +98,25 @@ Si el usuario necesita diseño gráfico, campañas de ads, o redacción SEO avan
 - Respondé con claridad, sin divagar
 - Usá ejemplos concretos`;
 
+// Deshabilitado para la beta: el módulo de asistente IA ya está sacado del
+// panel (comentado en AdminPage.tsx), pero esta función seguía activa y
+// alcanzable directo por HTTP sin ninguna autenticación ni límite de uso —
+// cualquiera podía pasarle un businessId ajeno y consumir la cuota de Gemini
+// del proyecto. Decisión: no ofrecer este módulo a los clientes de la beta
+// por no considerarse seguro todavía. Para reactivarlo, quitar este bloqueo
+// y agregar antes autenticación + rate limit reales.
+const AI_ASSISTANT_ENABLED = false;
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
+  if (!AI_ASSISTANT_ENABLED) {
+    return new Response(JSON.stringify({ error: "Asistente IA no disponible en esta versión." }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {

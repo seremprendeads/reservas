@@ -1,0 +1,62 @@
+BOOKINGBIO — Fase 3 (bloqueantes 2, 3 y 4)
+Archivos para reemplazar o agregar en tu proyecto local (VS Code).
+Cada carpeta de este zip respeta la ruta exacta del repo: descomprimí
+y arrastrá todo sobre la carpeta raíz de tu proyecto, reemplazando lo
+que ya existe.
+
+===========================================================================
+ARCHIVOS DE FRONTEND (React/TypeScript) — van directo a tu proyecto,
+no se tocan en Supabase.
+===========================================================================
+src/lib/supabase.ts
+src/modules/subscription/components/TrialBanner.tsx
+src/modules/subscription/lib/constants.ts
+src/pages/AcceptInvitePage.tsx
+src/pages/master/MasterDashboard.tsx
+src/pages/master/TrialTracking.tsx
+
+===========================================================================
+EDGE FUNCTIONS DE SUPABASE — cada una es una función distinta.
+Si usás el Dashboard de Supabase en vez de git, pegá el contenido de
+cada index.ts en Edge Functions → (nombre de la función) → Code, y
+hacé Deploy en cada una por separado.
+===========================================================================
+supabase/functions/_shared/auth.ts
+  → Archivo COMPARTIDO (no es una función en sí). Lo usan varias
+    funciones (admin-*, master-*). Si desplegás por Dashboard, este
+    archivo no tiene "función" propia — solo aplica si usás el CLI
+    o git, que lo empaqueta junto con cada función que lo importa.
+
+supabase/functions/admin-register/index.ts
+  → Función: admin-register
+
+supabase/functions/ai-assistant/index.ts
+  → Función: ai-assistant
+
+supabase/functions/master-create-invite/index.ts
+  → Función: master-create-invite
+
+supabase/functions/master-update-tenant/index.ts
+  → Función: master-update-tenant
+
+===========================================================================
+MIGRACIONES SQL — se corren en Supabase → SQL Editor, pegando el
+contenido completo de cada archivo y ejecutando "Run". Respetá el
+orden: primero la de trial, después la de planes.
+===========================================================================
+supabase/migrations/20260919000000_trial_16_days.sql
+  → SQL. Unifica el período de prueba en 16 días (solo afecta negocios
+    nuevos, no toca los que ya existen).
+
+supabase/migrations/20260919000001_fix_plan_check_constraint.sql
+  → SQL. Amplía la restricción CHECK de businesses.plan para aceptar
+    los 5 planes definitivos. Ejecutar DESPUÉS de la anterior.
+
+===========================================================================
+IMPORTANTE
+===========================================================================
+- Ninguna de estas migraciones fue ejecutada todavía en tu base real.
+- admin-register queda cerrada (responde 403) hasta que decidas
+  reabrirla — ver el comentario al principio del archivo.
+- Después de aplicar esto: npm run build / npm run typecheck / npm run
+  lint en tu máquina para confirmar que compila igual que acá.

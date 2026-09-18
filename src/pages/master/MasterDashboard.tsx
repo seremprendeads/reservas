@@ -126,7 +126,7 @@ function CreateInvitePanel({ onDone }: { onDone: () => void }) {
   if (result) {
     const trialDate = result.trial_ends_at
       ? new Date(result.trial_ends_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })
-      : '18 días desde hoy';
+      : '16 días desde hoy';
 
     return (
       <Card className="border-0 shadow-sm mb-6 border-l-4 border-l-emerald-500">

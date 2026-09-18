@@ -30,7 +30,7 @@ function slugify(text: string): string {
 // master-create-invite
 //
 // Crea en un solo paso:
-//   1. El negocio (business) con trial de 18 días
+//   1. El negocio (business) con trial de 16 días
 //   2. El admin_user con contraseña temporal y must_change_password = true
 //   3. El invite_token con el link de acceso
 //
@@ -135,7 +135,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 1. Crear el negocio (el trigger set_trial_end_date asigna 18 días automáticamente)
+    // 1. Crear el negocio (el trigger set_trial_end_date asigna 16 días automáticamente)
     const { data: business, error: bizError } = await supabase
       .from("businesses")
       .insert({

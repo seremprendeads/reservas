@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { authenticateMaster, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
+import { authenticateMaster, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders, TRIAL_DAYS } from "../_shared/auth.ts";
 
 // Planes válidos — DEBEN coincidir con el CHECK constraint de businesses.plan en la DB.
 // free = Free Bio Standard · bio_pro = Bio Pro · bio_reservas = Bio Pro + Reservas
@@ -53,9 +53,9 @@ Deno.serve(async (req: Request) => {
         break;
 
       case "extend_trial":
-        // Extiende el trial 18 días desde hoy
+        // Extiende el trial TRIAL_DAYS días desde hoy (misma constante que auth.ts)
         const newEnd = new Date();
-        newEnd.setDate(newEnd.getDate() + 18);
+        newEnd.setDate(newEnd.getDate() + TRIAL_DAYS);
         updates = {
           is_trial: true,
           trial_ends_at: newEnd.toISOString(),

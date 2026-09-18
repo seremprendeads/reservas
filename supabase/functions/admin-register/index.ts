@@ -1,9 +1,21 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createServiceClient, jsonSuccess, jsonError, corsHeaders, checkRateLimit } from "../_shared/auth.ts";
 
+// Registro cerrado durante la beta cerrada por invitación (bloqueante de
+// seguridad: permitía crear una cuenta sin invitación y, encadenado con
+// create-business, un negocio con trial completo sin pasar por
+// master-create-invite). El alta oficial es siempre vía invitación
+// (master-create-invite → accept-invite → admin-login). Para reabrir el
+// autorregistro público más adelante, quitar este bloqueo temprano.
+const REGISTRATION_OPEN = false;
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  if (!REGISTRATION_OPEN) {
+    return jsonError("Registro cerrado durante la beta. Pedí una invitación.", 403);
   }
 
   try {
