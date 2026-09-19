@@ -145,10 +145,13 @@ const socialLinks = [
           {/* Relleno de los costados en pantallas anchas */}
           <div className="fixed inset-0 z-0" style={{ background: profile.bg_solid_color }} />
           {/* Foto centrada, con ancho acotado. `fixed` la ata al alto de la
-              ventana: aunque la bio tenga muchos enlaces, no se estira. */}
+              ventana: aunque la bio tenga muchos enlaces, no se estira.
+              `center top` (no `center`) porque en pantallas bajas y anchas
+              (netbook, tablet apaisada) el recorte vertical con `center`
+              cortaba justo la cara/sujeto de la foto. */}
           <div
             className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-0"
-            style={{ background: `url(${profile.bg_image_url}) center/cover no-repeat` }}
+            style={{ background: `url(${profile.bg_image_url}) center top/cover no-repeat` }}
           />
         </>
       )}
