@@ -1,106 +1,3 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
-import { supabase } from '../../../lib/supabase';
-import { BioProfile, BioLink } from '../types';
-
-const ICON_MAP: Record<string, string> = {};
-
-function getButtonRadius(style: string) {
-  if (style === 'pill') return '9999px';
-  if (style === 'square') return '4px';
-  return '16px';
-}
-
-export function BioPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const [profile, setProfile] = useState<BioProfile | null>(null);
-  const [links, setLinks] = useState<BioLink[]>([]);
-  const [bookingBgColor, setBookingBgColor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-
-  const [isPremium, setIsPremium] = useState(true); // asume premium hasta verificar
-
-  useEffect(() => {
-    if (!slug) return;
-    (async () => {
-      const { data: biz } = await supabase
-        .from('businesses')
-        .select('id, plan, is_trial, trial_ends_at')
-        .eq('slug', slug)
-        .eq('is_active', true)
-        .maybeSingle();
-      if (!biz) { setNotFound(true); setLoading(false); return; }
-
-      // Determinar si tiene acceso premium (trial activo O plan pago)
-      const trialActive = biz.is_trial && (!biz.trial_ends_at || new Date(biz.trial_ends_at) > new Date());
-      const paidPlan = !biz.is_trial && biz.plan !== 'free';
-      setIsPremium(trialActive || paidPlan);
-
-      const { data: p } = await supabase.from('bio_profiles').select('*').eq('business_id', biz.id).eq('is_active', true).maybeSingle();
-      if (!p) { setNotFound(true); setLoading(false); return; }
-      setProfile(p);
-
-      const { data: l } = await supabase.from('bio_links').select('*').eq('profile_id', p.id).eq('is_active', true).order('sort_order');
-      if (l) setLinks(l);
-
-      const { data: branding } = await supabase.from('branding').select('background_color').eq('business_id', biz.id).maybeSingle();
-      if (branding?.background_color) setBookingBgColor(branding.background_color);
-
-      setLoading(false);
-
-      supabase.from('bio_stats').insert({ profile_id: p.id, event_type: 'visit' });
-    })();
-  }, [slug]);
-
-  const trackClick = (linkId: string) => {
-    if (profile) {
-      supabase.from('bio_stats').insert({ profile_id: profile.id, event_type: 'click', link_id: linkId });
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
-        <Loader2 className="w-6 h-6 animate-spin text-white/50" />
-      </div>
-    );
-  }
-
-  if (notFound || !profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
-        <div className="text-center text-white/50">
-          <p className="text-lg font-medium">Página no encontrada</p>
-          <p className="text-sm mt-1">Esta bio no existe o fue desactivada.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // En plan free: solo color sólido (sin gradiente ni imagen de fondo)
-  // La configuración premium se conserva en DB pero no se aplica en la vista pública
-  const effectiveBgType = isPremium ? profile.bg_type : 'solid';
-
-  // La imagen se dibuja en capas aparte. El contenedor ocupa todo el ancho de
-  // la pantalla, así que en PC `cover` agrandaba la foto para cubrir 1920px y
-  // la deformaba. Ahora la foto va en una columna centrada y los costados se
-  // rellenan con bg_solid_color (configurable en Apariencia).
-  const showBgImage = effectiveBgType === 'image' && !!profile.bg_image_url;
-
-  const bgStyle: React.CSSProperties = effectiveBgType === 'gradient'
-    ? { background: `linear-gradient(135deg, ${profile.bg_gradient_from}, ${profile.bg_gradient_to})` }
-    : showBgImage
-    ? { backgroundColor: profile.bg_solid_color }
-    : { background: profile.bg_solid_color };
-
-  // En plan free: máximo 3 links visibles
-  // Los links extra siguen en DB, simplemente no se muestran hasta que vuelvan a tener un plan
-  const visibleLinks = isPremium ? links : links.slice(0, 3);
-
-  const overlayOpacity = (profile.bg_opacity ?? 0) / 100;
-  const overlayColor = profile.bg_overlay_color || '#000000';
 
   // Con la capa fuerte, lo que define la legibilidad es el color de la capa y
   // no el fondo de abajo: con una capa blanca al 80% el texto blanco desaparece.
@@ -141,19 +38,14 @@ const socialLinks = [
   return (
     <div className="min-h-screen relative" style={bgStyle}>
       {showBgImage && (
-        <>
-          {/* Relleno de los costados en pantallas anchas */}
-          <div className="fixed inset-0 z-0" style={{ background: profile.bg_solid_color }} />
-          {/* Foto centrada, con ancho acotado. `fixed` la ata al alto de la
-              ventana: aunque la bio tenga muchos enlaces, no se estira.
-              `center top` (no `center`) porque en pantallas bajas y anchas
-              (netbook, tablet apaisada) el recorte vertical con `center`
-              cortaba justo la cara/sujeto de la foto. */}
-          <div
-            className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-0"
-            style={{ background: `url(${profile.bg_image_url}) center top/cover no-repeat` }}
-          />
-        </>
+        /* Foto a pantalla completa en cualquier ancho (mobile, tablet, netbook,
+           desktop). `fixed` la ata al viewport para que no se estire aunque la
+           bio tenga muchos enlaces. `center top` prioriza la parte de arriba
+           de la foto (donde suele estar la cara) al recortar. */
+        <div
+          className="fixed inset-0 z-0"
+          style={{ background: `url(${profile.bg_image_url}) center top/cover no-repeat` }}
+        />
       )}
       {overlayOpacity > 0 && (
         <div
