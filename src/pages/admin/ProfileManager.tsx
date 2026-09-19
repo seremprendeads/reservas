@@ -126,7 +126,7 @@ export function ProfileManager({
   };
 
   return (
-    <div className="mx-auto max-w-xl space-y-6">
+       <div className="mx-auto max-w-2xl space-y-6">
       <Card className="shadow-[0_8px_30px_rgba(0,0,0,.05)]">
         <CardHeader>
           <CardTitle className="font-display">Mi Perfil</CardTitle>
