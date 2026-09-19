@@ -12,6 +12,15 @@ interface DesignTabProps {
   theme: LandingTheme; updateTheme: (k: string, v: string) => void; businessId: string;
 }
 
+function isLightColor(hex: string): boolean {
+  const h = hex.replace('#', '');
+  if (h.length !== 6) return true;
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150;
+}
+
 export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
   const [selectedThemeId, setSelectedThemeId] = useState('');
 
@@ -23,7 +32,14 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
     updateTheme('secondary_color', t.tokens.secondary);
     updateTheme('bg_color', t.tokens.background);
     updateTheme('text_color', t.tokens.text);
-    updateTheme('footer_bg_color', t.tokens.cardBg);
+    // El footer siempre debe contrastar: en temas claros lo oscurecemos con
+    // el color de texto del tema (que es oscuro); en temas oscuros usamos la
+    // tarjeta (cardBg), que ya es oscura. Antes usaba siempre cardBg, y en
+    // temas claros (ej. Spa) eso dejaba el footer blanco con texto casi
+    // blanco encima: invisible.
+    const bgIsLight = isLightColor(t.tokens.background);
+    updateTheme('footer_bg_color', bgIsLight ? t.tokens.text : t.tokens.cardBg);
+    updateTheme('footer_text_color', bgIsLight ? '#f3f4f6' : t.tokens.textMuted);
     updateTheme('social_icon_color', t.tokens.textMuted);
     updateTheme('button_color', t.tokens.primary);
     updateTheme('service_icon_color', t.tokens.primary);
