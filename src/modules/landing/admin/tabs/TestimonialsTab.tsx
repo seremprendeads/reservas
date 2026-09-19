@@ -27,6 +27,15 @@ export function TestimonialsTab({ sections, updateSection }: TestimonialsTabProp
         <label className="text-sm font-medium text-foreground">Título de sección</label>
         <Input value={t.title} onChange={e => updateSection('testimonials', { ...t, title: e.target.value })} className="mt-1.5 h-12 rounded-xl" />
       </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Link a reseñas de Google (opcional)</label>
+        <Input value={t.google_review_url || ''} onChange={e => updateSection('testimonials', { ...t, google_review_url: e.target.value || null })}
+          placeholder="https://g.page/r/..."
+          className="mt-1.5 h-12 rounded-xl" />
+        <p className="text-xs text-muted-foreground mt-1.5">
+          Si lo completás, aparece un botón debajo de los testimonios invitando a dejar una reseña en Google.
+        </p>
+      </div>
       <Separator />
       {t.items.map((item, i) => (
         <div key={i} className="rounded-xl border p-5 space-y-4 shadow-[0_8px_30px_rgba(0,0,0,.05)]">

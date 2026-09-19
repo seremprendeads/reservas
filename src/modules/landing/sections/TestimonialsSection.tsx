@@ -33,7 +33,7 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
               </p>
               <div className="flex items-center justify-center sm:justify-start gap-3">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-medium text-sm"
-                  style={{ backgroundColor: theme.primary_color }}>
+                  style={{ background: `linear-gradient(135deg, ${theme.primary_color}, ${theme.secondary_color})` }}>
                   {t.name.charAt(0).toUpperCase()}
                 </div>
                 <span style={{ ...bodyStyle, color: theme.text_color, fontWeight: 500 }} className="text-sm">{t.name}</span>
@@ -41,6 +41,15 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
             </div>
           ))}
         </div>
+        {testimonials.google_review_url && (
+          <div className="text-center mt-12">
+            <a href={testimonials.google_review_url} target="_blank" rel="noopener noreferrer"
+              className={`inline-flex items-center gap-2 px-6 py-3 ${theme.button_border_radius} font-medium text-sm transition-all duration-200 border-2 hover:shadow-lg`}
+              style={{ borderColor: `${theme.primary_color}40`, color: theme.primary_color }}>
+              Dejanos tu reseña en Google
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

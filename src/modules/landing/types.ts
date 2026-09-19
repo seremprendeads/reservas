@@ -89,6 +89,7 @@ export interface LandingSections {
   testimonials: {
     title: string;
     items: { name: string; text: string; rating: number }[];
+    google_review_url: string | null;
   };
   faq: {
     title: string;

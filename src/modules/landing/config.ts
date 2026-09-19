@@ -105,6 +105,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
   testimonials: {
     title: 'Lo que dicen nuestros clientes',
     items: [],
+    google_review_url: null,
   },
   faq: {
     title: 'Preguntas frecuentes',
