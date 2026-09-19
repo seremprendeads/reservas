@@ -138,13 +138,13 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <AboutTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
                 )}
                 {activeTab === 'about_text' && (
-                  <AboutTextTab sections={sections} updateSection={updateSection} />
+                  <AboutTextTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
                 )}
                 {activeTab === 'main_service' && (
                   <MainServiceTab sections={sections} updateSection={updateSection} />
                 )}
                 {activeTab === 'services' && (
-                  <ServicesTab sections={sections} updateSection={updateSection} />
+                  <ServicesTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
                 )}
                 {activeTab === 'why' && (
                   <WhyChooseUsTab sections={sections} updateSection={updateSection} />

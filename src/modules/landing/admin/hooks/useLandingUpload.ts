@@ -65,6 +65,8 @@ export function useLandingUpload({ business, setLogoUrl, setSections }: UseLandi
         setSections(prev => ({ ...prev, hero: { ...prev.hero, cover_image: publicUrl } }));
       } else if (target === 'about_image') {
         setSections(prev => ({ ...prev, about: { ...prev.about, image_url: publicUrl } }));
+      } else if (target === 'about_text_image') {
+        setSections(prev => ({ ...prev, about_text: { ...prev.about_text, image_url: publicUrl } }));
       } else if (target === 'cta_image') {
         setSections(prev => ({ ...prev, cta: { ...prev.cta, image_url: publicUrl } }));
       } else if (target === 'banner_image') {
@@ -73,6 +75,13 @@ export function useLandingUpload({ business, setLogoUrl, setSections }: UseLandi
         setSections(prev => ({ ...prev, popup: { ...prev.popup, image_url: publicUrl } }));
       } else if (target === 'shop_invite_image') {
         setSections(prev => ({ ...prev, shop_invite: { ...prev.shop_invite, image_url: publicUrl } }));
+      } else if (target.startsWith('secondary_service_')) {
+        const idx = parseInt(target.split('_')[2]);
+        setSections(prev => {
+          const items = [...prev.secondary_services.items];
+          items[idx] = { ...items[idx], image_url: publicUrl };
+          return { ...prev, secondary_services: { ...prev.secondary_services, items } };
+        });
       } else if (target.startsWith('gallery_')) {
         const idx = parseInt(target.split('_')[1]);
         setSections(prev => {

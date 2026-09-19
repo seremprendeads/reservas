@@ -57,6 +57,8 @@ export const DEFAULT_SECTIONS: LandingSections = {
     title: '',
     text: '',
     alignment: 'left',
+    image_url: null,
+    image_position: 'left',
   },
   main_service: {
     icon: 'Star',
@@ -66,9 +68,9 @@ export const DEFAULT_SECTIONS: LandingSections = {
   secondary_services: {
     title: 'Otros servicios',
     items: [
-      { icon: 'Wrench', title: 'Servicio 1', description: 'Descripción del servicio' },
-      { icon: 'Palette', title: 'Servicio 2', description: 'Descripción del servicio' },
-      { icon: 'Zap', title: 'Servicio 3', description: 'Descripción del servicio' },
+      { icon: 'Wrench', image_url: null, title: 'Servicio 1', description: 'Descripción del servicio' },
+      { icon: 'Palette', image_url: null, title: 'Servicio 2', description: 'Descripción del servicio' },
+      { icon: 'Zap', image_url: null, title: 'Servicio 3', description: 'Descripción del servicio' },
     ],
   },
   why_choose_us: {

@@ -25,9 +25,15 @@ export function SecondaryServicesSection({ secondaryServices, theme, ts, heading
             return (
               <div key={i} className={`${ts.cardRadius} ${ts.cardShadow} p-8 text-center transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5`}
                 style={{ backgroundColor: theme.bg_color, border: `1px solid ${theme.text_color}06` }}>
-                <div className="inline-flex items-center justify-center w-12 h-12 mb-5">
-                  <Icon className="h-6 w-6" style={{ color: theme.service_icon_color }} />
-                </div>
+                {service.image_url ? (
+                  <div className={`w-16 h-16 mx-auto mb-5 overflow-hidden ${ts.cardRadius}`}>
+                    <img src={service.image_url} alt={service.title} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center justify-center w-12 h-12 mb-5">
+                    <Icon className="h-6 w-6" style={{ color: theme.service_icon_color }} />
+                  </div>
+                )}
                 <h3 style={{ ...headingStyle, fontWeight: 500 }} className="text-lg mb-3">{service.title}</h3>
                 <p style={{ ...bodyStyle, color: '#666666' }} className="text-sm leading-relaxed">{service.description}</p>
               </div>

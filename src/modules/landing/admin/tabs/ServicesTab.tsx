@@ -2,19 +2,19 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import { IconSelector } from '../components/IconSelector';
 import type { LandingSections } from '../../types';
 
 interface ServicesTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  triggerUpload: (t: string) => void; uploadingImage: string | null;
 }
 
-export function ServicesTab({ sections, updateSection }: ServicesTabProps) {
+export function ServicesTab({ sections, updateSection, triggerUpload, uploadingImage }: ServicesTabProps) {
   const ss = sections.secondary_services;
   const addItem = () => {
     updateSection('secondary_services', {
       ...ss,
-      items: [...ss.items, { icon: 'Wrench', title: '', description: '' }],
+      items: [...ss.items, { icon: 'Wrench', image_url: null, title: '', description: '' }],
     });
   };
   const removeItem = (i: number) => {
@@ -43,7 +43,22 @@ export function ServicesTab({ sections, updateSection }: ServicesTabProps) {
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
-          <IconSelector value={item.icon} onChange={v => updateItem(i, 'icon', v)} />
+          <div>
+            <label className="text-xs text-muted-foreground mb-2 block">Imagen</label>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="sm" onClick={() => triggerUpload(`secondary_service_${i}`)} disabled={!!uploadingImage}>
+                {uploadingImage === `secondary_service_${i}` ? 'Subiendo...' : item.image_url ? 'Cambiar' : 'Subir imagen'}
+              </Button>
+              {item.image_url && (
+                <>
+                  <img src={item.image_url} alt="" className="h-14 w-14 rounded-xl object-cover border" />
+                  <Button variant="ghost" size="sm" className="text-destructive" onClick={() => updateItem(i, 'image_url', '')}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
           <Input value={item.title} onChange={e => updateItem(i, 'title', e.target.value)} placeholder="Título" className="h-12 rounded-xl" />
           <Input value={item.description} onChange={e => updateItem(i, 'description', e.target.value)} placeholder="Descripción" className="h-12 rounded-xl" />
         </div>

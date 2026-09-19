@@ -65,6 +65,8 @@ export interface LandingSections {
     title: string;
     text: string;
     alignment: 'left' | 'center' | 'justify';
+    image_url: string | null;
+    image_position: 'left' | 'right';
   };
   main_service: {
     icon: string;
@@ -73,7 +75,7 @@ export interface LandingSections {
   };
   secondary_services: {
     title: string;
-    items: { icon: string; title: string; description: string }[];
+    items: { icon: string; image_url: string | null; title: string; description: string }[];
   };
   why_choose_us: {
     title: string;
