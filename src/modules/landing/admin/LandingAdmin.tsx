@@ -188,7 +188,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
               </CardContent>
             </Card>
 
-            <div className="flex items-center justify-between mt-5">
+            <div className="mt-5 space-y-3">
               <p className="text-xs text-muted-foreground">
                 {landing?.status === 'published' ? (
                   <span className="text-emerald-600 font-medium">● Publicada</span>
@@ -196,15 +196,10 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <span className="text-amber-600 font-medium">● Borrador</span>
                 )}
               </p>
-              <div className="flex gap-3">
-                <Button variant="ghost" onClick={() => setActiveTab(null)} disabled={saving}>
-                  Cerrar
-                </Button>
-                <Button variant="outline" onClick={handleSaveAndClose} disabled={saving}>
-                  {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
-                  Guardar
-                </Button>
-              </div>
+              <Button onClick={handleSaveAndClose} disabled={saving} className="w-full gap-1.5">
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Guardar cambios
+              </Button>
             </div>
           </div>
         )}
