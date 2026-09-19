@@ -10,6 +10,7 @@ export interface ThemeTokens {
   primary: string;
   primaryHover: string;
   primaryLight: string;
+  secondary: string;
   background: string;
   cardBg: string;
   text: string;

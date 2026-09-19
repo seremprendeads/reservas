@@ -9,6 +9,7 @@ export const medical: Theme = {
     primary: '#2563eb',
     primaryHover: '#1d4ed8',
     primaryLight: '#dbeafe',
+    secondary: '#0d9488',
     background: '#ffffff',
     cardBg: '#f8fafc',
     text: '#0f172a',

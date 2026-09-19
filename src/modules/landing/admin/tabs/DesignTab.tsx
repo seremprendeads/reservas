@@ -20,12 +20,28 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
     if (!t) return;
     setSelectedThemeId(themeId);
     updateTheme('primary_color', t.tokens.primary);
+    updateTheme('secondary_color', t.tokens.secondary);
     updateTheme('bg_color', t.tokens.background);
     updateTheme('text_color', t.tokens.text);
     updateTheme('footer_bg_color', t.tokens.cardBg);
     updateTheme('social_icon_color', t.tokens.textMuted);
     updateTheme('button_color', t.tokens.primary);
     updateTheme('service_icon_color', t.tokens.primary);
+    // Fondos por seccion: alternan entre el fondo base y el de las tarjetas,
+    // asi las secciones se distinguen entre si en vez de quedar todas iguales.
+    updateTheme('about_bg_color', t.tokens.background);
+    updateTheme('main_service_bg_color', t.tokens.cardBg);
+    updateTheme('secondary_services_card_bg_color', t.tokens.cardBg);
+    updateTheme('why_choose_us_bg_color', t.tokens.background);
+    updateTheme('why_choose_us_card_bg_color', t.tokens.cardBg);
+    updateTheme('why_choose_us_icon_color', t.tokens.primary);
+    updateTheme('gallery_bg_color', t.tokens.cardBg);
+    updateTheme('testimonials_bg_color', t.tokens.background);
+    updateTheme('testimonials_card_bg_color', t.tokens.cardBg);
+    updateTheme('faq_bg_color', t.tokens.cardBg);
+    updateTheme('faq_item_bg_color', t.tokens.background);
+    updateTheme('map_bg_color', t.tokens.background);
+    updateTheme('cta_bg_color', t.tokens.primary);
   };
 
   const copyFromBranding = async () => {

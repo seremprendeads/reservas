@@ -7,6 +7,7 @@ export { medical } from './medical';
 export { dental } from './dental';
 export { legal } from './legal';
 export { tattoo } from './tattoo';
+export { hairstylist } from './hairstylist';
 
 import { spa } from './spa';
 import { barber } from './barber';
@@ -16,5 +17,6 @@ import { medical } from './medical';
 import { dental } from './dental';
 import { legal } from './legal';
 import { tattoo } from './tattoo';
+import { hairstylist } from './hairstylist';
 
-export const allThemes = [spa, barber, psychology, gym, medical, dental, legal, tattoo];
+export const allThemes = [spa, barber, hairstylist, psychology, gym, medical, dental, legal, tattoo];

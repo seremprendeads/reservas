@@ -9,6 +9,7 @@ export const legal: Theme = {
     primary: '#1e3a5f',
     primaryHover: '#172e4b',
     primaryLight: '#dbeafe',
+    secondary: '#ca8a04',
     background: '#f8fafc',
     cardBg: '#ffffff',
     text: '#0f172a',

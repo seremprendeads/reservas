@@ -9,6 +9,7 @@ export const barber: Theme = {
     primary: '#b45309',
     primaryHover: '#92400e',
     primaryLight: '#fef3c7',
+    secondary: '#991b1b',
     background: '#1c1917',
     cardBg: '#292524',
     text: '#ffffff',

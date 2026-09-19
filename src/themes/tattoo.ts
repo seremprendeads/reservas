@@ -9,6 +9,7 @@ export const tattoo: Theme = {
     primary: '#7c3aed',
     primaryHover: '#6d28d9',
     primaryLight: '#ede9fe',
+    secondary: '#ec4899',
     background: '#09090b',
     cardBg: '#18181b',
     text: '#ffffff',

@@ -9,6 +9,7 @@ export const gym: Theme = {
     primary: '#dc2626',
     primaryHover: '#b91c1c',
     primaryLight: '#fee2e2',
+    secondary: '#ea580c',
     background: '#030712',
     cardBg: '#111827',
     text: '#ffffff',

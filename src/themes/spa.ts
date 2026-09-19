@@ -9,6 +9,7 @@ export const spa: Theme = {
     primary: '#6E8B74',
     primaryHover: '#5C7661',
     primaryLight: '#E5EBE6',
+    secondary: '#C9A66B',
     background: '#F8F6F2',
     cardBg: '#FFFFFF',
     text: '#2F3A33',

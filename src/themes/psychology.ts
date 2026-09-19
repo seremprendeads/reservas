@@ -9,6 +9,7 @@ export const psychology: Theme = {
     primary: '#6366f1',
     primaryHover: '#4f46e5',
     primaryLight: '#e0e7ff',
+    secondary: '#a78bfa',
     background: '#f8fafc',
     cardBg: '#ffffff',
     text: '#0f172a',

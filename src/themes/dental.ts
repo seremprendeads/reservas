@@ -9,6 +9,7 @@ export const dental: Theme = {
     primary: '#0891b2',
     primaryHover: '#0e7490',
     primaryLight: '#cffafe',
+    secondary: '#22c55e',
     background: '#f0fdfa',
     cardBg: '#ffffff',
     text: '#111827',
