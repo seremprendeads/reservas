@@ -1,7 +1,8 @@
-import { CalendarDays, Phone, Eye, ListChecks } from 'lucide-react';
+import { CalendarDays, Phone, Eye, ExternalLink } from 'lucide-react';
 import { Booking } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
+import { useBusiness } from '../../contexts/BusinessContext';
 
 interface DashboardViewProps {
   todaysBookings: Booking[];
@@ -20,19 +21,23 @@ export function DashboardView({
   onNavigate,
   onSelectBooking,
 }: DashboardViewProps) {
+  const { business } = useBusiness();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   return (
     <div className="mx-auto max-w-7xl space-y-10">
 
-      {/* Header con acceso directo a la lista completa de reservas */}
+      {/* Header con link a la web pública de reservas (mismo patrón que en
+          "Reservas de servicios"), no navegación interna. */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-display tracking-tight">Principal</h1>
-        <Button onClick={() => onNavigate('bookings')} className="gap-2">
-          <ListChecks className="h-4 w-4" />
-          Ver reservas
-        </Button>
+        <a href={`/${business?.slug || '...'}/reservas`} target="_blank" rel="noopener noreferrer">
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <ExternalLink className="h-3.5 w-3.5" />
+            Ver reservas
+          </Button>
+        </a>
       </div>
 
       {/* Stats grid */}

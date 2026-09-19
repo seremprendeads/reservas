@@ -1,10 +1,11 @@
-import { Search, RefreshCw, Phone, Mail, Eye, Calendar, Clock, XCircle, Trash2 } from 'lucide-react';
+import { Search, RefreshCw, Phone, Mail, Eye, Calendar, Clock, XCircle, Trash2, ExternalLink } from 'lucide-react';
 import { Booking } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Badge } from '../../components/ui/badge';
 import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { getStatusBadge, getPaymentBadge } from './helpers';
+import { useBusiness } from '../../contexts/BusinessContext';
 
 interface BookingsListViewProps {
   filteredBookings: Booking[];
@@ -29,9 +30,16 @@ export function BookingsListView({
   onUpdateStatus,
   onDelete,
 }: BookingsListViewProps) {
+  const { business } = useBusiness();
   return (
     <Card className="rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,.05)] border-border/60 transition-all duration-200">
       <CardHeader>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-xl sm:text-2xl font-bold font-display">Reservas</h2>
+          <a href={`/${business?.slug || '...'}/reservas`} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="sm" className="gap-1.5"><ExternalLink className="w-3.5 h-3.5" />Ver reservas</Button>
+          </a>
+        </div>
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
