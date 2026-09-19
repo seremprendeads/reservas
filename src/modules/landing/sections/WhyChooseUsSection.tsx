@@ -25,8 +25,8 @@ export function WhyChooseUsSection({ whyChooseUs, theme, ts, headingStyle, bodyS
             return (
               <div key={i} className={`${ts.cardRadius} ${ts.cardShadow} p-8 text-center transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5`}
                 style={{ backgroundColor: theme.why_choose_us_card_bg_color, border: `1px solid ${theme.text_color}06` }}>
-                <div className="inline-flex items-center justify-center w-16 h-16 mb-5">
-                  <Icon className="h-8 w-8" style={{ color: theme.why_choose_us_icon_color }} />
+                <div className="inline-flex items-center justify-center w-24 h-24 mb-5">
+                  <Icon className="h-12 w-12" style={{ color: theme.why_choose_us_icon_color }} />
                 </div>
                 <p style={{ ...bodyStyle, color: theme.text_color }} className="text-sm font-medium leading-relaxed">{item.text}</p>
               </div>
