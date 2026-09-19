@@ -29,7 +29,7 @@ export function AboutSection({ about, theme, ts, headingStyle, bodyStyle }: Abou
   const textAlign = isMobile ? 'center' : (about.alignment || 'left');
 
   return (
-    <section id="nosotros" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ borderTop: `1px solid ${theme.text_color}08` }}>
+    <section id="nosotros" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.about_bg_color, borderTop: `1px solid ${theme.text_color}08` }}>
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
         {about.image_url && (
           <div className={`${ts.cardRadius} overflow-hidden ${ts.cardShadow}`}>

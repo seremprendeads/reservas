@@ -250,6 +250,19 @@ export interface LandingTheme {
   button_border_radius: string;
   font_heading: string;
   font_body: string;
+  about_bg_color: string;
+  main_service_bg_color: string;
+  secondary_services_card_bg_color: string;
+  why_choose_us_bg_color: string;
+  why_choose_us_card_bg_color: string;
+  why_choose_us_icon_color: string;
+  gallery_bg_color: string;
+  testimonials_bg_color: string;
+  testimonials_card_bg_color: string;
+  faq_bg_color: string;
+  faq_item_bg_color: string;
+  map_bg_color: string;
+  cta_bg_color: string;
 }
 
 export interface LandingSEO {

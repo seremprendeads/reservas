@@ -14,7 +14,7 @@ interface TestimonialsSectionProps {
 
 export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bodyStyle }: TestimonialsSectionProps) {
   return (
-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: `${theme.text_color}03` }}>
+    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.testimonials_bg_color }}>
       <div className="max-w-6xl mx-auto">
         <h2 style={{ ...headingStyle, fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight text-center mb-16">
           {testimonials.title || 'Testimonios'}
@@ -22,7 +22,7 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {testimonials.items.map((t, i) => (
             <div key={i} className={`${ts.cardRadius} ${ts.cardShadow} p-8 text-center sm:text-left`}
-              style={{ backgroundColor: theme.bg_color, border: `1px solid ${theme.text_color}06` }}>
+              style={{ backgroundColor: theme.testimonials_card_bg_color, border: `1px solid ${theme.text_color}06` }}>
               <div className="flex gap-0.5 mb-5 justify-center sm:justify-start">
                 {Array.from({ length: 5 }).map((_, j) => (
                   <Star key={j} className="h-4 w-4" style={{ color: j < t.rating ? '#f59e0b' : '#e5e7eb', fill: j < t.rating ? '#f59e0b' : 'none' }} />

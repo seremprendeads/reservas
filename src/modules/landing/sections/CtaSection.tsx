@@ -16,7 +16,7 @@ interface CtaSectionProps {
 export function CtaSection({ cta, logoUrl, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: CtaSectionProps) {
   return (
     <section id="contacto" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12 relative overflow-hidden`}
-      style={{ backgroundColor: cta.image_url ? 'transparent' : theme.primary_color }}>
+      style={{ backgroundColor: cta.image_url ? 'transparent' : theme.cta_bg_color }}>
       {cta.image_url && (
         <>
           <div className="absolute inset-0">

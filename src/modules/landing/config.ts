@@ -261,6 +261,19 @@ export const DEFAULT_THEME: LandingTheme = {
   button_border_radius: 'rounded-xl',
   font_heading: 'Geist',
   font_body: 'Inter',
+  about_bg_color: '#ffffff',
+  main_service_bg_color: '#fafafa',
+  secondary_services_card_bg_color: '#ffffff',
+  why_choose_us_bg_color: '#fafafa',
+  why_choose_us_card_bg_color: '#ffffff',
+  why_choose_us_icon_color: '#059669',
+  gallery_bg_color: '#ffffff',
+  testimonials_bg_color: '#fafafa',
+  testimonials_card_bg_color: '#ffffff',
+  faq_bg_color: '#ffffff',
+  faq_item_bg_color: '#ffffff',
+  map_bg_color: '#ffffff',
+  cta_bg_color: '#059669',
 };
 
 export const TEMPLATE_STYLES: Record<LandingTemplate, {

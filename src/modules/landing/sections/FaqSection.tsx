@@ -14,7 +14,7 @@ interface FaqSectionProps {
 
 export function FaqSection({ faq, theme, ts, headingStyle, bodyStyle }: FaqSectionProps) {
   return (
-    <section id="faq" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`}>
+    <section id="faq" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.faq_bg_color }}>
       <div className="max-w-3xl mx-auto">
         <h2 style={{ ...headingStyle, fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight text-center mb-16">
           {faq.title || 'Preguntas frecuentes'}
@@ -22,7 +22,7 @@ export function FaqSection({ faq, theme, ts, headingStyle, bodyStyle }: FaqSecti
         <div className="space-y-3">
           {faq.items.map((item, i) => (
             <details key={i} className={`group ${ts.cardRadius} ${ts.cardShadow} overflow-hidden`}
-              style={{ backgroundColor: theme.bg_color, border: `1px solid ${theme.text_color}06` }}>
+              style={{ backgroundColor: theme.faq_item_bg_color, border: `1px solid ${theme.text_color}06` }}>
               <summary style={{ ...headingStyle, color: theme.text_color, fontWeight: 500 }}
                 className="flex items-center justify-center sm:justify-between p-6 cursor-pointer list-none select-none text-center sm:text-left gap-3 transition-colors hover:bg-black/[0.01]">
                 {item.question}

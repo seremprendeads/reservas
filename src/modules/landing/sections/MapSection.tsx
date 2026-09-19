@@ -36,7 +36,7 @@ export function MapSection({ map, theme, ts, headingStyle, bodyStyle }: MapSecti
   if (!embedUrl) return null;
 
   return (
-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.bg_color }}>
+    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.map_bg_color }}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10">
           <MapPin className="h-7 w-7 mx-auto mb-4" style={{ color: theme.primary_color }} />

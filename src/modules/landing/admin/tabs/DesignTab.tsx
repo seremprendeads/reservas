@@ -107,6 +107,41 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
       <Separator />
 
       <div>
+        <label className="text-xs font-medium text-foreground mb-2 block">Fondos por sección</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {[
+            { label: 'Sección Nosotros', key: 'about_bg_color' },
+            { label: 'Sección Servicio principal', key: 'main_service_bg_color' },
+            { label: 'Cartas de Otros servicios', key: 'secondary_services_card_bg_color' },
+            { label: 'Sección Por qué elegirnos', key: 'why_choose_us_bg_color' },
+            { label: 'Cartas de Por qué elegirnos', key: 'why_choose_us_card_bg_color' },
+            { label: 'Íconos de Por qué elegirnos', key: 'why_choose_us_icon_color' },
+            { label: 'Sección Galería', key: 'gallery_bg_color' },
+            { label: 'Sección Testimonios', key: 'testimonials_bg_color' },
+            { label: 'Cartas de Testimonios', key: 'testimonials_card_bg_color' },
+            { label: 'Sección Preguntas frecuentes', key: 'faq_bg_color' },
+            { label: 'Cada pregunta y respuesta', key: 'faq_item_bg_color' },
+            { label: 'Sección Google Maps', key: 'map_bg_color' },
+            { label: 'Sección Reservar ahora (CTA)', key: 'cta_bg_color' },
+          ].map(c => (
+            <div key={c.key} className="space-y-1">
+              <label className="text-xs text-muted-foreground">{c.label}</label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={theme[c.key as keyof LandingTheme] as string}
+                  onChange={e => updateTheme(c.key, e.target.value)}
+                  className="h-7 w-7 cursor-pointer rounded-lg border bg-transparent p-0.5 shrink-0" />
+                <Input type="text" value={theme[c.key as keyof LandingTheme] as string}
+                  onChange={e => updateTheme(c.key, e.target.value)}
+                  className="h-8 font-mono text-xs" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
         <label className="text-xs font-medium text-foreground mb-2 block">Bordes de Botones</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <div>

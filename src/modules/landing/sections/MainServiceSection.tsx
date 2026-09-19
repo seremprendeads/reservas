@@ -15,7 +15,7 @@ interface MainServiceSectionProps {
 export function MainServiceSection({ mainService, theme, ts, headingStyle, bodyStyle, getIcon }: MainServiceSectionProps) {
   const Icon = getIcon(mainService.icon);
   return (
-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: `${theme.text_color}03` }}>
+    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.main_service_bg_color }}>
       <div className="max-w-5xl mx-auto text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 mb-8">
           <Icon className="h-8 w-8" style={{ color: theme.service_icon_color }} />

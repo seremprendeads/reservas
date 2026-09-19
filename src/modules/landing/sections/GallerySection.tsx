@@ -16,7 +16,7 @@ interface GallerySectionProps {
 
 export function GallerySection({ gallery, galleryImages, theme, ts, headingStyle, bodyStyle, onImageClick }: GallerySectionProps) {
   return (
-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`}>
+    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.gallery_bg_color }}>
       <div className="max-w-6xl mx-auto">
         <h2 style={{ ...headingStyle, fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight text-center mb-16">
           {gallery.title || 'Galeria'}

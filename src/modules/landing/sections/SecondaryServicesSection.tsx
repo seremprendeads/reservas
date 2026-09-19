@@ -24,7 +24,7 @@ export function SecondaryServicesSection({ secondaryServices, theme, ts, heading
             const Icon = getIcon(service.icon);
             return (
               <div key={i} className={`${ts.cardRadius} ${ts.cardShadow} p-8 text-center transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5`}
-                style={{ backgroundColor: theme.bg_color, border: `1px solid ${theme.text_color}06` }}>
+                style={{ backgroundColor: theme.secondary_services_card_bg_color, border: `1px solid ${theme.text_color}06` }}>
                 {service.image_url ? (
                   <div className="w-40 h-40 mx-auto mb-5 overflow-hidden rounded-full">
                     <img src={service.image_url} alt={service.title} className="w-full h-full object-cover" />
