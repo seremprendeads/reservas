@@ -1,4 +1,4 @@
-import { CalendarDays, Phone, Eye } from 'lucide-react';
+import { CalendarDays, Phone, Eye, ListChecks } from 'lucide-react';
 import { Booking } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
@@ -25,6 +25,15 @@ export function DashboardView({
 
   return (
     <div className="mx-auto max-w-7xl space-y-10">
+
+      {/* Header con acceso directo a la lista completa de reservas */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-display tracking-tight">Principal</h1>
+        <Button onClick={() => onNavigate('bookings')} className="gap-2">
+          <ListChecks className="h-4 w-4" />
+          Ver reservas
+        </Button>
+      </div>
 
       {/* Stats grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
