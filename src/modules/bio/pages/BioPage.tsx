@@ -83,10 +83,7 @@ export function BioPage() {
   // La configuración premium se conserva en DB pero no se aplica en la vista pública
   const effectiveBgType = isPremium ? profile.bg_type : 'solid';
 
-  // La imagen se dibuja en capas aparte. El contenedor ocupa todo el ancho de
-  // la pantalla, así que en PC `cover` agrandaba la foto para cubrir 1920px y
-  // la deformaba. Ahora la foto va en una columna centrada y los costados se
-  // rellenan con bg_solid_color (configurable en Apariencia).
+  // La imagen se dibuja en una capa aparte a pantalla completa (ver más abajo).
   const showBgImage = effectiveBgType === 'image' && !!profile.bg_image_url;
 
   const bgStyle: React.CSSProperties = effectiveBgType === 'gradient'
@@ -141,19 +138,14 @@ const socialLinks = [
   return (
     <div className="min-h-screen relative" style={bgStyle}>
       {showBgImage && (
-        <>
-          {/* Relleno de los costados en pantallas anchas */}
-          <div className="fixed inset-0 z-0" style={{ background: profile.bg_solid_color }} />
-          {/* Foto centrada, con ancho acotado. `fixed` la ata al alto de la
-              ventana: aunque la bio tenga muchos enlaces, no se estira.
-              `center top` (no `center`) porque en pantallas bajas y anchas
-              (netbook, tablet apaisada) el recorte vertical con `center`
-              cortaba justo la cara/sujeto de la foto. */}
-          <div
-            className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-0"
-            style={{ background: `url(${profile.bg_image_url}) center top/cover no-repeat` }}
-          />
-        </>
+        /* Foto a pantalla completa en cualquier ancho (mobile, tablet, netbook,
+           desktop). `fixed` la ata al viewport para que no se estire aunque la
+           bio tenga muchos enlaces. `center top` prioriza la parte de arriba
+           de la foto (donde suele estar la cara) al recortar. */
+        <div
+          className="fixed inset-0 z-0"
+          style={{ background: `url(${profile.bg_image_url}) center top/cover no-repeat` }}
+        />
       )}
       {overlayOpacity > 0 && (
         <div
