@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { XCircle, Eye, EyeOff, Camera } from 'lucide-react';
+import { XCircle, Eye, EyeOff, Camera, Save, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
@@ -229,7 +229,8 @@ export function ProfileManager({
               </div>
             </div>
 
-            <Button onClick={handleSave} disabled={saving} size="lg" className="w-full transition-all duration-200">
+            <Button onClick={handleSave} disabled={saving} size="lg" className="w-full gap-1.5 transition-all duration-200">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               {saving ? 'Guardando...' : 'Guardar cambios'}
             </Button>
           </div>

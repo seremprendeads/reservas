@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, AlertTriangle, XCircle, Info } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, XCircle, Info, Save, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
@@ -192,7 +192,8 @@ export function LegalInfoSection({ adminEmail, showSuccess }: { adminEmail: stri
           </div>
           {field('phone', 'Teléfono (opcional)', '+54 11 1234-5678', 'tel')}
 
-          <Button onClick={handleSave} disabled={saving || loading || !!loadError} size="lg" className="w-full transition-all duration-200">
+          <Button onClick={handleSave} disabled={saving || loading || !!loadError} size="lg" className="w-full gap-1.5 transition-all duration-200">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {saving ? 'Guardando...' : 'Guardar datos legales'}
           </Button>
 
