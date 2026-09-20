@@ -1,6 +1,6 @@
 import { Sparkles, ArrowRight } from 'lucide-react';
 import type { ModuleId } from '../types';
-import { PLAN_CARDS, linkDePlan, nivelActual } from '../lib/plans';
+import { PLAN_CARDS, PLANS_PAGE_URL, nivelActual } from '../lib/plans';
 
 // ============================================================================
 // Invitación a subir de plan, como barra fija arriba del panel.
@@ -46,7 +46,7 @@ export function UpgradeBanner({ enabledModules }: UpgradeBannerProps) {
         </span>
 
         <a
-          href={linkDePlan(siguiente)}
+          href={PLANS_PAGE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition-all duration-200 hover:opacity-90 active:scale-[0.97] sm:px-4 sm:text-xs"

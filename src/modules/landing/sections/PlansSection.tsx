@@ -25,7 +25,7 @@ export function PlansSection({ plans, whatsapp, theme, ts, headingStyle, bodySty
   if (!plans.items.length) return null;
 
   return (
-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.plans_bg_color }}>
+    <section id="planes" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.plans_bg_color }}>
       <div className="max-w-6xl mx-auto">
         <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.text_color }} className="text-4xl sm:text-5xl tracking-tight text-center mb-16">
           {plans.title || 'Elegí tu plan'}

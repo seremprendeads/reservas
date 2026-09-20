@@ -13,6 +13,13 @@ export function whatsappLink(mensaje: string): string {
   return `https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
 }
 
+// Landing de venta de BookingBio (armada con la propia Landing Page del
+// producto, negocio "bookingbio"), sección Planes. En vez de mandar directo
+// a WhatsApp con un solo plan sugerido, se manda acá para que el negocio vea
+// todos los planes y elija — el botón "Consultar" de cada uno ya abre
+// WhatsApp con el nombre del plan elegido.
+export const PLANS_PAGE_URL = 'https://reservas-two-sigma.vercel.app/bookingbio#planes';
+
 export type PlanCard = {
   key: string;
   level: number;
