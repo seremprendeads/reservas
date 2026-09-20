@@ -20,6 +20,7 @@ import { BannerTab } from './tabs/BannerTab';
 import { TestimonialsTab } from './tabs/TestimonialsTab';
 import { FaqTab } from './tabs/FaqTab';
 import { CtaTab } from './tabs/CtaTab';
+import { PlansTab } from './tabs/PlansTab';
 import { MapTab } from './tabs/MapTab';
 import { FooterTab } from './tabs/FooterTab';
 import { DesignTab } from './tabs/DesignTab';
@@ -166,6 +167,9 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                 )}
                 {activeTab === 'cta' && (
                   <CtaTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                )}
+                {activeTab === 'plans' && (
+                  <PlansTab sections={sections} updateSection={updateSection} />
                 )}
                 {activeTab === 'map' && (
                   <MapTab sections={sections} updateSection={updateSection} />

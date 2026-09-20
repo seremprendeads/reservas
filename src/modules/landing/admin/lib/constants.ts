@@ -1,12 +1,12 @@
 import {
   Sparkles, Info, Star, Wrench, Heart, ImageIcon,
   MessageSquare, HelpCircle, MousePointerClick, Phone,
-  Settings, Palette, MapPin, AlignLeft, Megaphone, ShoppingBag, Search, Waves,
+  Settings, Palette, MapPin, AlignLeft, Megaphone, ShoppingBag, Search, Waves, CreditCard,
 } from 'lucide-react';
 
 export const SECTION_ICONS: Record<string, typeof Sparkles> = {
   Sparkles, Info, Star, Wrench, Heart, ImageIcon,
-  MessageSquare, HelpCircle, MousePointerClick, Phone, MapPin, AlignLeft, Megaphone, ShoppingBag, Search,
+  MessageSquare, HelpCircle, MousePointerClick, Phone, MapPin, AlignLeft, Megaphone, ShoppingBag, Search, CreditCard,
 };
 
 export const LUCIDE_ICON_NAMES = [
@@ -18,7 +18,7 @@ export const LUCIDE_ICON_NAMES = [
   'Diamond', 'Triangle', 'Circle', 'Square', 'Hexagon', 'Pentagon',
 ];
 
-export type AdminTab = 'general' | 'menu' | 'hero' | 'about' | 'about_text' | 'main_service' | 'services' | 'why' | 'gallery' | 'banner' | 'shop_invite' | 'testimonials' | 'faq' | 'cta' | 'map' | 'popup' | 'seo_marketing' | 'footer' | 'design' | 'dividers';
+export type AdminTab = 'general' | 'menu' | 'hero' | 'about' | 'about_text' | 'main_service' | 'services' | 'why' | 'gallery' | 'banner' | 'shop_invite' | 'testimonials' | 'faq' | 'cta' | 'plans' | 'map' | 'popup' | 'seo_marketing' | 'footer' | 'design' | 'dividers';
 
 export const ADMIN_TABS: { id: AdminTab; label: string; icon: typeof Sparkles }[] = [
   { id: 'general', label: 'General', icon: Settings },
@@ -35,6 +35,7 @@ export const ADMIN_TABS: { id: AdminTab; label: string; icon: typeof Sparkles }[
   { id: 'testimonials', label: 'Testimonios', icon: MessageSquare },
   { id: 'faq', label: 'FAQ', icon: HelpCircle },
   { id: 'cta', label: 'CTA', icon: MousePointerClick },
+  { id: 'plans', label: 'Planes', icon: CreditCard },
   { id: 'map', label: 'Mapa', icon: MapPin },
   { id: 'popup', label: 'Popup Marketing', icon: Megaphone },
   { id: 'seo_marketing', label: 'SEO Marketing', icon: Search },

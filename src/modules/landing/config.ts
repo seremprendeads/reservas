@@ -120,6 +120,9 @@ export const DEFAULT_SECTIONS: LandingSections = {
     overlay_color: '#111827',
     overlay_opacity: 70,
   },
+  plans: {
+    title: 'Elegí tu plan',
+  },
   map: {
     address: '',
     map_url: '',

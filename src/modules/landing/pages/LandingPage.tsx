@@ -21,6 +21,7 @@ import { AboutTextSection } from '../sections/AboutTextSection';
 import { MainServiceSection } from '../sections/MainServiceSection';
 import { SecondaryServicesSection } from '../sections/SecondaryServicesSection';
 import { WhyChooseUsSection } from '../sections/WhyChooseUsSection';
+import { PlansSection } from '../sections/PlansSection';
 import { GallerySection } from '../sections/GallerySection';
 import { Lightbox } from '../sections/Lightbox';
 import { TestimonialsSection } from '../sections/TestimonialsSection';
@@ -343,6 +344,16 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
           getIcon={getIcon}
+        />
+      )}
+
+      {hasSection('plans') && (
+        <PlansSection
+          plans={s.plans}
+          theme={theme}
+          ts={ts}
+          headingStyle={headingStyle}
+          bodyStyle={bodyStyle}
         />
       )}
 

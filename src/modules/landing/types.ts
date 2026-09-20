@@ -104,6 +104,9 @@ export interface LandingSections {
     overlay_color: string;
     overlay_opacity: number;
   };
+  plans: {
+    title: string;
+  };
   footer: {
     address: string;
     phone: string;
@@ -285,6 +288,7 @@ export const SECTION_DEFINITIONS = [
   { key: 'testimonials', label: 'Testimonios', icon: 'MessageSquare' as const },
   { key: 'faq', label: 'FAQ', icon: 'HelpCircle' as const },
   { key: 'cta', label: 'Llamada a la Acción', icon: 'MousePointerClick' as const },
+  { key: 'plans', label: 'Planes', icon: 'CreditCard' as const },
   { key: 'map', label: 'Mapa', icon: 'MapPin' as const },
   { key: 'popup', label: 'Popup Marketing', icon: 'Megaphone' as const },
   { key: 'seo_marketing', label: 'SEO Marketing', icon: 'Search' as const },
