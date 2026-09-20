@@ -185,17 +185,12 @@ function BookingContent() {
     }
   }, [slug, business?.id, setBusinessBySlug]);
 
-  if (business && !isModuleEnabled('reservas')) {
-    return <ModuleBlockedScreen moduleId="reservas" />;
-  }
-
-  // Vuelta desde Mercado Pago: se muestra el resultado en lugar del flujo.
-  const params = new URLSearchParams(window.location.search);
-  const estadoPago = params.get('pago');
-  if (estadoPago) {
-    return <ResultadoPago estado={estadoPago} codigo={params.get('codigo')} slug={slug} />;
-  }
-
+  // Estos dos useEffect deben correr en todos los renders, en el mismo
+  // orden — antes vivian despues de los returns tempranos de mas abajo
+  // (modulo bloqueado / vuelta de pago), asi que en un render donde alguno
+  // de esos returns se activaba, React llamaba menos hooks que en el
+  // render anterior y tiraba "Rendered fewer hooks than expected",
+  // rompiendo la pantalla en vez de mostrar el aviso correspondiente.
   useEffect(() => {
     if (!document.getElementById('mp-sdk')) {
       const script = document.createElement('script');
@@ -260,6 +255,17 @@ function BookingContent() {
       root.style.setProperty('--booking-error', '#ef4444');
     }
   }, [b]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (business && !isModuleEnabled('reservas')) {
+    return <ModuleBlockedScreen moduleId="reservas" />;
+  }
+
+  // Vuelta desde Mercado Pago: se muestra el resultado en lugar del flujo.
+  const params = new URLSearchParams(window.location.search);
+  const estadoPago = params.get('pago');
+  if (estadoPago) {
+    return <ResultadoPago estado={estadoPago} codigo={params.get('codigo')} slug={slug} />;
+  }
 
   const stepIndex = ['services', 'calendar', 'form', 'payment', 'confirmation'];
   const stepLabels = ['Servicio', 'Fecha y hora', 'Tus datos', 'Pago', 'Confirmación'];
