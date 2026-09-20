@@ -33,6 +33,12 @@ export function PlansTab({ sections, updateSection }: PlansTabProps) {
         Cada plan que agregues acá se muestra como una tarjeta con un botón "Consultar". Al tocarlo, se abre WhatsApp
         (el número que cargaste en Footer) con un mensaje que ya incluye el nombre del plan.
       </p>
+      {!sections.footer.whatsapp && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+          Todavía no cargaste un número de WhatsApp en la pestaña <strong>Footer</strong>. Sin ese número, el botón
+          "Consultar" no aparece en ninguna tarjeta de esta sección.
+        </div>
+      )}
       <Separator />
       {p.items.map((item, i) => (
         <div key={i} className="rounded-xl border p-5 space-y-4 shadow-[0_8px_30px_rgba(0,0,0,.05)]">
