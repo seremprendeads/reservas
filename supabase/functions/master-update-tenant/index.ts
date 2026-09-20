@@ -16,7 +16,7 @@ Deno.serve(async (req: Request) => {
     const auth = await authenticateMaster(req);
     if ("error" in auth) return jsonUnauthorized();
 
-    const { business_id, action, plan, product_limit } = await req.json();
+    const { business_id, action, plan, product_limit, confirm_slug } = await req.json();
 
     if (!business_id) return jsonError("business_id requerido", 400);
 
@@ -25,11 +25,31 @@ Deno.serve(async (req: Request) => {
     // Verificar que el negocio existe antes de operar
     const { data: biz } = await supabase
       .from("businesses")
-      .select("id, name, is_active, plan, is_trial")
+      .select("id, name, slug, is_active, plan, is_trial")
       .eq("id", business_id)
       .maybeSingle();
 
     if (!biz) return jsonError("Negocio no encontrado", 404);
+
+    // Eliminar es irreversible (borra el negocio y todo lo que cuelga de él
+    // via ON DELETE CASCADE: reservas, bio, tienda, admin_users, invitaciones,
+    // landing page, etc). Exige repetir el slug para evitar un click accidental.
+    if (action === "delete") {
+      if (confirm_slug !== biz.slug) {
+        return jsonError("Confirmación inválida: el slug no coincide", 400);
+      }
+
+      const { error: delError } = await supabase
+        .from("businesses")
+        .delete()
+        .eq("id", business_id);
+
+      if (delError) throw delError;
+
+      console.log(`Master ${auth.master.email} → action=delete business_id=${business_id} (${biz.slug})`);
+
+      return jsonSuccess({ success: true, action: "delete", business_id });
+    }
 
     let updates: Record<string, unknown> = {};
 
@@ -78,7 +98,7 @@ Deno.serve(async (req: Request) => {
         break;
 
       default:
-        return jsonError("Acción inválida. Válidas: suspend, reactivate, change_plan, extend_trial, set_product_limit", 400);
+        return jsonError("Acción inválida. Válidas: suspend, reactivate, change_plan, extend_trial, set_product_limit, delete", 400);
     }
 
     updates.updated_at = new Date().toISOString();

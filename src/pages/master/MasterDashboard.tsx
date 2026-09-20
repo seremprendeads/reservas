@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { masterGetToken, masterGetName, masterGetEmail, masterClearSession } from '../../lib/master-session';
-import { ShieldCheck, Users, Clock, Ban, CheckCircle, LogOut, RefreshCw, ChevronDown, ChevronUp, Plus, Copy, Check, ExternalLink, Edit2 } from 'lucide-react';
+import { ShieldCheck, Users, Clock, Ban, CheckCircle, LogOut, RefreshCw, ChevronDown, ChevronUp, Plus, Copy, Check, ExternalLink, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
@@ -39,7 +39,7 @@ interface InviteResult {
   slug: string;
 }
 
-type ActionType = 'suspend' | 'reactivate' | 'change_plan' | 'extend_trial';
+type ActionType = 'suspend' | 'reactivate' | 'change_plan' | 'extend_trial' | 'delete';
 
 // Enum de planes — debe coincidir con CHECK constraint de la DB y con
 // VALID_PLANS de la Edge Function master-update-tenant.
@@ -329,6 +329,30 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
     }
   };
 
+  const handleDelete = async (businessId: string, name: string, slug: string) => {
+    const typed = window.prompt(
+      `Esto borra "${name}" para siempre: reservas, bio, tienda, landing y accesos. No se puede deshacer.\n\nPara confirmar, escribí el slug del negocio (${slug}):`
+    );
+    if (typed === null) return;
+    if (typed.trim() !== slug) {
+      setActionError('El slug no coincide. No se eliminó nada.');
+      return;
+    }
+    setActionLoading(businessId + 'delete');
+    setActionError('');
+    try {
+      const { data, error: fnErr } = await invokeMaster('master-update-tenant', {
+        business_id: businessId, action: 'delete', confirm_slug: typed.trim(),
+      });
+      if (fnErr || !data?.success) throw new Error('Error al eliminar');
+      setTenants(prev => prev.filter(t => t.id !== businessId));
+    } catch {
+      setActionError('Error al eliminar el negocio. Intentá de nuevo.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const handleLogout = () => {
     masterClearSession();
     onLogout();
@@ -556,6 +580,13 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
                               <Button variant="outline" size="sm" disabled={!!actionLoading}
                                 onClick={() => handleAction(t.id, 'extend_trial')}>
                                 {actionLoading === t.id + 'extend_trial' ? 'Extendiendo...' : 'Extender trial 16d'}
+                              </Button>
+
+                              <Button variant="outline" size="sm" disabled={!!actionLoading}
+                                className="border-destructive text-destructive hover:bg-destructive/10"
+                                onClick={() => handleDelete(t.id, t.name, t.slug)}>
+                                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                {actionLoading === t.id + 'delete' ? 'Eliminando...' : 'Eliminar definitivamente'}
                               </Button>
 
                               <div className="flex items-center gap-2">
