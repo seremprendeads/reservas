@@ -41,10 +41,6 @@ export function UpgradeBanner({ enabledModules }: UpgradeBannerProps) {
           Tu plan<span className="hidden sm:inline"> puede crecer</span>
         </p>
 
-        <span className="hidden truncate text-[11px] text-gray-600 md:inline">
-          {siguiente.name}
-        </span>
-
         <a
           href={PLANS_PAGE_URL}
           target="_blank"
@@ -52,8 +48,8 @@ export function UpgradeBanner({ enabledModules }: UpgradeBannerProps) {
           className="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition-all duration-200 hover:opacity-90 active:scale-[0.97] sm:px-4 sm:text-xs"
           style={{ backgroundColor: siguiente.button }}
         >
-          <span className="hidden sm:inline">Ver cómo activarlo</span>
-          <span className="sm:hidden">Ver</span>
+          <span className="hidden sm:inline">Cambiar de plan</span>
+          <span className="sm:hidden">Cambiar</span>
           <ArrowRight className="h-3.5 w-3.5" />
         </a>
       </div>
