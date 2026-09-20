@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createServiceClient, corsHeaders } from "../_shared/auth.ts";
+import { createServiceClient, corsHeaders, checkRateLimit } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -7,12 +7,25 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // El codigo de reserva es adivinable (correlativo, RES-<anio>-0001...),
+    // asi que sin limite alguien podia usar este endpoint para mandar mails
+    // en cadena a cualquier direccion (email bombing) usando el dominio de
+    // envio de la app. 10 por minuto por IP alcanza para uso normal.
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const rl = checkRateLimit(`send-confirmation-email:${ip}`, 10, 60_000);
+    if (!rl.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Demasiadas solicitudes, esperá un momento." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
     const body = await req.json();
-    const { email, name, bookingCode, date, time, serviceName, businessName } = body;
+    const { name, bookingCode, date, time, serviceName, businessName } = body;
 
-    if (!email || !name || !bookingCode || !date || !time) {
+    if (!name || !bookingCode || !date || !time) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -83,6 +96,17 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({ error: "Invalid booking code" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // El destino del mail sale de la reserva ya guardada, nunca del body:
+    // si no, cualquiera podia mandar el mail de confirmacion a la direccion
+    // que quisiera con solo saber un codigo de reserva valido.
+    const email = booking.customer_email;
+    if (!email) {
+      return new Response(
+        JSON.stringify({ error: "La reserva no tiene email cargado" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
