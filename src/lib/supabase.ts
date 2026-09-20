@@ -138,10 +138,15 @@ export type ShopSocialConfig = {
   interval_seconds: number;
 };
 
+export type ShopGeneralConfig = {
+  show_in_booking: boolean;
+};
+
 export type ShopConfig = {
   banner: ShopBannerConfig | null;
   popup: ShopPopupConfig | null;
   social: ShopSocialConfig | null;
+  general: ShopGeneralConfig | null;
 };
 
 export type Branding = {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink, X, Megaphone, Timer, MessageSquare, Copy, Check } from 'lucide-react';
-import { supabase, ShopBannerConfig, ShopPopupConfig, ShopSocialConfig, ShopSocialEntry as SocialEntry } from '../../../lib/supabase';
+import { supabase, ShopBannerConfig, ShopPopupConfig, ShopSocialConfig, ShopGeneralConfig, ShopSocialEntry as SocialEntry } from '../../../lib/supabase';
 import { allThemes } from '../../../themes';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, Order } from '../types';
@@ -25,6 +25,7 @@ export function ShopAdmin() {
   const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'trash' | 'popup' | 'banner' | 'avisos'>('dashboard');
   const { config: bannerCfg, setConfig: setBannerCfg, save: saveBanner } = useShopSubConfig('banner', SHOP_BANNER_DEFAULTS);
   const { config: popupCfg, setConfig: setPopupCfg, save: savePopup } = useShopSubConfig('popup', SHOP_POPUP_DEFAULTS);
+  const { config: generalCfg, setConfig: setGeneralCfg, save: saveGeneral } = useShopSubConfig('general', SHOP_GENERAL_DEFAULTS);
   const [shopThemeId, setShopThemeId] = useState('');
 
   const applyShopTheme = (themeId: string) => {
@@ -70,6 +71,20 @@ export function ShopAdmin() {
               <Button variant="outline" size="sm" onClick={copyBrandingToShop}>Copiar colores</Button>
               <Button variant="outline" size="sm" onClick={resetShopColors} title="Restaurar valores predeterminados"><RotateCcw className="w-4 h-4" /></Button>
             </div>
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">Botón "Tienda" en Reservas</p>
+              <p className="text-xs text-muted-foreground">Mostrá u ocultá el botón que lleva a la tienda desde la página de reservas.</p>
+            </div>
+            <button
+              onClick={() => { const next = { ...generalCfg, show_in_booking: !generalCfg.show_in_booking }; setGeneralCfg(next); saveGeneral(next); }}
+              className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${generalCfg.show_in_booking ? 'bg-primary' : 'bg-muted'}`}>
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${generalCfg.show_in_booking ? 'translate-x-5' : ''}`} />
+            </button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {allThemes.map(t => (
@@ -837,6 +852,10 @@ function ShopPopupTab() {
   );
 }
 
+const SHOP_GENERAL_DEFAULTS: ShopGeneralConfig = {
+  show_in_booking: true,
+};
+
 const SHOP_BANNER_DEFAULTS: ShopBannerConfig = {
   enabled: false,
   text: '¡Oferta por tiempo limitado!',
@@ -848,7 +867,7 @@ const SHOP_BANNER_DEFAULTS: ShopBannerConfig = {
   text_color: '#ffffff',
 };
 
-function useShopSubConfig<T>(key: 'banner' | 'popup' | 'social', defaults: T) {
+function useShopSubConfig<T>(key: 'banner' | 'popup' | 'social' | 'general', defaults: T) {
   const { business } = useBusiness();
   const [config, setConfig] = useState<T>(defaults);
   const [saving, setSaving] = useState(false);

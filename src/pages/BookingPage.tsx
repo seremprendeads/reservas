@@ -238,6 +238,7 @@ function BookingContent() {
   const bgImageUrl = b?.background_image_url || '';
   const bgOpacity = b?.bg_opacity ?? 80;
   const overlayColor = b?.overlay_color || b?.background_color || '#111827';
+  const showShopButton = b?.shop_config?.general?.show_in_booking !== false;
 
   useEffect(() => {
     if (b) {
@@ -295,6 +296,7 @@ function BookingContent() {
               {subtitle && <p className="text-sm" style={{ color: mutedColor }}>{subtitle}</p>}
             </div>
           </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            {showShopButton && (
             <a
             href="/tienda"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
@@ -311,6 +313,7 @@ function BookingContent() {
             Tienda
             <Store className="w-4 h-4" />
             </a>
+            )}
         </div>
       </header>
 
