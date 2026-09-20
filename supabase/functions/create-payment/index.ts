@@ -69,9 +69,12 @@ Deno.serve(async (req: Request) => {
     // de quien es el pago y no puede elegir con que clave validar la firma.
     const notificationUrl = `${SUPABASE_URL}/functions/v1/mercadopago-webhook?negocio=${business.id}`;
 
-    // Get service name and validate price if service_id provided
+    // El precio SIEMPRE sale del servidor, nunca del amount que manda el
+    // cliente — antes, si la reserva no tenia service_id, se usaba el amount
+    // del body tal cual, y cualquiera podia armar una preferencia de pago por
+    // el monto que quisiera (ej: $1 en vez del precio real).
     let serviceName = "Turno reservado";
-    let validAmount = amount;
+    let validAmount: number | null = null;
     if (service_id) {
       const { data: service } = await supabase
         .from("services")
@@ -81,9 +84,19 @@ Deno.serve(async (req: Request) => {
         .maybeSingle();
       if (service) {
         serviceName = service.name;
-        // Use the price from DB instead of client-supplied amount (prevents price manipulation)
         validAmount = service.price;
       }
+    }
+    if (validAmount === null) {
+      const { data: settings } = await supabase
+        .from("settings")
+        .select("price")
+        .eq("business_id", business.id)
+        .maybeSingle();
+      validAmount = settings?.price ?? null;
+    }
+    if (!validAmount || validAmount <= 0) {
+      return jsonError("No se pudo determinar el precio de la reserva", 400);
     }
 
     const preference = {
