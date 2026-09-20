@@ -32,15 +32,19 @@ export type AccessStatus =
 // src/modules/subscription/lib/constants.ts y con business_has_module() en la DB.
 //   free / bio_pro / starter → bio
 //   bio_reservas             → bio, reservas
+//   bio_web                  → bio, landing (Plan 4 · sin reservas)
 //   bio_reservas_web         → bio, reservas, landing
+//   bio_web_shop             → bio, landing, shop (Plan 6 · sin reservas)
 //   pro (anterior)           → bio, reservas, landing, shop
-//   enterprise               → todo (Plan 5 · Todo completo)
+//   enterprise               → todo (Plan 7 · Todo completo)
 const PLAN_MODULES: Record<string, string[]> = {
   free: ["bio"],
   starter: ["bio"],
   bio_pro: ["bio"],
   bio_reservas: ["bio", "reservas"],
+  bio_web: ["bio", "landing"],
   bio_reservas_web: ["bio", "reservas", "landing"],
+  bio_web_shop: ["bio", "landing", "shop"],
   pro: ["bio", "reservas", "landing", "shop"],
   enterprise: ["bio", "reservas", "landing", "shop", "seo", "landing_shop"],
 };
