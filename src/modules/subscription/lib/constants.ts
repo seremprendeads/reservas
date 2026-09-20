@@ -45,11 +45,15 @@ export const PLAN_MODULES: Record<string, ModuleId[]> = {
   bio_pro: ['bio'],
   // Plan 3 · Bio Pro + Reservas
   bio_reservas: ['bio', 'reservas'],
-  // Plan 4 · Bio Pro + Reservas + Sitio web
+  // Plan 4 · Bio Pro + Sitio web (sin reservas)
+  bio_web: ['bio', 'landing'],
+  // Plan 5 · Bio Pro + Reservas + Sitio web
   bio_reservas_web: ['bio', 'reservas', 'landing'],
-  // pro: plan pago estándar
+  // Plan 6 · Bio Pro + Sitio web + Tienda (sin reservas)
+  bio_web_shop: ['bio', 'landing', 'shop'],
+  // pro: plan pago estándar (legado)
   pro: ['bio', 'landing', 'reservas', 'shop'],
-  // enterprise: plan pago avanzado (Plan 5 · Todo completo)
+  // enterprise: plan pago avanzado (Plan 7 · Todo incluido completo)
   enterprise: ['bio', 'landing', 'reservas', 'shop', 'seo', 'landing_shop'],
 };
 

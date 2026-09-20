@@ -41,16 +41,21 @@ type ActionType = 'suspend' | 'reactivate' | 'change_plan' | 'extend_trial';
 
 // Enum de planes — debe coincidir con CHECK constraint de la DB y con
 // VALID_PLANS de la Edge Function master-update-tenant.
+// IMPORTANTE: 'bio_web' y 'bio_web_shop' son nuevos (planes 4 y 6). Hasta que
+// se agreguen a esos dos lugares (constraint de la DB + VALID_PLANS), asignar
+// alguno de estos dos desde acá va a fallar al guardar.
 // 'pro' es el plan anterior: se puede ver pero ya no se ofrece al cambiar.
 const PLAN_LABELS: Record<string, string> = {
   free: '1 · Free Bio Standard',
   bio_pro: '2 · Bio Pro',
   bio_reservas: '3 · Bio Pro + Reservas',
-  bio_reservas_web: '4 · Bio Pro + Reservas + Sitio web',
-  enterprise: '5 · Todo completo',
+  bio_web: '4 · Bio Pro + Sitio web',
+  bio_reservas_web: '5 · Bio Pro + Reservas + Sitio web',
+  bio_web_shop: '6 · Bio Pro + Sitio web + Tienda',
+  enterprise: '7 · Todo incluido completo',
   pro: 'Pro (plan anterior)',
 };
-const PLANS = ['free', 'bio_pro', 'bio_reservas', 'bio_reservas_web', 'enterprise'];
+const PLANS = ['free', 'bio_pro', 'bio_reservas', 'bio_web', 'bio_reservas_web', 'bio_web_shop', 'enterprise'];
 const planLabel = (plan: string) => PLAN_LABELS[plan] || plan;
 
 // Durante la prueba el campo `plan` queda en 'free' pero el acceso es completo,
