@@ -31,24 +31,29 @@ export function PlansSection({ plans, whatsapp, theme, ts, headingStyle, bodySty
           {plans.title || 'Elegí tu plan'}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {plans.items.map((plan, i) => (
-            <div key={i} className={`${ts.cardRadius} ${ts.cardShadow} p-8 flex flex-col transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5`}
-              style={{ backgroundColor: theme.plans_card_bg_color }}>
-              <h3 style={{ ...headingStyle, fontWeight: 700, color: theme.primary_color }} className="text-xl mb-3">
-                {plan.name}
-              </h3>
-              <p style={{ ...bodyStyle, color: theme.text_color, opacity: 0.75 }} className="text-sm leading-relaxed flex-1 mb-6 whitespace-pre-line">
-                {plan.detail}
-              </p>
-              {whatsapp && (
-                <a href={whatsappLinkFor(whatsapp, `Hola! Quiero consultar por el plan "${plan.name}"`)} target="_blank" rel="noopener noreferrer"
-                  className={`inline-flex items-center justify-center px-6 py-3 ${theme.button_border_radius} font-medium text-sm text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]`}
-                  style={{ backgroundColor: theme.primary_color }}>
-                  Consultar
-                </a>
-              )}
-            </div>
-          ))}
+          {plans.items.map((plan, i) => {
+            const bg = plan.bg_color || theme.plans_card_bg_color;
+            const text = plan.text_color || theme.text_color;
+            const button = plan.button_color || theme.primary_color;
+            return (
+              <div key={i} className={`${ts.cardRadius} ${ts.cardShadow} p-8 flex flex-col transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5`}
+                style={{ backgroundColor: bg }}>
+                <h3 style={{ ...headingStyle, fontWeight: 700, color: button }} className="text-xl mb-3">
+                  {plan.name}
+                </h3>
+                <p style={{ ...bodyStyle, color: text, opacity: 0.75 }} className="text-sm leading-relaxed flex-1 mb-6 whitespace-pre-line">
+                  {plan.detail}
+                </p>
+                {whatsapp && (
+                  <a href={whatsappLinkFor(whatsapp, `Hola! Quiero consultar por el plan "${plan.name}"`)} target="_blank" rel="noopener noreferrer"
+                    className={`inline-flex items-center justify-center px-6 py-3 ${theme.button_border_radius} font-medium text-sm text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]`}
+                    style={{ backgroundColor: button }}>
+                    Consultar
+                  </a>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

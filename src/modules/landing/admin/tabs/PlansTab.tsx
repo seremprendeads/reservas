@@ -8,10 +8,12 @@ interface PlansTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
 }
 
+const NEW_ITEM_DEFAULTS = { bg_color: '#fafafa', text_color: '#111111', button_color: '#059669' };
+
 export function PlansTab({ sections, updateSection }: PlansTabProps) {
   const p = sections.plans;
   const addItem = () => {
-    updateSection('plans', { ...p, items: [...p.items, { name: '', detail: '' }] });
+    updateSection('plans', { ...p, items: [...p.items, { name: '', detail: '', ...NEW_ITEM_DEFAULTS }] });
   };
   const removeItem = (i: number) => {
     updateSection('plans', { ...p, items: p.items.filter((_, idx) => idx !== i) });
@@ -43,6 +45,36 @@ export function PlansTab({ sections, updateSection }: PlansTabProps) {
           <Input value={item.name} onChange={e => updateItem(i, 'name', e.target.value)} placeholder="Nombre del plan (ej: Paquete Premium)" className="h-12 rounded-xl" />
           <textarea value={item.detail} onChange={e => updateItem(i, 'detail', e.target.value)} placeholder="Detalle (qué incluye, precio, etc.)" rows={2}
             className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-200" />
+
+          <div className="grid grid-cols-3 gap-3 pt-1">
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Fondo de la tarjeta</label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={item.bg_color || NEW_ITEM_DEFAULTS.bg_color}
+                  onChange={e => updateItem(i, 'bg_color', e.target.value)}
+                  className="h-9 w-9 shrink-0 rounded-lg border border-input cursor-pointer" />
+                <span className="text-xs text-muted-foreground font-mono">{item.bg_color || NEW_ITEM_DEFAULTS.bg_color}</span>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Texto</label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={item.text_color || NEW_ITEM_DEFAULTS.text_color}
+                  onChange={e => updateItem(i, 'text_color', e.target.value)}
+                  className="h-9 w-9 shrink-0 rounded-lg border border-input cursor-pointer" />
+                <span className="text-xs text-muted-foreground font-mono">{item.text_color || NEW_ITEM_DEFAULTS.text_color}</span>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Botón</label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={item.button_color || NEW_ITEM_DEFAULTS.button_color}
+                  onChange={e => updateItem(i, 'button_color', e.target.value)}
+                  className="h-9 w-9 shrink-0 rounded-lg border border-input cursor-pointer" />
+                <span className="text-xs text-muted-foreground font-mono">{item.button_color || NEW_ITEM_DEFAULTS.button_color}</span>
+              </div>
+            </div>
+          </div>
         </div>
       ))}
       <Button variant="outline" size="sm" onClick={addItem}>

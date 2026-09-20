@@ -106,7 +106,7 @@ export interface LandingSections {
   };
   plans: {
     title: string;
-    items: { name: string; detail: string }[];
+    items: { name: string; detail: string; bg_color: string; text_color: string; button_color: string }[];
   };
   footer: {
     address: string;
