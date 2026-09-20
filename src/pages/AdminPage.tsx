@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/
 import { Booking, supabase } from '../lib/supabase';
 import { setName as setSessionName, setAvatar as setSessionAvatar } from '../lib/admin-session';
 import { getModuleById } from '../lib/admin-registry';
+import { useBusiness } from '../contexts/BusinessContext';
 import { LoginScreen } from './admin/LoginScreen';
 import { ChangePasswordGate } from './admin/ChangePasswordGate';
 import * as adminSession from '../lib/admin-session';
@@ -88,6 +89,7 @@ export function AdminPage() {
     enabledModules,
   } = useAdminData();
 
+  const { loading: businessLoading, error: businessError } = useBusiness();
   const { config: subConfig } = useSubscription({ business });
 
   // ── Embudo de conversión ────────────────────────────────────────────────
@@ -301,7 +303,27 @@ export function AdminPage() {
     );
   }
 
-  if (loading) {
+  // Si el login funcionó pero el negocio nunca pudo cargarse (error de red,
+  // negocio inexistente, o una sesión vieja sin negocio asociado), antes esto
+  // dejaba el panel girando en "Cargando..." para siempre sin ninguna salida.
+  if (!businessLoading && !business) {
+    return (
+      <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="text-center max-w-sm">
+          <p className="text-sm text-destructive font-medium mb-2">No se pudo cargar tu negocio</p>
+          <p className="text-sm text-muted-foreground mb-6">{businessError || 'Tu sesión puede haber vencido. Volvé a iniciar sesión.'}</p>
+          <button
+            onClick={handleLogout}
+            className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-white transition hover:opacity-90"
+          >
+            Volver a iniciar sesión
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading || businessLoading) {
     return (
       <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">

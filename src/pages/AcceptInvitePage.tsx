@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, CheckCircle, XCircle, Building2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { clearSession } from '../lib/admin-session';
 import { Card, CardContent } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
 
@@ -72,7 +73,12 @@ export function AcceptInvitePage() {
         body: JSON.stringify({ token }),
       }).catch(() => {});
     }
-    // Redirigir al panel admin — LoginScreen manejará el must_change_password
+    // Si el navegador ya tenía una sesión de admin activa (otro negocio, o una
+    // vieja que quedó a medio cargar), había que limpiarla: si no, /admin
+    // reanudaba esa sesión vieja en vez de mostrar el login para la cuenta
+    // recién invitada, y en el peor caso quedaba girando "Cargando..." para
+    // siempre por una sesión inconsistente.
+    clearSession();
     navigate('/admin');
   };
 

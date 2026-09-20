@@ -37,7 +37,23 @@ async function fetchBusinessById(businessId: string): Promise<Business | null> {
     .eq('is_active', true)
     .maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    // Si la migración que agrega product_limit todavía no corrió en la base
+    // en uso, esa columna no existe y esta consulta falla entera (dejando el
+    // panel de admin cargando para siempre en vez de mostrar el negocio).
+    // Reintentamos sin ese campo para no romper el login mientras se aplica.
+    if (error.code === '42703' || error.message?.includes('product_limit')) {
+      const fallback = await supabase
+        .from('businesses')
+        .select('id, name, slug, logo_url, timezone, currency, is_active, is_trial, trial_ends_at, plan')
+        .eq('id', businessId)
+        .eq('is_active', true)
+        .maybeSingle();
+      if (fallback.error) throw fallback.error;
+      return fallback.data as Business | null;
+    }
+    throw error;
+  }
   return data as Business | null;
 }
 
