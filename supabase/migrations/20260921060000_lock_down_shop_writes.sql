@@ -31,6 +31,7 @@ DROP POLICY IF EXISTS "Anon write shop_categories" ON shop_categories;
 -- 3. shop_orders: de "FOR ALL" (insert/update/delete) a solo INSERT, y
 --    gateado ademas por el modulo shop (igual que shop_products).
 DROP POLICY IF EXISTS "Anon write shop_orders" ON shop_orders;
+DROP POLICY IF EXISTS "Anon insert shop_orders" ON shop_orders;
 CREATE POLICY "Anon insert shop_orders" ON shop_orders
   FOR INSERT
   TO anon, authenticated
@@ -42,6 +43,7 @@ CREATE POLICY "Anon insert shop_orders" ON shop_orders
 -- 4. shop_order_items: idem, solo INSERT sobre un pedido propio recien
 --    creado (via el mismo join que ya usaba la policy anterior).
 DROP POLICY IF EXISTS "Anon write shop_order_items" ON shop_order_items;
+DROP POLICY IF EXISTS "Anon insert shop_order_items" ON shop_order_items;
 CREATE POLICY "Anon insert shop_order_items" ON shop_order_items
   FOR INSERT
   TO anon, authenticated
