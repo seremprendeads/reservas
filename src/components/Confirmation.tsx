@@ -3,7 +3,7 @@ import { CheckCircle, Calendar, Clock, Mail, Copy, Check, Download } from 'lucid
 import { useBooking } from '../contexts/BookingContext';
 import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
-import { buildGoogleCalendarUrl, buildICSFile } from '../lib/calendar-utils';
+import { buildGoogleCalendarUrl, buildICSFile, toLocalDateString } from '../lib/calendar-utils';
 
 export function Confirmation() {
   const { bookingData, resetBooking } = useBooking();
@@ -50,7 +50,7 @@ export function Confirmation() {
   };
 
   const dateStr = bookingData.date
-    ? bookingData.date.toISOString().split('T')[0]
+    ? toLocalDateString(bookingData.date)
     : '';
 
   const dateDisplay = bookingData.date?.toLocaleDateString('es-AR', {

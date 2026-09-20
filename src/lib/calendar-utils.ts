@@ -1,3 +1,15 @@
+// date.toISOString().split('T')[0] convierte a UTC primero: un Date
+// construido a medianoche local (como los que arma el calendario de
+// reservas) se corre al dia anterior para cualquier visitante en una zona
+// horaria con offset UTC positivo (Europa, Asia, Australia...). Esto formatea
+// el mismo dia que YA se ve en el calendario, sin pasar por UTC.
+export function toLocalDateString(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 interface CalendarEventParams {
   title: string;
   date: string;

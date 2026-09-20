@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Clock, Calendar as CalendarIcon, Users, Chec
 import { supabase, AvailabilitySetting, BlockedDate, Booking, Settings } from '../lib/supabase';
 import { useBooking } from '../contexts/BookingContext';
 import { useBusiness } from '../contexts/BusinessContext';
+import { toLocalDateString } from '../lib/calendar-utils';
 
 const DAYS_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTHS = [
@@ -42,7 +43,7 @@ function WaitingListForm({ selectedDate, onClose }: { selectedDate: Date; onClos
         nombre: nombre.trim(),
         telefono: telefono.trim(),
         email: email.trim(),
-        fecha_deseada: selectedDate.toISOString().split('T')[0],
+        fecha_deseada: toLocalDateString(selectedDate),
         horario_deseado: horario || null,
         servicio: servicio.trim() || null,
         estado: 'pendiente',
@@ -212,19 +213,20 @@ export function Calendar() {
     }
 
     const slots: string[] = [];
-    const [startHour] = daySettings.start_time.split(':').map(Number);
-    const [endHour] = daySettings.end_time.split(':').map(Number);
+    const [startH, startM] = daySettings.start_time.split(':').map(Number);
+    const [endH, endM] = daySettings.end_time.split(':').map(Number);
+    const startMinutes = startH * 60 + (startM || 0);
+    const endMinutes = endH * 60 + (endM || 0);
     const duration = settings?.slot_duration_minutes || 60;
-    const slotDurationHours = duration / 60;
 
-    for (let hour = startHour; hour < endHour; hour += slotDurationHours) {
-      const hours = Math.floor(hour);
-      const minutes = Math.round((hour - hours) * 60);
+    for (let m = startMinutes; m < endMinutes; m += duration) {
+      const hours = Math.floor(m / 60);
+      const minutes = m % 60;
       const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
       slots.push(timeString);
     }
 
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(date);
     const bookedTimes = bookedSlots.get(dateStr) || new Set();
     setAvailableTimeSlots(slots.filter(slot => !bookedTimes.has(slot)));
   };
@@ -233,7 +235,7 @@ export function Calendar() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (date < today) return false;
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(date);
     if (blockedDates.includes(dateStr)) return false;
     const dayOfWeek = date.getDay();
     const daySettings = availability.find(a => a.day_of_week === dayOfWeek);

@@ -3,6 +3,7 @@ import { User, Phone, Mail, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useBooking } from '../contexts/BookingContext';
 import { supabase, Settings } from '../lib/supabase';
 import { useBusiness } from '../contexts/BusinessContext';
+import { toLocalDateString } from '../lib/calendar-utils';
 import { useEffect } from 'react';
 
 export function BookingForm() {
@@ -62,7 +63,7 @@ export function BookingForm() {
     setLoading(true);
 
     try {
-      const dateStr = bookingData.date!.toISOString().split('T')[0];
+      const dateStr = toLocalDateString(bookingData.date!);
 
       const bookingRes = await supabase.rpc('generate_booking_code', { p_business_id: business.id });
 
