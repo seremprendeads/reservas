@@ -182,9 +182,12 @@ Deno.serve(async (req: Request) => {
 
     if (findError) throw findError;
 
+    // external_reference puede ser un booking_code (RES-2026-0001, de
+    // create-payment) o el id de un pedido de Tienda (create-shop-payment).
+    // Si no matchea una reserva, se prueba como pedido antes de descartar
+    // el aviso.
     if (!existingBooking) {
-      console.error("Reserva no encontrada para el codigo:", extRef);
-      return new Response("Booking not found", { status: 200 });
+      return await procesarPedidoTienda(supabase, extRef, prov.business_id, String(paymentId));
     }
 
     const businessId = existingBooking.business_id;
@@ -242,3 +245,64 @@ Deno.serve(async (req: Request) => {
     return new Response("Error", { status: 500 });
   }
 });
+
+// Marca un pedido de Tienda como pagado y descuenta stock. decrement_stock()
+// es SECURITY DEFINER con FOR UPDATE (bloquea la fila del producto), asi que
+// dos avisos simultaneos no pueden descontar el mismo stock dos veces ni
+// dejarlo negativo.
+async function procesarPedidoTienda(
+  supabase: ReturnType<typeof createClient>,
+  orderId: string,
+  businessId: string,
+  paymentId: string
+): Promise<Response> {
+  const { data: order, error: findError } = await supabase
+    .from("shop_orders")
+    .select("id, payment_status")
+    .eq("id", orderId)
+    .eq("business_id", businessId)
+    .maybeSingle();
+
+  if (findError) throw findError;
+
+  if (!order) {
+    console.error("Ni reserva ni pedido de tienda encontrados para:", orderId);
+    return new Response("Not found", { status: 200 });
+  }
+
+  // Idempotencia: MP reintenta los avisos, no procesar dos veces.
+  if (order.payment_status === "approved") {
+    return new Response("Already processed", { status: 200 });
+  }
+
+  const { error: updateError } = await supabase
+    .from("shop_orders")
+    .update({ payment_status: "approved", payment_id: paymentId })
+    .eq("id", orderId)
+    .eq("business_id", businessId);
+
+  if (updateError) throw updateError;
+
+  const { data: items } = await supabase
+    .from("shop_order_items")
+    .select("product_id, quantity")
+    .eq("order_id", orderId);
+
+  for (const item of items || []) {
+    const { data: ok, error: stockError } = await supabase.rpc("decrement_stock", {
+      p_product_id: item.product_id,
+      p_quantity: item.quantity,
+      p_reference: orderId,
+    });
+    if (stockError || !ok) {
+      // El pago ya esta aprobado — esto solo deja el stock desactualizado
+      // (ej: se vendio de mas por otro canal mientras tanto). Se loguea para
+      // revisar a mano, no se revierte el pago.
+      console.error("No se pudo descontar stock:", item.product_id, stockError);
+    }
+  }
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}

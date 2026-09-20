@@ -163,7 +163,9 @@ function ShopPageContent() {
     // El stock ya no se descuenta acá: lo hace el webhook cuando el pago se
     // aprueba. Antes, si el comprador cerraba la pestania, el stock no bajaba.
     const interval = setInterval(async () => {
-      const { data } = await supabase.from('shop_orders').select('payment_status').eq('id', orderId).eq('business_id', business?.id || '').maybeSingle();
+      const { data } = await supabase.functions.invoke('public-shop-order-status', {
+        body: { order_id: orderId, business_id: business?.id },
+      });
       if (data?.payment_status === 'approved') {
         clearInterval(interval);
         setOrderSuccess(true);
