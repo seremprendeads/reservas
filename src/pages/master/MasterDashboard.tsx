@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { masterGetToken, masterGetName, masterGetEmail, masterClearSession } from '../../lib/master-session';
-import { ShieldCheck, Users, Clock, Ban, CheckCircle, LogOut, RefreshCw, ChevronDown, ChevronUp, Plus, Copy, Check } from 'lucide-react';
+import { ShieldCheck, Users, Clock, Ban, CheckCircle, LogOut, RefreshCw, ChevronDown, ChevronUp, Plus, Copy, Check, ExternalLink } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
@@ -344,6 +344,10 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
             {v === 'dashboard' ? 'Dashboard' : v === 'tenants' ? 'Profesionales' : 'Seguimiento'}
           </button>
         ))}
+        <a href="/bookingclient-administracion-bio" target="_blank" rel="noopener noreferrer"
+          className="ml-auto flex items-center gap-1.5 px-4 py-3 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors">
+          <ExternalLink className="h-3.5 w-3.5" /> Panel del negocio principal
+        </a>
       </nav>
 
       <main className="p-6 max-w-7xl mx-auto">
