@@ -69,6 +69,7 @@ Deno.serve(async (req: Request) => {
         .from("bookings")
         .select("*")
         .eq("id", booking_id)
+        .eq("business_id", tenantId)
         .maybeSingle();
 
       if (!booking) return jsonError("Reserva no encontrada", 404);
