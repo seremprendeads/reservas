@@ -224,6 +224,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
     address: '',
     phone: '',
     whatsapp: '',
+    whatsapp_floating_enabled: true,
     email: '',
     instagram: '',
     facebook: '',

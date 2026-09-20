@@ -112,6 +112,10 @@ export interface LandingSections {
     address: string;
     phone: string;
     whatsapp: string;
+    // El numero de whatsapp tambien lo usan los botones "Consultar" de Planes.
+    // Este toggle solo controla si ademas aparece la burbuja flotante — antes
+    // cargar el numero para Planes obligaba a mostrar la burbuja tambien.
+    whatsapp_floating_enabled: boolean;
     email: string;
     instagram: string;
     facebook: string;

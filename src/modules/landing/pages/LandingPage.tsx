@@ -511,7 +511,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
       )}
 
       {/* ─── FLOATING WHATSAPP ─── */}
-      {s.footer?.whatsapp && (
+      {s.footer?.whatsapp && s.footer?.whatsapp_floating_enabled && (
         <FloatingWhatsApp phone={s.footer.whatsapp} />
       )}
     </div>

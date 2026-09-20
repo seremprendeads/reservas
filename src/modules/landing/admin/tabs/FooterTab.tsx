@@ -42,9 +42,19 @@ export function FooterTab({ sections, updateSection }: FooterTabProps) {
       </div>
       <Separator />
       <div>
-        <label className="text-sm font-medium text-foreground">WhatsApp (botón flotante)</label>
+        <label className="text-sm font-medium text-foreground">WhatsApp</label>
         <Input value={f.whatsapp} onChange={e => update('whatsapp', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="+54 11 1234-5678" />
+        <p className="text-xs text-muted-foreground mt-1">Lo usan el botón flotante y los botones "Consultar" de la sección Planes.</p>
       </div>
+      <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-muted/40 transition-all duration-200">
+        <input
+          type="checkbox"
+          checked={f.whatsapp_floating_enabled}
+          onChange={() => updateSection('footer', { ...f, whatsapp_floating_enabled: !f.whatsapp_floating_enabled })}
+          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+        />
+        <span className="text-sm font-medium text-foreground">Mostrar burbuja flotante de WhatsApp</span>
+      </label>
       <Separator />
       <p className="text-sm font-medium text-foreground">Redes sociales</p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
