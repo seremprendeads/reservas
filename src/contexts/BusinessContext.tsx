@@ -26,7 +26,7 @@ const PUBLIC_BUSINESS_FIELDS = 'id, name, slug, logo_url, timezone, currency, is
 // La mitigación es que la tabla businesses tiene RLS que solo permite service_role para
 // los campos sensibles — el cliente solo accede a public_businesses (vista segura).
 // Para el panel de admin, cargamos desde la vista y complementamos vía Edge Function si es necesario.
-const ADMIN_BUSINESS_FIELDS = 'id, name, slug, logo_url, timezone, currency, is_active, is_trial, trial_ends_at, plan';
+const ADMIN_BUSINESS_FIELDS = 'id, name, slug, logo_url, timezone, currency, is_active, is_trial, trial_ends_at, plan, product_limit';
 
 async function fetchBusinessById(businessId: string): Promise<Business | null> {
   // Intenta primero con campos admin (post-login, cuando hay sesión)

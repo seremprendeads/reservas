@@ -14,7 +14,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: tenants, error } = await supabase
       .from("businesses")
-      .select("id, name, slug, owner_email, is_active, plan, is_trial, trial_ends_at, created_at")
+      .select("id, name, slug, owner_email, is_active, plan, is_trial, trial_ends_at, created_at, product_limit")
       .order("created_at", { ascending: false });
 
     if (error) throw error;

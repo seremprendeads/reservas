@@ -17,6 +17,7 @@ interface DashboardStats {
 }
 
 import { TrialTracking } from './TrialTracking';
+import { PLAN_LIMITS } from '../../modules/shop/config';
 
 interface Tenant {
   id: string;
@@ -28,6 +29,7 @@ interface Tenant {
   is_trial: boolean;
   trial_ends_at: string | null;
   created_at: string;
+  product_limit: number | null;
 }
 
 interface InviteResult {
@@ -242,6 +244,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<Record<string, string>>({});
+  const [productLimitInput, setProductLimitInput] = useState<Record<string, string>>({});
   const [mainBusinessUrl, setMainBusinessUrl] = useState(() => localStorage.getItem('master_main_business_url') || '');
 
   const editMainBusinessUrl = () => {
@@ -295,6 +298,28 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
       const body: Record<string, unknown> = { business_id: businessId, action };
       if (plan) body.plan = plan;
       const { data, error: fnErr } = await invokeMaster('master-update-tenant', body);
+      if (fnErr || !data?.success) throw new Error('Error al ejecutar acción');
+      await loadTenants();
+    } catch {
+      setActionError('Error al ejecutar la acción. Intentá de nuevo.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleSetProductLimit = async (businessId: string, value: string) => {
+    const trimmed = value.trim();
+    const product_limit = trimmed === '' ? null : Number(trimmed);
+    if (product_limit !== null && (!Number.isInteger(product_limit) || product_limit < 1)) {
+      setActionError('El límite de productos debe ser un número entero mayor a 0 (o vacío para usar el del plan).');
+      return;
+    }
+    setActionLoading(businessId + 'set_product_limit');
+    setActionError('');
+    try {
+      const { data, error: fnErr } = await invokeMaster('master-update-tenant', {
+        business_id: businessId, action: 'set_product_limit', product_limit,
+      });
       if (fnErr || !data?.success) throw new Error('Error al ejecutar acción');
       await loadTenants();
     } catch {
@@ -546,6 +571,21 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
                                 <Button variant="outline" size="sm" disabled={!!actionLoading}
                                   onClick={() => handleAction(t.id, 'change_plan', selectedPlan[t.id] || t.plan)}>
                                   {actionLoading === t.id + 'change_plan' ? 'Cambiando...' : 'Cambiar plan'}
+                                </Button>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="number"
+                                  min={1}
+                                  placeholder={`Límite (def. ${PLAN_LIMITS.products})`}
+                                  value={productLimitInput[t.id] ?? (t.product_limit ?? '')}
+                                  onChange={(e) => setProductLimitInput(prev => ({ ...prev, [t.id]: e.target.value }))}
+                                  className="text-xs border border-border rounded px-2 py-1.5 bg-background w-40"
+                                />
+                                <Button variant="outline" size="sm" disabled={!!actionLoading}
+                                  onClick={() => handleSetProductLimit(t.id, productLimitInput[t.id] ?? String(t.product_limit ?? ''))}>
+                                  {actionLoading === t.id + 'set_product_limit' ? 'Guardando...' : 'Límite de productos'}
                                 </Button>
                               </div>
                             </div>

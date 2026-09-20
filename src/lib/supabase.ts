@@ -30,6 +30,9 @@ export type Business = {
   plan?: string;
   is_trial?: boolean;
   trial_ends_at?: string | null;
+  // Limite de productos activos de la Tienda, personalizado para este negocio
+  // (extra pago). null/undefined = usa el limite general del plan.
+  product_limit?: number | null;
   timezone: string;
   currency: string;
   language?: string;

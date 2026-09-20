@@ -3,8 +3,9 @@ import { authenticateMaster, createServiceClient, jsonSuccess, jsonError, jsonUn
 
 // Planes válidos — DEBEN coincidir con el CHECK constraint de businesses.plan en la DB.
 // free = Free Bio Standard · bio_pro = Bio Pro · bio_reservas = Bio Pro + Reservas
-// bio_reservas_web = Bio Pro + Reservas + Sitio web · enterprise = Todo completo · pro = anterior
-const VALID_PLANS = ["free", "bio_pro", "bio_reservas", "bio_reservas_web", "pro", "enterprise"];
+// bio_web = Bio Pro + Sitio web · bio_reservas_web = Bio Pro + Reservas + Sitio web
+// bio_web_shop = Bio Pro + Sitio web + Tienda · enterprise = Todo completo · pro = anterior
+const VALID_PLANS = ["free", "bio_pro", "bio_reservas", "bio_web", "bio_reservas_web", "bio_web_shop", "pro", "enterprise"];
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -15,7 +16,7 @@ Deno.serve(async (req: Request) => {
     const auth = await authenticateMaster(req);
     if ("error" in auth) return jsonUnauthorized();
 
-    const { business_id, action, plan } = await req.json();
+    const { business_id, action, plan, product_limit } = await req.json();
 
     if (!business_id) return jsonError("business_id requerido", 400);
 
@@ -63,8 +64,21 @@ Deno.serve(async (req: Request) => {
         };
         break;
 
+      case "set_product_limit":
+        // product_limit null/vacio = vuelve a usar el limite general del plan.
+        if (product_limit !== null && product_limit !== undefined) {
+          const n = Number(product_limit);
+          if (!Number.isInteger(n) || n < 1) {
+            return jsonError("product_limit debe ser un entero positivo o null", 400);
+          }
+          updates = { product_limit: n };
+        } else {
+          updates = { product_limit: null };
+        }
+        break;
+
       default:
-        return jsonError("Acción inválida. Válidas: suspend, reactivate, change_plan, extend_trial", 400);
+        return jsonError("Acción inválida. Válidas: suspend, reactivate, change_plan, extend_trial, set_product_limit", 400);
     }
 
     updates.updated_at = new Date().toISOString();

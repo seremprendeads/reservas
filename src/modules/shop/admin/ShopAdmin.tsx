@@ -195,8 +195,7 @@ function ShopDashboard() {
   );
 }
 
-function ProductUsageIndicator({ count }: { count: number }) {
-  const limit = PLAN_LIMITS.products;
+function ProductUsageIndicator({ count, limit = PLAN_LIMITS.products }: { count: number; limit?: number }) {
   const remaining = limit - count;
   const percentage = Math.round((count / limit) * 100);
   const isNearLimit = remaining <= 2 && remaining > 0;
@@ -254,8 +253,9 @@ function ProductsManager() {
   const [saving, setSaving] = useState(false);
   const [showLimitDialog, setShowLimitDialog] = useState(false);
 
+  const productLimit = business?.product_limit ?? PLAN_LIMITS.products;
   const activeCount = products.filter(p => p.is_active).length;
-  const isAtLimit = activeCount >= PLAN_LIMITS.products;
+  const isAtLimit = activeCount >= productLimit;
 
   const reload = () => {
     if (!business?.id) return;
@@ -336,7 +336,7 @@ function ProductsManager() {
 
   return (
     <div className="space-y-4">
-      <ProductUsageIndicator count={activeCount} />
+      <ProductUsageIndicator count={activeCount} limit={productLimit} />
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="relative flex-1 max-w-sm">
@@ -491,7 +491,7 @@ function ProductsManager() {
           <DialogHeader>
             <DialogTitle>Límite de productos alcanzado</DialogTitle>
             <DialogDescription>
-              Tu plan actual permite publicar hasta {PLAN_LIMITS.products} productos activos.
+              Tu plan actual permite publicar hasta {productLimit} productos activos.
               <br /><br />
               Para agregar más productos podés ampliar tu plan y desbloquear una capacidad mayor.
             </DialogDescription>
