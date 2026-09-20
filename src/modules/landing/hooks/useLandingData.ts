@@ -19,7 +19,15 @@ const FONT_GOOGLE_MAP: Record<string, string> = {
   'Plus Jakarta Sans': 'Plus+Jakarta+Sans:wght@400;500;600;700;800',
   'Instrument Sans': 'Instrument+Sans:wght@400;500;600;700;800',
   'Geist': 'Geist:wght@400;500;600;700;800',
+  'Poppins': 'Poppins:wght@400;500;600;700;800',
+  'Outfit': 'Outfit:wght@400;500;600;700;800',
   'Dancing Script': 'Dancing+Script:wght@400;500;600;700',
+  // Serif editoriales
+  'Fraunces': 'Fraunces:wght@400;500;600;700;800;900',
+  'Playfair Display': 'Playfair+Display:wght@400;500;600;700;800;900',
+  'Cormorant Garamond': 'Cormorant+Garamond:wght@400;500;600;700',
+  'Libre Baskerville': 'Libre+Baskerville:wght@400;700',
+  'DM Serif Display': 'DM+Serif+Display',
 };
 
 function getGoogleFontsUrl(...fonts: string[]) {

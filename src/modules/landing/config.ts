@@ -6,11 +6,20 @@ export const TEMPLATES: { id: LandingTemplate; name: string; description: string
 ];
 
 export const AVAILABLE_FONTS = [
+  // Serif / editoriales — para un aire más refinado en los títulos
+  { id: 'Fraunces', label: 'Fraunces (Serif editorial)' },
+  { id: 'Playfair Display', label: 'Playfair Display (Serif elegante)' },
+  { id: 'Cormorant Garamond', label: 'Cormorant Garamond (Serif delicada)' },
+  { id: 'Libre Baskerville', label: 'Libre Baskerville (Serif clásica)' },
+  { id: 'DM Serif Display', label: 'DM Serif Display (Serif con carácter)' },
+  // Sans-serif — para cuerpo de texto o títulos más modernos
   { id: 'Geist', label: 'Geist' },
   { id: 'Inter', label: 'Inter' },
   { id: 'Manrope', label: 'Manrope' },
   { id: 'Plus Jakarta Sans', label: 'Plus Jakarta Sans' },
   { id: 'Instrument Sans', label: 'Instrument Sans' },
+  { id: 'Poppins', label: 'Poppins' },
+  { id: 'Outfit', label: 'Outfit' },
   { id: 'Dancing Script', label: 'Dancing Script (Cursiva)' },
 ];
 
