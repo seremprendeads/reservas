@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { Business } from '../../../../lib/supabase';
+import type { Business } from '../../../lib/supabase';
 import type { SubscriptionInfo, SubscriptionConfig, SubscriptionStatus, ModuleId } from '../types';
 import { DEFAULT_SUBSCRIPTION_CONFIG, getEnabledModules } from '../lib/constants';
 

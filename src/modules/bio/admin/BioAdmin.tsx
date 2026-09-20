@@ -113,12 +113,12 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
   const draftRef = useRef<Partial<BioProfile>>({});
 
-  const handleFieldChange = (key: keyof BioProfile, value: string | boolean | null) => {
+  const handleFieldChange = (key: keyof BioProfile, value: string | boolean | number | null) => {
     (draftRef.current as Record<string, unknown>)[key] = value;
     setProfile(prev => {
       if (!prev) {
         const base: BioProfile = {
-          id: '', admin_email: adminEmail, slug: business?.slug || '',
+          id: '', business_id: business?.id || '', admin_email: adminEmail, slug: business?.slug || '',
           name: '', description: '', avatar_url: null, city: null, whatsapp: null,
           email: null, website: null, social_instagram: null, social_tiktok: null,
           social_facebook: null, social_youtube: null, social_twitter: null, social_linkedin: null,
