@@ -57,6 +57,19 @@ async function fetchBusinessById(businessId: string): Promise<Business | null> {
   return data as Business | null;
 }
 
+// err.message a veces viene vacío en errores de Postgrest (ej: RLS deniega
+// sin mensaje claro) — sumamos code/details/hint para poder diagnosticar
+// sin acceso a los logs de Supabase.
+function describeError(err: unknown): string {
+  if (err && typeof err === 'object') {
+    const e = err as { message?: string; details?: string; hint?: string; code?: string };
+    const parts = [e.message, e.details, e.hint, e.code].filter(Boolean);
+    if (parts.length) return parts.join(' — ');
+  }
+  if (err instanceof Error) return err.message;
+  return 'Error cargando negocio';
+}
+
 async function fetchBusinessBySlug(slug: string): Promise<Business | null> {
   // Para páginas públicas: usa la vista que no expone datos sensibles
   const { data, error } = await supabase
@@ -88,7 +101,7 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
       setBusiness(biz);
     } catch (err) {
       console.error('Error loading business:', err);
-      setError(err instanceof Error ? err.message : 'Error cargando negocio');
+      setError(describeError(err));
     } finally {
       setLoading(false);
     }
@@ -111,7 +124,7 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
       await loadBusiness(biz.id);
     } catch (err) {
       console.error('Error loading business by slug:', err);
-      setError(err instanceof Error ? err.message : 'Error cargando negocio');
+      setError(describeError(err));
     }
   };
 
@@ -123,7 +136,7 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
       await loadBusiness(id);
     } catch (err) {
       console.error('Error setting business by id:', err);
-      setError(err instanceof Error ? err.message : 'Error cargando negocio');
+      setError(describeError(err));
     }
   };
 
