@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { masterGetToken, masterGetName, masterGetEmail, masterClearSession } from '../../lib/master-session';
-import { ShieldCheck, Users, Clock, Ban, CheckCircle, LogOut, RefreshCw, ChevronDown, ChevronUp, Plus, Copy, Check, ExternalLink } from 'lucide-react';
+import { ShieldCheck, Users, Clock, Ban, CheckCircle, LogOut, RefreshCw, ChevronDown, ChevronUp, Plus, Copy, Check, ExternalLink, Edit2 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
@@ -237,6 +237,16 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<Record<string, string>>({});
+  const [mainBusinessUrl, setMainBusinessUrl] = useState(() => localStorage.getItem('master_main_business_url') || '');
+
+  const editMainBusinessUrl = () => {
+    const next = window.prompt('Link del negocio principal:', mainBusinessUrl);
+    if (next === null) return;
+    const trimmed = next.trim();
+    setMainBusinessUrl(trimmed);
+    if (trimmed) localStorage.setItem('master_main_business_url', trimmed);
+    else localStorage.removeItem('master_main_business_url');
+  };
   const [expandedTenant, setExpandedTenant] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -344,10 +354,25 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
             {v === 'dashboard' ? 'Dashboard' : v === 'tenants' ? 'Profesionales' : 'Seguimiento'}
           </button>
         ))}
-        <a href="/bookingclient-administracion-bio" target="_blank" rel="noopener noreferrer"
-          className="ml-auto flex items-center gap-1.5 px-4 py-3 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors">
-          <ExternalLink className="h-3.5 w-3.5" /> Panel del negocio principal
-        </a>
+        <div className="ml-auto flex items-center gap-1">
+          {mainBusinessUrl ? (
+            <a href={mainBusinessUrl} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-4 py-3 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors">
+              <ExternalLink className="h-3.5 w-3.5" /> Panel del negocio principal
+            </a>
+          ) : (
+            <button onClick={editMainBusinessUrl}
+              className="flex items-center gap-1.5 px-4 py-3 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors">
+              <Plus className="h-3.5 w-3.5" /> Agregar link del negocio principal
+            </button>
+          )}
+          {mainBusinessUrl && (
+            <button onClick={editMainBusinessUrl} title="Editar link"
+              className="px-2 py-3 text-foreground/40 hover:text-foreground transition-colors">
+              <Edit2 className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </nav>
 
       <main className="p-6 max-w-7xl mx-auto">
