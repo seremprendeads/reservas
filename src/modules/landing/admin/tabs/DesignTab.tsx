@@ -1,12 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { Input } from '../../../../components/ui/input';
 import { Button } from '../../../../components/ui/button';
 import { Separator } from '../../../../components/ui/separator';
 import { supabase } from '../../../../lib/supabase';
-import { AVAILABLE_FONTS, DEFAULT_THEME } from '../../config';
+import { AVAILABLE_FONTS, DEFAULT_THEME, getGoogleFontsUrl } from '../../config';
 import { allThemes } from '../../../../themes';
 import type { LandingTheme } from '../../types';
+
+// Carga todas las tipografías disponibles una sola vez, para que el selector
+// pueda mostrar cada opción en su letra real (si no, el <select> las muestra
+// todas con la fuente del sistema porque nunca se descargaron los archivos).
+function useLoadAllFonts() {
+  useEffect(() => {
+    const url = getGoogleFontsUrl(...AVAILABLE_FONTS.map(f => f.id));
+    if (!url) return;
+    if (document.querySelector(`link[href="${url}"]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = url;
+    document.head.appendChild(link);
+  }, []);
+}
 
 interface DesignTabProps {
   theme: LandingTheme; updateTheme: (k: string, v: string) => void; businessId: string;
@@ -23,6 +38,7 @@ function isLightColor(hex: string): boolean {
 
 export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
   const [selectedThemeId, setSelectedThemeId] = useState('');
+  useLoadAllFonts();
 
   const applyTheme = (themeId: string) => {
     const t = allThemes.find(th => th.id === themeId);
@@ -207,14 +223,14 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
             <label className="text-xs text-muted-foreground">Títulos</label>
             <select value={theme.font_heading} onChange={e => updateTheme('font_heading', e.target.value)}
               className="mt-1 w-full h-9 rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              {AVAILABLE_FONTS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
+              {AVAILABLE_FONTS.map(f => <option key={f.id} value={f.id} style={{ fontFamily: `'${f.id}', sans-serif` }}>{f.label}</option>)}
             </select>
           </div>
           <div>
             <label className="text-xs text-muted-foreground">Cuerpo</label>
             <select value={theme.font_body} onChange={e => updateTheme('font_body', e.target.value)}
               className="mt-1 w-full h-9 rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              {AVAILABLE_FONTS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
+              {AVAILABLE_FONTS.map(f => <option key={f.id} value={f.id} style={{ fontFamily: `'${f.id}', sans-serif` }}>{f.label}</option>)}
             </select>
           </div>
         </div>

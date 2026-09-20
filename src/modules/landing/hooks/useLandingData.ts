@@ -9,36 +9,9 @@ import type {
   LandingTemplate,
   LandingSEO,
 } from '../types';
-import { DEFAULT_SECTIONS, DEFAULT_THEME, TEMPLATE_STYLES } from '../config';
+import { DEFAULT_SECTIONS, DEFAULT_THEME, TEMPLATE_STYLES, getGoogleFontsUrl } from '../config';
 
 export type TemplateStyles = typeof TEMPLATE_STYLES[LandingTemplate];
-
-const FONT_GOOGLE_MAP: Record<string, string> = {
-  'Inter': 'Inter:wght@400;500;600;700;800',
-  'Manrope': 'Manrope:wght@400;500;600;700;800',
-  'Plus Jakarta Sans': 'Plus+Jakarta+Sans:wght@400;500;600;700;800',
-  'Instrument Sans': 'Instrument+Sans:wght@400;500;600;700;800',
-  'Geist': 'Geist:wght@400;500;600;700;800',
-  'Poppins': 'Poppins:wght@400;500;600;700;800',
-  'Outfit': 'Outfit:wght@400;500;600;700;800',
-  'Dancing Script': 'Dancing+Script:wght@400;500;600;700',
-  // Serif editoriales
-  'Fraunces': 'Fraunces:wght@400;500;600;700;800;900',
-  'Playfair Display': 'Playfair+Display:wght@400;500;600;700;800;900',
-  'Cormorant Garamond': 'Cormorant+Garamond:wght@400;500;600;700',
-  'Libre Baskerville': 'Libre+Baskerville:wght@400;700',
-  'DM Serif Display': 'DM+Serif+Display',
-};
-
-function getGoogleFontsUrl(...fonts: string[]) {
-  const families = new Set<string>();
-  for (const f of fonts) {
-    const mapped = FONT_GOOGLE_MAP[f];
-    if (mapped) families.add(mapped);
-  }
-  if (families.size === 0) return null;
-  return `https://fonts.googleapis.com/css2?${[...families].map(f => `family=${f}`).join('&')}&display=swap`;
-}
 
 interface UseLandingDataOptions {
   initialData?: LandingPageType;

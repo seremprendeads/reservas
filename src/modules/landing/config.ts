@@ -23,6 +23,36 @@ export const AVAILABLE_FONTS = [
   { id: 'Dancing Script', label: 'Dancing Script (Cursiva)' },
 ];
 
+// Query string de Google Fonts (familia:peso) para cada tipografía disponible.
+// Usado tanto por la landing pública (useLandingData) como por el selector de
+// tipografía del editor (DesignTab), para que este último pueda cargar las
+// fuentes y mostrar cada opción en su letra real.
+export const FONT_GOOGLE_MAP: Record<string, string> = {
+  'Inter': 'Inter:wght@400;500;600;700;800',
+  'Manrope': 'Manrope:wght@400;500;600;700;800',
+  'Plus Jakarta Sans': 'Plus+Jakarta+Sans:wght@400;500;600;700;800',
+  'Instrument Sans': 'Instrument+Sans:wght@400;500;600;700;800',
+  'Geist': 'Geist:wght@400;500;600;700;800',
+  'Poppins': 'Poppins:wght@400;500;600;700;800',
+  'Outfit': 'Outfit:wght@400;500;600;700;800',
+  'Dancing Script': 'Dancing+Script:wght@400;500;600;700',
+  'Fraunces': 'Fraunces:wght@400;500;600;700;800;900',
+  'Playfair Display': 'Playfair+Display:wght@400;500;600;700;800;900',
+  'Cormorant Garamond': 'Cormorant+Garamond:wght@400;500;600;700',
+  'Libre Baskerville': 'Libre+Baskerville:wght@400;700',
+  'DM Serif Display': 'DM+Serif+Display',
+};
+
+export function getGoogleFontsUrl(...fonts: string[]): string | null {
+  const families = new Set<string>();
+  for (const f of fonts) {
+    const mapped = FONT_GOOGLE_MAP[f];
+    if (mapped) families.add(mapped);
+  }
+  if (families.size === 0) return null;
+  return `https://fonts.googleapis.com/css2?${[...families].map(f => `family=${f}`).join('&')}&display=swap`;
+}
+
 export const DEFAULT_SECTIONS: LandingSections = {
   header: {
     menu_items: [
