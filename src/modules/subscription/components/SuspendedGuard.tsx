@@ -73,7 +73,7 @@ export function SuspendedGuard({ children }: SuspendedGuardProps) {
     setState(prev => ({ ...prev, checking: true }));
 
     supabase
-      .from('businesses')
+      .from('public_businesses')
       .select('*')
       .eq('slug', slug)
       .maybeSingle()

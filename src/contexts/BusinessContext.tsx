@@ -15,45 +15,21 @@ const BusinessContext = createContext<BusinessContextType | null>(null);
 const STORAGE_KEY = 'reservas_business_id';
 const SLUG_STORAGE_KEY = 'reservas_business_slug';
 
-// Campos seguros que el frontend puede leer con la anon key.
-// Usa la vista public_businesses que NO expone owner_email, plan, trial_ends_at, is_trial.
-// Los datos sensibles (plan, trial) se leen solo desde Edge Functions autenticadas.
-const PUBLIC_BUSINESS_FIELDS = 'id, name, slug, logo_url, timezone, currency, is_active';
-
-// Campos adicionales que el admin necesita después del login.
-// Estos se obtienen via Edge Function (service_role), no directamente desde el cliente.
-// Sin embargo, el BusinessContext actual los carga directo para el panel de admin.
-// La mitigación es que la tabla businesses tiene RLS que solo permite service_role para
-// los campos sensibles — el cliente solo accede a public_businesses (vista segura).
-// Para el panel de admin, cargamos desde la vista y complementamos vía Edge Function si es necesario.
-const ADMIN_BUSINESS_FIELDS = 'id, name, slug, logo_url, timezone, currency, is_active, is_trial, trial_ends_at, plan, product_limit';
+// Campos que el frontend puede leer con la anon key, tanto en paginas
+// publicas como en el panel de admin ya logueado. Vienen SIEMPRE de la vista
+// public_businesses (nunca de la tabla businesses directo): la vista nunca
+// expone owner_email ni otras columnas sensibles que puedan agregarse a la
+// tabla en el futuro, y filtra is_active = true de entrada.
+const BUSINESS_FIELDS = 'id, name, slug, logo_url, timezone, currency, is_active, is_trial, trial_ends_at, plan, product_limit';
 
 async function fetchBusinessById(businessId: string): Promise<Business | null> {
-  // Intenta primero con campos admin (post-login, cuando hay sesión)
   const { data, error } = await supabase
-    .from('businesses')
-    .select(ADMIN_BUSINESS_FIELDS)
+    .from('public_businesses')
+    .select(BUSINESS_FIELDS)
     .eq('id', businessId)
-    .eq('is_active', true)
     .maybeSingle();
 
-  if (error) {
-    // Si la migración que agrega product_limit todavía no corrió en la base
-    // en uso, esa columna no existe y esta consulta falla entera (dejando el
-    // panel de admin cargando para siempre en vez de mostrar el negocio).
-    // Reintentamos sin ese campo para no romper el login mientras se aplica.
-    if (error.code === '42703' || error.message?.includes('product_limit')) {
-      const fallback = await supabase
-        .from('businesses')
-        .select('id, name, slug, logo_url, timezone, currency, is_active, is_trial, trial_ends_at, plan')
-        .eq('id', businessId)
-        .eq('is_active', true)
-        .maybeSingle();
-      if (fallback.error) throw fallback.error;
-      return fallback.data as Business | null;
-    }
-    throw error;
-  }
+  if (error) throw error;
   return data as Business | null;
 }
 
@@ -71,10 +47,9 @@ function describeError(err: unknown): string {
 }
 
 async function fetchBusinessBySlug(slug: string): Promise<Business | null> {
-  // Para páginas públicas: usa la vista que no expone datos sensibles
   const { data, error } = await supabase
     .from('public_businesses')
-    .select(PUBLIC_BUSINESS_FIELDS)
+    .select(BUSINESS_FIELDS)
     .eq('slug', slug)
     .maybeSingle();
 
@@ -120,11 +95,12 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
 
       localStorage.setItem(STORAGE_KEY, biz.id);
       localStorage.setItem(SLUG_STORAGE_KEY, slug);
-      // Recargar con campos completos (para el admin si lo necesita)
-      await loadBusiness(biz.id);
+      setBusiness(biz);
     } catch (err) {
       console.error('Error loading business by slug:', err);
       setError(describeError(err));
+    } finally {
+      setLoading(false);
     }
   };
 

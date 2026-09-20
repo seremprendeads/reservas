@@ -26,10 +26,9 @@ export function BioPage() {
     if (!slug) return;
     (async () => {
       const { data: biz } = await supabase
-        .from('businesses')
+        .from('public_businesses')
         .select('id, plan, is_trial, trial_ends_at')
         .eq('slug', slug)
-        .eq('is_active', true)
         .maybeSingle();
       if (!biz) { setNotFound(true); setLoading(false); return; }
 
