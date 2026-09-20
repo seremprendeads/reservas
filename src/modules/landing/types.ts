@@ -106,6 +106,7 @@ export interface LandingSections {
   };
   plans: {
     title: string;
+    items: { name: string; detail: string }[];
   };
   footer: {
     address: string;
@@ -266,6 +267,8 @@ export interface LandingTheme {
   faq_item_bg_color: string;
   map_bg_color: string;
   cta_bg_color: string;
+  plans_bg_color: string;
+  plans_card_bg_color: string;
 }
 
 export interface LandingSEO {

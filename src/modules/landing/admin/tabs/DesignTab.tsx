@@ -58,6 +58,8 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
     updateTheme('faq_item_bg_color', t.tokens.background);
     updateTheme('map_bg_color', t.tokens.background);
     updateTheme('cta_bg_color', t.tokens.primary);
+    updateTheme('plans_bg_color', t.tokens.background);
+    updateTheme('plans_card_bg_color', t.tokens.cardBg);
   };
 
   const copyFromBranding = async () => {
@@ -155,6 +157,8 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
             { label: 'Cada pregunta y respuesta', key: 'faq_item_bg_color' },
             { label: 'Sección Google Maps', key: 'map_bg_color' },
             { label: 'Sección Reservar ahora (CTA)', key: 'cta_bg_color' },
+            { label: 'Sección Planes', key: 'plans_bg_color' },
+            { label: 'Cartas de Planes', key: 'plans_card_bg_color' },
           ].map(c => (
             <div key={c.key} className="space-y-1">
               <label className="text-xs text-muted-foreground">{c.label}</label>

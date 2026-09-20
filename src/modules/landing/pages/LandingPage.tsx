@@ -350,6 +350,7 @@ export function LandingPage({ initialData, isPreview }: { initialData?: LandingP
       {hasSection('plans') && (
         <PlansSection
           plans={s.plans}
+          whatsapp={s.footer?.whatsapp || ''}
           theme={theme}
           ts={ts}
           headingStyle={headingStyle}

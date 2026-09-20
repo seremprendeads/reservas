@@ -122,6 +122,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
   },
   plans: {
     title: 'Elegí tu plan',
+    items: [],
   },
   map: {
     address: '',
@@ -277,6 +278,8 @@ export const DEFAULT_THEME: LandingTheme = {
   faq_item_bg_color: '#ffffff',
   map_bg_color: '#ffffff',
   cta_bg_color: '#059669',
+  plans_bg_color: '#ffffff',
+  plans_card_bg_color: '#fafafa',
 };
 
 export const TEMPLATE_STYLES: Record<LandingTemplate, {
