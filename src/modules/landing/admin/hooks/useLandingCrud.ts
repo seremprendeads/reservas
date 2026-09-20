@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { type Business } from '../../../../lib/supabase';
-import { authInvoke } from '../../../../pages/admin/helpers';
+import { authInvoke, describeFunctionError } from '../../../../pages/admin/helpers';
 import type { LandingSections, LandingPage, LandingTheme, LandingTemplate } from '../../types';
 import { DEFAULT_SECTIONS, DEFAULT_THEME } from '../../config';
 import { SECTION_DEFINITIONS } from '../../types';
@@ -124,7 +124,7 @@ export function useLandingCrud({ business }: UseLandingCrudOptions): UseLandingC
       });
 
       if (error || !res?.success) {
-        throw new Error('No se pudo guardar. Intentá de nuevo.');
+        throw new Error((res as { error?: string } | undefined)?.error || await describeFunctionError(error, 'No se pudo guardar. Intentá de nuevo.'));
       }
 
       await loadLanding();
@@ -154,7 +154,7 @@ export function useLandingCrud({ business }: UseLandingCrudOptions): UseLandingC
       });
 
       if (error || !res?.success) {
-        throw new Error('No se pudo publicar. Intentá de nuevo.');
+        throw new Error((res as { error?: string } | undefined)?.error || await describeFunctionError(error, 'No se pudo publicar. Intentá de nuevo.'));
       }
 
       await loadLanding();

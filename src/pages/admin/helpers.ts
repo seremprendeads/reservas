@@ -27,3 +27,24 @@ export function authInvoke(fnName: string, body: Record<string, unknown> = {}) {
     body,
   });
 }
+
+// Cuando una Edge Function devuelve un status distinto de 2xx, supabase-js
+// tira un error generico ("Edge Function returned a non-2xx status code")
+// y deja el body real sin leer en error.context (un Response crudo). Esto
+// hacia que cualquier fallo de guardado mostrara siempre el mismo mensaje
+// generico, sin poder saber que estaba fallando en el servidor.
+export async function describeFunctionError(error: unknown, fallback: string): Promise<string> {
+  const context = (error as { context?: Response } | null)?.context;
+  if (context && typeof context.json === 'function') {
+    try {
+      const body = await context.clone().json();
+      if (body?.error) return body.error;
+    } catch {
+      // el body no era JSON — seguimos con el fallback
+    }
+  }
+  if (error instanceof Error && error.message && error.message !== 'Edge Function returned a non-2xx status code') {
+    return error.message;
+  }
+  return fallback;
+}
