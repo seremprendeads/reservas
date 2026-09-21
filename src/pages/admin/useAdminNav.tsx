@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Calendar,
   Plug,
+  PlayCircle,
 } from 'lucide-react';
 import type { View, NavItem } from './types';
 import type { WaitingListItem, Booking } from '../../lib/supabase';
@@ -80,7 +81,11 @@ export function useAdminNav(
     const bioItem = modules.find(m => m.id === 'bio');
     const otherModules = modules.filter(m => m.id !== 'bio');
 
+    // Tutoriales: siempre visible (tambien en plan gratuito), arriba de Bio links.
+    const tutorialsItem: NavItem = { id: 'tutorials', label: 'Tutoriales', icon: <PlayCircle className="h-5 w-5" /> };
+
     return [
+      tutorialsItem,
       ...(bioItem ? [bioItem] : []),
       ...core,
       ...otherModules,
@@ -103,6 +108,7 @@ export function useAdminNav(
     whatsapp: 'WhatsApp',
     trash: 'Papelera',
     detail: 'Detalle de Reserva',
+    tutorials: 'Tutoriales',
   };
 
   const viewTitles: Record<View, string> = useMemo(() => {

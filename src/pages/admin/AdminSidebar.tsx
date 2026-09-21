@@ -148,6 +148,23 @@ export function AdminSidebar({
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-3 space-y-1.5">
+          {getItemById('tutorials') && (
+            <button
+              onClick={() => { onNavigate('tutorials'); onSidebarClose(); }}
+              title={collapsed ? getItemById('tutorials')?.label : undefined}
+              className={cn(
+                'flex w-full items-center rounded-2xl text-base font-display transition-all duration-200 mb-2',
+                collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3',
+                currentView === 'tutorials'
+                  ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+                  : 'bg-primary/10 text-primary hover:bg-primary/20'
+              )}
+            >
+              {getItemById('tutorials')?.icon}
+              {!collapsed && <span className="flex-1 text-left font-bold">Tutoriales</span>}
+            </button>
+          )}
+
           {getItemById('bio') && (
             <button
               onClick={() => { onNavigate('bio'); onSidebarClose(); }}

@@ -19,6 +19,7 @@ import { DashboardView } from './admin/DashboardView';
 import { BookingsListView } from './admin/BookingsListView';
 import { BookingDetailView } from './admin/BookingDetailView';
 import { TrashView } from './admin/TrashView';
+import { TutorialsView } from './admin/TutorialsView';
 import { CalendarPage } from './admin/calendar/CalendarPage';
 import { AdminSidebar } from './admin/AdminSidebar';
 import { AdminHeader } from './admin/AdminHeader';
@@ -30,7 +31,7 @@ import { CalendarIntegrations } from '../modules/calendar-integration';
 import type { AdminTab } from '../modules/landing/admin/lib/constants';
 
 // Plan gratuito (prueba vencida sin renovar): solo estas secciones del panel.
-const FREE_PLAN_ALLOWED_VIEWS = ['bio', 'profile'];
+const FREE_PLAN_ALLOWED_VIEWS = ['bio', 'profile', 'tutorials'];
 
 export function AdminPage() {
   const {
@@ -221,6 +222,8 @@ export function AdminPage() {
         return <WaitingListManager waitingList={waitingList} onRefresh={loadData} />;
       case 'whatsapp':
         return <WhatsAppManager bookings={bookings} />;
+      case 'tutorials':
+        return <TutorialsView />;
       case 'profile':
         return (
           <ProfileManager
