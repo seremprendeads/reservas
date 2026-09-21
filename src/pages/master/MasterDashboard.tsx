@@ -307,6 +307,26 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
     }
   };
 
+  const handleEditEmail = async (businessId: string, currentEmail: string) => {
+    const next = window.prompt('Email del dueño del negocio:', currentEmail);
+    if (next === null) return;
+    const trimmed = next.trim();
+    if (!trimmed || trimmed === currentEmail) return;
+    setActionLoading(businessId + 'edit_email');
+    setActionError('');
+    try {
+      const { data, error: fnErr } = await invokeMaster('master-update-tenant', {
+        business_id: businessId, action: 'edit_email', new_email: trimmed,
+      });
+      if (fnErr || !data?.success) throw new Error((fnErr as { error?: string })?.error || 'Error al ejecutar acción');
+      await loadTenants();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Error al ejecutar la acción. Intentá de nuevo.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const handleSetProductLimit = async (businessId: string, value: string) => {
     const trimmed = value.trim();
     const product_limit = trimmed === '' ? null : Number(trimmed);
@@ -545,7 +565,17 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
                               </span>
                               <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{planLabelFor(t)}</span>
                             </div>
-                            <p className="text-xs text-foreground/50 mt-0.5 truncate">{t.owner_email} · /{t.slug}</p>
+                            <p className="text-xs text-foreground/50 mt-0.5 truncate flex items-center gap-1">
+                              {t.owner_email} · /{t.slug}
+                              <button
+                                onClick={() => handleEditEmail(t.id, t.owner_email)}
+                                title="Editar email"
+                                disabled={actionLoading === t.id + 'edit_email'}
+                                className="shrink-0 text-foreground/40 hover:text-foreground transition-colors"
+                              >
+                                <Edit2 className="h-3 w-3" />
+                              </button>
+                            </p>
                           </div>
                           <button
                             onClick={() => setExpandedTenant(isExpanded ? null : t.id)}

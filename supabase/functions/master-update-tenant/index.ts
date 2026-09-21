@@ -16,7 +16,7 @@ Deno.serve(async (req: Request) => {
     const auth = await authenticateMaster(req);
     if ("error" in auth) return jsonUnauthorized();
 
-    const { business_id, action, plan, product_limit, confirm_slug } = await req.json();
+    const { business_id, action, plan, product_limit, confirm_slug, new_email } = await req.json();
 
     if (!business_id) return jsonError("business_id requerido", 400);
 
@@ -25,7 +25,7 @@ Deno.serve(async (req: Request) => {
     // Verificar que el negocio existe antes de operar
     const { data: biz } = await supabase
       .from("businesses")
-      .select("id, name, slug, is_active, plan, is_trial")
+      .select("id, name, slug, is_active, plan, is_trial, owner_email")
       .eq("id", business_id)
       .maybeSingle();
 
@@ -49,6 +49,49 @@ Deno.serve(async (req: Request) => {
       console.log(`Master ${auth.master.email} → action=delete business_id=${business_id} (${biz.slug})`);
 
       return jsonSuccess({ success: true, action: "delete", business_id });
+    }
+
+    // El email es editable aparte porque toca dos tablas a la vez
+    // (businesses.owner_email, que se muestra en este panel, y
+    // admin_users.email, que es con lo que el dueño hace login) y deben
+    // quedar sincronizadas.
+    if (action === "edit_email") {
+      const cleanEmail = (new_email || "").trim().toLowerCase();
+      if (!cleanEmail || !cleanEmail.includes("@")) {
+        return jsonError("Email inválido", 400);
+      }
+
+      const { data: existing } = await supabase
+        .from("admin_users")
+        .select("id")
+        .ilike("email", cleanEmail)
+        .neq("business_id", business_id)
+        .maybeSingle();
+
+      if (existing) {
+        return jsonError("Ese email ya está en uso por otro negocio", 400);
+      }
+
+      const { error: bizUpdateError } = await supabase
+        .from("businesses")
+        .update({ owner_email: cleanEmail, updated_at: new Date().toISOString() })
+        .eq("id", business_id);
+
+      if (bizUpdateError) throw bizUpdateError;
+
+      // Actualiza el/los admin_users de este negocio que tenían el email viejo,
+      // para que el login siga funcionando con el email corregido.
+      const { error: adminUpdateError } = await supabase
+        .from("admin_users")
+        .update({ email: cleanEmail })
+        .eq("business_id", business_id)
+        .ilike("email", biz.owner_email || "");
+
+      if (adminUpdateError) throw adminUpdateError;
+
+      console.log(`Master ${auth.master.email} → action=edit_email business_id=${business_id} (${biz.owner_email} -> ${cleanEmail})`);
+
+      return jsonSuccess({ success: true, action: "edit_email", business_id });
     }
 
     let updates: Record<string, unknown> = {};
@@ -98,7 +141,7 @@ Deno.serve(async (req: Request) => {
         break;
 
       default:
-        return jsonError("Acción inválida. Válidas: suspend, reactivate, change_plan, extend_trial, set_product_limit, delete", 400);
+        return jsonError("Acción inválida. Válidas: suspend, reactivate, change_plan, extend_trial, set_product_limit, edit_email, delete", 400);
     }
 
     updates.updated_at = new Date().toISOString();
