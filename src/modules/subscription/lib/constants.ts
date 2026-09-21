@@ -45,8 +45,8 @@ export const PLAN_MODULES: Record<string, ModuleId[]> = {
   bio_pro: ['bio'],
   // Plan 3 · Bio Pro + Reservas
   bio_reservas: ['bio', 'reservas'],
-  // Plan 4 · Bio Pro + Sitio web (ahora incluye reservas)
-  bio_web: ['bio', 'landing', 'reservas'],
+  // Plan 4 · Bio Pro + Sitio web (sin reservas)
+  bio_web: ['bio', 'landing'],
   // Plan 5 · Bio Pro + Reservas + Sitio web
   bio_reservas_web: ['bio', 'reservas', 'landing'],
   // Plan 6 · Bio Pro + Sitio web + Tienda (sin reservas)

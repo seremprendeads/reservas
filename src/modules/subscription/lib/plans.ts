@@ -58,8 +58,8 @@ export const PLAN_CARDS: PlanCard[] = [
     key: 'bio_web',
     level: 3,
     name: 'Bio Pro + Sitio web',
-    detail: 'Sumá tu página completa con servicios, galería, contacto y agenda de turnos.',
-    modules: ['bio', 'landing', 'reservas'],
+    detail: 'Sumá tu página completa con servicios, galería y contacto (sin agenda de turnos).',
+    modules: ['bio', 'landing'],
     bg: '#FFF9E6', border: '#F5E6B8', button: '#A88A2A',
   },
   {
