@@ -37,7 +37,7 @@ export function BioPage() {
       const paidPlan = !biz.is_trial && biz.plan !== 'free';
       setIsPremium(trialActive || paidPlan);
 
-      const { data: p } = await supabase.from('bio_profiles').select('*').eq('business_id', biz.id).eq('is_active', true).maybeSingle();
+      const { data: p } = await supabase.from('public_bio_profiles').select('*').eq('business_id', biz.id).eq('is_active', true).maybeSingle();
       if (!p) { setNotFound(true); setLoading(false); return; }
       setProfile(p);
 

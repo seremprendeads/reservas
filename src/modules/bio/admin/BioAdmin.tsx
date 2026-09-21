@@ -73,7 +73,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
   const loadProfile = useCallback(async () => {
     if (!business?.id) return;
-    const { data } = await supabase.from('bio_profiles').select('*').eq('business_id', business.id).maybeSingle();
+    const { data } = await supabase.from('public_bio_profiles').select('*').eq('business_id', business.id).maybeSingle();
     if (data) {
       setProfile(data);
       profileRef.current = data;
@@ -213,7 +213,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
         }
       }
       if (p.id) {
-        const { data: fresh } = await supabase.from('bio_profiles').select('*').eq('business_id', business?.id).maybeSingle();
+        const { data: fresh } = await supabase.from('public_bio_profiles').select('*').eq('business_id', business?.id).maybeSingle();
         if (fresh) {
           profileRef.current = fresh;
           setProfile(fresh);
