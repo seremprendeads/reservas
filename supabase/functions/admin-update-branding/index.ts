@@ -18,7 +18,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const body = await req.json();
-    const { logo_url, title, subtitle, primary_color, background_color, card_bg_color, text_color, muted_color, caption_color, background_image_url, bg_opacity, overlay_color, header_color, header_opacity, shop_config } = body;
+    const { logo_url, logo_shape, title, subtitle, primary_color, background_color, card_bg_color, text_color, muted_color, caption_color, background_image_url, bg_opacity, overlay_color, header_color, header_opacity, shop_config } = body;
 
     const supabase = createServiceClient();
     const { error } = await supabase
@@ -26,6 +26,7 @@ Deno.serve(async (req: Request) => {
       .upsert({
         business_id: auth.businessId,
         logo_url: logo_url || "",
+        logo_shape: logo_shape === "square" ? "square" : "circle",
         title: title || "Reserva tu Turno",
         subtitle: subtitle || "Sistema de Reserva",
         primary_color: primary_color || "#059669",

@@ -228,6 +228,7 @@ function BookingContent() {
   const mutedColor = b?.muted_color || '#e6e6e6';
   const captionColor = b?.caption_color || '#e6e6e6';
   const logoUrl = b?.logo_url || '';
+  const logoShape = b?.logo_shape || 'circle';
   const title = b?.title || 'Reserva tu Turno';
   const subtitle = b?.subtitle || 'Sistema de Reserva';
   const bgImageUrl = b?.background_image_url || '';
@@ -291,7 +292,15 @@ function BookingContent() {
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-center">
           <div className="flex items-center gap-4">
             {logoUrl ? (
-              <img src={logoUrl} alt="Logo" className="h-11 w-11 rounded-full object-cover" />
+              <img
+                src={logoUrl}
+                alt="Logo"
+                className={
+                  logoShape === 'square'
+                    ? 'h-11 sm:h-14 w-auto max-w-[200px] object-contain'
+                    : 'h-11 w-11 rounded-full object-cover'
+                }
+              />
             ) : (
               <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: primaryColor }}>
                 <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>

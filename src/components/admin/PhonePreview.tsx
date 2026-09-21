@@ -5,6 +5,7 @@ interface PhonePreviewProps {
   primaryColor: string;
   headerOpacity: number;
   logoUrl: string;
+  logoShape?: 'circle' | 'square';
   title: string;
   subtitle: string;
   mutedColor: string;
@@ -21,6 +22,7 @@ export function PhonePreview({
   primaryColor,
   headerOpacity,
   logoUrl,
+  logoShape,
   title,
   subtitle,
   mutedColor,
@@ -59,7 +61,15 @@ export function PhonePreview({
               }}>
                 <div className="px-4 py-3 flex items-center gap-2.5">
                   {logoUrl ? (
-                    <img src={logoUrl} alt="" className="h-8 w-8 rounded-full object-cover shrink-0" />
+                    <img
+                      src={logoUrl}
+                      alt=""
+                      className={
+                        logoShape === 'square'
+                          ? 'h-8 w-auto max-w-[90px] object-contain shrink-0'
+                          : 'h-8 w-8 rounded-full object-cover shrink-0'
+                      }
+                    />
                   ) : (
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0" style={{ backgroundColor: primaryColor }}>
                       <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>

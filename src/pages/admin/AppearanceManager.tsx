@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { XCircle, RotateCcw } from 'lucide-react';
+import { XCircle, RotateCcw, Circle, Square } from 'lucide-react';
+import { cn } from '../../lib/utils';
 import { Branding } from '../../lib/supabase';
 import { compressImage as compressImageUtil } from '../../lib/image-utils';
 import { Button } from '../../components/ui/button';
@@ -22,6 +23,7 @@ export function AppearanceManager({
 }) {
   const { business } = useBusiness();
   const [logoUrl, setLogoUrl] = useState(branding?.logo_url || '');
+  const [logoShape, setLogoShape] = useState<'circle' | 'square'>(branding?.logo_shape || 'circle');
   const [title, setTitle] = useState(branding?.title || 'Reserva tu Turno');
   const [subtitle, setSubtitle] = useState(branding?.subtitle || 'Sistema de Reserva');
   const [primaryColor, setPrimaryColor] = useState(branding?.primary_color || '#059669');
@@ -108,6 +110,7 @@ export function AppearanceManager({
     try {
       const data = {
                 logo_url: logoUrl,
+        logo_shape: logoShape,
         title,
         subtitle,
         primary_color: primaryColor,
@@ -178,12 +181,22 @@ export function AppearanceManager({
             <CardContent className="space-y-5">
               <div className="space-y-3">
                 <label className="text-sm font-medium text-foreground">Logo</label>
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full overflow-hidden border shrink-0" style={{ backgroundColor: primaryColor }}>
+                <div className="flex items-center gap-4 flex-wrap">
+                  <div
+                    className={cn(
+                      'flex items-center justify-center overflow-hidden border shrink-0',
+                      logoShape === 'square' ? 'h-14 w-auto max-w-[160px] px-2 rounded-lg' : 'h-14 w-14 rounded-full'
+                    )}
+                    style={{ backgroundColor: primaryColor }}
+                  >
                     {logoUrl ? (
-                      <img src={logoUrl} alt="Logo" className="h-full w-full object-cover" />
+                      <img
+                        src={logoUrl}
+                        alt="Logo"
+                        className={logoShape === 'square' ? 'h-full w-auto object-contain' : 'h-full w-full object-cover'}
+                      />
                     ) : (
-                      <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      <svg className="h-7 w-7 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     )}
                   </div>
                   <div className="flex gap-3">
@@ -196,8 +209,37 @@ export function AppearanceManager({
                       </Button>
                     )}
                   </div>
+                  <div className="flex items-center gap-1 rounded-xl border p-1">
+                    <button
+                      type="button"
+                      title="Círculo"
+                      onClick={() => setLogoShape('circle')}
+                      className={cn(
+                        'flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-200',
+                        logoShape === 'circle' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted/40'
+                      )}
+                    >
+                      <Circle className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Cuadrado"
+                      onClick={() => setLogoShape('square')}
+                      className={cn(
+                        'flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-200',
+                        logoShape === 'square' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted/40'
+                      )}
+                    >
+                      <Square className="h-4 w-4" />
+                    </button>
+                  </div>
                   <input ref={logo.fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  {logoShape === 'circle'
+                    ? 'Círculo: recorta la imagen al centro. Subí una imagen cuadrada (ej. 400×400px) para que no se corte mal.'
+                    : 'Cuadrado: muestra el logo completo sin recortar. Sirve tanto para un ícono cuadrado como para un logo ancho (ícono + texto). Recomendado: fondo transparente (PNG).'}
+                </p>
               </div>
               <Separator />
               <div className="grid gap-5 md:grid-cols-2">
@@ -334,6 +376,7 @@ export function AppearanceManager({
           primaryColor={primaryColor}
           headerOpacity={headerOpacity}
           logoUrl={logoUrl}
+          logoShape={logoShape}
           title={title}
           subtitle={subtitle}
           mutedColor={mutedColor}

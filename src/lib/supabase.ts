@@ -156,6 +156,7 @@ export type Branding = {
   id: string;
   business_id: string;
   logo_url: string;
+  logo_shape: 'circle' | 'square';
   title: string;
   subtitle: string;
   primary_color: string;
