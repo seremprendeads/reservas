@@ -156,8 +156,8 @@ export function AdminSidebar({
                 'flex w-full items-center rounded-2xl text-base font-display transition-all duration-200 mb-2',
                 collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3',
                 currentView === 'tutorials'
-                  ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                  : 'bg-primary/10 text-primary hover:bg-primary/20'
+                  ? 'bg-red-500 text-white shadow-md shadow-red-500/20'
+                  : 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20'
               )}
             >
               {getItemById('tutorials')?.icon}

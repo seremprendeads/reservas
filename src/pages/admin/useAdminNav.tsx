@@ -12,7 +12,7 @@ import {
   LayoutDashboard,
   Calendar,
   Plug,
-  PlayCircle,
+  Youtube,
 } from 'lucide-react';
 import type { View, NavItem } from './types';
 import type { WaitingListItem, Booking } from '../../lib/supabase';
@@ -82,7 +82,7 @@ export function useAdminNav(
     const otherModules = modules.filter(m => m.id !== 'bio');
 
     // Tutoriales: siempre visible (tambien en plan gratuito), arriba de Bio links.
-    const tutorialsItem: NavItem = { id: 'tutorials', label: 'Tutoriales', icon: <PlayCircle className="h-5 w-5" /> };
+    const tutorialsItem: NavItem = { id: 'tutorials', label: 'Tutoriales', icon: <Youtube className="h-5 w-5" /> };
 
     return [
       tutorialsItem,
