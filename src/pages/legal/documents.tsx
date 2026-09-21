@@ -122,8 +122,8 @@ function PrivacyPolicy({ d }: { d: PublicLegalInfo }) {
 
   const providers: ReactNode[] = [];
   providers.push(d.has_reservas || d.has_shop
-    ? 'BookingBio, como plataforma de la página, las reservas y la tienda.'
-    : 'BookingBio, como plataforma de la página.');
+    ? 'BioWebLink, como plataforma de la página, las reservas y la tienda.'
+    : 'BioWebLink, como plataforma de la página.');
   providers.push('Supabase, para la base de datos y el almacenamiento de archivos.');
   providers.push('Vercel, para el alojamiento del sitio web.');
   if (pays) providers.push('Mercado Pago, cuando realizás un pago online.');
@@ -141,8 +141,8 @@ function PrivacyPolicy({ d }: { d: PublicLegalInfo }) {
         <p>{holderSentence(d, 'El responsable es')}</p>
         <p>Podés comunicarte con el responsable <ContactLinks d={d} />.</p>
         <p>
-          Esta página funciona sobre BookingBio, una plataforma tecnológica que {name} utiliza para publicar su
-          página{d.has_reservas && ', gestionar reservas'}{d.has_shop && ' y vender online'}. BookingBio trata los
+          Esta página funciona sobre BioWebLink, una plataforma tecnológica que {name} utiliza para publicar su
+          página{d.has_reservas && ', gestionar reservas'}{d.has_shop && ' y vender online'}. BioWebLink trata los
           datos por cuenta del negocio y solo para prestar el servicio de la plataforma.
         </p>
       </Section>
@@ -152,7 +152,7 @@ function PrivacyPolicy({ d }: { d: PublicLegalInfo }) {
         {pays && (
           <p>
             Los datos de tu tarjeta o medio de pago los ingresás directamente en Mercado Pago. Ni {name} ni
-            BookingBio los reciben ni los guardan.
+            BioWebLink los reciben ni los guardan.
           </p>
         )}
       </Section>
@@ -264,7 +264,7 @@ function CookiesPolicy({ d }: { d: PublicLegalInfo }) {
 
       <Section title="Almacenamiento necesario para que la página funcione">
         <p>
-          La plataforma BookingBio no utiliza cookies propias con fines publicitarios ni de medición. Sí usa el
+          La plataforma BioWebLink no utiliza cookies propias con fines publicitarios ni de medición. Sí usa el
           almacenamiento de tu navegador para:
         </p>
         <List items={storageItems} />
@@ -301,7 +301,7 @@ function CookiesPolicy({ d }: { d: PublicLegalInfo }) {
 }
 
 // ----------------------------------------------------------------------------
-// CONDICIONES DE RESERVA (del negocio, no de BookingBio)
+// CONDICIONES DE RESERVA (del negocio, no de BioWebLink)
 // Solo se muestra si el negocio tiene reservas o tienda.
 // No existe configuración de cancelación en el sistema: se remite al negocio.
 // ----------------------------------------------------------------------------
@@ -335,11 +335,11 @@ function BookingConditions({ d }: { d: PublicLegalInfo }) {
         <List items={role} />
       </Section>
 
-      <Section title="El rol de BookingBio">
+      <Section title="El rol de BioWebLink">
         <p>
-          BookingBio proporciona la plataforma tecnológica que {name} usa para crear su página
+          BioWebLink proporciona la plataforma tecnológica que {name} usa para crear su página
           {d.has_reservas && ', gestionar reservas'}{d.has_shop && ', vender online'} y otras funcionalidades que
-          haya contratado. BookingBio no presta los servicios ni vende los productos del negocio, no fija sus
+          haya contratado. BioWebLink no presta los servicios ni vende los productos del negocio, no fija sus
           precios ni condiciones y no es parte de la relación comercial entre vos y {name}.
         </p>
         <p>Las consultas y reclamos sobre servicios, productos, precios o pagos se dirigen a {name}.</p>

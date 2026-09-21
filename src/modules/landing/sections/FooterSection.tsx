@@ -182,7 +182,7 @@ export function FooterSection({ footer, menuItems, logoUrl, slug, businessId, le
             </div>
             <a href="https://bookingbio.com" target="_blank" rel="noopener noreferrer" className="inline-block mt-8 group">
               <span style={{ ...bodyStyle, color: footerTextColor }} className="text-sm font-black tracking-tight opacity-30 group-hover:opacity-60 transition-opacity">
-                by BookingBio
+                by BioWebLink
               </span>
             </a>
           </div>

@@ -133,7 +133,7 @@ export function AcceptInvitePage() {
             <Building2 className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-3xl font-display text-foreground">¡Te damos la bienvenida!</h1>
-          <p className="mt-2 text-muted-foreground">Tu acceso a BookingBio está listo</p>
+          <p className="mt-2 text-muted-foreground">Tu acceso a BioWebLink está listo</p>
         </div>
 
         <Card className="border-0 shadow-premium-lg">
@@ -173,7 +173,7 @@ export function AcceptInvitePage() {
             </button>
           </CardContent>
         </Card>
-        <p className="mt-6 text-center text-sm text-muted-foreground">by bookingBio</p>
+        <p className="mt-6 text-center text-sm text-muted-foreground">by BioWebLink</p>
       </div>
     </div>
   );

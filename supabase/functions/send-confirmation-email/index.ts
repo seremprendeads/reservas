@@ -67,11 +67,11 @@ Deno.serve(async (req: Request) => {
     const icsLines = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//BookingBio//Reserva//ES",
+      "PRODID:-//BioWebLink//Reserva//ES",
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       "BEGIN:VEVENT",
-      `UID:${bookingCode}@bookingbio`,
+      `UID:${bookingCode}@bioweblink`,
       `DTSTART:${dateISO ? dateISO.replace(/-/g, "") : ""}T${String(tH).padStart(2, "0")}${String(tM).padStart(2, "0")}00`,
       `DTEND:${dateISO ? dateISO.replace(/-/g, "") : ""}T${String(tH + 1).padStart(2, "0")}${String(tM).padStart(2, "0")}00`,
       `SUMMARY:${SERVICE_NAME} - ${name}`,

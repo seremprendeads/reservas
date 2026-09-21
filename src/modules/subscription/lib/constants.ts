@@ -15,7 +15,7 @@ export const DEFAULT_SUBSCRIPTION_CONFIG: SubscriptionConfig = {
   suspended_message: 'Tu suscripción está suspendida. Para continuar usando el sistema, renová tu plan.',
   support_whatsapp: SUPPORT_WHATSAPP,
   support_email: '',
-  payment_button_url: whatsappLink('Hola! Quiero renovar mi membresía de BookingBio.'),
+  payment_button_url: whatsappLink('Hola! Quiero renovar mi membresía de BioWebLink.'),
   read_only_when_cancelled: true,
 };
 

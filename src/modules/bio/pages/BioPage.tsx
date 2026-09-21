@@ -222,10 +222,10 @@ const socialLinks = [
 
         {/* Footer */}
         <a href="https://bookingbio.com" target="_blank" rel="noopener noreferrer" className="mt-12 inline-flex flex-col items-center gap-1 group">
-          <span className="text-xl font-black tracking-tight opacity-40 group-hover:opacity-70 transition-opacity" style={{ color: isLight(profile.primary_color) ? '#111' : '#fff' }}>
-            Powered by BookingBio
+          <span className="text-xl font-black tracking-tight opacity-40 group-hover:opacity-70 transition-opacity" style={{ color: textColor }}>
+            Powered by BioWebLink
           </span>
-          <span className="text-[10px] tracking-widest opacity-30 group-hover:opacity-50 transition-opacity" style={{ color: isLight(profile.primary_color) ? '#111' : '#fff' }}>
+          <span className="text-[10px] tracking-widest opacity-30 group-hover:opacity-50 transition-opacity" style={{ color: textColor }}>
             Tu Presencia Online
           </span>
         </a>

@@ -314,7 +314,7 @@ function ShopPageContent() {
                 Pagos seguros con Mercado Pago
               </p>
               <a href="https://bookingbio.com" target="_blank" rel="noopener noreferrer" className="text-sm font-black tracking-tight text-gray-500 hover:text-gray-300 transition-colors">
-                by BookingBio
+                by BioWebLink
               </a>
             </div>
           </div>

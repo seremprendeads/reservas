@@ -17,7 +17,7 @@ function App() {
       <ThemeProvider>
         <BrowserRouter>
           <Routes>
-            {/* Master Admin - propietario BookingBio - separado de /admin */}
+            {/* Master Admin - propietario BioWebLink - separado de /admin */}
             <Route path="/master-admin" element={<MasterAdminPage />} />
 
             {/* Admin panel - must be before catch-all */}

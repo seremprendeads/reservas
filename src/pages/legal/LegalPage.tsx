@@ -151,7 +151,7 @@ export function LegalPage({ doc }: { doc: LegalDocKey }) {
           </section>
 
           <p className="mt-6 text-xs leading-5 text-muted-foreground">
-            Documento generado automáticamente por BookingBio con la información que {info.business_name} cargó
+            Documento generado automáticamente por BioWebLink con la información que {info.business_name} cargó
             en su cuenta. No reemplaza el asesoramiento legal profesional.
           </p>
         </article>
@@ -161,7 +161,7 @@ export function LegalPage({ doc }: { doc: LegalDocKey }) {
         <div className="max-w-3xl mx-auto px-5 sm:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <LegalFooterLinks slug={info.slug} className="justify-center" linkClassName="hover:text-foreground" />
           <a href="https://bookingbio.com" target="_blank" rel="noopener noreferrer" className="font-black tracking-tight opacity-50 hover:opacity-80 transition-opacity">
-            by BookingBio
+            by BioWebLink
           </a>
         </div>
       </footer>

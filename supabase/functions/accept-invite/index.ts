@@ -76,7 +76,7 @@ Deno.serve(async (req: Request) => {
 
     if (new Date(invite.expires_at) <= new Date()) {
       return jsonError(
-        "Esta invitación venció. Contactá a BookingBio para obtener una nueva.",
+        "Esta invitación venció. Contactá a BioWebLink para obtener una nueva.",
         410
       );
     }

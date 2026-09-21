@@ -11,7 +11,7 @@ type Message = {
 
 const WELCOME: Message = {
   role: 'assistant',
-  content: '¡Hola! Soy BookingBot 🤖\n\nSoy tu asistente virtual de BookingBio. Puedo ayudarte con:\n\n• Configurar tu negocio (colores, logo, branding)\n• Recomendarte paletas de colores según tu rubro\n• Ayudarte con el SEO de tu landing\n• Explicarte cómo funciona cada módulo (reservas, tienda, bio, etc.)\n• Responder cualquier duda sobre la plataforma\n\n¿En qué te ayudo?',
+  content: '¡Hola! Soy BookingBot 🤖\n\nSoy tu asistente virtual de BioWebLink. Puedo ayudarte con:\n\n• Configurar tu negocio (colores, logo, branding)\n• Recomendarte paletas de colores según tu rubro\n• Ayudarte con el SEO de tu landing\n• Explicarte cómo funciona cada módulo (reservas, tienda, bio, etc.)\n• Responder cualquier duda sobre la plataforma\n\n¿En qué te ayudo?',
 };
 
 export function AiAssistant() {

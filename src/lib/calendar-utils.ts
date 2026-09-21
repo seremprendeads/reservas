@@ -58,12 +58,12 @@ export function buildICSFile(event: CalendarEventParams): void {
   };
 
   const now = new Date();
-  const uid = `${Date.now()}-${Math.random().toString(36).slice(2)}@bookingbio`;
+  const uid = `${Date.now()}-${Math.random().toString(36).slice(2)}@bioweblink`;
 
   const ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//BookingBio//Reserva//ES',
+    'PRODID:-//BioWebLink//Reserva//ES',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
