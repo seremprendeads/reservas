@@ -34,10 +34,23 @@ interface UseLandingDataResult {
 
 export function useLandingData({ initialData, slug: forcedSlug }: UseLandingDataOptions = {}): UseLandingDataResult {
   const { slug: urlSlug } = useParams<{ slug: string }>();
-  const { business } = useBusiness();
+  const { business, setBusinessBySlug } = useBusiness();
   // forcedSlug lo usa la ruta "/" (dominio raiz, sin :slug en la URL) para
   // mostrar una landing fija sin depender de BusinessContext ni redirigir.
   const slug = forcedSlug || urlSlug || business?.slug;
+
+  // A diferencia de BookingPage/ShopPage, esta pagina nunca le avisaba al
+  // resto de la app (BusinessContext) que negocio se estaba mostrando —
+  // solo traia la fila de landing_pages por su cuenta. Sin business cargado,
+  // useModuleAccess() no tenia forma de saber el plan real y asumia "free"
+  // (sin Landing habilitado), mostrando el cartel de "renova tu membresia"
+  // a cualquier visitante nuevo sin una sesion de admin ya cacheada en ese
+  // navegador. Mismo patron que ya usan BookingForm.tsx y ShopPage.tsx.
+  useEffect(() => {
+    if (slug && !business?.id) {
+      setBusinessBySlug(slug);
+    }
+  }, [slug, business?.id, setBusinessBySlug]);
 
   const [landing, setLanding] = useState<LandingPageType | null>(initialData || null);
   const [loading, setLoading] = useState(!initialData);
