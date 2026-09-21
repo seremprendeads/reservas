@@ -60,7 +60,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
                 alt=""
                 className={
                   s.header.logo_shape === 'square'
-                    ? 'h-9 sm:h-10 w-auto max-w-[160px] object-contain'
+                    ? 'h-10 sm:h-14 w-auto max-w-[220px] object-contain'
                     : 'h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover'
                 }
               />
