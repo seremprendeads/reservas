@@ -21,6 +21,31 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage }: Hero
     <div className="space-y-5">
       <div className="space-y-5">
         <div>
+          <label className="text-sm font-medium text-foreground mb-2 block">Logo (opcional)</label>
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" onClick={() => triggerUpload('hero_logo_image')} disabled={!!uploadingImage}>
+              {uploadingImage === 'hero_logo_image' ? 'Subiendo...' : data.logo_url ? 'Cambiar' : 'Subir logo'}
+            </Button>
+            {data.logo_url && (
+              <>
+                <img src={data.logo_url} alt="" className="h-12 w-auto max-w-[140px] rounded-lg object-contain border bg-muted/20 p-1" />
+                <Button variant="ghost" size="sm" className="text-destructive" onClick={() => update('logo_url', null)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5">
+            Se muestra arriba del título. Recomendado: PNG con fondo transparente, no se recorta.
+          </p>
+        </div>
+        {data.logo_url && (
+          <div>
+            <label className="text-sm font-medium text-foreground">Texto debajo del logo (opcional)</label>
+            <Input value={data.logo_caption} onChange={e => update('logo_caption', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Ej: Desde 2020" />
+          </div>
+        )}
+        <div>
           <label className="text-sm font-medium text-foreground">Título</label>
           <Input value={data.title} onChange={e => update('title', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Tu negocio de confianza" />
         </div>

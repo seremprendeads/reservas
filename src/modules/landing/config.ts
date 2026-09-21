@@ -70,6 +70,8 @@ export const DEFAULT_SECTIONS: LandingSections = {
   },
   hero: {
     hero_template: 'centered',
+    logo_url: null,
+    logo_caption: '',
     title: 'Tu negocio de confianza',
     subtitle: 'Descripción breve de tu negocio. Lo que hacemos y por qué somos diferentes.',
     description: '',

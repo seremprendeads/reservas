@@ -32,6 +32,16 @@ export function HeroVideo({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
           <div className="absolute inset-0" style={{ backgroundColor: data.background_color }} />
         )}
         <div className="relative z-10 max-w-5xl mx-auto text-center px-6 sm:px-8">
+          {data.logo_url && (
+            <div className="mb-6 flex flex-col items-center gap-2">
+              <img src={data.logo_url} alt="" className="h-12 sm:h-16 w-auto max-w-[220px] object-contain" />
+              {data.logo_caption && (
+                <span style={{ ...bodyStyle, color: 'rgba(255,255,255,0.5)' }} className="text-xs sm:text-sm tracking-wide">
+                  {data.logo_caption}
+                </span>
+              )}
+            </div>
+          )}
           <h1
             style={{ ...headingStyle, color: '#ffffff', fontWeight: 700 }}
             className="text-5xl sm:text-6xl lg:text-8xl leading-[1.05] tracking-tight mb-8"

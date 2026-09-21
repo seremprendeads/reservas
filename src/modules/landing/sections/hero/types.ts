@@ -1,6 +1,8 @@
 export type HeroTemplate = 'centered' | 'image' | 'video';
 
 export interface HeroBaseData {
+  logo_url: string | null;
+  logo_caption: string;
   title: string;
   subtitle: string;
   description: string;
@@ -46,6 +48,8 @@ export const HERO_TEMPLATE_DESCRIPTIONS: Record<HeroTemplate, string> = {
 
 export function createDefaultHeroData(template: HeroTemplate, existing?: Partial<HeroBaseData>): HeroData {
   const base: HeroBaseData = {
+    logo_url: existing?.logo_url ?? null,
+    logo_caption: existing?.logo_caption ?? '',
     title: existing?.title ?? 'Tu negocio de confianza',
     subtitle: existing?.subtitle ?? 'Descripción breve de tu negocio.',
     description: existing?.description ?? '',
@@ -71,6 +75,8 @@ export function createDefaultHeroData(template: HeroTemplate, existing?: Partial
 export function migrateHeroData(oldHero: Record<string, unknown>): HeroData {
   const template = (oldHero.hero_template as HeroTemplate) || 'centered';
   return createDefaultHeroData(template, {
+    logo_url: (oldHero.logo_url as string) || null,
+    logo_caption: (oldHero.logo_caption as string) || '',
     title: (oldHero.title as string) || 'Tu negocio de confianza',
     subtitle: (oldHero.subtitle as string) || '',
     description: (oldHero.description as string) || '',

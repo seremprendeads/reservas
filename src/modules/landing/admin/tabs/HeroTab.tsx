@@ -22,6 +22,8 @@ export function HeroTab({ sections, updateSection, triggerUpload, uploadingImage
 
   const handleTemplateChange = (template: HeroTemplate) => {
     const newData = createDefaultHeroData(template, {
+      logo_url: heroData.logo_url,
+      logo_caption: heroData.logo_caption,
       title: heroData.title,
       subtitle: heroData.subtitle,
       description: heroData.description,

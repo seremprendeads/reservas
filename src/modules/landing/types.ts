@@ -39,6 +39,8 @@ export interface LandingSections {
   };
   hero: {
     hero_template: string;
+    logo_url: string | null;
+    logo_caption: string;
     title: string;
     subtitle: string;
     description: string;
