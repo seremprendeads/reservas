@@ -57,6 +57,14 @@ export interface LandingSections {
     background_image: string | null;
     cover_image: string | null;
     video_url: string;
+    logo_caption_size: number | null;
+    logo_caption_color: string | null;
+    title_size: number | null;
+    title_color: string | null;
+    subtitle_size: number | null;
+    subtitle_color: string | null;
+    description_size: number | null;
+    description_color: string | null;
   };
   about: {
     title: string;

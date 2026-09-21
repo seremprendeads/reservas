@@ -13,6 +13,17 @@ export interface HeroBaseData {
   background_color: string;
   background_image: string | null;
   overlay_opacity: number;
+  // Tamaño (px) y color propios de cada texto. null = usar el estilo por
+  // defecto de la plantilla (tamaño responsive de Tailwind, color derivado
+  // del tema y de si hay imagen de fondo).
+  logo_caption_size: number | null;
+  logo_caption_color: string | null;
+  title_size: number | null;
+  title_color: string | null;
+  subtitle_size: number | null;
+  subtitle_color: string | null;
+  description_size: number | null;
+  description_color: string | null;
 }
 
 export interface HeroCenteredData extends HeroBaseData {
@@ -60,6 +71,14 @@ export function createDefaultHeroData(template: HeroTemplate, existing?: Partial
     background_color: existing?.background_color ?? '#111827',
     background_image: existing?.background_image ?? null,
     overlay_opacity: existing?.overlay_opacity ?? 40,
+    logo_caption_size: existing?.logo_caption_size ?? null,
+    logo_caption_color: existing?.logo_caption_color ?? null,
+    title_size: existing?.title_size ?? null,
+    title_color: existing?.title_color ?? null,
+    subtitle_size: existing?.subtitle_size ?? null,
+    subtitle_color: existing?.subtitle_color ?? null,
+    description_size: existing?.description_size ?? null,
+    description_color: existing?.description_color ?? null,
   };
 
   switch (template) {

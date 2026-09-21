@@ -12,6 +12,49 @@ interface HeroFormProps {
   uploadingImage: string | null;
 }
 
+// Tamaño (px) y color inline para un texto del Hero. null = usar el estilo
+// por defecto de la plantilla — el botón "Restablecer" vuelve a null.
+function TextStyleRow({
+  size, color, onSizeChange, onColorChange,
+}: {
+  size: number | null; color: string | null;
+  onSizeChange: (v: number | null) => void; onColorChange: (v: string | null) => void;
+}) {
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-4">
+      <div className="flex items-center gap-1.5">
+        <label className="text-xs text-muted-foreground">Tamaño</label>
+        <input
+          type="number" min={8} max={160}
+          placeholder="Auto"
+          value={size ?? ''}
+          onChange={e => onSizeChange(e.target.value === '' ? null : Number(e.target.value))}
+          className="h-8 w-16 rounded-lg border border-input bg-background px-2 text-xs"
+        />
+        <span className="text-xs text-muted-foreground">px</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <label className="text-xs text-muted-foreground">Color</label>
+        <input
+          type="color"
+          value={color || '#000000'}
+          onChange={e => onColorChange(e.target.value)}
+          className="h-7 w-7 cursor-pointer rounded-lg border bg-transparent p-0.5"
+        />
+        {(size !== null || color !== null) && (
+          <button
+            type="button"
+            onClick={() => { onSizeChange(null); onColorChange(null); }}
+            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+          >
+            Restablecer
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function HeroForm({ data, onChange, triggerUpload, uploadingImage }: HeroFormProps) {
   const update = <K extends keyof HeroData>(key: K, value: HeroData[K]) => {
     onChange({ ...data, [key]: value });
@@ -43,19 +86,35 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage }: Hero
           <div>
             <label className="text-sm font-medium text-foreground">Texto debajo del logo (opcional)</label>
             <Input value={data.logo_caption} onChange={e => update('logo_caption', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Ej: Desde 2020" />
+            <TextStyleRow
+              size={data.logo_caption_size} color={data.logo_caption_color}
+              onSizeChange={v => update('logo_caption_size', v)} onColorChange={v => update('logo_caption_color', v)}
+            />
           </div>
         )}
         <div>
           <label className="text-sm font-medium text-foreground">Título</label>
           <Input value={data.title} onChange={e => update('title', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Tu negocio de confianza" />
+          <TextStyleRow
+            size={data.title_size} color={data.title_color}
+            onSizeChange={v => update('title_size', v)} onColorChange={v => update('title_color', v)}
+          />
         </div>
         <div>
           <label className="text-sm font-medium text-foreground">Subtítulo</label>
           <Input value={data.subtitle} onChange={e => update('subtitle', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Descripción breve" />
+          <TextStyleRow
+            size={data.subtitle_size} color={data.subtitle_color}
+            onSizeChange={v => update('subtitle_size', v)} onColorChange={v => update('subtitle_color', v)}
+          />
         </div>
         <div>
           <label className="text-sm font-medium text-foreground">Descripción (opcional)</label>
           <Input value={data.description} onChange={e => update('description', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Texto descriptivo adicional" />
+          <TextStyleRow
+            size={data.description_size} color={data.description_color}
+            onSizeChange={v => update('description_size', v)} onColorChange={v => update('description_color', v)}
+          />
         </div>
       </div>
 

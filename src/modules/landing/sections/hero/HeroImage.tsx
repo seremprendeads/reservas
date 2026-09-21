@@ -39,20 +39,20 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
               <div className="mb-6 flex flex-col items-center sm:items-start gap-2">
                 <img src={data.logo_url} alt="" className="h-12 sm:h-14 w-auto max-w-[200px] object-contain" />
                 {data.logo_caption && (
-                  <span style={{ ...bodyStyle, color: hasBgImage ? 'rgba(255,255,255,0.5)' : '#888888' }} className="text-xs sm:text-sm tracking-wide">
+                  <span style={{ ...bodyStyle, color: data.logo_caption_color || (hasBgImage ? 'rgba(255,255,255,0.5)' : '#888888'), fontSize: data.logo_caption_size ? `${data.logo_caption_size}px` : undefined }} className="text-xs sm:text-sm tracking-wide">
                     {data.logo_caption}
                   </span>
                 )}
               </div>
             )}
-            <h1 style={{ ...headingStyle, color: hasBgImage ? '#ffffff' : theme.text_color, fontWeight: 700 }} className="text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight mb-8">
+            <h1 style={{ ...headingStyle, color: data.title_color || (hasBgImage ? '#ffffff' : theme.text_color), fontWeight: 700, fontSize: data.title_size ? `${data.title_size}px` : undefined }} className="text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight mb-8">
               {data.title}
             </h1>
-            <p style={{ ...bodyStyle, color: hasBgImage ? 'rgba(255,255,255,0.65)' : '#666666' }} className="text-lg sm:text-xl mb-4 leading-relaxed">
+            <p style={{ ...bodyStyle, color: data.subtitle_color || (hasBgImage ? 'rgba(255,255,255,0.65)' : '#666666'), fontSize: data.subtitle_size ? `${data.subtitle_size}px` : undefined }} className="text-lg sm:text-xl mb-4 leading-relaxed">
               {data.subtitle}
             </p>
             {data.description && (
-              <p style={{ ...bodyStyle, color: hasBgImage ? 'rgba(255,255,255,0.5)' : '#888888' }} className="text-lg sm:text-xl leading-relaxed">
+              <p style={{ ...bodyStyle, color: data.description_color || (hasBgImage ? 'rgba(255,255,255,0.5)' : '#888888'), fontSize: data.description_size ? `${data.description_size}px` : undefined }} className="text-lg sm:text-xl leading-relaxed">
                 {data.description}
               </p>
             )}
