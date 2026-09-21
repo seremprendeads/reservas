@@ -460,6 +460,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
         <CtaSection
           cta={s.cta}
           logoUrl={landing.logo_url}
+          logoShape={s.header.logo_shape}
           theme={theme}
           ts={ts}
           headingStyle={headingStyle}
@@ -479,6 +480,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
           footer={s.footer}
           menuItems={s.header.menu_items || []}
           logoUrl={s.header.logo_image_url || landing.logo_url}
+          logoShape={s.header.logo_shape}
           slug={landing.slug}
           businessId={isPreview ? null : landing.business_id}
           legalLinksNewTab={isPreview}

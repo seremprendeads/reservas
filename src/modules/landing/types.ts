@@ -35,6 +35,7 @@ export interface LandingSections {
     logo_title: string;
     logo_description: string;
     logo_image_url: string | null;
+    logo_shape: 'circle' | 'square';
   };
   hero: {
     hero_template: string;

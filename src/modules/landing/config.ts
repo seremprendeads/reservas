@@ -66,6 +66,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
     logo_title: '',
     logo_description: '',
     logo_image_url: null,
+    logo_shape: 'circle',
   },
   hero: {
     hero_template: 'centered',

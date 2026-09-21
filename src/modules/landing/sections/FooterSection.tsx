@@ -40,6 +40,7 @@ interface FooterSectionProps {
   footer: LandingSections['footer'];
   menuItems: { label: string; href: string }[];
   logoUrl: string | null;
+  logoShape?: 'circle' | 'square';
   slug: string;
   // Id del negocio dueño de la landing: se usa para resolver el slug de las páginas legales.
   businessId?: string | null;
@@ -51,7 +52,7 @@ interface FooterSectionProps {
   handleSmoothScroll: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-export function FooterSection({ footer, menuItems, logoUrl, slug, businessId, legalLinksNewTab, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: FooterSectionProps) {
+export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, businessId, legalLinksNewTab, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: FooterSectionProps) {
   const footerBgColor = theme.footer_bg_color;
   const footerTextColor = theme.footer_text_color;
 
@@ -61,7 +62,7 @@ export function FooterSection({ footer, menuItems, logoUrl, slug, businessId, le
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
           <div className="text-center sm:text-left">
             {logoUrl && (
-              <img src={logoUrl} alt="" className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover mb-5 mx-auto sm:mx-0" />
+              <img src={logoUrl} alt="" className={`h-14 w-14 sm:h-16 sm:w-16 object-cover mb-5 mx-auto sm:mx-0 ${logoShape === 'square' ? 'rounded-xl' : 'rounded-full'}`} />
             )}
             {(footer.logo_title || footer.logo_description) && (
               <div className="mb-3">

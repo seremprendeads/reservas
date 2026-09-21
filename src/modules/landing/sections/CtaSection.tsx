@@ -6,6 +6,7 @@ type TemplateStyles = { sectionSpacing: string; buttonRadius: string };
 interface CtaSectionProps {
   cta: LandingSections['cta'];
   logoUrl: string | null;
+  logoShape?: 'circle' | 'square';
   theme: LandingTheme;
   ts: TemplateStyles;
   headingStyle: React.CSSProperties;
@@ -13,7 +14,7 @@ interface CtaSectionProps {
   handleSmoothScroll: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-export function CtaSection({ cta, logoUrl, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: CtaSectionProps) {
+export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: CtaSectionProps) {
   return (
     <section id="contacto" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12 relative overflow-hidden`}
       style={{ backgroundColor: cta.image_url ? 'transparent' : theme.cta_bg_color }}>
@@ -27,7 +28,7 @@ export function CtaSection({ cta, logoUrl, theme, ts, headingStyle, bodyStyle, h
       )}
       <div className="max-w-3xl mx-auto text-center relative z-10">
         {logoUrl && (
-          <img src={logoUrl} alt="" className="h-28 w-28 sm:h-36 sm:w-36 rounded-full object-cover mx-auto mb-8" />
+          <img src={logoUrl} alt="" className={`h-28 w-28 sm:h-36 sm:w-36 object-cover mx-auto mb-8 ${logoShape === 'square' ? 'rounded-2xl' : 'rounded-full'}`} />
         )}
         <h2 style={{ ...headingStyle, color: '#ffffff', fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight mb-6">
           {cta.title}

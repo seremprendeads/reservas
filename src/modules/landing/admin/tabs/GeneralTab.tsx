@@ -2,7 +2,8 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SECTION_DEFINITIONS } from '../../types';
 import { SECTION_ICONS } from '../lib/constants';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Circle, Square } from 'lucide-react';
+import { cn } from '../../../../lib/utils';
 import type { LandingSections } from '../../types';
 
 interface GeneralTabProps {
@@ -27,7 +28,16 @@ export function GeneralTab({ slug, setSlug, template, setTemplate, visibleSectio
       <div>
         <label className="text-sm font-medium text-foreground mb-3 block">Logo</label>
         <div className="flex items-center gap-4">
-          {logoUrl && <img src={logoUrl} alt="Logo" className="h-12 w-12 rounded-full object-cover border" />}
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt="Logo"
+              className={cn(
+                'h-12 w-12 object-cover border',
+                sections.header.logo_shape === 'square' ? 'rounded-lg' : 'rounded-full'
+              )}
+            />
+          )}
           <button
             onClick={() => triggerUpload('logo')}
             disabled={!!uploadingImage}
@@ -35,6 +45,34 @@ export function GeneralTab({ slug, setSlug, template, setTemplate, visibleSectio
           >
             {uploadingImage === 'logo' ? 'Subiendo...' : logoUrl ? 'Cambiar logo' : 'Subir logo'}
           </button>
+          <div className="flex items-center gap-1 rounded-xl border p-1">
+            <button
+              type="button"
+              title="Círculo"
+              onClick={() => updateSection('header', { ...sections.header, logo_shape: 'circle' })}
+              className={cn(
+                'flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200',
+                (sections.header.logo_shape || 'circle') === 'circle'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted/40'
+              )}
+            >
+              <Circle className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              title="Cuadrado"
+              onClick={() => updateSection('header', { ...sections.header, logo_shape: 'square' })}
+              className={cn(
+                'flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200',
+                sections.header.logo_shape === 'square'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted/40'
+              )}
+            >
+              <Square className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 
