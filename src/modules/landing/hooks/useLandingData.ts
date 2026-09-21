@@ -15,6 +15,7 @@ export type TemplateStyles = typeof TEMPLATE_STYLES[LandingTemplate];
 
 interface UseLandingDataOptions {
   initialData?: LandingPageType;
+  slug?: string;
 }
 
 interface UseLandingDataResult {
@@ -31,10 +32,12 @@ interface UseLandingDataResult {
   bodyStyle: React.CSSProperties;
 }
 
-export function useLandingData({ initialData }: UseLandingDataOptions = {}): UseLandingDataResult {
+export function useLandingData({ initialData, slug: forcedSlug }: UseLandingDataOptions = {}): UseLandingDataResult {
   const { slug: urlSlug } = useParams<{ slug: string }>();
   const { business } = useBusiness();
-  const slug = urlSlug || business?.slug;
+  // forcedSlug lo usa la ruta "/" (dominio raiz, sin :slug en la URL) para
+  // mostrar una landing fija sin depender de BusinessContext ni redirigir.
+  const slug = forcedSlug || urlSlug || business?.slug;
 
   const [landing, setLanding] = useState<LandingPageType | null>(initialData || null);
   const [loading, setLoading] = useState(!initialData);

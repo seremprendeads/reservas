@@ -160,7 +160,7 @@ export function LegalPage({ doc }: { doc: LegalDocKey }) {
       <footer className="border-t">
         <div className="max-w-3xl mx-auto px-5 sm:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <LegalFooterLinks slug={info.slug} className="justify-center" linkClassName="hover:text-foreground" />
-          <a href="https://bookingbio.com" target="_blank" rel="noopener noreferrer" className="font-black tracking-tight opacity-50 hover:opacity-80 transition-opacity">
+          <a href="https://bioweblink.com" target="_blank" rel="noopener noreferrer" className="font-black tracking-tight opacity-50 hover:opacity-80 transition-opacity">
             by BioWebLink
           </a>
         </div>

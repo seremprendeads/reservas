@@ -221,7 +221,7 @@ const socialLinks = [
         </div>
 
         {/* Footer */}
-        <a href="https://bookingbio.com" target="_blank" rel="noopener noreferrer" className="mt-12 inline-flex flex-col items-center gap-1 group">
+        <a href="https://bioweblink.com" target="_blank" rel="noopener noreferrer" className="mt-12 inline-flex flex-col items-center gap-1 group">
           <span className="text-xl font-black tracking-tight opacity-40 group-hover:opacity-70 transition-opacity" style={{ color: textColor }}>
             Powered by BioWebLink
           </span>

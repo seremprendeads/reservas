@@ -383,7 +383,7 @@ function BookingContent() {
             <p className="text-xs" style={{ color: captionColor }}>
               Pagos seguros con Mercado Pago
             </p>
-            <a href="https://bookingbio.com" target="_blank" rel="noopener noreferrer" className="text-sm font-black tracking-tight opacity-30 hover:opacity-60 transition-opacity" style={{ color: captionColor }}>
+            <a href="https://bioweblink.com" target="_blank" rel="noopener noreferrer" className="text-sm font-black tracking-tight opacity-30 hover:opacity-60 transition-opacity" style={{ color: captionColor }}>
               by BioWebLink
             </a>
           </div>

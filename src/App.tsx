@@ -45,7 +45,10 @@ function App() {
             <Route path="/invite/:token" element={<AcceptInvitePage />} />
 
             {/* Landing page - catch-all: / or /:slug */}
-            <Route path="/" element={<LandingPage />} />
+            {/* La raiz del dominio (bioweblink.com, sin slug en la URL) muestra
+                siempre la landing del negocio "bioweblink" (la web madre de
+                BioWebLink) en vez de quedarse cargando sin saber que negocio mostrar. */}
+            <Route path="/" element={<LandingPage slug="bioweblink" />} />
             <Route path="/:slug" element={<LandingPage />} />
           </Routes>
         </BrowserRouter>

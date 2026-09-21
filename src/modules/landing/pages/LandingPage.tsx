@@ -49,8 +49,8 @@ function getIcon(name: string) {
   return ICON_MAP[name] || Star;
 }
 
-export function LandingPage({ initialData, isPreview }: { initialData?: LandingPageType; isPreview?: boolean } = {}) {
-  const { landing, loading, notFound, s, theme, seo, ts, hasSection, headingStyle, bodyStyle } = useLandingData({ initialData });
+export function LandingPage({ initialData, isPreview, slug }: { initialData?: LandingPageType; isPreview?: boolean; slug?: string } = {}) {
+  const { landing, loading, notFound, s, theme, seo, ts, hasSection, headingStyle, bodyStyle } = useLandingData({ initialData, slug });
   const { isModuleEnabled } = useModuleAccess();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
