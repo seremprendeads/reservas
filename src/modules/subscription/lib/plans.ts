@@ -13,7 +13,7 @@ export function whatsappLink(mensaje: string): string {
   return `https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
 }
 
-// Landing de venta de BioWebLink (armada con la propia Landing Page del
+// Landing de venta de BiowebLink (armada con la propia Landing Page del
 // producto, negocio "bioweblink", que ahora vive en la raiz de bioweblink.com),
 // sección Planes. En vez de mandar directo a WhatsApp con un solo plan
 // sugerido, se manda acá para que el negocio vea todos los planes y elija —

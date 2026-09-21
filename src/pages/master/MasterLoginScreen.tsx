@@ -63,7 +63,7 @@ export function MasterLoginScreen({ onLogin }: Props) {
           <div className="flex justify-center mb-4">
             <ShieldCheck className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-3xl font-display text-foreground">BioWebLink Master</h1>
+          <h1 className="text-3xl font-display text-foreground">BiowebLink Master</h1>
           <p className="mt-3 text-sm text-foreground/70">Panel de administración global</p>
         </div>
 
@@ -115,7 +115,7 @@ export function MasterLoginScreen({ onLogin }: Props) {
             </form>
           </CardContent>
         </Card>
-        <p className="mt-8 text-center text-sm text-foreground/40">BioWebLink · Acceso restringido</p>
+        <p className="mt-8 text-center text-sm text-foreground/40">BiowebLink · Acceso restringido</p>
       </div>
     </div>
   );

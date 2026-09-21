@@ -67,7 +67,7 @@ Deno.serve(async (req: Request) => {
     const icsLines = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//BioWebLink//Reserva//ES",
+      "PRODID:-//BiowebLink//Reserva//ES",
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       "BEGIN:VEVENT",

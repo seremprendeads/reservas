@@ -314,7 +314,7 @@ function ShopPageContent() {
                 Pagos seguros con Mercado Pago
               </p>
               <a href="https://bioweblink.com" target="_blank" rel="noopener noreferrer" className="text-sm font-black tracking-tight text-gray-500 hover:text-gray-300 transition-colors">
-                by BioWebLink
+                by BiowebLink
               </a>
             </div>
           </div>

@@ -348,7 +348,7 @@ export function AdminSidebar({
         {/* Branding - solo visible en móvil (< 640px) */}
         {!collapsed && (
           <div className="border-t border-border px-3 py-3 text-center sm:hidden">
-            <span className="text-xs text-gray-500 font-bold">by BioWebLink</span>
+            <span className="text-xs text-gray-500 font-bold">by BiowebLink</span>
           </div>
         )}
       </aside>

@@ -74,11 +74,11 @@ Deno.serve(async (req: Request) => {
         body: JSON.stringify({
           from: FROM_EMAIL,
           to: email,
-          subject: "🔑 Tu contraseña temporal - BioWebLink",
+          subject: "🔑 Tu contraseña temporal - BiowebLink",
           html: `
             <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
               <div style="background: #059669; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
-                <h1 style="color: white; margin: 0; font-size: 24px;">BioWebLink</h1>
+                <h1 style="color: white; margin: 0; font-size: 24px;">BiowebLink</h1>
               </div>
               <h2 style="color: #1f2937;">Hola${admin.name ? `, ${admin.name}` : ''}!</h2>
               <p style="color: #4b5563;">Recibimos una solicitud para restablecer tu contraseña. Tu contraseña temporal es:</p>

@@ -34,13 +34,13 @@ Deno.serve(async (req: Request) => {
     }
 
     const payload = {
-      from: `BioWebLink <${FROM_EMAIL}>`,
+      from: `BiowebLink <${FROM_EMAIL}>`,
       to: TO_EMAIL,
-      subject: `Soporte | BioWebLink - [${ticketNum}]`,
+      subject: `Soporte | BiowebLink - [${ticketNum}]`,
       html: `
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
           <div style="background: #059669; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">Soporte BioWebLink</h1>
+            <h1 style="color: white; margin: 0; font-size: 24px;">Soporte BiowebLink</h1>
             <p style="color: #d1fae5; margin: 8px 0 0; font-size: 14px;">Ticket #${ticketNum}</p>
           </div>
           <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin: 24px 0;">

@@ -27,7 +27,7 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
       });
       if (fnError || !data?.success) {
         if (data?.reason === 'suspended') {
-          setError('Tu cuenta está suspendida. Contactá a BioWebLink para más información.');
+          setError('Tu cuenta está suspendida. Contactá a BiowebLink para más información.');
         } else {
           setError('Email o contraseña incorrectos');
         }
@@ -153,7 +153,7 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
             )}
           </CardContent>
         </Card>
-        <p className="mt-8 text-center text-base font-bold text-foreground/60">by BioWebLink</p>
+        <p className="mt-8 text-center text-base font-bold text-foreground/60">by BiowebLink</p>
       </div>
     </div>
   );

@@ -67,7 +67,7 @@ export function TrialBanner({ trialCountdown }: TrialBannerProps) {
         </div>
 
         <a
-          href={whatsappLink('Hola! Estoy en la prueba de BioWebLink y quiero consultar por los planes.')}
+          href={whatsappLink('Hola! Estoy en la prueba de BiowebLink y quiero consultar por los planes.')}
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0 rounded-lg border border-red-500 bg-red-600 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition-all duration-200 hover:bg-red-700 active:scale-[0.97] sm:px-4 sm:text-xs"

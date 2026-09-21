@@ -22,7 +22,7 @@ export function TutorialsView() {
           Tutoriales
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Aprendé a sacarle el máximo provecho a tu cuenta de BioWebLink.
+          Aprendé a sacarle el máximo provecho a tu cuenta de BiowebLink.
         </p>
       </div>
 
@@ -33,7 +33,7 @@ export function TutorialsView() {
               <iframe
                 className="h-full w-full"
                 src={`https://www.youtube.com/embed/${FEATURED_VIDEO_ID}`}
-                title="Tutorial de BioWebLink"
+                title="Tutorial de BiowebLink"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />

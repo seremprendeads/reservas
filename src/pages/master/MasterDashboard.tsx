@@ -381,7 +381,7 @@ export function MasterDashboard({ onLogout }: { onLogout: () => void }) {
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="font-display text-lg text-foreground">BioWebLink Master</h1>
+            <h1 className="font-display text-lg text-foreground">BiowebLink Master</h1>
             <p className="text-xs text-foreground/50">{masterGetEmail()}</p>
           </div>
         </div>

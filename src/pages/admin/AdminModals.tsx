@@ -107,7 +107,7 @@ export function AdminModals({
                 className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-[0_8px_30px_rgba(0,0,0,.05)] transition-all duration-200"
                 asChild
               >
-                <a href={whatsappLink('Hola! Mi prueba de BioWebLink esta por vencer y quiero elegir un plan.')} target="_blank" rel="noopener noreferrer">Actualizar Plan</a>
+                <a href={whatsappLink('Hola! Mi prueba de BiowebLink esta por vencer y quiero elegir un plan.')} target="_blank" rel="noopener noreferrer">Actualizar Plan</a>
               </Button>
               <Button variant="ghost" className="w-full rounded-xl text-muted-foreground hover:bg-muted/40 transition-all duration-200" onClick={onTrialWarningClose}>
                 Cerrar para continuar hasta el 14

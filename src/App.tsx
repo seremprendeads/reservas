@@ -17,7 +17,7 @@ function App() {
       <ThemeProvider>
         <BrowserRouter>
           <Routes>
-            {/* Master Admin - propietario BioWebLink - separado de /admin */}
+            {/* Master Admin - propietario BiowebLink - separado de /admin */}
             <Route path="/master-admin" element={<MasterAdminPage />} />
 
             {/* Admin panel - must be before catch-all */}
@@ -47,7 +47,7 @@ function App() {
             {/* Landing page - catch-all: / or /:slug */}
             {/* La raiz del dominio (bioweblink.com, sin slug en la URL) muestra
                 siempre la landing del negocio "bioweblink" (la web madre de
-                BioWebLink) en vez de quedarse cargando sin saber que negocio mostrar. */}
+                BiowebLink) en vez de quedarse cargando sin saber que negocio mostrar. */}
             <Route path="/" element={<LandingPage slug="bioweblink" />} />
             <Route path="/:slug" element={<LandingPage />} />
           </Routes>

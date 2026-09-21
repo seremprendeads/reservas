@@ -397,7 +397,7 @@ export function AdminPage() {
             <span className="text-[10px] font-bold">Atrás</span>
           </button>
 
-          <span className="text-xs text-gray-500 font-bold">by BioWebLink</span>
+          <span className="text-xs text-gray-500 font-bold">by BiowebLink</span>
 
           <button
             onClick={() => handleNavigate(isFreePlan ? 'bio' : 'dashboard')}
@@ -470,7 +470,7 @@ export function AdminPage() {
                 Cerrar
               </button>
               <p className="text-center text-xs text-gray-400 mt-4">
-                Powered by <span className="font-bold">BioWebLink</span>
+                Powered by <span className="font-bold">BiowebLink</span>
               </p>
             </div>
           ) : (

@@ -63,7 +63,7 @@ export function buildICSFile(event: CalendarEventParams): void {
   const ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//BioWebLink//Reserva//ES',
+    'PRODID:-//BiowebLink//Reserva//ES',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
