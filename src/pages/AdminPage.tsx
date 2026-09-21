@@ -33,6 +33,10 @@ import type { AdminTab } from '../modules/landing/admin/lib/constants';
 // Plan gratuito (prueba vencida sin renovar): solo estas secciones del panel.
 const FREE_PLAN_ALLOWED_VIEWS = ['bio', 'profile', 'tutorials'];
 
+// Vistas de gestión de turnos: requieren el módulo "reservas" del plan
+// (ej. no disponibles en "Bio Pro + Sitio web", que no lo incluye).
+const RESERVAS_VIEWS = ['dashboard', 'calendar', 'bookings', 'detail', 'clients', 'waiting', 'availability', 'services', 'appearance'];
+
 export function AdminPage() {
   const {
     business,
@@ -123,6 +127,15 @@ export function AdminPage() {
     }
   }, [isFreePlan, view, setView]);
 
+  const hasReservas = enabledModules.includes('reservas');
+
+  // Si el plan no incluye Reservas, sacar de las vistas de gestión de turnos.
+  useEffect(() => {
+    if (!hasReservas && RESERVAS_VIEWS.includes(view)) {
+      setView('bio');
+    }
+  }, [hasReservas, view, setView]);
+
   // Acepta string para compatibilidad con DashboardView/AdminSidebar props,
   // y castea al tipo que espera setView internamente.
   const handleNavigate = (newView: string) => {
@@ -140,6 +153,12 @@ export function AdminPage() {
 
     // Plan gratuito: vistas no permitidas no se renderizan (el useEffect redirige a Bio).
     if (isFreePlan && !FREE_PLAN_ALLOWED_VIEWS.includes(view)) {
+      return null;
+    }
+
+    // Sin módulo Reservas: vistas de gestión de turnos no se renderizan
+    // (el useEffect redirige a Bio).
+    if (!hasReservas && RESERVAS_VIEWS.includes(view)) {
       return null;
     }
 

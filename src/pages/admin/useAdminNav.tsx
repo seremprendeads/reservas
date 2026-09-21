@@ -28,11 +28,12 @@ export function useAdminNav(
 
   const navItems: NavItem[] = useMemo(() => {
     const isFreePlan = enabledModules.length === 1 && enabledModules[0] === 'bio';
+    const hasReservas = enabledModules.includes('reservas');
 
-    // Plan gratuito (prueba vencida sin renovar): sin Gestión (Principal, Calendario).
-    const core: NavItem[] = isFreePlan
-      ? []
-      : [
+    // Sin el módulo Reservas (plan gratuito, o un plan pago que no lo incluye,
+    // ej. "Bio Pro + Sitio web"): sin Gestión (Principal, Calendario, etc).
+    const core: NavItem[] = hasReservas
+      ? [
           { id: 'dashboard', label: 'Principal', icon: <LayoutDashboard className="h-5 w-5" /> },
           { id: 'calendar', label: 'Calendario', icon: <Calendar className="h-5 w-5" /> },
           { id: 'bookings', label: 'Reservas', icon: <CalendarDays className="h-5 w-5" /> },
@@ -43,7 +44,8 @@ export function useAdminNav(
           },
           { id: 'availability', label: 'Disponibilidad', icon: <Clock className="h-5 w-5" /> },
           { id: 'services', label: 'Reservas de servicios', icon: <Package className="h-5 w-5" /> },
-        ];
+        ]
+      : [];
 
     const moduleViewToModuleId: Record<string, ModuleId> = {
       shop: 'shop',
