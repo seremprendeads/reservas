@@ -28,7 +28,15 @@ export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, b
       )}
       <div className="max-w-3xl mx-auto text-center relative z-10">
         {logoUrl && (
-          <img src={logoUrl} alt="" className={`h-28 w-28 sm:h-36 sm:w-36 object-cover mx-auto mb-8 ${logoShape === 'square' ? 'rounded-2xl' : 'rounded-full'}`} />
+          <img
+            src={logoUrl}
+            alt=""
+            className={
+              logoShape === 'square'
+                ? 'h-28 sm:h-36 w-auto max-w-[380px] object-contain mx-auto mb-8'
+                : 'h-28 w-28 sm:h-36 sm:w-36 rounded-full object-cover mx-auto mb-8'
+            }
+          />
         )}
         <h2 style={{ ...headingStyle, color: '#ffffff', fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight mb-6">
           {cta.title}

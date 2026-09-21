@@ -55,7 +55,15 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
           {/* Logo */}
           <a href="#inicio" onClick={handleSmoothScroll} className="flex items-center gap-3 shrink-0">
             {navLogoUrl ? (
-              <img src={navLogoUrl} alt="" className={`h-9 w-9 sm:h-10 sm:w-10 object-cover ${s.header.logo_shape === 'square' ? 'rounded-xl' : 'rounded-full'}`} />
+              <img
+                src={navLogoUrl}
+                alt=""
+                className={
+                  s.header.logo_shape === 'square'
+                    ? 'h-9 sm:h-10 w-auto max-w-[160px] object-contain'
+                    : 'h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover'
+                }
+              />
             ) : (
               <span style={{ ...headingStyle, color: headerTextColor, fontWeight: 500 }} className="text-lg tracking-tight">
                 {landing.slug}

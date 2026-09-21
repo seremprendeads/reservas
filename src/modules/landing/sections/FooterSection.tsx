@@ -62,7 +62,15 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
           <div className="text-center sm:text-left">
             {logoUrl && (
-              <img src={logoUrl} alt="" className={`h-14 w-14 sm:h-16 sm:w-16 object-cover mb-5 mx-auto sm:mx-0 ${logoShape === 'square' ? 'rounded-xl' : 'rounded-full'}`} />
+              <img
+                src={logoUrl}
+                alt=""
+                className={
+                  logoShape === 'square'
+                    ? 'h-16 sm:h-20 w-auto max-w-[220px] object-contain mb-5 mx-auto sm:mx-0'
+                    : 'h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover mb-5 mx-auto sm:mx-0'
+                }
+              />
             )}
             {(footer.logo_title || footer.logo_description) && (
               <div className="mb-3">

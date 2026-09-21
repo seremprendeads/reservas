@@ -33,8 +33,10 @@ export function GeneralTab({ slug, setSlug, template, setTemplate, visibleSectio
               src={logoUrl}
               alt="Logo"
               className={cn(
-                'h-12 w-12 object-cover border',
-                sections.header.logo_shape === 'square' ? 'rounded-lg' : 'rounded-full'
+                'border bg-muted/20',
+                sections.header.logo_shape === 'square'
+                  ? 'h-12 w-auto max-w-[140px] object-contain rounded-lg p-1'
+                  : 'h-12 w-12 object-cover rounded-full'
               )}
             />
           )}
