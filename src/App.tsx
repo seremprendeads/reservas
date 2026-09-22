@@ -25,12 +25,14 @@ function App() {
             <Route path="/bookingclient-administracion-bio" element={<AdminPage />} />
             <Route path="/create-business" element={<CreateBusinessPage />} />
             
-            {/* Public booking page */}
-            <Route path="/reservas" element={<BookingPage />} />
+            {/* Public booking page. "/reservas" (sin slug) es la ruta del
+                dominio raiz (bioweblink.com): resuelve siempre al negocio
+                "bioweblink", igual que "/" con la Landing Page más abajo. */}
+            <Route path="/reservas" element={<BookingPage slug="bioweblink" />} />
             <Route path="/:slug/reservas" element={<BookingPage />} />
-            
-            {/* Shop - public */}
-            <Route path="/tienda" element={<ShopPage />} />
+
+            {/* Shop - public. Mismo patrón que "/reservas" para el dominio raiz. */}
+            <Route path="/tienda" element={<ShopPage slug="bioweblink" />} />
             <Route path="/:slug/tienda" element={<ShopPage />} />
             
             {/* Bio - public */}

@@ -21,12 +21,16 @@ function formatPrice(amount: number) {
   return `$${amount.toLocaleString('es-AR')}`;
 }
 
-function ShopPageContent() {
+function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
   // La tienda tomaba el negocio solo de lo que hubiera quedado guardado en el
   // navegador: al abrir el link compartido por primera vez, no habia negocio y
   // la pagina se quedaba cargando para siempre. Ahora se resuelve por el slug
   // de la direccion, como el resto de las paginas publicas.
-  const { slug } = useParams<{ slug: string }>();
+  const { slug: urlSlug } = useParams<{ slug: string }>();
+  // forcedSlug lo usa la ruta "/tienda" (dominio raiz, sin :slug en la URL)
+  // para resolver siempre el negocio "bioweblink" — mismo patron que "/" en
+  // LandingPage y "/reservas" en BookingPage.
+  const slug = forcedSlug || urlSlug;
   const { business, setBusinessBySlug } = useBusiness();
   const { isModuleEnabled } = useModuleAccess();
   const { items, addItem, removeItem, updateQuantity, clearCart, itemCount, subtotal, currency } = useCart();
@@ -611,10 +615,10 @@ function useShopConfig() {
   return config;
 }
 
-export function ShopPage() {
+export function ShopPage({ slug }: { slug?: string } = {}) {
   return (
     <CartProvider>
-      <ShopPageContent />
+      <ShopPageContent forcedSlug={slug} />
       <ShopMarketingPopup />
       <ShopCountdownBanner />
       <ShopSocialProof />

@@ -171,9 +171,15 @@ function ResultadoPago({ estado, codigo, slug }: { estado: string; codigo: strin
   );
 }
 
-function BookingContent() {
+function BookingContent({ forcedSlug }: { forcedSlug?: string }) {
   const { step, setStep, bookingData, setSelectedService } = useBooking();
-  const { slug } = useParams<{ slug: string }>();
+  const { slug: urlSlug } = useParams<{ slug: string }>();
+  // forcedSlug lo usa la ruta "/reservas" (dominio raiz, sin :slug en la URL)
+  // para resolver siempre el negocio "bioweblink" — mismo patron que "/" en
+  // LandingPage. Sin esto, un visitante sin sesion previa en el navegador
+  // (sin business_id en localStorage) ve una pantalla en blanco: nada le
+  // avisa a BusinessContext que negocio mostrar.
+  const slug = forcedSlug || urlSlug;
   const { business, setBusinessBySlug } = useBusiness();
   const { isModuleEnabled } = useModuleAccess();
   const [branding, setBranding] = useState<Branding | null>(null);
@@ -406,10 +412,10 @@ function BookingContent() {
   );
 }
 
-export function BookingPage() {
+export function BookingPage({ slug }: { slug?: string } = {}) {
   return (
     <BookingProvider>
-      <BookingContent />
+      <BookingContent forcedSlug={slug} />
     </BookingProvider>
   );
 }
