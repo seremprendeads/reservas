@@ -52,6 +52,15 @@ export function ProductImageSlider({ images, alt, compact = false, className = '
     setTouchDelta(0);
   };
 
+  // Si el navegador cancela el gesto a mitad de camino (pasa seguido en
+  // pantallas tactiles, ej. cuando el swipe se confunde con un gesto de
+  // navegacion del navegador), nunca llega el touchend — sin esto, la
+  // imagen quedaba trabada a mitad de camino entre dos fotos para siempre.
+  const handleTouchCancel = () => {
+    setTouchStart(null);
+    setTouchDelta(0);
+  };
+
   useEffect(() => {
     setCurrent(0);
   }, [images]);
@@ -75,11 +84,12 @@ export function ProductImageSlider({ images, alt, compact = false, className = '
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
       >
         <div className="aspect-square relative">
           <div
             className="absolute inset-0 flex transition-transform duration-300 ease-out"
-            style={{ transform: `translateX(-${current * 100}%)${touchStart !== 0 ? ` translateX(${touchDelta}px)` : ''}` }}
+            style={{ transform: `translateX(-${current * 100}%)${touchStart !== null ? ` translateX(${touchDelta}px)` : ''}` }}
           >
             {validImages.map((img, i) => (
               <div key={i} className="min-w-full h-full shrink-0">
