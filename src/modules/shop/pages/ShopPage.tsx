@@ -79,10 +79,11 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
     });
   }, [business?.id]);
 
-  if (business && !isModuleEnabled('shop')) {
-    return <ModuleBlockedScreen moduleId="shop" />;
-  }
-
+  // Este useMemo tiene que ir ANTES del return condicional de abajo: los
+  // hooks deben llamarse siempre en el mismo orden en todos los renders.
+  // Antes vivía después, y al pasar de "cargando" a "sin módulo tienda" React
+  // veía una cantidad distinta de hooks entre renders y crasheaba en blanco,
+  // sin ningún error visible (mismo bug ya corregido antes en BookingPage.tsx).
   const filtered = useMemo(() => {
     return products.filter(p => {
       if (selectedCategory && p.category_id !== selectedCategory) return false;
@@ -90,6 +91,10 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
       return true;
     });
   }, [products, selectedCategory, search]);
+
+  if (business && !isModuleEnabled('shop')) {
+    return <ModuleBlockedScreen moduleId="shop" />;
+  }
 
   const openDetail = (p: Product) => {
     setSelectedProduct(p);

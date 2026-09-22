@@ -130,7 +130,7 @@ export function ShopAdmin() {
         <button onClick={() => setView('trash')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'trash' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <Archive className="w-4 h-4 inline mr-1.5" />Papelera
         </button>
-        <a href="/tienda" target="_blank" rel="noopener noreferrer" className="shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent lg:ml-auto inline-flex items-center">
+        <a href={`/${business?.slug}/tienda`} target="_blank" rel="noopener noreferrer" className="shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent lg:ml-auto inline-flex items-center">
           <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
         </a>
       </div>
