@@ -47,10 +47,15 @@ export function useLandingData({ initialData, slug: forcedSlug }: UseLandingData
   // a cualquier visitante nuevo sin una sesion de admin ya cacheada en ese
   // navegador. Mismo patron que ya usan BookingForm.tsx y ShopPage.tsx.
   useEffect(() => {
-    if (slug && !business?.id) {
-      setBusinessBySlug(slug);
-    }
-  }, [slug, business?.id, setBusinessBySlug]);
+    // Comparar contra business?.slug (no solo si ya hay ALGUN negocio
+    // cargado): si el navegador tiene otro negocio guardado de una visita
+    // anterior (ej. entro primero a bioweblink.com y despues a
+    // bioweblink.com/tatoo), habia que cambiar de negocio igual. Antes, con
+    // "!business?.id", una vez cargado cualquier negocio ya no se volvia a
+    // llamar setBusinessBySlug y quedaba mostrando el negocio equivocado.
+    if (!slug || business?.slug === slug) return;
+    setBusinessBySlug(slug);
+  }, [slug, business?.slug, setBusinessBySlug]);
 
   const [landing, setLanding] = useState<LandingPageType | null>(initialData || null);
   const [loading, setLoading] = useState(!initialData);

@@ -186,10 +186,16 @@ function BookingContent({ forcedSlug }: { forcedSlug?: string }) {
   const [services, setServices] = useState<Service[]>([]);
 
   useEffect(() => {
-    if (slug && !business?.id) {
-      setBusinessBySlug(slug);
-    }
-  }, [slug, business?.id, setBusinessBySlug]);
+    // Comparar contra business?.slug (no solo si ya hay ALGUN negocio
+    // cargado): si el navegador tiene otro negocio guardado de una visita
+    // anterior (ej. entro primero a bioweblink.com y despues a
+    // bioweblink.com/tatoo/reservas), habia que cambiar de negocio igual.
+    // Antes, con "!business?.id", una vez cargado cualquier negocio ya no se
+    // volvia a llamar setBusinessBySlug y quedaba mostrando el negocio
+    // equivocado.
+    if (!slug || business?.slug === slug) return;
+    setBusinessBySlug(slug);
+  }, [slug, business?.slug, setBusinessBySlug]);
 
   // Estos dos useEffect deben correr en todos los renders, en el mismo
   // orden — antes vivian despues de los returns tempranos de mas abajo
