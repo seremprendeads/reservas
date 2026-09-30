@@ -536,7 +536,7 @@ function CheckoutSteps({ current }: { current: number }) {
   );
 }
 
-function LabeledInput({ label, hint, ...props }: { label: string; hint?: string } & InputHTMLAttributes<HTMLInputElement>) {
+function LabeledInput({ label, hint, hintStrong, ...props }: { label: string; hint?: string; hintStrong?: boolean } & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block">
       <span className="mb-1.5 block text-xs font-semibold" style={{ color: 'var(--booking-text)' }}>{label}</span>
@@ -545,7 +545,7 @@ function LabeledInput({ label, hint, ...props }: { label: string; hint?: string 
         className="h-12 w-full rounded-xl border px-4 text-sm transition-colors focus:outline-none focus:ring-2"
         style={FIELD}
       />
-      {hint && <span className="mt-1 block text-[11px]" style={{ color: 'var(--booking-text-muted)' }}>{hint}</span>}
+      {hint && <span className={`mt-1 block text-[11px] ${hintStrong ? 'font-bold' : ''}`} style={{ color: hintStrong ? 'var(--booking-text)' : 'var(--booking-text-muted)' }}>{hint}</span>}
     </label>
   );
 }
@@ -707,7 +707,7 @@ function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCa
               <LabeledInput label="Nombre completo" type="text" value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Juan Pérez" />
               <LabeledInput label="Email" type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} placeholder="juan@email.com" hint="Ahí te llega el comprobante" />
               <LabeledInput label="Teléfono" type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="11 2345 6789" />
-              <LabeledInput label="Detalle del pedido" type="text" value={customerNotes} onChange={e => setCustomerNotes(e.target.value)} placeholder="Ej: talle M, 2 kilos, 6 botellas" hint="Obligatorio: indicá el talle, la medida o la presentación que necesitás." required />
+              <LabeledInput label="Detalle del pedido" type="text" value={customerNotes} onChange={e => setCustomerNotes(e.target.value)} placeholder="Ejemplo: Talle M, 2 kilos, medidas en cm, etc." hint="Obligatorio: indicá el talle, la medida o la presentación que necesitás" hintStrong required />
               <button
                 onClick={onStartCheckout}
                 disabled={checkoutLoading}
