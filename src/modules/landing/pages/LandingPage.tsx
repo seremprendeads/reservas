@@ -289,7 +289,10 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
 
       {/* ─── SEPARADOR HERO → NOSOTROS ─── */}
       {hasSection('hero') && (
-        <SectionDivider divider={s.dividers?.hero_about} color={theme.bg_color} />
+        <SectionDivider
+          divider={s.dividers?.hero_about}
+          color={theme.divider_hero_about_color || theme.bg_color}
+        />
       )}
 
       {/* ─── ABOUT ─── */}
@@ -471,7 +474,10 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
 
       {/* ─── SEPARADOR CTA → FOOTER ─── */}
       {hasSection('footer') && (
-        <SectionDivider divider={s.dividers?.cta_footer} color={theme.footer_bg_color} />
+        <SectionDivider
+          divider={s.dividers?.cta_footer}
+          color={theme.divider_cta_footer_color || theme.footer_bg_color}
+        />
       )}
 
       {/* ─── FOOTER ─── */}

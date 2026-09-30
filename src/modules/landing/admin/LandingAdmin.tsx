@@ -189,7 +189,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <DesignTab theme={theme} updateTheme={updateTheme} businessId={business?.id || ''} />
                 )}
                 {activeTab === 'dividers' && (
-                  <DividersTab sections={sections} updateSection={updateSection} />
+                  <DividersTab sections={sections} updateSection={updateSection} theme={theme} />
                 )}
               </CardContent>
             </Card>

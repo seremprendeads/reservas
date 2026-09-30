@@ -335,6 +335,8 @@ export const DEFAULT_THEME: LandingTheme = {
   cta_bg_color: '#059669',
   plans_bg_color: '#ffffff',
   plans_card_bg_color: '#fafafa',
+  divider_hero_about_color: '',
+  divider_cta_footer_color: '',
 };
 
 export const TEMPLATE_STYLES: Record<LandingTemplate, {

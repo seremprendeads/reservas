@@ -291,6 +291,10 @@ export interface LandingTheme {
   cta_bg_color: string;
   plans_bg_color: string;
   plans_card_bg_color: string;
+  // Color de cada separador de onda. Vacio = "Auto": el separador toma el
+  // fondo de la seccion de abajo, como antes de existir estos controles.
+  divider_hero_about_color: string;
+  divider_cta_footer_color: string;
 }
 
 export interface LandingSEO {

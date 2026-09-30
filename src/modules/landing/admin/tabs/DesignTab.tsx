@@ -27,6 +27,55 @@ interface DesignTabProps {
   theme: LandingTheme; updateTheme: (k: string, v: string) => void; businessId: string;
 }
 
+// Igual que la fila de color normal pero con estado "Auto" (vacio), que un
+// <input type="color"> no puede representar. Mientras esta en Auto no se emite
+// la propiedad CSS y el separador sigue tomando el fondo de la seccion de
+// abajo, que es como se comportaba antes de existir este control.
+function AutoColorRow({
+  label, value, fallback, onChange,
+}: {
+  label: string; value: string; fallback: string; onChange: (v: string) => void;
+}) {
+  const isAuto = !value;
+  const effective = isAuto ? fallback : value;
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <label className="text-xs text-muted-foreground">{label}</label>
+        <button
+          type="button"
+          onClick={() => onChange('')}
+          disabled={isAuto}
+          className="text-[11px] text-primary hover:underline disabled:text-muted-foreground/50 disabled:no-underline disabled:cursor-default"
+        >
+          Automático
+        </button>
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={effective || '#000000'}
+          onChange={e => onChange(e.target.value)}
+          className="h-7 w-7 cursor-pointer rounded-lg border bg-transparent p-0.5 shrink-0"
+        />
+        <Input
+          type="text"
+          value={effective}
+          readOnly={isAuto}
+          onChange={e => onChange(e.target.value)}
+          className={`h-8 font-mono text-xs ${isAuto ? 'opacity-60' : ''}`}
+        />
+      </div>
+      {isAuto && (
+        <p className="text-[11px] text-muted-foreground leading-snug">
+          Hereda de la sección de abajo ({effective || 'sin color definido'}).
+        </p>
+      )}
+    </div>
+  );
+}
+
 // Deslizador de espaciado tipografico. Guarda el valor con su unidad CSS
 // ("0.05em", "1.6") porque React acepta ambos como string en CSSProperties.
 // Vacio = Auto: no se guarda nada y el navegador/Tailwind manda.
@@ -171,10 +220,8 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
           {[
             { label: 'Principal', key: 'primary_color' },
             { label: 'Secundario', key: 'secondary_color' },
-            { label: 'Fondo', key: 'bg_color' },
             { label: 'Texto', key: 'text_color' },
             { label: 'Botones', key: 'button_color' },
-            { label: 'Fondo Footer', key: 'footer_bg_color' },
             { label: 'Texto Footer', key: 'footer_text_color' },
             { label: 'Iconos Redes', key: 'social_icon_color' },
             { label: 'Iconos Servicios', key: 'service_icon_color' },
@@ -200,6 +247,7 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
         <label className="text-xs font-medium text-foreground mb-2 block">Fondos por sección</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {[
+            { label: 'Fondo principal', key: 'bg_color' },
             { label: 'Sección Nosotros', key: 'about_bg_color' },
             { label: 'Sección Servicio principal', key: 'main_service_bg_color' },
             { label: 'Cartas de Otros servicios', key: 'secondary_services_card_bg_color' },
@@ -215,6 +263,7 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
             { label: 'Sección Reservar ahora (CTA)', key: 'cta_bg_color' },
             { label: 'Sección Planes', key: 'plans_bg_color' },
             { label: 'Cartas de Planes', key: 'plans_card_bg_color' },
+            { label: 'Fondo Footer', key: 'footer_bg_color' },
           ].map(c => (
             <div key={c.key} className="space-y-1">
               <label className="text-xs text-muted-foreground">{c.label}</label>
@@ -228,6 +277,26 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
+        <label className="text-xs font-medium text-foreground mb-2 block">Separadores</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <AutoColorRow
+            label="Separador Hero → Nosotros"
+            value={theme.divider_hero_about_color}
+            fallback={theme.bg_color}
+            onChange={v => updateTheme('divider_hero_about_color', v)}
+          />
+          <AutoColorRow
+            label="Separador CTA → Footer"
+            value={theme.divider_cta_footer_color}
+            fallback={theme.footer_bg_color}
+            onChange={v => updateTheme('divider_cta_footer_color', v)}
+          />
         </div>
       </div>
 

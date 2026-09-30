@@ -1,6 +1,6 @@
 import { FlipHorizontal } from 'lucide-react';
 import { Separator } from '../../../../components/ui/separator';
-import type { LandingSections, LandingDivider } from '../../types';
+import type { LandingSections, LandingDivider, LandingTheme } from '../../types';
 import { DEFAULT_SECTIONS } from '../../config';
 import {
   DIVIDER_SHAPES,
@@ -13,16 +13,28 @@ import {
 interface DividersTabProps {
   sections: LandingSections;
   updateSection: (k: string, v: unknown) => void;
+  theme?: LandingTheme;
 }
 
 type DividerKey = 'hero_about' | 'cta_footer';
+
+// Color efectivo de cada separador: el elegido en Diseño, o el fondo de la
+// seccion de abajo cuando esta en Automatico.
+const DIVIDER_FALLBACK: Record<DividerKey, (t: LandingTheme) => string> = {
+  hero_about: t => t.bg_color,
+  cta_footer: t => t.footer_bg_color,
+};
+const DIVIDER_COLOR_KEY: Record<DividerKey, keyof LandingTheme> = {
+  hero_about: 'divider_hero_about_color',
+  cta_footer: 'divider_cta_footer_color',
+};
 
 const DIVIDER_BLOCKS: { key: DividerKey; label: string; help: string }[] = [
   { key: 'hero_about', label: 'Hero → Nosotros', help: 'Se dibuja al final del hero. El fondo del hero (color o imagen) se ve por detrás de la curva.' },
   { key: 'cta_footer', label: 'CTA → Footer', help: 'Se dibuja al final de la sección de llamada a la acción, antes del footer.' },
 ];
 
-export function DividersTab({ sections, updateSection }: DividersTabProps) {
+export function DividersTab({ sections, updateSection, theme }: DividersTabProps) {
   const d = sections.dividers ?? DEFAULT_SECTIONS.dividers;
 
   const patch = (key: DividerKey, changes: Partial<LandingDivider>) => {
@@ -35,13 +47,16 @@ export function DividersTab({ sections, updateSection }: DividersTabProps) {
   return (
     <div className="space-y-6">
       <p className="text-xs text-muted-foreground leading-relaxed">
-        Los separadores usan los colores de la paleta definida en la tab Diseño. Si cambiás la
-        paleta, se actualizan solos.
+        Acá elegís la forma y la altura de las curvas. El color se define en la tab Diseño
+        (bloque Separadores): si lo dejás en Automático, el separador toma el fondo de la
+        sección de abajo, así que cambia solo con la paleta.
       </p>
 
       {DIVIDER_BLOCKS.map(({ key, label, help }, i) => {
         const cfg = d[key] ?? DEFAULT_SECTIONS.dividers[key];
         const height = clampDividerHeight(cfg.height);
+        const custom = theme ? (theme[DIVIDER_COLOR_KEY[key]] as string) || '' : '';
+        const previewColor = (custom || (theme ? DIVIDER_FALLBACK[key](theme) : '')) || '#ffffff';
 
         return (
           <div key={key} className="space-y-4">
@@ -84,7 +99,7 @@ export function DividersTab({ sections, updateSection }: DividersTabProps) {
                             className="block w-full h-8 rounded-md bg-muted"
                             style={{ transform: cfg.flip ? 'scaleX(-1)' : undefined }}
                           >
-                            <path d={shape.path} fill="currentColor" className="text-primary" />
+                            <path d={shape.path} fill={previewColor} />
                           </svg>
                           <span className="mt-1.5 block text-[11px] text-muted-foreground">
                             {shape.label}
