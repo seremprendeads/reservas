@@ -27,6 +27,46 @@ interface DesignTabProps {
   theme: LandingTheme; updateTheme: (k: string, v: string) => void; businessId: string;
 }
 
+// Deslizador de espaciado tipografico. Guarda el valor con su unidad CSS
+// ("0.05em", "1.6") porque React acepta ambos como string en CSSProperties.
+// Vacio = Auto: no se guarda nada y el navegador/Tailwind manda.
+function SpacingControl({
+  label, value, min, max, step, fallback, unit, sampleFont, onChange,
+}: {
+  label: string; value: string;
+  min: number; max: number; step: number; fallback: number; unit: string;
+  sampleFont: string; onChange: (v: string) => void;
+}) {
+  const parsed = parseFloat(value);
+  const current = Number.isFinite(parsed) ? parsed : fallback;
+  const display = Math.round(current * 1000) / 1000;
+
+  return (
+    <div className="mt-2 space-y-1">
+      <div className="flex items-baseline justify-between gap-2">
+        <label className="text-[11px] text-muted-foreground">{label}</label>
+        <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+          {display}{unit}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={current}
+        aria-label={label}
+        style={{ fontFamily: `'${sampleFont}', sans-serif`, accentColor: 'hsl(var(--primary))' }}
+        onChange={e => {
+          const n = Number(e.target.value);
+          onChange(`${Math.round(n * 1000) / 1000}${unit}`);
+        }}
+        className="h-1.5 w-full cursor-pointer"
+      />
+    </div>
+  );
+}
+
 function isLightColor(hex: string): boolean {
   const h = hex.replace('#', '');
   if (h.length !== 6) return true;
@@ -225,6 +265,20 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
               className="mt-1 w-full h-9 rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               {AVAILABLE_FONTS.map(f => <option key={f.id} value={f.id} style={{ fontFamily: `'${f.id}', sans-serif` }}>{f.label}</option>)}
             </select>
+            <SpacingControl
+              label="Separación de letras"
+              value={theme.font_heading_tracking}
+              min={-0.1} max={0.5} step={0.005} fallback={0} unit="em"
+              sampleFont={theme.font_heading}
+              onChange={v => updateTheme('font_heading_tracking', v)}
+            />
+            <SpacingControl
+              label="Altura de renglón"
+              value={theme.font_heading_line_height}
+              min={0.9} max={2.5} step={0.05} fallback={1.2} unit=""
+              sampleFont={theme.font_heading}
+              onChange={v => updateTheme('font_heading_line_height', v)}
+            />
           </div>
           <div>
             <label className="text-xs text-muted-foreground">Cuerpo</label>
@@ -232,6 +286,20 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
               className="mt-1 w-full h-9 rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               {AVAILABLE_FONTS.map(f => <option key={f.id} value={f.id} style={{ fontFamily: `'${f.id}', sans-serif` }}>{f.label}</option>)}
             </select>
+            <SpacingControl
+              label="Separación de letras"
+              value={theme.font_body_tracking}
+              min={-0.1} max={0.5} step={0.005} fallback={0} unit="em"
+              sampleFont={theme.font_body}
+              onChange={v => updateTheme('font_body_tracking', v)}
+            />
+            <SpacingControl
+              label="Altura de renglón"
+              value={theme.font_body_line_height}
+              min={0.9} max={2.5} step={0.05} fallback={1.6} unit=""
+              sampleFont={theme.font_body}
+              onChange={v => updateTheme('font_body_line_height', v)}
+            />
           </div>
         </div>
       </div>

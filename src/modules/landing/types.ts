@@ -269,6 +269,13 @@ export interface LandingTheme {
   button_border_radius: string;
   font_heading: string;
   font_body: string;
+  // Espaciado tipografico. Cadena vacia = "Auto": no se emite la propiedad CSS
+  // y el navegador/Tailwind sigue mandando (asi las landings ya publicadas no
+  // cambian de aspecto al agregar estas claves).
+  font_heading_tracking: string;
+  font_heading_line_height: string;
+  font_body_tracking: string;
+  font_body_line_height: string;
   about_bg_color: string;
   main_service_bg_color: string;
   secondary_services_card_bg_color: string;

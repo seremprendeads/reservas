@@ -111,8 +111,19 @@ export function useLandingData({ initialData, slug: forcedSlug }: UseLandingData
 
   const hasSection = (key: string) => visibleSections.includes(key);
 
-  const headingStyle: React.CSSProperties = { fontFamily: `'${theme.font_heading}', sans-serif` };
-  const bodyStyle: React.CSSProperties = { fontFamily: `'${theme.font_body}', sans-serif` };
+  // Solo se emite la propiedad si el negocio la configuro (vacio = "Auto").
+  // Asi el estilo inline no pisa las clases tracking-*/leading-* de cada
+  // seccion en las landings que nunca tocaron estos controles.
+  const headingStyle: React.CSSProperties = {
+    fontFamily: `'${theme.font_heading}', sans-serif`,
+    ...(theme.font_heading_tracking ? { letterSpacing: theme.font_heading_tracking } : {}),
+    ...(theme.font_heading_line_height ? { lineHeight: theme.font_heading_line_height } : {}),
+  };
+  const bodyStyle: React.CSSProperties = {
+    fontFamily: `'${theme.font_body}', sans-serif`,
+    ...(theme.font_body_tracking ? { letterSpacing: theme.font_body_tracking } : {}),
+    ...(theme.font_body_line_height ? { lineHeight: theme.font_body_line_height } : {}),
+  };
 
   return {
     landing,
