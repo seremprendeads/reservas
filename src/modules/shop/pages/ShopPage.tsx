@@ -405,18 +405,11 @@ function ProductCard({ product, onView, onAddToCart }: { product: Product; onVie
           )}
         </div>
         <div className="mt-auto flex gap-2">
-          {hasSizes && product.stock > 0 ? (
-            <button onClick={onView} className="w-full py-2.5 rounded-xl text-xs font-semibold text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: 'var(--booking-primary)' }}>Elegir talle</button>
-          ) : (
-            <>
-              <button onClick={onView} className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-colors border"
-                style={{ borderColor: 'var(--booking-border)', color: 'var(--booking-text)' }}>Ver</button>
-              {product.stock > 0 && (
-                <button onClick={onAddToCart} className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white transition-colors hover:opacity-90"
-                  style={{ backgroundColor: 'var(--booking-primary)' }}>Comprar</button>
-              )}
-            </>
+          <button onClick={onView} className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-colors border"
+            style={{ borderColor: 'var(--booking-border)', color: 'var(--booking-text)' }}>Ver</button>
+          {product.stock > 0 && (
+            <button onClick={hasSizes ? onView : onAddToCart} className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white transition-colors hover:opacity-90"
+              style={{ backgroundColor: 'var(--booking-primary)' }}>Comprar</button>
           )}
         </div>
       </div>
