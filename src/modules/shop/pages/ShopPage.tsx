@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback, useRef, CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
-import { Search, ShoppingCart, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Package, Check, X, MapPin } from 'lucide-react';
+import { Search, ShoppingCart, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Package, Check, X, MapPin, Lock, Wallet, ShieldCheck } from 'lucide-react';
+import type { InputHTMLAttributes } from 'react';
 import { supabase, ShopConfig, ShopColorsConfig } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, CartItem } from '../types';
@@ -483,6 +484,78 @@ function DetailScreen({ product, onAddToCart, onBuyNow }: { product: Product; on
   );
 }
 
+const SURFACE: CSSProperties = {
+  backgroundColor: 'var(--booking-card-bg)',
+  borderColor: 'var(--booking-border)',
+};
+
+const FIELD = {
+  backgroundColor: 'var(--booking-input-bg)',
+  borderColor: 'var(--booking-border)',
+  color: 'var(--booking-text)',
+  '--tw-ring-color': 'var(--booking-ring)',
+} as CSSProperties;
+
+const CHECKOUT_STEPS = ['Carrito', 'Tus datos', 'Pago'];
+
+function CheckoutSteps({ current }: { current: number }) {
+  return (
+    <ol className="mb-8 flex items-center justify-center gap-1.5">
+      {CHECKOUT_STEPS.map((label, index) => {
+        const step = index + 1;
+        const reached = step <= current;
+        return (
+          <li key={label} className="flex items-center gap-1.5">
+            <span className="flex items-center gap-2">
+              <span
+                className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
+                style={{
+                  backgroundColor: reached ? 'var(--booking-primary)' : 'var(--booking-primary-light)',
+                  color: reached ? '#fff' : 'var(--booking-primary)',
+                }}
+              >
+                {step < current ? <Check className="h-4 w-4" /> : step}
+              </span>
+              <span
+                className="hidden text-sm font-medium sm:inline"
+                style={{ color: step === current ? 'var(--booking-text)' : 'var(--booking-text-muted)' }}
+              >
+                {label}
+              </span>
+            </span>
+            {index < CHECKOUT_STEPS.length - 1 && (
+              <span className="mx-1 h-px w-5 sm:w-10" style={{ backgroundColor: 'var(--booking-border)' }} />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function LabeledInput({ label, hint, ...props }: { label: string; hint?: string } & InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-semibold" style={{ color: 'var(--booking-text)' }}>{label}</span>
+      <input
+        {...props}
+        className="h-12 w-full rounded-xl border px-4 text-sm transition-colors focus:outline-none focus:ring-2"
+        style={FIELD}
+      />
+      {hint && <span className="mt-1 block text-[11px]" style={{ color: 'var(--booking-text-muted)' }}>{hint}</span>}
+    </label>
+  );
+}
+
+function TrustNote() {
+  return (
+    <p className="mt-4 flex items-center justify-center gap-1.5 text-xs" style={{ color: 'var(--booking-text-muted)' }}>
+      <Lock className="h-3.5 w-3.5" />
+      Pago 100% seguro procesado por Mercado Pago
+    </p>
+  );
+}
+
 function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCart,
   customerName, setCustomerName, customerEmail, setCustomerEmail, customerPhone, setCustomerPhone,
   onStartCheckout, checkoutLoading, checkoutError
@@ -508,71 +581,142 @@ function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCa
     );
   }
 
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold" style={{ color: 'var(--booking-text)' }}>Carrito ({items.length} productos)</h2>
-        <button onClick={onClearCart} className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: 'var(--booking-error)' }}>Vaciar carrito</button>
-      </div>
+    <div className="mx-auto max-w-5xl">
+      <CheckoutSteps current={showForm ? 2 : 1} />
 
-      <div className="space-y-3 mb-6">
-        {items.map(item => (
-          <div key={`${item.product.id}__${item.selected_size || ''}`} className="flex items-center gap-4 p-5 rounded-2xl border"
-            style={{ backgroundColor: 'var(--booking-card-bg)', borderColor: 'var(--booking-border)', boxShadow: '0 4px 15px rgba(0,0,0,.03)' }}>
-            <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-booking-primary-light">
-              {item.product.image ? <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" /> : <Package className="w-8 h-8 m-4" style={{ color: 'var(--booking-primary)' }} />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm truncate" style={{ color: 'var(--booking-text)' }}>{item.product.name}</h3>
-              {item.selected_size && <p className="text-xs" style={{ color: 'var(--booking-text-muted)' }}>Talle: {item.selected_size}</p>}
-              <p className="text-sm font-bold" style={{ color: 'var(--booking-primary)' }}>{formatPrice(item.product.price)}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1, item.selected_size)} className="p-1.5 rounded-lg hover:bg-accent transition-colors" style={{ color: 'var(--booking-text)' }}><Minus className="w-4 h-4" /></button>
-              <span className="w-8 text-center text-sm font-semibold" style={{ color: 'var(--booking-text)' }}>{item.quantity}</span>
-              <button onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1, item.selected_size)} disabled={item.quantity >= item.product.stock} className="p-1.5 rounded-lg hover:bg-accent transition-colors disabled:opacity-30" style={{ color: 'var(--booking-text)' }}><Plus className="w-4 h-4" /></button>
-            </div>
-            <button onClick={() => onRemoveItem(item.product.id, item.selected_size)} className="p-1.5 rounded-lg hover:bg-red-50 transition-colors" style={{ color: 'var(--booking-error)' }}><Trash2 className="w-4 h-4" /></button>
+      <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
+        <div>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-bold" style={{ color: 'var(--booking-text)' }}>
+              Tu carrito ({itemCount} {itemCount === 1 ? 'producto' : 'productos'})
+            </h2>
+            <button onClick={onClearCart} className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: 'var(--booking-error)' }}>
+              Vaciar
+            </button>
           </div>
-        ))}
-      </div>
 
-      <div className="p-5 rounded-2xl border mb-6" style={{ backgroundColor: 'var(--booking-card-bg)', borderColor: 'var(--booking-border)' }}>
-        <div className="flex justify-between text-lg font-bold" style={{ color: 'var(--booking-text)' }}>
-          <span>Total</span>
-          <span style={{ color: 'var(--booking-primary)' }}>{formatPrice(subtotal)}</span>
-        </div>
-      </div>
+          <div className="overflow-hidden rounded-2xl border" style={SURFACE}>
+            {items.map((item, index) => (
+              <div
+                key={`${item.product.id}__${item.selected_size || ''}`}
+                className="flex gap-4 p-4"
+                style={{ borderTop: index === 0 ? 'none' : '1px solid var(--booking-border)' }}
+              >
+                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-booking-primary-light">
+                  {item.product.image
+                    ? <img src={item.product.image} alt={item.product.name} className="h-full w-full object-cover" />
+                    : <Package className="m-4 h-8 w-8" style={{ color: 'var(--booking-primary)' }} />}
+                </div>
 
-      {!showForm ? (
-        <button onClick={() => setShowForm(true)}
-          className="w-full py-3.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
-          style={{ backgroundColor: 'var(--booking-primary)' }}>
-          Continuar con la compra
-        </button>
-      ) : (
-        <div className="space-y-4 p-5 rounded-2xl border" style={{ backgroundColor: 'var(--booking-card-bg)', borderColor: 'var(--booking-border)' }}>
-          <h3 className="font-semibold" style={{ color: 'var(--booking-text)' }}>Tus datos</h3>
-          {checkoutError && <p className="text-sm" style={{ color: 'var(--booking-error)' }}>{checkoutError}</p>}
-          <input type="text" value={customerName} onChange={e => setCustomerName(e.target.value)}
-            placeholder="Nombre completo"
-            className="w-full px-4 h-12 rounded-xl border text-sm focus:outline-none focus:ring-2"
-            style={{ backgroundColor: 'var(--booking-input-bg)', borderColor: 'var(--booking-border)', color: 'var(--booking-text)', '--tw-ring-color': 'var(--booking-ring)' } as React.CSSProperties} />
-          <input type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)}
-            placeholder="Email"
-            className="w-full px-4 h-12 rounded-xl border text-sm focus:outline-none focus:ring-2"
-            style={{ backgroundColor: 'var(--booking-input-bg)', borderColor: 'var(--booking-border)', color: 'var(--booking-text)', '--tw-ring-color': 'var(--booking-ring)' } as React.CSSProperties} />
-          <input type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)}
-            placeholder="Teléfono"
-            className="w-full px-4 h-12 rounded-xl border text-sm focus:outline-none focus:ring-2"
-            style={{ backgroundColor: 'var(--booking-input-bg)', borderColor: 'var(--booking-border)', color: 'var(--booking-text)', '--tw-ring-color': 'var(--booking-ring)' } as React.CSSProperties} />
-          <button onClick={onStartCheckout} disabled={checkoutLoading}
-            className="w-full py-3.5 rounded-xl font-semibold text-white transition-colors disabled:opacity-50 hover:opacity-90"
-            style={{ backgroundColor: 'var(--booking-primary)' }}>
-            {checkoutLoading ? 'Procesando...' : `Pagar ${formatPrice(subtotal)}`}
-          </button>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="text-sm font-semibold leading-snug" style={{ color: 'var(--booking-text)' }}>{item.product.name}</h3>
+                    <button
+                      onClick={() => onRemoveItem(item.product.id, item.selected_size)}
+                      className="shrink-0 rounded-lg p-1 transition-colors hover:bg-red-50"
+                      style={{ color: 'var(--booking-error)' }}
+                      aria-label="Quitar del carrito"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                    {item.selected_size && (
+                      <span className="rounded-lg px-2 py-0.5 text-[11px] font-medium" style={{ backgroundColor: 'var(--booking-primary-light)', color: 'var(--booking-primary)' }}>
+                        Talle {item.selected_size}
+                      </span>
+                    )}
+                    <span className="text-xs" style={{ color: 'var(--booking-text-muted)' }}>{formatPrice(item.product.price)} c/u</span>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="flex items-center rounded-xl border" style={{ borderColor: 'var(--booking-border)' }}>
+                      <button
+                        onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1, item.selected_size)}
+                        className="p-2 transition-colors hover:bg-accent"
+                        style={{ color: 'var(--booking-text)' }}
+                        aria-label="Restar uno"
+                      >
+                        <Minus className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="w-8 text-center text-sm font-semibold" style={{ color: 'var(--booking-text)' }}>{item.quantity}</span>
+                      <button
+                        onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1, item.selected_size)}
+                        disabled={item.quantity >= item.product.stock}
+                        className="p-2 transition-colors hover:bg-accent disabled:opacity-30"
+                        style={{ color: 'var(--booking-text)' }}
+                        aria-label="Sumar uno"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <p className="text-sm font-bold" style={{ color: 'var(--booking-primary)' }}>{formatPrice(item.product.price * item.quantity)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+
+        <aside className="rounded-2xl border p-5 lg:sticky lg:top-24" style={SURFACE}>
+          <h3 className="mb-4 text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--booking-text-muted)' }}>
+            Resumen de compra
+          </h3>
+
+          <dl className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <dt style={{ color: 'var(--booking-text-muted)' }}>Productos</dt>
+              <dd style={{ color: 'var(--booking-text)' }}>{formatPrice(subtotal)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt style={{ color: 'var(--booking-text-muted)' }}>Envío</dt>
+              <dd style={{ color: 'var(--booking-text-muted)' }}>A coordinar</dd>
+            </div>
+          </dl>
+
+          <div className="my-4 border-t" style={{ borderColor: 'var(--booking-border)' }} />
+
+          <div className="mb-5 flex items-baseline justify-between">
+            <span className="text-sm font-bold" style={{ color: 'var(--booking-text)' }}>Total</span>
+            <span className="text-xl font-bold" style={{ color: 'var(--booking-primary)' }}>{formatPrice(subtotal)}</span>
+          </div>
+
+          {!showForm ? (
+            <button
+              onClick={() => setShowForm(true)}
+              className="w-full rounded-xl py-3.5 font-semibold text-white transition-colors hover:opacity-90"
+              style={{ backgroundColor: 'var(--booking-primary)' }}
+            >
+              Continuar con la compra
+            </button>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm font-bold" style={{ color: 'var(--booking-text)' }}>Tus datos</p>
+              {checkoutError && (
+                <p className="rounded-xl px-3 py-2 text-sm" style={{ backgroundColor: '#fef2f2', color: 'var(--booking-error)' }}>{checkoutError}</p>
+              )}
+              <LabeledInput label="Nombre completo" type="text" value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Juan Pérez" />
+              <LabeledInput label="Email" type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} placeholder="juan@email.com" hint="Ahí te llega el comprobante" />
+              <LabeledInput label="Teléfono" type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="11 2345 6789" />
+              <button
+                onClick={onStartCheckout}
+                disabled={checkoutLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+                style={{ backgroundColor: 'var(--booking-primary)' }}
+              >
+                {checkoutLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                {checkoutLoading ? 'Procesando...' : 'Continuar al pago'}
+              </button>
+            </div>
+          )}
+
+          <TrustNote />
+        </aside>
+      </div>
     </div>
   );
 }
@@ -623,15 +767,44 @@ function CheckoutScreen({ preferenceId, orderId, pollPayment }: {
   }
 
   return (
-    <div className="max-w-md mx-auto py-10">
-      <h2 className="text-xl font-bold text-center mb-6" style={{ color: 'var(--booking-text)' }}>Completá el pago</h2>
+    <div className="mx-auto max-w-lg py-6">
+      <CheckoutSteps current={3} />
+
+      <h2 className="mb-1 text-center text-xl font-bold" style={{ color: 'var(--booking-text)' }}>Completá el pago</h2>
+      <p className="mb-6 text-center text-sm" style={{ color: 'var(--booking-text-muted)' }}>Elegí cómo querés pagar y confirmá tu compra</p>
+
+      <div className="mb-4 rounded-2xl border p-5" style={SURFACE}>
+        <p className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--booking-text-muted)' }}>
+          <ShieldCheck className="h-3.5 w-3.5" />
+          Método de pago
+        </p>
+
+        <div className="flex items-center gap-3 rounded-xl border-2 p-4" style={{ borderColor: 'var(--booking-primary)', backgroundColor: 'var(--booking-primary-light)' }}>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: '#009EE3' }}>
+            <Wallet className="h-5 w-5 text-white" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold" style={{ color: 'var(--booking-text)' }}>Mercado Pago</p>
+            <p className="text-xs" style={{ color: 'var(--booking-text-muted)' }}>Tarjetas de crédito, débito y dinero en cuenta</p>
+          </div>
+          <Check className="h-5 w-5 shrink-0" style={{ color: 'var(--booking-primary)' }} />
+        </div>
+
+        <p className="mt-3 text-xs" style={{ color: 'var(--booking-text-muted)' }}>
+          Aceptamos Visa, Mastercard, American Express y pagos con QR
+        </p>
+      </div>
+
       {loading && (
-        <div className="text-center py-10">
-          <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4" style={{ color: 'var(--booking-primary)' }} />
-          <p style={{ color: 'var(--booking-text-muted)' }}>Preparando pago...</p>
+        <div className="py-8 text-center">
+          <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin" style={{ color: 'var(--booking-primary)' }} />
+          <p style={{ color: 'var(--booking-text-muted)' }}>Preparando pago seguro...</p>
         </div>
       )}
+
       <div id="mercadopago_container" className="min-h-[100px]" />
+
+      <TrustNote />
     </div>
   );
 }
