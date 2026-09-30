@@ -374,6 +374,7 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
 
 function ProductCard({ product, onView, onAddToCart }: { product: Product; onView: () => void; onAddToCart: () => void }) {
   const allImages = [product.image, ...(product.images || [])].filter(Boolean) as string[];
+  const hasSizes = (product.sizes?.length ?? 0) > 0;
 
   return (
     <div className="rounded-2xl border overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col"
@@ -404,11 +405,18 @@ function ProductCard({ product, onView, onAddToCart }: { product: Product; onVie
           )}
         </div>
         <div className="mt-auto flex gap-2">
-          <button onClick={onView} className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-colors border"
-            style={{ borderColor: 'var(--booking-border)', color: 'var(--booking-text)' }}>Ver</button>
-          {product.stock > 0 && (
-            <button onClick={onAddToCart} className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: 'var(--booking-primary)' }}>Comprar</button>
+          {hasSizes && product.stock > 0 ? (
+            <button onClick={onView} className="w-full py-2.5 rounded-xl text-xs font-semibold text-white transition-colors hover:opacity-90"
+              style={{ backgroundColor: 'var(--booking-primary)' }}>Elegir talle</button>
+          ) : (
+            <>
+              <button onClick={onView} className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-colors border"
+                style={{ borderColor: 'var(--booking-border)', color: 'var(--booking-text)' }}>Ver</button>
+              {product.stock > 0 && (
+                <button onClick={onAddToCart} className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white transition-colors hover:opacity-90"
+                  style={{ backgroundColor: 'var(--booking-primary)' }}>Comprar</button>
+              )}
+            </>
           )}
         </div>
       </div>
