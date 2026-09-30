@@ -469,11 +469,11 @@ function DetailScreen({ product, onAddToCart, onBuyNow }: { product: Product; on
           <div className="flex gap-3">
             {product.stock > 0 && (
               <>
-                <button onClick={() => onAddToCart(selectedSize)} disabled={hasSizes && !selectedSize}
-                  className="flex-1 py-3.5 rounded-xl font-semibold transition-colors border disabled:opacity-40 hover:bg-accent"
+                <button onClick={() => onAddToCart(selectedSize)}
+                  className="flex-1 py-3.5 rounded-xl font-semibold transition-colors border hover:bg-accent"
                   style={{ borderColor: 'var(--booking-border)', color: 'var(--booking-text)' }}>Agregar al carrito</button>
-                <button onClick={() => onBuyNow(selectedSize)} disabled={hasSizes && !selectedSize}
-                  className="flex-1 py-3.5 rounded-xl font-semibold text-white transition-colors disabled:opacity-40 hover:opacity-90"
+                <button onClick={() => onBuyNow(selectedSize)}
+                  className="flex-1 py-3.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
                   style={{ backgroundColor: 'var(--booking-primary)' }}>Comprar ahora</button>
               </>
             )}
