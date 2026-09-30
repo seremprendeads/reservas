@@ -420,7 +420,6 @@ function ProductCard({ product, onView, onAddToCart }: { product: Product; onVie
 }
 
 function DetailScreen({ product, onAddToCart, onBuyNow }: { product: Product; onAddToCart: (size?: string | null) => void; onBuyNow: (size?: string | null) => void }) {
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const allImages = [product.image, ...(product.images || [])].filter(Boolean) as string[];
   const hasSizes = product.sizes && product.sizes.length > 0;
 
@@ -452,11 +451,11 @@ function DetailScreen({ product, onAddToCart, onBuyNow }: { product: Product; on
               <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--booking-text)' }}>Talle</h3>
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map(s => (
-                  <button key={s} onClick={() => setSelectedSize(s)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${selectedSize === s ? 'border-current' : 'border-transparent'}`}
-                    style={{ backgroundColor: selectedSize === s ? 'var(--booking-primary)' : 'var(--booking-input-bg)', color: selectedSize === s ? 'white' : 'var(--booking-text)', borderColor: selectedSize === s ? 'var(--booking-primary)' : 'var(--booking-border)' }}>
+                  <span key={s}
+                    className="px-3 py-1.5 rounded-xl text-sm font-medium"
+                    style={{ backgroundColor: 'var(--booking-primary-light)', color: 'var(--booking-primary)' }}>
                     {s}
-                  </button>
+                  </span>
                 ))}
               </div>
             </div>
@@ -472,10 +471,10 @@ function DetailScreen({ product, onAddToCart, onBuyNow }: { product: Product; on
           <div className="flex gap-3">
             {product.stock > 0 && (
               <>
-                <button onClick={() => onAddToCart(selectedSize)}
+                <button onClick={() => onAddToCart()}
                   className="flex-1 py-3.5 rounded-xl font-semibold transition-colors border hover:bg-accent"
                   style={{ borderColor: 'var(--booking-border)', color: 'var(--booking-text)' }}>Agregar al carrito</button>
-                <button onClick={() => onBuyNow(selectedSize)}
+                <button onClick={() => onBuyNow()}
                   className="flex-1 py-3.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
                   style={{ backgroundColor: 'var(--booking-primary)' }}>Comprar ahora</button>
               </>
