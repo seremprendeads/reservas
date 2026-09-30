@@ -332,7 +332,7 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6">
                 {filtered.map(p => (
-                  <ProductCard key={p.id} product={p} onView={() => openDetail(p)} onAddToCart={(size) => { addItem(p, 1, size ?? null); showCartToast(p.name); }} />
+                  <ProductCard key={p.id} product={p} onView={() => openDetail(p)} onAddToCart={() => { addItem(p); showCartToast(p.name); }} />
                 ))}
               </div>
             )}
@@ -372,10 +372,8 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
   );
 }
 
-function ProductCard({ product, onView, onAddToCart }: { product: Product; onView: () => void; onAddToCart: (size?: string | null) => void }) {
+function ProductCard({ product, onView, onAddToCart }: { product: Product; onView: () => void; onAddToCart: () => void }) {
   const allImages = [product.image, ...(product.images || [])].filter(Boolean) as string[];
-  const hasSizes = (product.sizes?.length ?? 0) > 0;
-  const [showSizes, setShowSizes] = useState(false);
 
   return (
     <div className="rounded-2xl border overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col"
@@ -405,26 +403,12 @@ function ProductCard({ product, onView, onAddToCart }: { product: Product; onVie
             <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}>Sin stock</span>
           )}
         </div>
-        <div className="mt-auto">
-          <div className="flex gap-2">
-            <button onClick={onView} className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-colors border"
-              style={{ borderColor: 'var(--booking-border)', color: 'var(--booking-text)' }}>Ver</button>
-            {product.stock > 0 && (
-              <button onClick={() => (hasSizes ? setShowSizes(v => !v) : onAddToCart())} className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white transition-colors hover:opacity-90"
-                style={{ backgroundColor: 'var(--booking-primary)' }}>Comprar</button>
-            )}
-          </div>
-          {hasSizes && showSizes && product.stock > 0 && (
-            <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--booking-border)' }}>
-              <p className="text-[11px] font-medium mb-2" style={{ color: 'var(--booking-text-muted)' }}>Elegí un talle</p>
-              <div className="flex flex-wrap gap-1.5">
-                {product.sizes.map(s => (
-                  <button key={s} onClick={() => { onAddToCart(s); setShowSizes(false); }}
-                    className="min-w-9 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors hover:opacity-80"
-                    style={{ borderColor: 'var(--booking-primary)', color: 'var(--booking-primary)', backgroundColor: 'var(--booking-primary-light)' }}>{s}</button>
-                ))}
-              </div>
-            </div>
+        <div className="mt-auto flex gap-2">
+          <button onClick={onView} className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-colors border"
+            style={{ borderColor: 'var(--booking-border)', color: 'var(--booking-text)' }}>Ver</button>
+          {product.stock > 0 && (
+            <button onClick={onAddToCart} className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white transition-colors hover:opacity-90"
+              style={{ backgroundColor: 'var(--booking-primary)' }}>Comprar</button>
           )}
         </div>
       </div>
