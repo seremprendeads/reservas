@@ -291,7 +291,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {hasSection('hero') && (
         <SectionDivider
           divider={s.dividers?.hero_about}
-          color={theme.divider_hero_about_color || theme.bg_color}
+          color={theme.divider_hero_about_color || theme.about_bg_color}
         />
       )}
 
@@ -303,6 +303,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
           ts={ts}
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
+          showTopBorder={!s.dividers?.hero_about?.enabled}
         />
       )}
 

@@ -21,7 +21,7 @@ type DividerKey = 'hero_about' | 'cta_footer';
 // Color efectivo de cada separador: el elegido en Diseño, o el fondo de la
 // seccion de abajo cuando esta en Automatico.
 const DIVIDER_FALLBACK: Record<DividerKey, (t: LandingTheme) => string> = {
-  hero_about: t => t.bg_color,
+  hero_about: t => t.about_bg_color,
   cta_footer: t => t.footer_bg_color,
 };
 const DIVIDER_COLOR_KEY: Record<DividerKey, keyof LandingTheme> = {

@@ -247,7 +247,7 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
         <label className="text-xs font-medium text-foreground mb-2 block">Fondos por sección</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {[
-            { label: 'Fondo principal', key: 'bg_color' },
+            { label: 'Color Fondo Principal', key: 'bg_color' },
             { label: 'Sección Nosotros', key: 'about_bg_color' },
             { label: 'Sección Servicio principal', key: 'main_service_bg_color' },
             { label: 'Cartas de Otros servicios', key: 'secondary_services_card_bg_color' },
@@ -288,7 +288,7 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
           <AutoColorRow
             label="Separador Hero → Nosotros"
             value={theme.divider_hero_about_color}
-            fallback={theme.bg_color}
+            fallback={theme.about_bg_color}
             onChange={v => updateTheme('divider_hero_about_color', v)}
           />
           <AutoColorRow

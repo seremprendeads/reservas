@@ -10,6 +10,10 @@ interface AboutSectionProps {
   ts: TemplateStyles;
   headingStyle: React.CSSProperties;
   bodyStyle: React.CSSProperties;
+  // Cuando el separador de onda esta activo, la curva ya hace de separacion:
+  // el hairline recto de arriba quedaria pegado debajo de la onda y se ve como
+  // una linea de 1px de otro color. Por eso se puede desactivar.
+  showTopBorder?: boolean;
 }
 
 function useIsMobile() {
@@ -24,12 +28,12 @@ function useIsMobile() {
   return mobile;
 }
 
-export function AboutSection({ about, theme, ts, headingStyle, bodyStyle }: AboutSectionProps) {
+export function AboutSection({ about, theme, ts, headingStyle, bodyStyle, showTopBorder = true }: AboutSectionProps) {
   const isMobile = useIsMobile();
   const textAlign = isMobile ? 'center' : (about.alignment || 'left');
 
   return (
-    <section id="nosotros" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.about_bg_color, borderTop: `1px solid ${theme.text_color}08` }}>
+    <section id="nosotros" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.about_bg_color, borderTop: showTopBorder ? `1px solid ${theme.text_color}08` : 'none' }}>
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
         {about.image_url && (
           <div className={`${ts.cardRadius} overflow-hidden ${ts.cardShadow}`}>
