@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, CSSProperties } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef, CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
 import { Search, ShoppingCart, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Package, Check, X, MapPin } from 'lucide-react';
 import { supabase, ShopConfig, ShopColorsConfig } from '../../../lib/supabase';
@@ -6,6 +6,7 @@ import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, CartItem } from '../types';
 import { CartProvider, useCart } from '../contexts/CartContext';
 import { ProductImageSlider } from '../components/ProductImageSlider';
+import { CartToast } from '../components/CartToast';
 import { useModuleAccess, ModuleBlockedScreen } from '../../subscription';
 import { LegalFooterLinks } from '../../../components/legal/LegalFooterLinks';
 
@@ -49,6 +50,18 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
   const [checkoutError, setCheckoutError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [negocioNoEncontrado, setNegocioNoEncontrado] = useState(false);
+  const [cartToast, setCartToast] = useState<string | null>(null);
+  const cartToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showCartToast = useCallback((productName: string) => {
+    if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
+    setCartToast(productName);
+    cartToastTimer.current = setTimeout(() => setCartToast(null), 3000);
+  }, []);
+
+  useEffect(() => () => {
+    if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
+  }, []);
 
   useEffect(() => {
     if (!slug) return;
@@ -289,7 +302,7 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
         )}
 
         {view === 'detail' && selectedProduct && (
-          <DetailScreen product={selectedProduct} onAddToCart={(size) => { addItem(selectedProduct, 1, size ?? null); }} onBuyNow={(size) => handleBuyNow(selectedProduct, size)} />
+          <DetailScreen product={selectedProduct} onAddToCart={(size) => { addItem(selectedProduct, 1, size ?? null); showCartToast(selectedProduct.name); }} onBuyNow={(size) => handleBuyNow(selectedProduct, size)} />
         )}
 
         {view === 'catalog' && (
@@ -318,7 +331,7 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6">
                 {filtered.map(p => (
-                  <ProductCard key={p.id} product={p} onView={() => openDetail(p)} onAddToCart={() => addItem(p)} />
+                  <ProductCard key={p.id} product={p} onView={() => openDetail(p)} onAddToCart={() => { addItem(p); showCartToast(p.name); }} />
                 ))}
               </div>
             )}
@@ -347,6 +360,13 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
             <LegalFooterLinks slug={business?.slug} className="text-xs text-gray-400" linkClassName="hover:text-gray-200" />
           </div>
         </footer>
+
+        {cartToast && (
+          <CartToast
+            productName={cartToast}
+            onViewCart={() => { setCartToast(null); setView('cart'); }}
+          />
+        )}
     </div>
   );
 }
