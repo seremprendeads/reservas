@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CalendarDays, RefreshCw, Unlink, CheckCircle2, AlertCircle, Loader2, Clock, Settings, ChevronDown, ChevronUp, ExternalLink, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
+import { CalendarDays, RefreshCw, Unlink, CheckCircle2, AlertCircle, Loader2, Clock, Settings, ChevronDown, ChevronUp, ExternalLink, Trash2 } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
@@ -61,9 +61,30 @@ export function CalendarIntegrations() {
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Calendarios</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Conectá tu calendario externo para sincronizar las reservas automáticamente.
+          Conectá tu Google Calendar para que las reservas de BiowebLink aparezcan también en tu
+          agenda de Google.
         </p>
       </div>
+
+      <Card className="border-primary/20 bg-primary/[0.03]">
+        <CardContent className="py-4 space-y-2.5 text-sm leading-relaxed">
+          <p className="text-foreground">
+            <span className="font-semibold">¿Para qué sirve?</span> Para que las reservas que tomes
+            en BiowebLink aparezcan también en tu Google Calendar, sin cargarlas dos veces.
+          </p>
+          <p className="text-muted-foreground">
+            Tocá <span className="font-medium text-foreground">Conectar con Google</span>, elegí tu
+            cuenta y Google te pide permiso. Después elegí en qué calendario se crean los eventos.
+          </p>
+          <p className="text-muted-foreground">
+            <span className="font-medium text-foreground">Importante:</span> solo va en una
+            dirección. Las reservas se copian hacia Google, pero los eventos que ya tengas en tu
+            Google Calendar no se traen a BiowebLink. Si querés ver un turno nuevo en Google,
+            confirmalo desde el panel o usá{' '}
+            <span className="font-medium text-foreground">Sincronizar ahora</span>.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Google Calendar Card */}
       <Card>
@@ -186,25 +207,7 @@ export function CalendarIntegrations() {
                     </div>
                   )}
 
-                  {/* Auto Sync Toggle */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Sincronización automática</p>
-                      <p className="text-xs text-muted-foreground">Cada reserva nueva se sincroniza al instante.</p>
-                    </div>
-                    <button
-                      onClick={() => updateSettings({ auto_sync: !googleIntegration?.auto_sync })}
-                      className="shrink-0"
-                    >
-                      {googleIntegration?.auto_sync ? (
-                        <ToggleRight className="h-10 w-10 text-primary" />
-                      ) : (
-                        <ToggleLeft className="h-10 w-10 text-muted-foreground" />
-                      )}
-                    </button>
-                  </div>
-
-                  {/* On Delete Action */}
+                  {/* Al cancelar una reserva */}
                   <div>
                     <p className="text-sm font-medium text-foreground mb-1">Al cancelar una reserva</p>
                     <p className="text-xs text-muted-foreground mb-3">Qué hacer con el evento en Google Calendar.</p>
