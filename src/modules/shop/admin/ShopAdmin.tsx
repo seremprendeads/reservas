@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink, X, Megaphone, Timer, MessageSquare, Copy, Check } from 'lucide-react';
-import { supabase, ShopBannerConfig, ShopPopupConfig, ShopSocialConfig, ShopGeneralConfig, ShopSocialEntry as SocialEntry } from '../../../lib/supabase';
+import { supabase, ShopBannerConfig, ShopPopupConfig, ShopSocialConfig, ShopGeneralConfig, ShopColorsConfig, ShopSocialEntry as SocialEntry } from '../../../lib/supabase';
 import { allThemes } from '../../../themes';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, Order } from '../types';
@@ -23,21 +23,72 @@ import { deleteStorageFile } from './storage-utils';
 export function ShopAdmin() {
   const { business } = useBusiness();
   const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'trash' | 'popup' | 'banner' | 'avisos'>('dashboard');
-  const { config: bannerCfg, setConfig: setBannerCfg, save: saveBanner } = useShopSubConfig('banner', SHOP_BANNER_DEFAULTS);
-  const { config: popupCfg, setConfig: setPopupCfg, save: savePopup } = useShopSubConfig('popup', SHOP_POPUP_DEFAULTS);
+  const { config: bannerCfg, setConfig: setBannerCfg, save: saveBanner, loaded: bannerLoaded } = useShopSubConfig('banner', SHOP_BANNER_DEFAULTS);
+  const { config: popupCfg, setConfig: setPopupCfg, save: savePopup, loaded: popupLoaded } = useShopSubConfig('popup', SHOP_POPUP_DEFAULTS);
   const { config: generalCfg, setConfig: setGeneralCfg, save: saveGeneral } = useShopSubConfig('general', SHOP_GENERAL_DEFAULTS);
+  const { config: colorsCfg, setConfig: setColorsCfg, save: saveColors, loaded: colorsLoaded } = useShopSubConfig('colors', SHOP_COLORS_DEFAULTS);
   const [shopThemeId, setShopThemeId] = useState('');
+  // Foto de los colores que están realmente guardados, para poder descartar.
+  const [savedColors, setSavedColors] = useState<{ banner: ShopBannerConfig; popup: ShopPopupConfig; colors: ShopColorsConfig } | null>(null);
+  const [savingPalette, setSavingPalette] = useState(false);
 
-  const applyShopTheme = (themeId: string) => {
+  useEffect(() => {
+    if (!bannerLoaded || !popupLoaded || !colorsLoaded || savedColors) return;
+    setSavedColors({ banner: bannerCfg, popup: popupCfg, colors: colorsCfg });
+  }, [bannerLoaded, popupLoaded, colorsLoaded, bannerCfg, popupCfg, colorsCfg, savedColors]);
+
+  // Hay cambios sin guardar si el preview difiere de lo que esta en la base.
+  const hasPendingColors = !!savedColors && (
+    bannerCfg.gradient_from !== savedColors.banner.gradient_from ||
+    bannerCfg.gradient_to !== savedColors.banner.gradient_to ||
+    bannerCfg.text_color !== savedColors.banner.text_color ||
+    popupCfg.overlay_color !== savedColors.popup.overlay_color ||
+    (Object.keys(SHOP_COLORS_DEFAULTS) as (keyof ShopColorsConfig)[])
+      .some(k => colorsCfg[k] !== savedColors.colors[k])
+  );
+
+  // Elegir una paleta SOLO cambia el estado local: se ve en la vista previa y no
+  // se persiste hasta que se aprieta Guardar. Antes se guardaba en el acto y no
+  // habia forma de mirar el resultado sin Commit.
+  const previewShopTheme = (themeId: string) => {
     const t = allThemes.find(th => th.id === themeId);
     if (!t) return;
     setShopThemeId(themeId);
-    const newBanner = { ...bannerCfg, gradient_from: t.tokens.primary, gradient_to: t.tokens.cardBg, text_color: t.tokens.text };
-    const newPopup = { ...popupCfg, overlay_color: t.tokens.primary };
-    setBannerCfg(newBanner);
-    setPopupCfg(newPopup);
-    saveBanner(newBanner);
-    savePopup(newPopup);
+    setColorsCfg({
+      primary: t.tokens.primary,
+      primary_hover: t.tokens.primaryHover,
+      primary_light: t.tokens.primaryLight,
+      background: t.tokens.background,
+      card_bg: t.tokens.cardBg,
+      text: t.tokens.text,
+      text_muted: t.tokens.textMuted,
+      border: t.tokens.border,
+    });
+    setBannerCfg({ ...bannerCfg, gradient_from: t.tokens.primary, gradient_to: t.tokens.cardBg, text_color: t.tokens.text });
+    setPopupCfg({ ...popupCfg, overlay_color: t.tokens.primary });
+  };
+
+  const saveShopColors = async () => {
+    setSavingPalette(true);
+    try {
+      // Secuencial a proposito: cada save() relee branding, mergea su clave en
+      // shop_config y lo vuelve a escribir. En paralelo las tres leen la misma
+      // base y la ultima que escribe pisa a las otras dos.
+      await saveColors(colorsCfg);
+      await saveBanner(bannerCfg);
+      await savePopup(popupCfg);
+      setSavedColors({ banner: bannerCfg, popup: popupCfg, colors: colorsCfg });
+    } finally {
+      setSavingPalette(false);
+    }
+  };
+
+  const discardShopColors = () => {
+    if (!savedColors) return;
+    setBannerCfg(savedColors.banner);
+    setPopupCfg(savedColors.popup);
+    setColorsCfg(savedColors.colors);
+    setShopThemeId('');
   };
 
   const copyBrandingToShop = async () => {
@@ -49,16 +100,25 @@ export function ShopAdmin() {
     const newPopup = { ...popupCfg, overlay_color: data.primary_color || popupCfg.overlay_color };
     setBannerCfg(newBanner);
     setPopupCfg(newPopup);
-    saveBanner(newBanner);
-    savePopup(newPopup);
+    // primary_hover, primary_light y border no existen en branding, asi que
+    // quedan los que ya tenia la tienda.
+    setColorsCfg({
+      primary: data.primary_color || colorsCfg.primary,
+      primary_hover: colorsCfg.primary_hover,
+      primary_light: colorsCfg.primary_light,
+      background: data.background_color || colorsCfg.background,
+      card_bg: data.card_bg_color || colorsCfg.card_bg,
+      text: data.text_color || colorsCfg.text,
+      text_muted: data.muted_color || colorsCfg.text_muted,
+      border: colorsCfg.border,
+    });
   };
 
   const resetShopColors = () => {
     setShopThemeId('');
     setBannerCfg(SHOP_BANNER_DEFAULTS);
     setPopupCfg(SHOP_POPUP_DEFAULTS);
-    saveBanner(SHOP_BANNER_DEFAULTS);
-    savePopup(SHOP_POPUP_DEFAULTS);
+    setColorsCfg(SHOP_COLORS_DEFAULTS);
   };
 
   return (
@@ -88,7 +148,7 @@ export function ShopAdmin() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {allThemes.map(t => (
-              <button key={t.id} onClick={() => applyShopTheme(t.id)}
+              <button key={t.id} onClick={() => previewShopTheme(t.id)}
                 className={`relative flex items-center gap-1.5 rounded-xl border-2 p-2.5 transition-all ${
                   shopThemeId === t.id ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-muted-foreground/30'
                 }`}>
@@ -101,6 +161,57 @@ export function ShopAdmin() {
                 <span className="text-[11px] font-medium text-muted-foreground truncate">{t.name}</span>
               </button>
             ))}
+          </div>
+
+          <Separator />
+
+          {/* Vista previa: como va a verse la tienda con estos colores. */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-foreground">Vista previa</p>
+              {hasPendingColors
+                ? <span className="text-xs font-medium text-amber-600">Cambios sin guardar</span>
+                : <span className="text-xs text-muted-foreground">Guardado</span>}
+            </div>
+
+            <div className="rounded-xl overflow-hidden border" style={{ backgroundColor: colorsCfg.background, borderColor: colorsCfg.border }}>
+              <div
+                className="px-4 py-2.5 flex items-center gap-2"
+                style={{ backgroundColor: colorsCfg.card_bg, borderBottom: `1px solid ${colorsCfg.border}` }}>
+                <div className="h-2 w-16 rounded-full" style={{ backgroundColor: colorsCfg.text, opacity: 0.85 }} />
+                <div className="h-2 w-10 rounded-full" style={{ backgroundColor: colorsCfg.text_muted, opacity: 0.5 }} />
+              </div>
+              <div className="p-3 space-y-2.5">
+                <div
+                  className="h-16 rounded-lg border"
+                  style={{ backgroundColor: colorsCfg.card_bg, borderColor: colorsCfg.border }} />
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-7 px-4 rounded-lg flex items-center text-[10px] font-semibold text-white"
+                    style={{ backgroundColor: colorsCfg.primary }}>Comprar</div>
+                  <div
+                    className="h-3 w-20 rounded-full"
+                    style={{ backgroundColor: colorsCfg.text_muted, opacity: 0.45 }} />
+                </div>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Estos son los colores propios de la tienda. No afectan la Bio ni la Landing.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-2">
+            {hasPendingColors && (
+              <Button variant="ghost" size="sm" onClick={discardShopColors}>Descartar</Button>
+            )}
+            <Button
+              size="sm"
+              onClick={saveShopColors}
+              disabled={!hasPendingColors || savingPalette}
+              title={hasPendingColors ? 'Guardar los colores de la tienda' : 'No hay cambios que guardar'}>
+              {savingPalette ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              Guardar
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -867,23 +978,41 @@ const SHOP_BANNER_DEFAULTS: ShopBannerConfig = {
   text_color: '#ffffff',
 };
 
-function useShopSubConfig<T>(key: 'banner' | 'popup' | 'social' | 'general', defaults: T) {
-  const { business } = useBusiness();
-  const [config, setConfig] = useState<T>(defaults);
-  const [saving, setSaving] = useState(false);
+// Defaults de la paleta: son los tokens de un tema claro comun, y solo se usan
+// como base. La paleta que se elige siempre sobreescribe estos valores.
+const SHOP_COLORS_DEFAULTS: ShopColorsConfig = {
+  primary: '#2563eb',
+  primary_hover: '#1d4ed8',
+  primary_light: '#dbeafe',
+  background: '#ffffff',
+  card_bg: '#f8fafc',
+  text: '#0f172a',
+  text_muted: '#64748b',
+  border: '#e2e8f0',
+};
 
-  useEffect(() => {
-    if (!business?.id) return;
-    (async () => {
-      const { data } = await supabase
-        .from('branding')
-        .select('shop_config')
-        .eq('business_id', business.id)
-        .maybeSingle();
-      const cfg = (data?.shop_config as Record<string, unknown> | null)?.[key] as T | null;
-      if (cfg) setConfig({ ...defaults, ...cfg });
-    })();
-  }, [business?.id, key]);
+function useShopSubConfig<T>(key: 'banner' | 'popup' | 'social' | 'general' | 'colors', defaults: T) {
+    const { business } = useBusiness();
+    const [config, setConfig] = useState<T>(defaults);
+    const [saving, setSaving] = useState(false);
+    // Marca cuándo la config real del negocio ya llegó desde la base. La usan
+    // las paletas de la tienda para recién entonces tomar una foto de los
+    // colores guardados y poder ofrecer "descartar".
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+      if (!business?.id) return;
+      (async () => {
+        const { data } = await supabase
+          .from('branding')
+          .select('shop_config')
+          .eq('business_id', business.id)
+          .maybeSingle();
+        const cfg = (data?.shop_config as Record<string, unknown> | null)?.[key] as T | null;
+        if (cfg) setConfig({ ...defaults, ...cfg });
+        setLoaded(true);
+      })();
+    }, [business?.id, key]);
 
   const save = useCallback(async (next: T) => {
     if (!business?.id) return;
@@ -915,7 +1044,7 @@ function useShopSubConfig<T>(key: 'banner' | 'popup' | 'social' | 'general', def
     setSaving(false);
   }, [business?.id, key]);
 
-  return { config, setConfig, saving, save };
+    return { config, setConfig, saving, save, loaded };
 }
 
 function ShopBannerTab() {

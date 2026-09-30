@@ -50,6 +50,12 @@ DROP POLICY IF EXISTS "calendar_integrations_tenant_isolation" ON calendar_integ
 DROP POLICY IF EXISTS "calendar_sync_events_tenant_isolation" ON calendar_sync_events;
 DROP POLICY IF EXISTS "calendar_sync_logs_tenant_isolation" ON calendar_sync_logs;
 
+-- Si se crearon a mano antes (mismo nombre), la CREATE POLICY de abajo
+-- chocaria con 42710; se dropean explicitamente para poder repetir.
+DROP POLICY IF EXISTS "Service role manages calendar_integrations" ON calendar_integrations;
+DROP POLICY IF EXISTS "Service role manages calendar_sync_events" ON calendar_sync_events;
+DROP POLICY IF EXISTS "Service role manages calendar_sync_logs" ON calendar_sync_logs;
+
 CREATE POLICY "Service role manages calendar_integrations" ON calendar_integrations
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 CREATE POLICY "Service role manages calendar_sync_events" ON calendar_sync_events

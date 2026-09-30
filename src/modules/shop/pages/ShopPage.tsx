@@ -1,7 +1,7 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
 import { Search, ShoppingCart, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Package, Check, X, MapPin } from 'lucide-react';
-import { supabase, ShopConfig } from '../../../lib/supabase';
+import { supabase, ShopConfig, ShopColorsConfig } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { Product, Category, CartItem } from '../types';
 import { CartProvider, useCart } from '../contexts/CartContext';
@@ -111,28 +111,43 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
       setCheckoutError('Completá todos los datos');
       return;
     }
+    if (!business?.id) {
+      setCheckoutError('No pudimos identificar la tienda. Recargá la página e intentá de nuevo.');
+      return;
+    }
     setCheckoutLoading(true);
     setCheckoutError('');
     try {
-      const { data: orderData, error: orderError } = await supabase
+      // El id del pedido lo genera el cliente a proposito.
+      //
+      // Antes se hacia .insert().select().single() para recuperar el id. El
+      // .select() hace que PostgREST agregue RETURNING a la sentencia, y en
+      // Postgres RETURNING tambien evalua las policies de SELECT, no solo las
+      // de INSERT. En shop_orders no hay policy de SELECT para anon (a
+      // proposito: abrirla expondría nombre, email y telefono de TODOS los
+      // pedidos de TODOS los negocios a cualquiera que llame al endpoint), asi
+      // que el insert rebotaba con 42501 y el checkout no arrancaba.
+      // Generando el id aca, el INSERT no necesita devolver nada.
+      const orderId = crypto.randomUUID();
+
+      const { error: orderError } = await supabase
         .from('shop_orders')
         .insert({
-          business_id: business?.id,
+          id: orderId,
+          business_id: business.id,
           customer_name: customerName.trim(),
           customer_email: customerEmail.trim(),
           customer_phone: customerPhone.trim(),
           total: subtotal,
           currency,
           payment_status: 'pending',
-        })
-        .select()
-        .single();
+        });
 
-      if (orderError || !orderData) throw new Error('Error creating order');
+      if (orderError) throw new Error('Error creating order');
 
       const orderItems = items.map(i => ({
-        business_id: business?.id,
-        order_id: orderData.id,
+        business_id: business.id,
+        order_id: orderId,
         product_id: i.product.id,
         product_name: i.product.name + (i.selected_size ? ` (${i.selected_size})` : ''),
         quantity: i.quantity,
@@ -150,8 +165,8 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
       // guarda el preference_id por su cuenta.
       const { data: prefData, error: prefError } = await supabase.functions.invoke('create-shop-payment', {
         body: {
-          business_slug: business?.slug,
-          order_id: orderData.id,
+          business_slug: business.slug,
+          order_id: orderId,
         },
       });
 
@@ -159,7 +174,7 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
         throw new Error(prefData?.error || 'No se pudo iniciar el pago. Intentá de nuevo.');
       }
 
-      setCheckoutInfo({ preferenceId: prefData.id, orderId: orderData.id });
+      setCheckoutInfo({ preferenceId: prefData.id, orderId });
       setView('checkout');
     } catch (err) {
       setCheckoutError(err instanceof Error ? err.message : 'Error al iniciar pago');
@@ -620,14 +635,44 @@ function useShopConfig() {
   return config;
 }
 
+// Aplica los colores PROPIOS de la tienda como variables CSS, acotados a este
+// contenedor. ThemeContext define las mismas variables globalmente desde el
+// branding (que es el de la Bio y la Landing); al redefinirlas aca, la tienda se
+// ve distinto sin repintar el resto del sitio.
+//
+// Si el negocio todavia no guardo paleta, se devuelve {} y sigue mandando el
+// branding de siempre, que es el comportamiento anterior.
+function shopColorVars(colors: ShopColorsConfig | null | undefined): CSSProperties {
+  if (!colors?.primary) return {};
+  return {
+    '--booking-primary': colors.primary,
+    '--booking-primary-hover': colors.primary_hover,
+    '--booking-primary-light': colors.primary_light,
+    '--booking-bg': colors.background,
+    '--booking-card-bg': colors.card_bg,
+    '--booking-text': colors.text,
+    '--booking-text-muted': colors.text_muted,
+    '--booking-border': colors.border,
+    // Derivados de los mismos colores, para que los controles que usan estas
+    // variables (anillo de foco, captions, fondo de inputs) no queden con el
+    // tono de la Bio.
+    '--booking-ring': colors.primary,
+    '--booking-caption': colors.text_muted,
+    '--booking-input-bg': colors.card_bg,
+  } as CSSProperties;
+}
+
 export function ShopPage({ slug }: { slug?: string } = {}) {
+  const config = useShopConfig();
   return (
-    <CartProvider>
-      <ShopPageContent forcedSlug={slug} />
-      <ShopMarketingPopup />
-      <ShopCountdownBanner />
-      <ShopSocialProof />
-    </CartProvider>
+    <div style={shopColorVars(config?.colors)}>
+      <CartProvider>
+        <ShopPageContent forcedSlug={slug} />
+        <ShopMarketingPopup />
+        <ShopCountdownBanner />
+        <ShopSocialProof />
+      </CartProvider>
+    </div>
   );
 }
 

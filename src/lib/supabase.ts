@@ -145,11 +145,33 @@ export type ShopGeneralConfig = {
   show_in_booking: boolean;
 };
 
+// Colores PROPIOS de la tienda.
+//
+// Van aparte de los colores de branding (primary_color, background_color,
+// card_bg_color, text_color) a proposito: esos son los de la Bio y la Landing,
+// y compartirlos hacia que cambiar la paleta de la tienda te repinta el sitio
+// entero. Guardarlos en shop_config.colors permite vender la tienda por
+// separado mas adelante, con su propia identidad visual.
+//
+// Solo se guardan los que el negocio elige a mano; el resto se completa en el
+// cliente con los tokens del tema elegido (ver applyShopColorVars).
+export type ShopColorsConfig = {
+  primary: string;
+  primary_hover: string;
+  primary_light: string;
+  background: string;
+  card_bg: string;
+  text: string;
+  text_muted: string;
+  border: string;
+};
+
 export type ShopConfig = {
   banner: ShopBannerConfig | null;
   popup: ShopPopupConfig | null;
   social: ShopSocialConfig | null;
   general: ShopGeneralConfig | null;
+  colors: ShopColorsConfig | null;
 };
 
 export type Branding = {
