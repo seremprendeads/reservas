@@ -11,7 +11,6 @@ import {
   Archive,
   LayoutDashboard,
   Calendar,
-  Plug,
   Youtube,
 } from 'lucide-react';
 import type { View, NavItem } from './types';
@@ -71,7 +70,6 @@ export function useAdminNav(
           { id: 'profile', label: 'Configuración de Cuenta', icon: <UserCog className="h-5 w-5" /> },
         ]
       : [
-          { id: 'integrations', label: 'Integraciones', icon: <Plug className="h-5 w-5" /> },
           { id: 'profile', label: 'Perfil', icon: <UserCog className="h-5 w-5" /> },
           { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquareText className="h-5 w-5" /> },
           {
@@ -103,7 +101,6 @@ export function useAdminNav(
     waiting: 'Lista de Espera',
     availability: 'Disponibilidad',
     services: 'Reservas de servicios',
-    integrations: 'Integraciones',
     appearance: 'Reservas de servicios',
     payments: 'Pagos',
     profile: 'Perfil',

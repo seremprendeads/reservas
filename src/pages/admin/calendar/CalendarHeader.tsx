@@ -1,6 +1,8 @@
 import { ChevronLeft, ChevronRight, CalendarDays, Plus, Lock } from 'lucide-react';
 import type { CalendarView } from './types';
+import type { Booking } from '../../../lib/supabase';
 import { formatDateDisplay, formatDateShort, getToday } from './calendarUtils';
+import { ExportMenu } from './ExportMenu';
 
 interface CalendarHeaderProps {
   currentDate: string;
@@ -11,6 +13,10 @@ interface CalendarHeaderProps {
   onToday: () => void;
   onNewBooking: () => void;
   onBlockedTimes: () => void;
+  exportBookings: Booking[];
+  exportBusinessName: string;
+  exportRangeLabel: string;
+  exportFilename: string;
 }
 
 export function CalendarHeader({
@@ -22,6 +28,10 @@ export function CalendarHeader({
   onToday,
   onNewBooking,
   onBlockedTimes,
+  exportBookings,
+  exportBusinessName,
+  exportRangeLabel,
+  exportFilename,
 }: CalendarHeaderProps) {
   const getTitle = () => {
     if (view === 'day') return formatDateDisplay(currentDate);
@@ -65,6 +75,13 @@ export function CalendarHeader({
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
+
+        <ExportMenu
+          bookings={exportBookings}
+          businessName={exportBusinessName}
+          rangeLabel={exportRangeLabel}
+          filename={exportFilename}
+        />
 
         <button
           onClick={onBlockedTimes}

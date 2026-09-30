@@ -26,7 +26,6 @@ import { AdminHeader } from './admin/AdminHeader';
 import { AdminModals } from './admin/AdminModals';
 import { useAdminData } from './admin/useAdminData';
 import { useSubscription, FreePlanBanner, UpgradePopup, UpgradeBanner, TrialBanner } from '../modules/subscription';
-import { CalendarIntegrations } from '../modules/calendar-integration';
 // import { AiAssistant } from '../modules/ai-assistant';
 import type { AdminTab } from '../modules/landing/admin/lib/constants';
 
@@ -217,8 +216,6 @@ export function AdminPage() {
             onDelete={deleteBooking}
           />
         );
-      case 'integrations':
-        return <CalendarIntegrations />;
       case 'availability':
         return (
           <AvailabilityManager

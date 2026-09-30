@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Booking, AvailabilitySetting, BlockedDate } from '../../../lib/supabase';
 import type { CalendarView, CalendarFilters, BlockedTimeBlock } from './types';
-import { syncBookingToCalendar } from '../../../modules/calendar-integration';
 import { CalendarHeader } from './CalendarHeader';
 import { CalendarToolbar } from './CalendarToolbar';
 import { CalendarDayView } from './CalendarDayView';
@@ -10,7 +9,7 @@ import { CalendarMonthView } from './CalendarMonthView';
 import { BookingDrawer } from './BookingDrawer';
 import { BookingFormCalendar } from './BookingFormCalendar';
 import { BlockedTimeModal } from './BlockedTimeModal';
-import { getToday, addDays, getWeekStart, getMonthStart, getMonthEnd, getDaySummary, filterBookings } from './calendarUtils';
+import { getToday, addDays, getWeekStart, getMonthStart, getMonthEnd, getDaySummary, filterBookings, formatDateDisplay, formatDateShort } from './calendarUtils';
 import { supabase } from '../../../lib/supabase';
 import { authInvoke } from '../helpers';
 import { useBusiness } from '../../../contexts/BusinessContext';
@@ -89,6 +88,17 @@ export function CalendarPage({
     b => b.booking_date >= range.start && b.booking_date <= range.end
   );
 
+  const rangeLabel =
+    view === 'day'
+      ? formatDateDisplay(range.start)
+      : view === 'week'
+        ? `Semana del ${formatDateShort(range.start)}`
+        : new Date(range.start).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+
+  const exportFilename = view === 'month'
+    ? `reservas-${range.start.slice(0, 7)}`
+    : `reservas-${range.start}_a_${range.end}`;
+
   const summary = getDaySummary(filteredBookings, currentDate);
 
   const handlePrev = () => {
@@ -156,7 +166,6 @@ export function CalendarPage({
       return;
     }
 
-    if (data.id) syncBookingToCalendar(data.id).catch(() => {});
     onRefresh();
   };
 
@@ -177,6 +186,10 @@ export function CalendarPage({
         onToday={handleToday}
         onNewBooking={handleNewBooking}
         onBlockedTimes={() => setBlockedTimesOpen(true)}
+        exportBookings={rangeBookings}
+        exportBusinessName={business?.name || 'Bioweblink'}
+        exportRangeLabel={rangeLabel}
+        exportFilename={exportFilename}
       />
 
       <CalendarToolbar
