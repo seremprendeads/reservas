@@ -146,6 +146,9 @@ export function ShopAdmin() {
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${generalCfg.show_in_booking ? 'translate-x-5' : ''}`} />
             </button>
           </div>
+          <a href={`/${business?.slug}/tienda`} target="_blank" rel="noopener noreferrer" className="mb-3 inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-border text-foreground hover:bg-accent w-fit">
+            <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
+          </a>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {allThemes.map(t => (
               <button key={t.id} onClick={() => previewShopTheme(t.id)}
@@ -241,9 +244,6 @@ export function ShopAdmin() {
         <button onClick={() => setView('trash')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'trash' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <Archive className="w-4 h-4 inline mr-1.5" />Papelera
         </button>
-        <a href={`/${business?.slug}/tienda`} target="_blank" rel="noopener noreferrer" className="shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent lg:ml-auto inline-flex items-center">
-          <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
-        </a>
       </div>
       {view === 'dashboard' && <ShopDashboard />}
       {view === 'products' && <ProductsManager />}
