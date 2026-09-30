@@ -1,6 +1,14 @@
 import type { LandingDivider } from '../types';
 import { getDividerPath, clampDividerHeight, DIVIDER_VIEWBOX } from '../lib/dividers';
 
+// El svg se dibuja un poco mas alto que el solapamiento y se baja la misma
+// cantidad dentro de la seccion siguiente. El margen sigue siendo -height (el
+// corte queda en el limite exacto entre secciones), pero la onda queda pintada
+// 2px por encima de la_union: al ser el MISMO color que la seccion de abajo,
+// esos 2px son invisibles y tapan el seam de 1px que dejaba el antialiasing del
+// borde del svg. Antes se veía una linea clara entre la onda y la seccion.
+const BLEED = 2;
+
 interface SectionDividerProps {
   /** Configuración guardada en sections.dividers */
   divider: LandingDivider | undefined | null;
@@ -50,7 +58,7 @@ export function SectionDivider({ divider, color }: SectionDividerProps) {
         style={{
           display: 'block',
           width: '100%',
-          height,
+          height: height + BLEED,
           transform: divider.flip ? 'scaleX(-1)' : undefined,
         }}
       >
