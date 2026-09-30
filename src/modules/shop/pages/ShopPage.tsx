@@ -458,6 +458,9 @@ function DetailScreen({ product, onAddToCart, onBuyNow }: { product: Product; on
                   </span>
                 ))}
               </div>
+              <p className="mt-2 text-[11px]" style={{ color: 'var(--booking-text-muted)' }}>
+                Al comprar, anotá en "Detalle del pedido" tu talle, los kilos o las medidas en cm.
+              </p>
             </div>
           )}
 
