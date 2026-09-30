@@ -33,6 +33,7 @@ export type Order = {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
+  customer_notes: string | null;
   total: number;
   currency: string;
   payment_status: 'approved' | 'pending' | 'rejected';

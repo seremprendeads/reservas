@@ -47,7 +47,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: order } = await supabase
       .from("shop_orders")
-      .select("id, business_id, payment_status, customer_name, customer_email")
+      .select("id, business_id, payment_status, customer_name, customer_email, customer_notes")
       .eq("id", order_id)
       .eq("business_id", business.id)
       .maybeSingle();
@@ -126,6 +126,8 @@ Deno.serve(async (req: Request) => {
     const volverA = (estado: string) => `${siteUrl}/${business_slug}/tienda?pago=${estado}&pedido=${order_id}`;
     const notificationUrl = `${SUPABASE_URL}/functions/v1/mercadopago-webhook?negocio=${business.id}`;
 
+    const detallePedido = String(order.customer_notes || "").trim().slice(0, 220);
+
     const preference = {
       items: mpItems,
       payer: {
@@ -141,6 +143,9 @@ Deno.serve(async (req: Request) => {
       notification_url: notificationUrl,
       external_reference: order_id,
       statement_descriptor: "TIENDA",
+      // El detalle que escribio el comprador (talle, kilos, botellas) tiene que
+      // verse en el comprobante de Mercado Pago, no solo en el admin.
+      description: `Detalle: ${detallePedido}`.slice(0, 250),
     };
 
     const response = await fetch("https://api.mercadopago.com/checkout/preferences", {

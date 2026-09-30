@@ -48,6 +48,7 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [customerNotes, setCustomerNotes] = useState('');
   const [checkoutError, setCheckoutError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [negocioNoEncontrado, setNegocioNoEncontrado] = useState(false);
@@ -121,8 +122,8 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
   };
 
   const startCheckout = async () => {
-    if (!customerName.trim() || !customerEmail.trim() || !customerPhone.trim()) {
-      setCheckoutError('Completá todos los datos');
+    if (!customerName.trim() || !customerEmail.trim() || !customerPhone.trim() || !customerNotes.trim()) {
+      setCheckoutError('Completá todos los datos, incluido el detalle del pedido');
       return;
     }
     if (!business?.id) {
@@ -152,6 +153,7 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
           customer_name: customerName.trim(),
           customer_email: customerEmail.trim(),
           customer_phone: customerPhone.trim(),
+          customer_notes: customerNotes.trim(),
           total: subtotal,
           currency,
           payment_status: 'pending',
@@ -298,6 +300,7 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
             customerName={customerName} setCustomerName={setCustomerName}
             customerEmail={customerEmail} setCustomerEmail={setCustomerEmail}
             customerPhone={customerPhone} setCustomerPhone={setCustomerPhone}
+            customerNotes={customerNotes} setCustomerNotes={setCustomerNotes}
             onStartCheckout={startCheckout} checkoutLoading={checkoutLoading} checkoutError={checkoutError}
           />
         )}
@@ -558,6 +561,7 @@ function TrustNote() {
 
 function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCart,
   customerName, setCustomerName, customerEmail, setCustomerEmail, customerPhone, setCustomerPhone,
+  customerNotes, setCustomerNotes,
   onStartCheckout, checkoutLoading, checkoutError
 }: {
   items: CartItem[]; subtotal: number; currency: string;
@@ -567,6 +571,7 @@ function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCa
   customerName: string; setCustomerName: (v: string) => void;
   customerEmail: string; setCustomerEmail: (v: string) => void;
   customerPhone: string; setCustomerPhone: (v: string) => void;
+  customerNotes: string; setCustomerNotes: (v: string) => void;
   onStartCheckout: () => Promise<void>; checkoutLoading: boolean; checkoutError: string;
 }) {
   const [showForm, setShowForm] = useState(false);
@@ -702,6 +707,7 @@ function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCa
               <LabeledInput label="Nombre completo" type="text" value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Juan Pérez" />
               <LabeledInput label="Email" type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} placeholder="juan@email.com" hint="Ahí te llega el comprobante" />
               <LabeledInput label="Teléfono" type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="11 2345 6789" />
+              <LabeledInput label="Detalle del pedido" type="text" value={customerNotes} onChange={e => setCustomerNotes(e.target.value)} placeholder="Ej: talle M, 2 kilos, 6 botellas" hint="Obligatorio: indicá el talle, la medida o la presentación que necesitás." required />
               <button
                 onClick={onStartCheckout}
                 disabled={checkoutLoading}

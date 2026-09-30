@@ -717,6 +717,12 @@ function OrdersList() {
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-sm sm:text-base">{o.customer_name}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground truncate">{o.customer_email} · {o.customer_phone}</p>
+                  {o.customer_notes && (
+                    <p className="text-xs sm:text-sm mt-0.5">
+                      <span className="text-muted-foreground">Detalle: </span>
+                      <span className="font-medium">{o.customer_notes}</span>
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString('es-AR')}</p>
                 </div>
                 <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
