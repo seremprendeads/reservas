@@ -26,8 +26,9 @@ export function useAdminAuth() {
   const trialWarningShownRef = useRef(false);
 
   const [darkMode, setDarkMode] = useState(() => {
-    const stored = localStorage.getItem('admin_dark');
-    const isDark = stored !== null ? stored === '1' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Arranca siempre en claro. Antes tomaba la preferencia del sistema, asi
+    // que un usuario nuevo con el SO en oscuro entraba al admin a oscuras.
+    const isDark = localStorage.getItem('admin_dark') === '1';
     document.documentElement.classList.toggle('dark', isDark);
     return isDark;
   });
