@@ -1,0 +1,348 @@
+==============================================================================
+RESUMEN DE TRABAJO - BIOWEBLINK (RESERVAS)
+Fecha: 2026-10-02
+Proyecto Supabase: slsgkbepewxlsmzmcpri
+Repo: https://github.com/seremprendeads/reservas.git  (rama main)
+==============================================================================
+
+Este archivo cuenta TODO lo que se hizo: el diagnostico previo, el codigo
+escrito, lo que se aplico en produccion y lo que queda pendiente.
+
+==============================================================================
+1. OBJETIVO
+==============================================================================
+
+Cerrar los bloqueantes pre-beta C.1, C.2, C.3 y C.4, y ademas EJECUTARLO en
+produccion (aplicar migraciones y desplegar Edge Functions). El usuario delego
+la ejecucion ("hacelo vos").
+
+Restricciones respetadas:
+- No cambiar planes, trial, arquitectura, modulos, Mercado Pago ni frontend no
+  relacionado.
+- No agregar CAPTCHA ni rate limit distribuido.
+- No mostrar/commitear secretos.
+
+
+==============================================================================
+2. HALLAZGOS / CAUSA RAIZ
+==============================================================================
+
+C.1 - Funciones SQL con EXECUTE otorgado a PUBLIC.
+  En PostgreSQL toda funcion nueva nace con EXECUTE para el rol PUBLIC. Los
+  REVOKE ... FROM anon, authenticated de migraciones viejas no quitaban el
+  privilegio heredado de PUBLIC. Con la anon key (publica, va en el bundle JS)
+  se podian ejecutar create_master_admin, update_admin_password_direct,
+  update_admin_password_by_id, create_admin_user, verify_admin_password,
+  verify_master_password, decrement_stock y get_business_id_from_admin.
+  update_admin_password_direct era la mas grave: reseteaba la contrasena de
+  cualquier admin sin autenticarse.
+
+C.2 - admin-save-bio sin validacion de ownership.
+  No verificaba que los bio_profiles / bio_links pertenecieran al business
+  autenticado, permitiendo tocar datos de otro negocio.
+
+C.3 - Escritura anon en Storage.
+  Se descubrio que NO existe ni un solo supabase.auth.* en todo el proyecto:
+  el login admin es 100% custom (admin-login + JWT propio). Por eso el browser
+  nunca tiene sesion Supabase y todos los supabase.storage.upload() salian con
+  la anon key. Sin auth.uid() ni claim de business, el business_id del path lo
+  elegia el cliente y el bucket "branding" permitia escritura anon.
+  Ademas:
+  - "shop-images" YA estaba roto de antes: su policy de INSERT
+    (20260715090000:16) exigia email en request.jwt.claims, que nunca existe.
+  - "avatars" no tenia bucket ni definicion.
+
+C.4 - Cuenta master del tutorial.
+  La cuenta tu@email.com quedaba activa y con credencial visible en el repo
+  (comentario de 20260820100000_master_admin.sql).
+
+
+==============================================================================
+3. CODIGO ESCRITO / MODIFICADO
+==============================================================================
+
+C.2 - supabase/functions/admin-save-bio/index.ts
+  - Resuelve perfiles propios (bio_profiles.id con .eq("business_id", auth.businessId)).
+  - update_link / delete_link / reorder_links acotados con
+    .in("profile_id", idsPropios).
+  - add_link ignora profile_id ajeno (usa el propio si esta en el set).
+  - save_profile filtra tambien por business_id.
+  - update_link usa destructuring para no reasignar profile_id.
+  - Errores 404 identicos para "no existe" y "es de otro" (sin oraculo).
+
+C.3 - Gateway de uploads (nuevo).
+  supabase/functions/admin-storage-upload/index.ts
+    - authenticateToken + checkBusinessAccess + checkRateLimit (30/5min por business).
+    - Allowlist: branding 5MB, shop-images 2MB, avatars 2MB; MIME
+      image/webp | image/jpeg | image/png (los tres).
+    - validatePath: exige que segments[0] === auth.businessId y rechaza
+      "..", "\", "/" inicial y segmentos vacios.
+    - Acciones upload y delete, ambas con control de tenant.
+  src/lib/storage-upload.ts (nuevo)
+    - uploadStorageFile(bucket, name, blob, contentType): antepone SIEMPRE el
+      business_id de la sesion (no del call site).
+    - deleteStorageFileSecure.
+    - readFunctionError: extrae error.context para no perder mensajes non-2xx.
+  supabase/migrations/20261002100000_lock_down_storage_writes.sql
+    - Elimina toda escritura anon/authenticated en storage.objects; deja
+      service_role como unico escritor; recrea lecturas publicas; crea bucket
+      "avatars" si falta (ON CONFLICT DO NOTHING).
+  5 call sites migrados al helper:
+    - src/hooks/useImageUpload.ts (se elimino la opcion pathPrefix)
+    - src/modules/landing/admin/hooks/useLandingUpload.ts
+    - src/modules/bio/admin/BioAdmin.tsx
+    - src/modules/shop/admin/ShopAdmin.tsx
+    - src/modules/shop/admin/MultiImageUploader.tsx
+    - src/modules/shop/admin/storage-utils.ts
+  Ademas se quito pathPrefix en:
+    - src/pages/admin/AppearanceManager.tsx
+    - src/pages/admin/ProfileManager.tsx
+    - src/pages/admin/ServicesManager.tsx
+
+C.1 - supabase/functions/admin-forgot-password/index.ts
+  - Respuesta generica (no revelar si el email existe).
+  supabase/migrations/20261001090000_revoke_public_on_security_definer_functions.sql
+  - Revoca ALL de PUBLIC y de anon/authenticated en funciones sensibles y
+    concede EXECUTE solo a service_role.
+  - Mantiene explicitamente el acceso anon/authenticated a las funciones que el
+    frontend publico si necesita (generate_booking_code, business_has_module,
+    order_belongs_to_business, get_public_business_legal_info,
+    get_business_id_from_slug).
+
+C.4
+  supabase/migrations/20261002090000_deactivate_tutorial_master.sql
+    - Desactiva tu@email.com (reversible, no borra, idempotente).
+  supabase/migrations/20260820100000_master_admin.sql
+    - Se quito la contrasena literal del comentario (solo comentario, sin
+      impacto de esquema).
+
+Artefactos de diagnostico / prueba (quedaron SIN commitear):
+  - CONSULTAR-MASTER-Y-STORAGE.sql  (F.1 en linea 94; bloques F.2/F.3 A-E desde 117)
+  - PRUEBAS-C2-C3.md
+  - DIAGNOSTICO-BLOQUEANTES-PRE-BETA.txt
+
+
+==============================================================================
+4. VERIFICACION LOCAL PREVIA
+==============================================================================
+
+- Build PASS.
+- typecheck: 45 errores = baseline preexistente (ninguno propio; distribucion
+  por codigo identica).
+- npx -y deno check --node-modules-dir=auto de admin-storage-upload y
+  admin-save-bio: limpios (1 error preexistente compartido en
+  _shared/jwt.ts:74 TS2345, confirmado contra admin-update-branding sin tocar).
+- ESLint de archivos tocados: solo hallazgos preexistentes.
+- Escaneo de credenciales: sin secretos hardcodeados en src/, supabase/functions
+  ni supabase/migrations.
+
+
+==============================================================================
+5. EJECUCION EN PRODUCCION (lo que se hizo hoy)
+==============================================================================
+
+5.1 Correccion de la migracion C.1
+  El primer db push FALLO con:
+    ERROR: function public.has_business_role(uuid, text, text) does not exist
+  Motivo: el esquema real de produccion esta desincronizado del repo.
+  - has_business_role y get_business_id_from_slug figuraban en el repo pero no
+    existen en produccion.
+  - order_belongs_to_business lo crea 20260928010000 (una migracion AJENA que
+    sigue pendiente), asi que tampoco existia.
+  Se reescribio la seccion 2 de la migracion como un LOOP POR NOMBRE
+  (pg_proc.proname), tolerante a overloads y a funciones ausentes. has_business_role
+  quedo en un loop propio, solo para service_role. El fallo hizo rollback: nada
+  quedo aplicado.
+
+5.2 Aplicacion de migraciones
+  Para aplicar SOLO las migraciones propias, se movieron temporalmente fuera de
+  supabase/migrations/ estas 4 (3 ajenas + el lock-down de storage):
+    - 20260928010000_restore_shop_checkout_policies.sql   (ajena)
+    - 20260930000000_drop_calendar_integrations.sql       (ajena, DESTRUCTIVA)
+    - 20260930010000_add_customer_notes_to_shop_orders.sql (ajena)
+    - 20261002100000_lock_down_storage_writes.sql         (propia, se aplica al final)
+  Luego: supabase db push --yes  ->  APLICADAS:
+    * 20261001090000_revoke_public_on_security_definer_functions.sql
+    * 20261002090000_deactivate_tutorial_master.sql
+  La C.4 imprimio un NOTICE: cuenta tu@email.com encontrada, is_active=t,
+  updated_at = created_at => NO registra uso.
+  Los 4 archivos movidos se restauraron al final (verificado con git status).
+  NO se aplicaron las 3 migraciones ajenas.
+
+5.3 Deploy de Edge Functions
+  Docker no esta instalado => se uso --use-api (bundle server-side).
+  No hay supabase/config.toml y el JWT es custom => --no-verify-jwt.
+  Comando:
+    supabase functions deploy admin-storage-upload admin-save-bio admin-forgot-password --no-verify-jwt --use-api
+  Resultado: las 3 desplegadas, ACTIVE.
+    - admin-storage-upload  (v1)
+    - admin-save-bio
+    - admin-forgot-password
+
+5.4 Verificacion de la funcion nueva
+  POST sin auth a /functions/v1/admin-storage-upload:
+    STATUS 401  {"success":false,"error":"No autorizado"}
+  Ese JSON es NUESTRO (espanol, forma propia) => la funcion ejecuto y
+  verify_jwt esta OFF. Si estuviera ON, respondería el gateway de Supabase.
+
+5.5 Estado de migraciones remotas
+  Aplicadas: 20261001090000, 20261002090000.
+  Pendientes a proposito: 20261002100000 (storage lock-down) + las 3 ajenas.
+
+5.6 Commit y push
+  Commit b1d8d61  "fix(seguridad): cierra escritura anon de storage y ownership
+  de links en bio" (18 archivos, +1038 / -86).
+  Push: 55a1f03..b1d8d61  main -> main.
+  SE EXCLUYERON del commit: .gitignore (M), LEEME.txt (D), 
+  supabase/.temp/cli-latest (M) por no ser parte del fix.
+  Archivos incluidos:
+    src/hooks/useImageUpload.ts
+    src/lib/storage-upload.ts (nuevo)
+    src/modules/bio/admin/BioAdmin.tsx
+    src/modules/landing/admin/hooks/useLandingUpload.ts
+    src/modules/shop/admin/MultiImageUploader.tsx
+    src/modules/shop/admin/ShopAdmin.tsx
+    src/modules/shop/admin/storage-utils.ts
+    src/pages/admin/AppearanceManager.tsx
+    src/pages/admin/LoginScreen.tsx
+    src/pages/admin/ProfileManager.tsx
+    src/pages/admin/ServicesManager.tsx
+    supabase/functions/admin-forgot-password/index.ts
+    supabase/functions/admin-save-bio/index.ts
+    supabase/functions/admin-storage-upload/index.ts (nuevo)
+    supabase/migrations/20260820100000_master_admin.sql
+    supabase/migrations/20261001090000_revoke_public_on_security_definer_functions.sql (nuevo)
+    supabase/migrations/20261002090000_deactivate_tutorial_master.sql (nuevo)
+    supabase/migrations/20261002100000_lock_down_storage_writes.sql (nuevo, aun NO aplicada)
+  No hay CI/GitHub Actions en el repo (sin .github/).
+
+
+==============================================================================
+6. PENDIENTE (actualizado tras la seccion 8)
+==============================================================================
+
+Ya NO queda nada de backend pendiente por parte del agente: todo lo que
+dependia de ejecucion (migraciones, deploy de funciones, lock-down, auditoria
+F.1-F.3 y el fix de update_branding) esta hecho y verificado en produccion.
+
+1) SMOKE TEST EN LA UI (unico paso que depende del usuario). Con la app live:
+   - Subir imagen principal de producto, galeria, branding y avatar: deben
+     subir OK (via Edge Function). Un POST directo con anon key debe dar 403.
+   - Hacer una reserva publica de punta a punta.
+   - Hacer UN pago de prueba real en Mercado Pago y confirmar que se acredita.
+
+2) Decision sobre las 3 migraciones AJENAS (siguen sin aplicar a proposito,
+   ver seccion 7).
+
+3) Opcional: crear supabase/config.toml declarando verify_jwt=false POR funcion
+   para no depender del recuerdo manual en cada deploy (ver seccion 7).
+
+
+==============================================================================
+7. NOTAS / RIESGOS
+==============================================================================
+
+- No hay supabase/config.toml: verify_jwt se recuerda POR FUNCION en la
+  plataforma. Si alguien redespliega admin-storage-upload sin --no-verify-jwt,
+  se rompe. Se puede crear un config.toml declarando verify_jwt=false por
+  funcion, pero hay que revisar el resto (no todas las funciones deben ser
+  false).
+- Migraciones ajenas pendientes (NO aplicadas por decision del usuario):
+    * 20260928010000_restore_shop_checkout_policies.sql (fix de bug real)
+    * 20260930000000_drop_calendar_integrations.sql (DESTRUCTIVA, DROP TABLE
+      CASCADE; calendar-manage / calendar-sync siguen desplegadas ACTIVE)
+    * 20260930010000_add_customer_notes_to_shop_orders.sql (columna nullable)
+- Archivo de migracion invalido que el CLI omite con warning:
+  "20260901000000 commercial cycle.sql" (no cumple el patron de nombre).
+- SI hay acceso a SQL arbitrario: "supabase db query --linked" (via Management
+  API) y ademas existe supabase/.temp/pooler-url para psql. F.1-F.3 se
+  corrieron desde la terminal (ver seccion 8). El Supabase SQL Editor sigue
+  siendo alternativa, pero ya no es necesaria.
+- ServiciosManager acepta GIF pero el bucket ya lo rechazaba antes (roto
+  preexistente, no es regresion).
+- El typecheck global no puede marcarse PASS por 45 errores base preexistentes.
+
+==============================================================================
+8. ACTUALIZACION (misma fecha, continuacion): lock-down, C.6 y auditoria SQL
+==============================================================================
+
+8.1 Aplicacion del lock-down de Storage (C.3)
+  Con el frontend nuevo ya live (commit b1d8d61 confirmado por el usuario) se
+  aplico la migracion que quedaba pendiente a proposito:
+    20261002100000_lock_down_storage_writes.sql   -> APLICADA.
+  Los NOTICE indicaron que varias policies de escritura anon ya no existian
+  (se habian quitado antes); la migracion es idempotente.
+  Verificacion con la anon key: POST directo a storage/branding ->
+    403 {"statusCode":"403","error":"Unauthorized",
+         "message":"new row violates row-level security policy",
+         "code":"AccessDenied"}
+  => la escritura anon en Storage quedo cerrada.
+
+8.2 C.6 - Validacion de monto en mercadopago-webhook (anti-fraude)
+  supabase/functions/mercadopago-webhook/index.ts
+    - montoCoincide (redondeo a centavo) y alertarMonto (ntfy).
+    - Reservas: compara transaction_amount contra bookings.amount.
+    - Tienda: compara contra shop_orders.total.
+    - Si NO coincide: no confirma pago, no descuenta stock; loguea y alerta.
+  Es un control defensivo/opcional: Mercado Pago ya funcionaba. Desplegada con
+  --no-verify-jwt --use-api -> ACTIVE. GET -> 200 OK.
+
+8.3 Fix de un call site de upload que faltaba
+  src/modules/shop/admin/ImageUploader.tsx usaba supabase.storage directo con la
+  anon key para la imagen principal de producto (usado en ShopAdmin.tsx:577).
+  Se migro a uploadStorageFile. Tambien se quito un import sin usar en
+  MultiImageUploader.tsx. El typecheck bajo de 45 a 44 errores.
+
+8.4 Commits de esta etapa (todos pusheados a origin/main)
+  44453b2  fix(shop): sube la imagen principal via gateway autenticado
+  5278ae6  fix(pagos): valida el monto del webhook de Mercado Pago (C.6)
+
+8.5 Auditoria F.1-F.3 ejecutada con "supabase db query"
+  HALLAZGO DE HERRAMIENTA: SI hay acceso a SQL. La CLI trae el subcomando
+  "supabase db query" (con --linked, via Management API) y existe
+  supabase/.temp/pooler-url para psql. F.1-F.3 se corrieron desde la terminal.
+
+  Resultados:
+  - F.1 (table privileges): anon/authenticated APARECEN con
+    SELECT/INSERT/UPDATE/DELETE en todas las tablas sensibles. Esto es el
+    DEFAULT de Supabase (GRANT amplio a anon/authenticated) y NO es una fuga por
+    si solo: la proteccion real es RLS. Se verifico con pg_class que las 12
+    tablas sensibles tienen relrowsecurity = true. Para admin_users,
+    master_admins y payment_providers la UNICA policy es para service_role
+    ("Service role manages ..."), asi que anon/authenticated quedan en
+    default-deny. => OK.
+  - Bloque A: todas false. OK.
+  - Bloque B: todas true. OK.
+  - Bloque C: todas true (service_role conserva acceso). OK.
+  - Bloque D: 1 filtrada -> public.update_branding(...). Ver 8.6.
+  - Bloque E: la allowlist esperada + funciones de pgcrypto (son de la
+    extension pgcrypto, NO son SECURITY DEFINER; no exponen datos).
+
+8.6 HALLAZGO Y FIX: public.update_branding ejecutable por anon
+  La migracion 20261001090000 revocaba por LISTA DE NOMBRES y dejo afuera una
+  funcion que es DRIFT (no existe en ninguna migracion del repo y no hay
+  referencia en src/):
+    public.update_branding(uuid, text x13)  SECURITY DEFINER y sin validar que
+    quien llama sea dueno de p_business_id.
+  El frontend guarda el branding con la Edge admin-update-branding
+  (AppearanceManager.tsx:127 y ShopAdmin.tsx:1033) via service_role; el RPC
+  quedo huerfano. Como era SECURITY DEFINER y anon podia ejecutarlo, cualquiera
+  con la anon key (publica) podia pisar el branding de CUALQUIER negocio.
+  FIX (nueva migracion, aplicada):
+    supabase/migrations/20261002110000_lock_down_leftover_security_definer_functions.sql
+    Hace un BARRIDO: recorre TODAS las funciones SECURITY DEFINER de public que
+    hoy tienen EXECUTE para anon/authenticated y, salvo la allowlist publica
+    conocida, las deja solo en service_role. Cierra esta clase de problema para
+    cualquier drift futuro.
+  Verificado: update_branding -> anon_exec=false, auth_exec=false, sr_exec=true
+  (acl final: postgres, service_role). Bloque D -> 0 filas.
+
+8.7 Estado de migraciones remotas (final)
+  Aplicadas por esta tarea: 20261001090000, 20261002090000, 20261002100000,
+  20261002110000.
+  Siguen pendientes a proposito (ajenas): 20260928010000, 20260930000000,
+  20260930010000.
+
+==============================================================================
+FIN
+==============================================================================
