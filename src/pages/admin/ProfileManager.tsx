@@ -37,7 +37,6 @@ export function ProfileManager({
   const [error, setError] = useState('');
   const { uploading, uploadError, clearError, fileInputRef, handleFileChange } = useImageUpload({
     bucket: 'avatars',
-    pathPrefix: business?.id || 'default',
     filePrefix: `avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
     maxFileSize: 2 * 1024 * 1024,
   });

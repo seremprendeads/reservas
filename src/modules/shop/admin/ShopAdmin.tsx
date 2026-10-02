@@ -19,6 +19,7 @@ import {
 import { ImageUploader } from './ImageUploader';
 import { MultiImageUploader } from './MultiImageUploader';
 import { deleteStorageFile } from './storage-utils';
+import { uploadStorageFile } from '../../../lib/storage-upload';
 
 export function ShopAdmin() {
   const { business } = useBusiness();
@@ -854,11 +855,10 @@ function ShopPopupTab() {
     try {
       const { compressImage } = await import('../../../lib/image-utils');
       const blob = await compressImage(file, { maxWidth: 800, maxHeight: 600 });
-      const path = `${business.id}/shop-popup-${Date.now()}.webp`;
-      const { error } = await supabase.storage.from('branding').upload(path, blob, { upsert: false, contentType: 'image/webp' });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from('branding').getPublicUrl(path);
-      setConfig(prev => ({ ...prev, image_url: (urlData?.publicUrl || '') + `?t=${Date.now()}` }));
+      const path = `shop-popup-${Date.now()}.webp`;
+      // La carpeta la antepone uploadStorageFile con el business_id de la sesion.
+      const publicUrl = await uploadStorageFile('branding', path, blob, 'image/webp');
+      setConfig(prev => ({ ...prev, image_url: publicUrl }));
     } catch (err) {
       console.error('Upload error:', err);
     } finally {

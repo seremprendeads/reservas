@@ -43,13 +43,11 @@ export function AppearanceManager({
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
   const logo = useImageUpload({
     bucket: 'branding',
-    pathPrefix: business?.id || 'default',
     filePrefix: 'logo',
     compress: (f) => compressImage(f, 'logo'),
   });
   const bg = useImageUpload({
     bucket: 'branding',
-    pathPrefix: business?.id || 'default',
     filePrefix: 'bg',
     compress: (f) => compressImage(f, 'bg'),
   });

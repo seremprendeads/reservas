@@ -3,7 +3,28 @@ import { createServiceClient, jsonSuccess, jsonError, corsHeaders, checkRateLimi
 
 function generateTempPassword(): string {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  return Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  // crypto.getRandomValues y no Math.random(): la contrasena temporal es una
+  // credencial real, y Math.random no es criptograficamente seguro. Es
+  // predecible a partir del estado interno, lo que reduce el espacio de
+  // busqueda de una credencial que da acceso al panel.
+  const pool = new Uint32Array(10);
+  crypto.getRandomValues(pool);
+  return Array.from(pool, (n) => chars[n % chars.length]).join('');
+}
+
+// Cierra el canal lateral de tiempo. Cuando el email no existe el handler
+// termina al instante; cuando existe hace dos RPCs y un POST a Resend. Esa
+// diferencia de latencia permite enumerar cuentas probando emails y midiendo
+// la respuesta, aunque el body y el status sean identicos. Se nivela con una
+// espera fija en el camino rapido (el lento ya excede el piso).
+const MIN_RESPONSE_MS = 700;
+
+async function respondGeneric(startedAt: number) {
+  const elapsed = Date.now() - startedAt;
+  if (elapsed < MIN_RESPONSE_MS) {
+    await new Promise((r) => setTimeout(r, MIN_RESPONSE_MS - elapsed));
+  }
+  return jsonSuccess({ sent: true });
 }
 
 Deno.serve(async (req: Request) => {
@@ -11,8 +32,10 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
+  const startedAt = Date.now();
+
   try {
-    // Rate limiting: máx 5 solicitudes por IP por minuto
+    // Rate limiting por IP: frena el envio masivo desde un mismo origen.
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
     const rl = checkRateLimit(`admin-forgot-password:${ip}`, 5, 60_000);
     if (!rl.allowed) {
@@ -26,6 +49,22 @@ Deno.serve(async (req: Request) => {
     }
 
     const cleanEmail = (email || "").trim().toLowerCase();
+
+    // Rate limiting por email: frena el ataque dirigido a una victima concreta.
+    // Sin esto, el limite por IP no sirve de nada: el atacante rota de IP o
+    // espera un minuto entre cada intento y sigue pidiendo resets.
+    //
+    // Se devuelve la MISMA respuesta generica en vez de un 429. Un 429 aqui
+    // solo para emails que existen seria un oraculo de enumeracion de cuentas
+    // (y el cooldown aplicado despues de consultar admin_users lo seria
+    // todavia mas). Devolviendo {sent:true} siempre, el atacante no puede
+    // distinguir "te mandamos el mail" de "estas en cooldown" ni de
+    // "ese email no existe".
+    const emailRl = checkRateLimit(`admin-forgot-password:email:${cleanEmail}`, 3, 15 * 60_000);
+    if (!emailRl.allowed) {
+      return await respondGeneric(startedAt);
+    }
+
     const supabase = createServiceClient();
 
     const { data: admin } = await supabase
@@ -34,9 +73,10 @@ Deno.serve(async (req: Request) => {
       .ilike("email", cleanEmail)
       .maybeSingle();
 
-    // Respuesta genérica si el email no existe (previene enumeración de usuarios)
+    // Respuesta generica si el email no existe (previene enumeracion de usuarios).
+    // Pasa por respondGeneric para no delatar la diferencia de tiempo.
     if (!admin) {
-      return jsonSuccess({ sent: true });
+      return await respondGeneric(startedAt);
     }
 
     const tempPassword = generateTempPassword();
@@ -73,7 +113,7 @@ Deno.serve(async (req: Request) => {
         },
         body: JSON.stringify({
           from: FROM_EMAIL,
-          to: email,
+          to: admin.email,
           subject: "🔑 Tu contraseña temporal - BiowebLink",
           html: `
             <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
@@ -92,16 +132,22 @@ Deno.serve(async (req: Request) => {
         }),
       });
       if (!emailRes.ok) {
-        console.error("Resend error:", await emailRes.text());
+        // Se registra solo el status, no el cuerpo de la respuesta: el body
+        // de Resend puede devolver un eco de la request (destinatario y
+        // contenido), y el contenido del mail lleva la contrasena temporal.
+        console.error("admin-forgot-password: Resend respondio", emailRes.status);
       }
     }
 
     // IMPORTANTE: NO devolver temp_password en el response.
-    // La contraseña se envía SOLO por email.
-    // Si no hay RESEND_API_KEY configurado, la contraseña se pierde.
-    return jsonSuccess({ sent: true });
+    // La contrasena se envia SOLO por email.
+    // Si no hay RESEND_API_KEY configurado, la contrasena se pierde.
+    return await respondGeneric(startedAt);
   } catch (err) {
-    console.error("admin-forgot-password error:", err);
+    // Se registra solo el mensaje, no el objeto entero: los errores de
+    // PostgREST pueden incluir parametros enviados, y entre ellos la
+    // contrasena temporal.
+    console.error("admin-forgot-password error:", err instanceof Error ? err.message : "unknown");
     return jsonError("Error interno");
   }
 });

@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { X, Image as ImageIcon, Loader2, Plus } from 'lucide-react';
-import { supabase } from '../../../lib/supabase';
-import { useBusiness } from '../../../contexts/BusinessContext';
+import { uploadStorageFile } from '../../../lib/storage-upload';
 import { SHOP_STORAGE_BUCKET, IMAGE_CONFIG } from '../config';
 import { Progress } from '../../../components/ui/progress';
 import { deleteStorageFile } from './storage-utils';
@@ -40,7 +39,6 @@ function compressImage(file: File): Promise<Blob> {
 }
 
 export function MultiImageUploader({ images, onImagesChange, maxImages = 4, disabled }: MultiImageUploaderProps) {
-  const { business } = useBusiness();
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [status, setStatus] = useState<UploadStatus>('idle');
   const [progress, setProgress] = useState(0);
@@ -66,27 +64,28 @@ export function MultiImageUploader({ images, onImagesChange, maxImages = 4, disa
 
     setStatus('uploading');
     setProgress(0);
-    const businessId = business?.id || 'default';
-    const fileName = `${businessId}/product-gallery-${Date.now()}-${targetIndex}.webp`;
     try {
-      const { error } = await supabase.storage.from(SHOP_STORAGE_BUCKET).upload(fileName, blob, { contentType: 'image/webp', upsert: false });
-      if (error) throw new Error(error.message);
+      // La carpeta la antepone uploadStorageFile con el business_id de la sesion.
+      const publicUrl = await uploadStorageFile(
+        SHOP_STORAGE_BUCKET,
+        `product-gallery-${Date.now()}-${targetIndex}.webp`,
+        blob,
+        'image/webp',
+      );
       setProgress(100);
+
+      const updated = [...images];
+      updated[targetIndex] = publicUrl;
+      onImagesChange(updated);
+      setStatus('done');
     } catch {
       setStatus('error');
       setUploadingIndex(null);
       return;
     }
 
-    const { data: urlData } = supabase.storage.from(SHOP_STORAGE_BUCKET).getPublicUrl(fileName);
-    const publicUrl = (urlData?.publicUrl || '') + `?t=${Date.now()}`;
-
-    const updated = [...images];
-    updated[targetIndex] = publicUrl;
-    onImagesChange(updated);
-    setStatus('done');
     setUploadingIndex(null);
-  }, [images, onImagesChange, business?.id]);
+  }, [images, onImagesChange]);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

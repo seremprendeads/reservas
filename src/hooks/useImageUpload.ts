@@ -1,18 +1,20 @@
 import { useState, useCallback, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { uploadStorageFile } from '../lib/storage-upload';
 
 interface UseImageUploadOptions {
   bucket: string;
-  pathPrefix: string;
   filePrefix: string;
   maxFileSize?: number;
   acceptedTypes?: string[];
   compress?: (file: File) => Promise<Blob>;
 }
 
+// No hay opcion de carpeta a proposito: uploadStorageFile antepone siempre el
+// business_id de la sesion. Antes cada componente pasaba
+// `pathPrefix: business?.id || 'default'` y ese fallback 'default' era una
+// carpeta compartida entre tenants.
 export function useImageUpload({
   bucket,
-  pathPrefix,
   filePrefix,
   maxFileSize,
   acceptedTypes = ['image/'],
@@ -35,17 +37,12 @@ export function useImageUpload({
     }
 
     const blob = compress ? await compress(file) : file;
-    const path = `${pathPrefix}/${filePrefix}-${Date.now()}.webp`;
+    const contentType = blob.type || file.type;
+    const ext = contentType.includes('png') ? 'png' : contentType.includes('jpeg') ? 'jpg' : 'webp';
+    const name = `${filePrefix}-${Date.now()}.${ext}`;
 
-    const { error: uploadErr } = await supabase.storage
-      .from(bucket)
-      .upload(path, blob, { upsert: false, contentType: 'image/webp' });
-
-    if (uploadErr) throw new Error(uploadErr.message);
-
-    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
-    return (urlData?.publicUrl || '') + `?t=${Date.now()}`;
-  }, [bucket, pathPrefix, filePrefix, maxFileSize, acceptedTypes, compress]);
+    return await uploadStorageFile(bucket, name, blob, contentType);
+  }, [bucket, filePrefix, maxFileSize, acceptedTypes, compress]);
 
   const handleFileChange = useCallback(async (
     e: React.ChangeEvent<HTMLInputElement>,

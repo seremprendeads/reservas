@@ -71,10 +71,19 @@ REVOKE EXECUTE ON FUNCTION verify_master_password(TEXT, TEXT) FROM anon, authent
 CREATE INDEX IF NOT EXISTS idx_master_admins_email ON master_admins(email);
 
 -- ============================================================================
--- COMENTARIO DE CREACIÓN INICIAL
--- Para crear el primer Master Admin, ejecutar en SQL Editor de Supabase:
+-- CREACIÓN DEL PRIMER MASTER ADMIN
+-- Para crear el primer Master Admin, generar la contraseña FUERA del repo y
+-- ejecutar en el SQL Editor de Supabase:
 --
--- SELECT create_master_admin('tu@email.com', 'contraseña-segura', 'Tu Nombre');
+--   SELECT create_master_admin(
+--     'tu@email.com',
+--     '<contraseña generada por el operador>',
+--     'Tu Nombre'
+--   );
+--
+-- NO escribir la contraseña real en este archivo. Este repositorio es
+-- versionado y cualquier valor literal acá queda expuesto de forma permanente
+-- en el historial de git, aunque después se borre la línea.
 --
 -- NO existe endpoint público para registrarse como master.
 -- ============================================================================

@@ -1,4 +1,4 @@
-import { supabase } from '../../../lib/supabase';
+import { deleteStorageFileSecure } from '../../../lib/storage-upload';
 
 export function extractStoragePath(url: string, bucket: string): string | null {
   const marker = `/storage/v1/object/public/${bucket}/`;
@@ -11,5 +11,7 @@ export function extractStoragePath(url: string, bucket: string): string | null {
 export async function deleteStorageFile(url: string, bucket: string): Promise<void> {
   const path = extractStoragePath(url, bucket);
   if (!path) return;
-  await supabase.storage.from(bucket).remove([path]);
+  // Pasa por la Edge Function para que el servidor valide que el path
+  // pertenece al negocio de la sesion antes de borrar.
+  await deleteStorageFileSecure(bucket, path);
 }

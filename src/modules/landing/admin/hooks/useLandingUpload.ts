@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
-import { supabase, type Business } from '../../../../lib/supabase';
+import { type Business } from '../../../../lib/supabase';
+import { uploadStorageFile } from '../../../../lib/storage-upload';
 import { compressImage } from '../../../../lib/image-utils';
 import { useImageUpload } from '../../../../hooks/useImageUpload';
 import type { LandingSections } from '../../types';
@@ -29,7 +30,6 @@ export function useLandingUpload({ business, setLogoUrl, setSections }: UseLandi
     clearError,
   } = useImageUpload({
     bucket: 'branding',
-    pathPrefix: '',
     filePrefix: 'landing',
     compress: (file) => compressImage(file, { maxWidth: 1920, maxHeight: 1080 }),
   });
@@ -42,14 +42,14 @@ export function useLandingUpload({ business, setLogoUrl, setSections }: UseLandi
     setUploadingImage(target);
     setLocalUploadError(null);
     try {
-      const path = `${business.id}/landing-${target}-${Date.now()}.webp`;
       const blob = await compressImage(file, { maxWidth: 1920, maxHeight: 1080 });
-      const { error } = await supabase.storage.from('branding').upload(path, blob, {
-        upsert: false, contentType: 'image/webp',
-      });
-      if (error) throw new Error(error.message || 'Error al subir imagen al servidor');
-      const { data: urlData } = supabase.storage.from('branding').getPublicUrl(path);
-      const publicUrl = (urlData?.publicUrl || '') + `?t=${Date.now()}`;
+      // La carpeta la antepone uploadStorageFile con el business_id de la sesion.
+      const publicUrl = await uploadStorageFile(
+        'branding',
+        `landing-${target}-${Date.now()}.webp`,
+        blob,
+        'image/webp',
+      );
 
       if (target === 'logo') {
         setLogoUrl(publicUrl);

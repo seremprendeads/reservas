@@ -58,19 +58,21 @@ export function LoginScreen({ onLogin }: { onLogin: (email: string, token: strin
     setLoading(true);
     const cleanEmail = email.trim().toLowerCase();
     try {
-      const { data } = await supabase.functions.invoke('admin-forgot-password', {
+      // La respuesta se ignera a proposito. Se usa para forzar el error de
+      // red si la invocacion falla, no para leer ningun campo.
+      await supabase.functions.invoke('admin-forgot-password', {
         body: { email: cleanEmail },
       });
 
-      if (data?.not_found) {
-        setError('Ese email no está registrado. Revisá que sea el mismo con el que activaste tu cuenta.');
-        return;
-      }
-
       // La contrasena temporal nunca se muestra en pantalla: solo llega por
-      // mail. Mostrarla acá permitiria que cualquiera la vea escribiendo el
+      // mail. Mostrarla aca permitiria que cualquiera la vea escribiendo el
       // mail de otro, y ademas queda feo.
-      setSuccess('Te enviamos una contraseña temporal. Revisá tu bandeja de entrada.');
+      //
+      // No se chequea data.not_found ni ningun otro campo para armar un
+      // mensaje por caso: la funcion siempre responde {sent:true}, y aunque
+      // devolviera algo distinto, diferenciar aca "ese email no existe" de
+      // "no pudimos enviarlo" es una enumeracion de cuentas gratis.
+      setSuccess('Si ese email esta registrado, te enviamos una contraseña temporal. Revisá tu bandeja de entrada.');
     } catch {
       setError('Error al enviar el email. Intentá de nuevo.');
     } finally {

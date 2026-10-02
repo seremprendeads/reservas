@@ -5,6 +5,7 @@ import {
   Download, Upload, X, RotateCcw, AlertTriangle,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import { uploadStorageFile } from '../../../lib/storage-upload';
 import { useBusiness } from '../../../contexts/BusinessContext';
 import { BioProfile, BioLink, BioStats } from '../types';
 import { BIO_BUTTON_STYLES, BIO_BG_PRESETS } from '../config';
@@ -258,11 +259,13 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
         });
       }
       const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
-      const fileName = `${business?.id || 'default'}/bio-avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('branding').upload(fileName, blob, { upsert: false });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from('branding').getPublicUrl(fileName);
-      const publicUrl = (urlData?.publicUrl || '') + `?t=${Date.now()}`;
+      // La carpeta la antepone uploadStorageFile con el business_id de la sesion.
+      const publicUrl = await uploadStorageFile(
+        'branding',
+        `bio-avatar-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`,
+        blob,
+        blob.type === 'image/webp' ? 'image/webp' : 'image/jpeg',
+      );
       handleFieldChange('avatar_url', publicUrl);
       saveDraft();
     } catch (err) {
@@ -300,11 +303,12 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
         });
       }
       const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
-      const fileName = `${business?.id || 'default'}/bio-bg-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('branding').upload(fileName, blob, { upsert: false });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from('branding').getPublicUrl(fileName);
-      const publicUrl = (urlData?.publicUrl || '') + `?t=${Date.now()}`;
+      const publicUrl = await uploadStorageFile(
+        'branding',
+        `bio-bg-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`,
+        blob,
+        blob.type === 'image/webp' ? 'image/webp' : 'image/jpeg',
+      );
       handleFieldChange('bg_image_url', publicUrl);
       saveDraft();
     } catch (err) {

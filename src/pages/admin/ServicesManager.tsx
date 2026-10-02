@@ -18,7 +18,6 @@ export function ServicesManager({ appearanceSlot }: { appearanceSlot?: React.Rea
   const [activeTab, setActiveTab] = useState<ServicesTab>('servicios');
   const { uploading: uploadingImg, fileInputRef: imgInputRef, handleFileChange } = useImageUpload({
     bucket: 'branding',
-    pathPrefix: business?.id || 'default',
     filePrefix: 'service',
     maxFileSize: 5 * 1024 * 1024,
     compress: async (f) => {
