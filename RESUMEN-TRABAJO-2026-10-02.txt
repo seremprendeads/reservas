@@ -369,9 +369,14 @@ F.1-F.3 y el fix de update_branding) esta hecho y verificado en produccion.
   En vez de SSG por slug (mas fragil: fallback de slugs nuevos, resync de build),
   se usa UNA Edge Function de Vercel:
     api/seo.ts (runtime edge)
-    - Rewrite: "/" -> /api/seo?slug=bioweblink&path=/  y  "/:slug" -> /api/seo?slug=:slug
-      (ambos ANTES del catch-all; /admin y demas rutas privadas se listan antes
-      de "/:slug" para no pasar por la funcion).
+    - "/:slug" -> /api/seo?slug=:slug en vercel.json (antes del catch-all;
+      /admin y demas rutas privadas se listan antes de "/:slug" para no pasar
+      por la funcion).
+    - Raiz "/": se maneja con middleware.ts (Routing Middleware de Vercel, corre
+      ANTES del filesystem/cache). El rewrite de vercel.json NO alcanza para "/"
+      porque Vercel sirve dist/index.html como archivo estatico antes de aplicar
+      rewrites (verificado en produccion). Usa rewrite() de @vercel/functions
+      (dependencia nueva) con matcher ["/"] para no tocar ningun otro path.
     - Trae landing_pages (publicada) + public_businesses con la anon key.
     - Baja el index.html estatico de la misma build y le inyecta en <head>:
       title, description, keywords, robots, canonical, Open Graph, Twitter,
@@ -386,16 +391,20 @@ F.1-F.3 y el fix de update_branding) esta hecho y verificado en produccion.
       montando React y usando sus datos frescos; lo inyectado es solo para bots.
 
 9.4 Verificacion
-  - Prueba local de la funcion (mock de Supabase + dist/index.html): 15/15 checks
+  - Prueba local de la funcion (mock de Supabase + dist/index.html): 17/17 checks
     OK (title del negocio gana sobre el de plataforma, og:*, canonical sin query,
-    JSON-LD, noscript, root div y bundle intactos, sin og duplicado).
+    JSON-LD solo con campos no vacios, noscript, root div y bundle intactos, sin
+    og duplicado).
   - Slug inexistente -> devuelve el index.html original byte a byte.
-  - npm run build OK; eslint api/seo.ts limpio; typecheck sigue en 44 (api/ no
-    esta en tsconfig.app.json, no agrega errores).
+  - Produccion (2b0b58e): /robots.txt OK; /bioweblink (via "/:slug") devuelve el
+    head completo del negocio + noscript. La raiz "/" salia SIN inyectar (por la
+    precedencia del filesystem sobre el rewrite) -> se agrego middleware.ts.
+  - npm run build OK; eslint api/seo.ts y middleware.ts limpios; typecheck sigue
+    en 44 (api/ y middleware.ts no estan en tsconfig.app.json).
 
 9.5 Pendiente / decisiones
-  - El cambio se despliega solo al pushear (Vercel). Falta confirmar en produccion
-    que /<slug> devuelve el head del negocio y que /admin sigue OK.
+  - El cambio se despliega solo al pushear (Vercel). Falta re-confirmar en
+    produccion que "/" ya trae el head del negocio con el middleware.
   - Vercel debe tener VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY cargadas como env
     vars del proyecto (ya lo estan para el build; la funcion las lee en runtime).
   - Cloudflare / rate limit en las lecturas REST publicas: descartado por ahora

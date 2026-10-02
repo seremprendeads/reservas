@@ -108,14 +108,17 @@ function buildJsonLd(opts: {
 }): string {
   const { canonical, schemaCfg, title, description, image, footer } = opts;
 
-  const addressParts = {
+  const addressParts: Record<string, string> = {};
+  for (const [key, value] of Object.entries({
     streetAddress: pick(schemaCfg.street_address),
     addressLocality: pick(schemaCfg.address_locality),
     addressRegion: pick(schemaCfg.address_region),
     postalCode: pick(schemaCfg.postal_code),
     addressCountry: pick(schemaCfg.address_country),
-  };
-  const hasAddress = Object.values(addressParts).some(Boolean);
+  })) {
+    if (value) addressParts[key] = value;
+  }
+  const hasAddress = Object.keys(addressParts).length > 0;
 
   const sameAs = pick(schemaCfg.social_profiles, footer.instagram, footer.facebook)
     .split(/[\s,]+/)

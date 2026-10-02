@@ -1,6 +1,5 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/api/seo?slug=bioweblink&path=/" },
     { "source": "/admin", "destination": "/" },
     { "source": "/bookingclient-administracion-bio", "destination": "/" },
     { "source": "/master-admin", "destination": "/" },
