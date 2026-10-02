@@ -81,6 +81,44 @@ async function validarFirmaMp(
   return dif === 0;
 }
 
+// Compara el monto esperado contra lo que informa Mercado Pago, al centavo.
+// Los dos montos salen del servidor, nunca del navegador:
+//   - reservas: bookings.amount, que RLS obliga a igualar services.price o
+//     settings.price (migracion 20260921080000).
+//   - tienda: shop_orders.total, recalculado en create-shop-payment desde
+//     shop_products.price.
+// Por eso una diferencia real solo puede venir de un pago manipulado o de un
+// error grave. Ante la duda, NO se confirma automaticamente.
+function montoCoincide(esperado: unknown, pagado: unknown): boolean {
+  const a = Number(esperado);
+  const b = Number(pagado);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
+  return Math.round(a * 100) === Math.round(b * 100);
+}
+
+// Avisa al duenio que llego un pago por un monto distinto al esperado. Usa el
+// mismo canal (ntfy) que la confirmacion, para que se vea sin entrar al panel.
+async function alertarMonto(businessId: string, mensaje: string): Promise<void> {
+  if (Deno.env.get("NTFY_ENABLED") !== "true") return;
+  const topic = Deno.env.get(`NTFY_TOPIC_${businessId.replace(/-/g, "_")}`)
+    || Deno.env.get("NTFY_TOPIC");
+  if (!topic) return;
+  try {
+    await fetch(`https://ntfy.sh/${topic}`, {
+      method: "POST",
+      headers: {
+        "Title": "ALERTA: pago con monto distinto",
+        "Priority": "urgent",
+        "Tags": "warning,money_with_wings",
+        "Content-Type": "text/plain",
+      },
+      body: mensaje,
+    });
+  } catch (e) {
+    console.error("No se pudo enviar alerta de monto:", e instanceof Error ? e.message : "unknown");
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
@@ -175,7 +213,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: existingBooking, error: findError } = await supabase
       .from("bookings")
-      .select("id, business_id, booking_date, booking_time, customer_name, booking_code, payment_status")
+      .select("id, business_id, booking_date, booking_time, customer_name, booking_code, payment_status, amount")
       .eq("booking_code", extRef)
       .eq("business_id", prov.business_id)
       .maybeSingle();
@@ -187,7 +225,13 @@ Deno.serve(async (req: Request) => {
     // Si no matchea una reserva, se prueba como pedido antes de descartar
     // el aviso.
     if (!existingBooking) {
-      return await procesarPedidoTienda(supabase, extRef, prov.business_id, String(paymentId));
+      return await procesarPedidoTienda(
+        supabase,
+        extRef,
+        prov.business_id,
+        String(paymentId),
+        payment.transaction_amount
+      );
     }
 
     const businessId = existingBooking.business_id;
@@ -195,6 +239,22 @@ Deno.serve(async (req: Request) => {
     // Idempotencia: MP reintenta los avisos, no procesar dos veces.
     if (existingBooking.payment_status === "approved") {
       return new Response("Already processed", { status: 200 });
+    }
+
+    // El monto esperado es el de la reserva. Si MP informa otro monto, no se
+    // confirma: se avisa y queda pendiente para revision manual.
+    const montoPagado = payment.transaction_amount;
+    if (!montoCoincide(existingBooking.amount, montoPagado)) {
+      console.error(
+        "Monto distinto en reserva:", extRef,
+        "esperado:", existingBooking.amount,
+        "pagado:", montoPagado
+      );
+      await alertarMonto(
+        businessId,
+        `Reserva ${extRef}: se esperaba $${existingBooking.amount} y Mercado Pago informo $${montoPagado}. NO se confirmo automaticamente.`
+      );
+      return new Response("Amount mismatch", { status: 200 });
     }
 
     const { data: booking, error } = await supabase
@@ -254,11 +314,12 @@ async function procesarPedidoTienda(
   supabase: ReturnType<typeof createClient>,
   orderId: string,
   businessId: string,
-  paymentId: string
+  paymentId: string,
+  montoPagado: unknown
 ): Promise<Response> {
   const { data: order, error: findError } = await supabase
     .from("shop_orders")
-    .select("id, payment_status")
+    .select("id, payment_status, total")
     .eq("id", orderId)
     .eq("business_id", businessId)
     .maybeSingle();
@@ -273,6 +334,24 @@ async function procesarPedidoTienda(
   // Idempotencia: MP reintenta los avisos, no procesar dos veces.
   if (order.payment_status === "approved") {
     return new Response("Already processed", { status: 200 });
+  }
+
+  // El total del pedido lo recalculo create-shop-payment desde shop_products.
+  // Si MP informa otro monto, no se marca pagado ni se descuenta stock.
+  // (order viene tipado como never por el cliente de supabase sin tipos; el
+  // cast solo evita el ruido de tipado, el valor existe en runtime.)
+  const totalEsperado = (order as unknown as { total: number | null }).total;
+  if (!montoCoincide(totalEsperado, montoPagado)) {
+    console.error(
+      "Monto distinto en pedido:", orderId,
+      "esperado:", totalEsperado,
+      "pagado:", montoPagado
+    );
+    await alertarMonto(
+      businessId,
+      `Pedido ${orderId}: se esperaba $${totalEsperado} y Mercado Pago informo $${montoPagado}. NO se marco pagado ni se desconto stock.`
+    );
+    return new Response("Amount mismatch", { status: 200 });
   }
 
   const { error: updateError } = await supabase
