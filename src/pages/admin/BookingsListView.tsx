@@ -1,4 +1,4 @@
-import { Search, RefreshCw, Phone, Mail, Eye, Calendar, Clock, XCircle, Trash2, ExternalLink } from 'lucide-react';
+import { Search, RefreshCw, Phone, Mail, Eye, Calendar, Clock, XCircle, Trash2, ExternalLink, Undo2 } from 'lucide-react';
 import { Booking } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -119,6 +119,12 @@ export function BookingsListView({
                         <Button onClick={() => onUpdateStatus(booking.id, 'cancelled')}
                           variant="ghost" size="icon" title="Cancelar" className="text-destructive">
                           <XCircle className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {(booking.booking_status === 'cancelled' || booking.booking_status === 'completed') && (
+                        <Button onClick={() => onUpdateStatus(booking.id, 'confirmed')}
+                          variant="ghost" size="icon" title="Reabrir" className="text-emerald-600">
+                          <Undo2 className="h-4 w-4" />
                         </Button>
                       )}
                       {(booking.booking_status === 'cancelled' || booking.booking_status === 'completed') && (

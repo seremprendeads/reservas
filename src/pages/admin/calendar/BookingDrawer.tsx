@@ -1,4 +1,4 @@
-import { X, Phone, Mail, Clock, Calendar, CreditCard, FileText, CheckCircle, XCircle, Trash2, Edit } from 'lucide-react';
+import { X, Phone, Mail, Clock, Calendar, CreditCard, FileText, CheckCircle, XCircle, Trash2, Undo2 } from 'lucide-react';
 import type { Booking } from '../../../lib/supabase';
 import { STATUS_COLORS, STATUS_LABELS } from './types';
 import { formatDateDisplay } from './calendarUtils';
@@ -22,6 +22,7 @@ export function BookingDrawer({
 
   const colors = STATUS_COLORS[booking.booking_status] || STATUS_COLORS.pending;
   const time = booking.booking_time.substring(0, 5);
+  const esReapertura = booking.booking_status === 'completed' || booking.booking_status === 'cancelled';
 
   return (
     <>
@@ -121,8 +122,8 @@ export function BookingDrawer({
                 onClick={() => onUpdateStatus(booking.id, 'confirmed')}
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"
               >
-                <CheckCircle className="h-4 w-4" />
-                Confirmar
+                {esReapertura ? <Undo2 className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                {esReapertura ? 'Reabrir' : 'Confirmar'}
               </button>
             )}
 

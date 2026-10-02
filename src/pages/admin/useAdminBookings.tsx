@@ -6,7 +6,7 @@ import * as session from '../../lib/admin-session';
 interface UseAdminBookingsOpts {
   businessId: string | undefined;
   onProfileLoaded: (name: string | null, avatar: string | null) => void;
-  setConfirmModal: (modal: { open: boolean; message: string; onConfirm: () => void }) => void;
+  setConfirmModal: (modal: { open: boolean; message: string; onConfirm: () => void; title?: string; confirmLabel?: string; destructive?: boolean }) => void;
 }
 
 export function useAdminBookings({ businessId, onProfileLoaded, setConfirmModal }: UseAdminBookingsOpts) {
@@ -77,13 +77,38 @@ export function useAdminBookings({ businessId, onProfileLoaded, setConfirmModal 
   // Note: loadData is called from the orchestrator (useAdminData) gated on loggedIn + businessId
 
   const updateBookingStatus = async (id: string, status: Booking['booking_status']) => {
-    try {
-      const { data, error } = await authInvoke('admin-update-booking', { booking_id: id, booking_status: status });
-      if (error || !data?.success) throw new Error('Error al actualizar');
-      loadData();
-    } catch {
-      alert('Error al actualizar la reserva');
+    const apply = async () => {
+      try {
+        const { data, error } = await authInvoke('admin-update-booking', { booking_id: id, booking_status: status });
+        if (error || !data?.success) throw new Error('Error al actualizar');
+        loadData();
+      } catch {
+        alert('Error al actualizar la reserva');
+      }
+    };
+
+    // Completar y cancelar antes se aplicaban al primer clic y no se podían
+    // deshacer. Ahora piden confirmación; si igual fue un error, la reserva se
+    // puede reabrir a "Confirmada" desde la lista, el detalle o el calendario.
+    if (status === 'completed' || status === 'cancelled') {
+      const esCancelacion = status === 'cancelled';
+      setConfirmModal({
+        open: true,
+        title: esCancelacion ? 'Cancelar reserva' : 'Marcar como completada',
+        message: esCancelacion
+          ? 'La reserva quedará cancelada. Si fue un error, podés reabrirla desde la lista.'
+          : 'La reserva quedará marcada como completada. Si fue un error, podés reabrirla desde la lista.',
+        confirmLabel: esCancelacion ? 'Sí, cancelar' : 'Sí, completar',
+        destructive: esCancelacion,
+        onConfirm: async () => {
+          setConfirmModal({ open: false, message: '', onConfirm: () => {} });
+          await apply();
+        },
+      });
+      return;
     }
+
+    await apply();
   };
 
   const deleteBooking = async (id: string) => {

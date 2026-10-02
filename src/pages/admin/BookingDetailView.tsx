@@ -1,4 +1,4 @@
-import { ArrowLeft, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, Undo2 } from 'lucide-react';
 import { Booking } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -90,6 +90,11 @@ export function BookingDetailView({
             {(selectedBooking.booking_status === 'pending' || selectedBooking.booking_status === 'confirmed') && (
               <Button onClick={() => onUpdateStatus(selectedBooking.id, 'cancelled')} variant="destructive" className="flex-1">
                 Cancelar
+              </Button>
+            )}
+            {(selectedBooking.booking_status === 'cancelled' || selectedBooking.booking_status === 'completed') && (
+              <Button onClick={() => onUpdateStatus(selectedBooking.id, 'confirmed')} variant="secondary" className="flex-1">
+                <Undo2 className="mr-2 h-4 w-4" /> Reabrir
               </Button>
             )}
             {(selectedBooking.booking_status === 'cancelled' || selectedBooking.booking_status === 'completed') && (

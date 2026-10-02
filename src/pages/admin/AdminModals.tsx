@@ -9,7 +9,7 @@ import {
 interface AdminModalsProps {
   successModal: { open: boolean; message: string };
   onSuccessClose: () => void;
-  confirmModal: { open: boolean; message: string; onConfirm: () => void };
+  confirmModal: { open: boolean; message: string; onConfirm: () => void; title?: string; confirmLabel?: string; destructive?: boolean };
   onConfirmClose: () => void;
   trialWarningOpen: boolean;
   onTrialWarningClose: () => void;
@@ -27,6 +27,7 @@ export function AdminModals({
   trialDaysLeft,
   trialCountdown,
 }: AdminModalsProps) {
+  const confirmDestructive = confirmModal.destructive ?? true;
   return (
     <>
       {/* Success Modal */}
@@ -51,18 +52,20 @@ export function AdminModals({
       <Dialog open={confirmModal.open} onOpenChange={(open) => !open && onConfirmClose()}>
         <DialogContent className="sm:max-w-md rounded-2xl p-8">
           <DialogHeader>
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
-              <Trash2 className="h-7 w-7 text-destructive" />
+            <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${confirmDestructive ? 'bg-destructive/10' : 'bg-emerald-100 dark:bg-emerald-900/50'}`}>
+              {confirmDestructive
+                ? <Trash2 className="h-7 w-7 text-destructive" />
+                : <CheckCircle className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />}
             </div>
-            <DialogTitle className="text-center pt-4 font-display">Eliminar reserva</DialogTitle>
+            <DialogTitle className="text-center pt-4 font-display">{confirmModal.title ?? 'Eliminar reserva'}</DialogTitle>
             <DialogDescription className="text-center">{confirmModal.message}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-center gap-3">
             <Button onClick={onConfirmClose} variant="outline" className="rounded-xl transition-all duration-200">
-              Cancelar
+              Volver
             </Button>
-            <Button onClick={confirmModal.onConfirm} variant="destructive" className="rounded-xl transition-all duration-200">
-              Eliminar
+            <Button onClick={confirmModal.onConfirm} variant={confirmDestructive ? 'destructive' : 'default'} className="rounded-xl transition-all duration-200">
+              {confirmModal.confirmLabel ?? 'Eliminar'}
             </Button>
           </DialogFooter>
         </DialogContent>

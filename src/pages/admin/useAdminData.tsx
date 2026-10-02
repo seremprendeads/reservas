@@ -13,7 +13,7 @@ export function useAdminData() {
   const { enabledModules, isFreePlan, isTrial } = useModuleAccess();
   const [view, setView] = useState<View>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void }>({ open: false, message: '', onConfirm: () => {} });
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; message: string; onConfirm: () => void; title?: string; confirmLabel?: string; destructive?: boolean }>({ open: false, message: '', onConfirm: () => {} });
   const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
 
   const auth = useAdminAuth();
