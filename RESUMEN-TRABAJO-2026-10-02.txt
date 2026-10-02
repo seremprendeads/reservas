@@ -344,5 +344,63 @@ F.1-F.3 y el fix de update_branding) esta hecho y verificado en produccion.
   20260930010000.
 
 ==============================================================================
+9. BLINDAJE ANTE CRAWLERS + PRE-RENDER SEO (commit f4fc7b5 y siguiente)
+==============================================================================
+
+9.1 Contexto
+  Preocupacion del usuario: los bots rastreadores de IA (GPTBot, ClaudeBot,
+  PerplexityBot, CCBot, Bytespider...) pueden saturar las paginas publicas.
+  Hallazgo: la app es una SPA; las paginas publicas consultan Supabase en runtime
+  (public_businesses, branding, landing_pages, etc.). Los bots que NO ejecutan
+  JS solo bajaban el HTML vacio (no tocaban Supabase); los que SI renderizan JS
+  (Googlebot y pocos) golpeaban la base en cada visita. Ademas el SEO por negocio
+  se armaba SOLO en el cliente (LandingPage.tsx:115-131), asi que las landings no
+  se indexaban bien.
+
+9.2 robots.txt + headers (commit f4fc7b5, pusheado)
+  public/robots.txt (nuevo): permite Google/Bing; Disallow en /admin,
+  /bookingclient-administracion-bio, /master-admin, /create-business, /invite/;
+  y bloquea 19 rastreadores de IA/scraping.
+  vercel.json: X-Robots-Tag: noindex,nofollow en las rutas privadas (complementa
+  el Disallow: impide indexar si llegan por un link externo) + Cache-Control
+  immutable en /assets/*.
+
+9.3 Pre-render SEO por slug (Edge Function, ver api/seo.ts)
+  En vez de SSG por slug (mas fragil: fallback de slugs nuevos, resync de build),
+  se usa UNA Edge Function de Vercel:
+    api/seo.ts (runtime edge)
+    - Rewrite: "/" -> /api/seo?slug=bioweblink&path=/  y  "/:slug" -> /api/seo?slug=:slug
+      (ambos ANTES del catch-all; /admin y demas rutas privadas se listan antes
+      de "/:slug" para no pasar por la funcion).
+    - Trae landing_pages (publicada) + public_businesses con la anon key.
+    - Baja el index.html estatico de la misma build y le inyecta en <head>:
+      title, description, keywords, robots, canonical, Open Graph, Twitter,
+      verifications y JSON-LD (LocalBusiness tipado). Saca del HTML base los meta
+      de la plataforma para no duplicar (el crawler toma la primera ocurrencia).
+    - Agrega un <noscript> con H1, descripcion, servicios y contacto: los bots
+      sin JS ven contenido real.
+    - Cache-Control: public, s-maxage=300, stale-while-revalidate=86400. Los
+      reintentos de crawlers golpean la CDN de Vercel, no Supabase.
+    - Tolerante a fallos: si Supabase falla o el slug no existe, devuelve el
+      index.html ORIGINAL sin tocar (la SPA nunca se cae por esto). La app sigue
+      montando React y usando sus datos frescos; lo inyectado es solo para bots.
+
+9.4 Verificacion
+  - Prueba local de la funcion (mock de Supabase + dist/index.html): 15/15 checks
+    OK (title del negocio gana sobre el de plataforma, og:*, canonical sin query,
+    JSON-LD, noscript, root div y bundle intactos, sin og duplicado).
+  - Slug inexistente -> devuelve el index.html original byte a byte.
+  - npm run build OK; eslint api/seo.ts limpio; typecheck sigue en 44 (api/ no
+    esta en tsconfig.app.json, no agrega errores).
+
+9.5 Pendiente / decisiones
+  - El cambio se despliega solo al pushear (Vercel). Falta confirmar en produccion
+    que /<slug> devuelve el head del negocio y que /admin sigue OK.
+  - Vercel debe tener VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY cargadas como env
+    vars del proyecto (ya lo estan para el build; la funcion las lee en runtime).
+  - Cloudflare / rate limit en las lecturas REST publicas: descartado por ahora
+    (el CDN con s-maxage ya absorbe la carga repetida). Revisar si aparece abuso.
+
+==============================================================================
 FIN
 ==============================================================================

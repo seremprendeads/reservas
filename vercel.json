@@ -1,5 +1,12 @@
 {
   "rewrites": [
+    { "source": "/", "destination": "/api/seo?slug=bioweblink&path=/" },
+    { "source": "/admin", "destination": "/" },
+    { "source": "/bookingclient-administracion-bio", "destination": "/" },
+    { "source": "/master-admin", "destination": "/" },
+    { "source": "/create-business", "destination": "/" },
+    { "source": "/invite/:token", "destination": "/" },
+    { "source": "/:slug", "destination": "/api/seo?slug=:slug" },
     { "source": "/(.*)", "destination": "/" }
   ],
   "headers": [
