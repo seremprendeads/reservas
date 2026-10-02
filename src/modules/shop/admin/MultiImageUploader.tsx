@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { X, Image as ImageIcon, Loader2, Plus } from 'lucide-react';
+import { X, Loader2, Plus } from 'lucide-react';
 import { uploadStorageFile } from '../../../lib/storage-upload';
 import { SHOP_STORAGE_BUCKET, IMAGE_CONFIG } from '../config';
 import { Progress } from '../../../components/ui/progress';

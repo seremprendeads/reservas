@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
-import { supabase } from '../../../lib/supabase';
-import { useBusiness } from '../../../contexts/BusinessContext';
+import { uploadStorageFile } from '../../../lib/storage-upload';
 import { SHOP_STORAGE_BUCKET, IMAGE_CONFIG } from '../config';
 import { Progress } from '../../../components/ui/progress';
 import { Button } from '../../../components/ui/button';
@@ -69,21 +68,16 @@ async function uploadToStorage(
   fileName: string,
   blob: Blob,
   onProgress: (pct: number) => void
-): Promise<void> {
+): Promise<string> {
   onProgress(0);
 
-  const { error } = await supabase.storage
-    .from(bucket)
-    .upload(fileName, blob, {
-      contentType: 'image/webp',
-      upsert: false,
-    });
-
-  if (error) {
-    throw new Error(error.message || 'Error al subir imagen');
-  }
+  // Sube via la Edge Function admin-storage-upload (service_role). El helper
+  // antepone la carpeta business_id del negocio de la sesion; por eso fileName
+  // ya no lleva la carpeta.
+  const publicUrl = await uploadStorageFile(bucket, fileName, blob, 'image/webp');
 
   onProgress(100);
+  return publicUrl;
 }
 
 export function ImageUploader({
@@ -92,7 +86,6 @@ export function ImageUploader({
   onOldImageDelete,
   disabled,
 }: ImageUploaderProps) {
-  const { business } = useBusiness();
   const [status, setStatus] = useState<UploadStatus>('idle');
   const [progress, setProgress] = useState(0);
   const [preview, setPreview] = useState<string | null>(currentImageUrl || null);
@@ -119,29 +112,23 @@ export function ImageUploader({
       return;
     }
 
-    // Upload with business_id path
+    // Sube via Edge Function; la carpeta business_id la antepone uploadStorageFile.
     setStatus('uploading');
     setProgress(0);
-    const businessId = business?.id || 'default';
-    const fileName = `${businessId}/product-${Date.now()}.webp`;
+    const fileName = `product-${Date.now()}.webp`;
+    let publicUrl: string;
     try {
-      await uploadToStorage(SHOP_STORAGE_BUCKET, fileName, blob, setProgress);
+      publicUrl = await uploadToStorage(SHOP_STORAGE_BUCKET, fileName, blob, setProgress);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'No se pudo subir la imagen. Verificá tu conexión e intentá nuevamente.';
       setStatus('error');
       setErrorMessage(message);
       return;
     }
-
-    // Get public URL
-    setStatus('saving');
-    const { data: urlData } = supabase.storage
-      .from(SHOP_STORAGE_BUCKET)
-      .getPublicUrl(fileName);
-
-    const publicUrl = (urlData?.publicUrl || '') + `?t=${Date.now()}`;
+    publicUrl += `?t=${Date.now()}`;
 
     // Delete old image if replacing
+    setStatus('saving');
     if (currentImageUrl && onOldImageDelete) {
       onOldImageDelete(currentImageUrl);
     }
@@ -150,7 +137,7 @@ export function ImageUploader({
     setStatus('done');
     setProgress(100);
     onUploadComplete(publicUrl);
-  }, [currentImageUrl, onUploadComplete, onOldImageDelete, business?.id]);
+  }, [currentImageUrl, onUploadComplete, onOldImageDelete]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
