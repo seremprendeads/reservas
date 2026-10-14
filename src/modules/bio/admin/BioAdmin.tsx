@@ -601,16 +601,6 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                       placeholder="https://linkedin.com/..." />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs text-muted-foreground">Color de íconos sociales</label>
-                  <div className="flex items-center gap-3">
-                    <input type="color" value={profile?.social_icon_color || '#9ca3af'}
-                      onChange={e => { handleFieldChange('social_icon_color', e.target.value || null); debouncedSave(); }}
-                      className="h-8 w-8 rounded-lg border cursor-pointer" />
-                    <Input value={profile?.social_icon_color || ''} onChange={e => { handleFieldChange('social_icon_color', e.target.value || null); debouncedSave(); }}
-                      className="w-32 font-mono text-sm" placeholder="#9ca3af" />
-                  </div>
-                </div>
                 <div className="h-px bg-border/50" />
                 <Button onClick={saveDraft} disabled={saving} className="w-full gap-1.5">
                   {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Guardando...</>
@@ -778,6 +768,17 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     <Input value={profile?.description_color || ''}
                       onChange={e => { handleFieldChange('description_color', e.target.value); debouncedSave(); }}
                       className="w-32 font-mono text-sm" placeholder="#ffffff" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Color de íconos sociales</label>
+                  <div className="flex items-center gap-3">
+                    <input type="color" value={profile?.social_icon_color || '#9ca3af'}
+                      onChange={e => { handleFieldChange('social_icon_color', e.target.value || null); debouncedSave(); }}
+                      className="h-10 w-10 rounded-lg border cursor-pointer" />
+                    <Input value={profile?.social_icon_color || ''}
+                      onChange={e => { handleFieldChange('social_icon_color', e.target.value || null); debouncedSave(); }}
+                      className="w-32 font-mono text-sm" placeholder="#9ca3af" />
                   </div>
                 </div>
                 <div className="space-y-2">
