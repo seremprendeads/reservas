@@ -736,7 +736,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                 <Separator />
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Color principal</label>
+                  <label className="text-sm font-medium">Color fondo botones</label>
                   <div className="flex items-center gap-3">
                     <input type="color" value={profile?.primary_color || '#059669'}
                       onChange={e => { handleFieldChange('primary_color', e.target.value); debouncedSave(); }}
