@@ -58,7 +58,7 @@ export function CreateBusinessPage() {
         },
       });
 
-      if (data?.success) {
+      if (data?.business_id) {
         await setBusinessById(data.business_id);
         setBusinessId(data.business_id);
         navigate('/admin');

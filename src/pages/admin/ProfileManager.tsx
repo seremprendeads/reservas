@@ -91,7 +91,7 @@ export function ProfileManager({
         const { data: bizRes, error: bizFnError } = await authInvoke('admin-update-business', {
           name: bizName.trim(),
         });
-        if (bizFnError || !bizRes?.success) {
+        if (bizFnError || bizRes?.success === false) {
           setError(bizRes?.error || 'Error al actualizar el negocio');
           return;
         }

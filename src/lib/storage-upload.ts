@@ -136,8 +136,8 @@ export async function uploadStorageFile(
   });
 
   if (error) throw new Error(await readFunctionError(error, 'No se pudo subir la imagen'));
-  const result = data as { success?: boolean; publicUrl?: string; error?: string } | null;
-  if (!result?.success || !result?.publicUrl) {
+  const result = data as { publicUrl?: string; error?: string } | null;
+  if (!result?.publicUrl) {
     throw new Error(result?.error || 'Error al subir la imagen');
   }
 
