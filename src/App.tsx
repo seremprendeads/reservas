@@ -25,33 +25,35 @@ function App() {
             <Route path="/bookingclient-administracion-bio" element={<AdminPage />} />
             <Route path="/create-business" element={<CreateBusinessPage />} />
             
-            {/* Public booking page. "/reservas" (sin slug) es la ruta del
-                dominio raiz (bioweblink.com): resuelve siempre al negocio
-                "bioweblink", igual que "/" con la Landing Page más abajo. */}
+            {/* Paginas publicas: PRIMERO la seccion, DESPUES el slug del negocio.
+                Ej: /bio/leo-destino, /reservas/leo-destino, /tienda/leo-destino,
+                /landing/leo-destino. Las rutas sin slug resuelven al negocio
+                "bioweblink" (dominio raiz). */}
             <Route path="/reservas" element={<BookingPage slug="bioweblink" />} />
-            <Route path="/:slug/reservas" element={<BookingPage />} />
+            <Route path="/reservas/:slug" element={<BookingPage />} />
 
             {/* Shop - public. Mismo patrón que "/reservas" para el dominio raiz. */}
             <Route path="/tienda" element={<ShopPage slug="bioweblink" />} />
-            <Route path="/:slug/tienda" element={<ShopPage />} />
-            
+            <Route path="/tienda/:slug" element={<ShopPage />} />
+
             {/* Bio - public */}
-            <Route path="/:slug/bio" element={<BioPage />} />
-            
-            {/* Documentos legales del negocio - public (antes del catch-all /:slug) */}
-            <Route path="/:slug/privacidad" element={<LegalPage doc="privacidad" />} />
-            <Route path="/:slug/cookies" element={<LegalPage doc="cookies" />} />
-            <Route path="/:slug/condiciones" element={<LegalPage doc="condiciones" />} />
+            <Route path="/bio/:slug" element={<BioPage />} />
+
+            {/* Documentos legales del negocio - public */}
+            <Route path="/privacidad/:slug" element={<LegalPage doc="privacidad" />} />
+            <Route path="/cookies/:slug" element={<LegalPage doc="cookies" />} />
+            <Route path="/condiciones/:slug" element={<LegalPage doc="condiciones" />} />
 
             {/* Invitación de negocio */}
             <Route path="/invite/:token" element={<AcceptInvitePage />} />
 
-            {/* Landing page - catch-all: / or /:slug */}
+            {/* Landing page de cada negocio */}
+            <Route path="/landing/:slug" element={<LandingPage />} />
+
             {/* La raiz del dominio (bioweblink.com, sin slug en la URL) muestra
                 siempre la landing del negocio "bioweblink" (la web madre de
                 BiowebLink) en vez de quedarse cargando sin saber que negocio mostrar. */}
             <Route path="/" element={<LandingPage slug="bioweblink" />} />
-            <Route path="/:slug" element={<LandingPage />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

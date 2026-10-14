@@ -106,7 +106,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
             <Button variant="outline" size="sm" asChild>
               {/* El negocio "bioweblink" es la web madre del producto: vive en
                   la raiz del dominio (bioweblink.com), no en /bioweblink. */}
-              <a href={slug === 'bioweblink' ? '/' : `/${encodeURIComponent(slug)}`} target="_blank" className="flex items-center gap-1">
+              <a href={slug === 'bioweblink' ? '/' : `/landing/${encodeURIComponent(slug)}`} target="_blank" className="flex items-center gap-1">
                 <Eye className="h-4 w-4" /> Ver sitio web
               </a>
             </Button>

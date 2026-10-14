@@ -5,7 +5,7 @@
     { "source": "/master-admin", "destination": "/" },
     { "source": "/create-business", "destination": "/" },
     { "source": "/invite/:token", "destination": "/" },
-    { "source": "/:slug", "destination": "/api/seo?slug=:slug" },
+    { "source": "/landing/:slug", "destination": "/api/seo?slug=:slug" },
     { "source": "/(.*)", "destination": "/" }
   ],
   "headers": [

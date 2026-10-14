@@ -36,7 +36,7 @@ export function BookingsListView({
       <CardHeader>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-xl sm:text-2xl font-bold font-display">Reservas</h2>
-          <a href={`/${business?.slug || '...'}/reservas`} target="_blank" rel="noopener noreferrer">
+          <a href={`/reservas/${business?.slug || '...'}`} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="sm" className="gap-1.5"><ExternalLink className="w-3.5 h-3.5" />Ver reservas</Button>
           </a>
         </div>

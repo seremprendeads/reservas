@@ -161,7 +161,7 @@ function ResultadoPago({ estado, codigo, slug }: { estado: string; codigo: strin
           </div>
         )}
         <a
-          href={slug ? `/${slug}/reservas` : '/reservas'}
+          href={slug ? `/reservas/${slug}` : '/reservas'}
           className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-gray-900 px-5 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
         >
           {estado === 'error' ? 'Intentar de nuevo' : 'Volver'}
@@ -325,7 +325,7 @@ function BookingContent({ forcedSlug }: { forcedSlug?: string }) {
           </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             {showShopButton && (
             <a
-            href={`/${slug || business?.slug}/tienda`}
+            href={`/tienda/${slug || business?.slug}`}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
             style={{
               // Antes usaba primaryColor de fondo, el mismo color del encabezado,

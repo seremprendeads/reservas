@@ -147,7 +147,7 @@ export function ShopAdmin() {
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${generalCfg.show_in_booking ? 'translate-x-5' : ''}`} />
             </button>
           </div>
-          <a href={`/${business?.slug}/tienda`} target="_blank" rel="noopener noreferrer" className="mb-3 inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-border text-foreground hover:bg-accent w-fit">
+          <a href={`/tienda/${business?.slug}`} target="_blank" rel="noopener noreferrer" className="mb-3 inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-border text-foreground hover:bg-accent w-fit">
             <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
           </a>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

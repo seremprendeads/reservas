@@ -40,7 +40,7 @@ export function PhonePreview({
       <div className="sticky top-4 space-y-3">
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Vista previa</p>
-          <a href={`/${businessSlug || '...'}/reservas`} target="_blank" className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline">
+          <a href={`/reservas/${businessSlug || '...'}`} target="_blank" className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline">
             <ExternalLink className="w-3 h-3" /> Ver reservas
           </a>
         </div>

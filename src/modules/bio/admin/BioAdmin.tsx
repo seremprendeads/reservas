@@ -357,7 +357,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
   useEffect(() => { if (tab === 'stats') loadStats(); }, [tab, loadStats]);
 
-  const publicUrl = `${window.location.origin}/${business?.slug || '...'}/bio`;
+  const publicUrl = `${window.location.origin}/bio/${business?.slug || '...'}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(publicUrl);

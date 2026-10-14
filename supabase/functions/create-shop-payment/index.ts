@@ -123,7 +123,7 @@ Deno.serve(async (req: Request) => {
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const siteUrl = (Deno.env.get("SITE_URL") || req.headers.get("origin") || "").replace(/\/$/, "");
-    const volverA = (estado: string) => `${siteUrl}/${business_slug}/tienda?pago=${estado}&pedido=${order_id}`;
+    const volverA = (estado: string) => `${siteUrl}/tienda/${business_slug}?pago=${estado}&pedido=${order_id}`;
     const notificationUrl = `${SUPABASE_URL}/functions/v1/mercadopago-webhook?negocio=${business.id}`;
 
     const detallePedido = String(order.customer_notes || "").trim().slice(0, 220);

@@ -433,7 +433,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
           ts={ts}
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
-          shopUrl={`/${landing.slug}/tienda`}
+          shopUrl={`/tienda/${landing.slug}`}
         />
       )}
 

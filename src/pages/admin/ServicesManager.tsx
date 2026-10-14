@@ -145,7 +145,7 @@ export function ServicesManager({ appearanceSlot }: { appearanceSlot?: React.Rea
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <a href={`/${business?.slug || '...'}/reservas`} target="_blank" rel="noopener noreferrer">
+          <a href={`/reservas/${business?.slug || '...'}`} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="sm" className="gap-1.5 transition-all duration-200"><ExternalLink className="w-3.5 h-3.5" />Ver reservas</Button>
           </a>
           {activeTab === 'servicios' && (

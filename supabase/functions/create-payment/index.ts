@@ -60,7 +60,7 @@ Deno.serve(async (req: Request) => {
     // a la pagina de reservas del negocio, con el resultado en la query.
     const siteUrl = (Deno.env.get("SITE_URL") || req.headers.get("origin") || "").replace(/\/$/, "");
     const volverA = (estado: string) =>
-      `${siteUrl}/${business_slug}/reservas?pago=${estado}&codigo=${bookingCode}`;
+      `${siteUrl}/reservas/${business_slug}?pago=${estado}&codigo=${bookingCode}`;
     const successUrl = volverA("exito");
     const failureUrl = volverA("error");
     const pendingUrl = volverA("pendiente");

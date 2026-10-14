@@ -179,9 +179,9 @@ function buildNoscript(opts: {
   ].filter(Boolean);
 
   const links = [
-    `<a href="/${esc(slug)}/reservas">Reservar un turno</a>`,
-    `<a href="/${esc(slug)}/tienda">Tienda</a>`,
-    `<a href="/${esc(slug)}/bio">Bio / links</a>`,
+    `<a href="/reservas/${esc(slug)}">Reservar un turno</a>`,
+    `<a href="/tienda/${esc(slug)}">Tienda</a>`,
+    `<a href="/bio/${esc(slug)}">Bio / links</a>`,
   ].join(' &middot; ');
 
   return [
@@ -240,7 +240,7 @@ async function passthrough(req: Request, cacheControl: string): Promise<Response
 export default async function handler(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const slug = (url.searchParams.get('slug') || '').trim();
-  const path = (url.searchParams.get('path') || (slug ? `/${slug}` : '/')).trim();
+  const path = (url.searchParams.get('path') || (slug ? `/landing/${slug}` : '/')).trim();
 
   if (!SUPABASE_URL || !ANON_KEY || !slug) {
     try {

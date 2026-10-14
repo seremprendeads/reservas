@@ -197,7 +197,7 @@ export function ProfileManager({
               <Input type="text" value={bizName} onChange={(e) => setBizName(e.target.value)}
                 placeholder="Tatoo Greco" className="h-12 rounded-xl" />
               <p className="text-xs text-muted-foreground">
-                Tus links: <span className="font-mono">{window.location.origin}/{bizName.trim() ? bizName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-') : '...'}</span>/bio, /reservas, /tienda
+                Tus links: <span className="font-mono">{window.location.origin}/bio/{bizName.trim() ? bizName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-') : '...'}</span><span className="font-mono">, /reservas/…, /tienda/…</span>
               </p>
             </div>
             <Separator />
@@ -236,7 +236,7 @@ export function ProfileManager({
         </CardContent>
       </Card>
 
-      {/* Datos legales del negocio: alimentan /:slug/privacidad, /:slug/cookies y /:slug/condiciones */}
+      {/* Datos legales del negocio: alimentan /privacidad/:slug, /cookies/:slug y /condiciones/:slug */}
       {showLegalInfo && <LegalInfoSection adminEmail={adminEmail} showSuccess={showSuccess} />}
     </div>
   );

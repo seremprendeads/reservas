@@ -36,7 +36,7 @@ export function availableLegalDocs(m: LegalModules) {
 }
 
 export function legalPath(slug: string, doc: LegalDocKey): string {
-  return `/${encodeURIComponent(slug)}/${doc}`;
+  return `/${doc}/${encodeURIComponent(slug)}`;
 }
 
 export type LegalInfoFields = {

@@ -32,7 +32,7 @@ export function DashboardView({
           "Reservas de servicios"), no navegación interna. */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-display tracking-tight">Principal</h1>
-        <a href={`/${business?.slug || '...'}/reservas`} target="_blank" rel="noopener noreferrer">
+        <a href={`/reservas/${business?.slug || '...'}`} target="_blank" rel="noopener noreferrer">
           <Button variant="outline" size="sm" className="gap-1.5">
             <ExternalLink className="h-3.5 w-3.5" />
             Ver reservas
