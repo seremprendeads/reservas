@@ -185,19 +185,6 @@ const socialLinks = [
           <p className="mt-2 text-xs tracking-wide uppercase" style={profile.description_color ? { color: profile.description_color } : { opacity: 0.5 }}>{profile.city}</p>
         )}
 
-        {/* Social icons */}
-        {socialLinks.length > 0 && (
-          <div className="flex items-center gap-4 mt-5">
-            {socialLinks.map(s => (
-              <a key={s.label} href={s.url!} target="_blank" rel="noopener noreferrer"
-                className={`transition-all duration-300 hover:scale-110 ${profile.social_icon_color ? '' : 'opacity-50 hover:opacity-100'}`}
-                style={{ color: profile.social_icon_color || undefined }}>
-                <SocialIcon name={s.name} />
-              </a>
-            ))}
-          </div>
-        )}
-
         {/* Links */}
         <div className="w-full mt-8 space-y-4">
           {visibleLinks.map((link, i) => {
@@ -219,6 +206,19 @@ const socialLinks = [
             );
           })}
         </div>
+
+        {/* Social icons */}
+        {socialLinks.length > 0 && (
+          <div className="flex items-center gap-4 mt-6">
+            {socialLinks.map(s => (
+              <a key={s.label} href={s.url!} target="_blank" rel="noopener noreferrer"
+                className={`transition-all duration-300 hover:scale-110 ${profile.social_icon_color ? '' : 'opacity-50 hover:opacity-100'}`}
+                style={{ color: profile.social_icon_color || undefined }}>
+                <SocialIcon name={s.name} />
+              </a>
+            ))}
+          </div>
+        )}
 
         {/* Footer */}
         <a href="https://bioweblink.com" target="_blank" rel="noopener noreferrer" className="mt-12 inline-flex flex-col items-center gap-1 group">

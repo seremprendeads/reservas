@@ -1064,14 +1064,6 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                       {profile?.description && <p className="text-xs mt-1" style={profile?.description_color ? { color: profile.description_color } : { opacity: 0.7 }}>{profile.description}</p>}
                       {profile?.city && <p className="text-xs mt-1" style={profile?.description_color ? { color: profile.description_color } : { opacity: 0.5 }}>{profile.city}</p>}
                     </div>
-                    <div className="flex items-center gap-3">
-                      {profile?.social_instagram && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="instagram" /></span>}
-                      {profile?.social_tiktok && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="tiktok" /></span>}
-                      {profile?.social_facebook && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="facebook" /></span>}
-                      {profile?.social_youtube && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="youtube" /></span>}
-                      {profile?.social_twitter && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="twitter" /></span>}
-                      {profile?.social_linkedin && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="linkedin" /></span>}
-                    </div>
                     <div className="w-full space-y-2.5">
                       {links.filter(l => l.is_active).map(link => (
                         <div key={link.id}
@@ -1085,6 +1077,14 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                           {link.title}
                         </div>
                       ))}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {profile?.social_instagram && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="instagram" /></span>}
+                      {profile?.social_tiktok && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="tiktok" /></span>}
+                      {profile?.social_facebook && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="facebook" /></span>}
+                      {profile?.social_youtube && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="youtube" /></span>}
+                      {profile?.social_twitter && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="twitter" /></span>}
+                      {profile?.social_linkedin && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="linkedin" /></span>}
                     </div>
                   </div>
                 </div>
