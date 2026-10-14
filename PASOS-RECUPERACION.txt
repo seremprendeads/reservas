@@ -1,0 +1,195 @@
+========================================================================
+BIOWEBLINK - PASO A PASO PARA RECUPERAR FUNCIONALIDAD
+Proyecto Supabase (produccion): Reserva Unica -> slsgkbepewxlsmzmcpri
+========================================================================
+
+IMPORTANTE
+- Estos pasos los ejecuta el DUENO. La IA no aplica migraciones ni despliega.
+- Todo lo listado ya esta preparado en el repositorio local.
+- No hace falta tocar los 5 planes ni el trial de 16 dias.
+- Pegar/ejecutar en orden. Despues de cada paso hay una verificacion.
+- Este archivo no contiene secretos ni claves.
+
+RESUMEN DE LO QUE HAY QUE HACER
+  A. Aplicar 1 migracion urgente (H1) -> desbloquea RESERVAS.
+  B. Desplegar 3 Edge Functions.
+  C. Desplegar el frontend (commit + push).
+  D. Verificaciones finales.
+  E. Opcional: endurecer RLS (H2) tras verificar.
+
+------------------------------------------------------------------------
+PASO 0 - ABRIR LAS HERRAMIENTAS
+------------------------------------------------------------------------
+1. Abrir una terminal PowerShell en la carpeta del proyecto:
+     cd C:\Users\leode\Desktop\Nichos\bioweblink
+2. Confirmar que la Supabase CLI esta linkeada al proyecto correcto:
+     supabase --version
+     Get-Content .\supabase\.temp\project-ref
+   Debe mostrar: slsgkbepewxlsmzmcpri
+3. Confirmar que no hay cambios sin revisar:
+     git status
+   (Los cambios preparados por la auditoria estan en: BookingForm.tsx,
+   BioAdmin.tsx, create-payment, admin-update-bio, admin-manage-payments,
+   admin-get-bio-stats y las migraciones 20261012*. No los borres.)
+
+========================================================================
+PASO 1 (URGENTE) - DESBLOQUEAR RESERVAS Y LISTA DE ESPERA (H1)
+========================================================================
+QUE PASA: la politica de insertar reservas consulta la tabla "businesses"
+con la clave anonima, pero a anon se le revoke esa lectura. Resultado:
+toda reserva publica y toda lista de espera falla con 401.
+
+1.1 VERIFICAR (solo lectura) - abrir el SQL Editor del proyecto
+    slsgkbepewxlsmzmcpri y ejecutar:
+
+     SELECT tablename, policyname, with_check
+     FROM pg_policies
+     WHERE schemaname = 'public'
+       AND tablename IN ('bookings','waiting_list')
+       AND policyname IN ('anon_insert_bookings','anon_insert_waiting_list');
+
+    Si en "with_check" aparece "EXISTS (SELECT 1 FROM businesses ...)",
+    el problema esta presente -> continuar con 1.2.
+
+1.2 APLICAR LA MIGRACION H1
+    Opcion A (recomendada, solo H1):
+      - Abrir el archivo:
+          supabase\migrations\20261012000000_fix_bookings_waiting_list_businesses_subselect.sql
+      - Copiar TODO su contenido.
+      - Pegarlo en el SQL Editor de Supabase y presionar RUN.
+
+    Opcion B (CLI, aplica las 3 migraciones nuevas de una):
+      supabase db push
+      (aplica 20261012000000, 20261012010000 y 20261012020000; las dos
+       ultimas son idempotentes y seguras)
+
+1.3 VERIFICAR QUE SE APLICO (solo lectura):
+     SELECT tablename, policyname, with_check
+     FROM pg_policies
+     WHERE schemaname='public'
+       AND tablename IN ('bookings','waiting_list')
+       AND policyname IN ('anon_insert_bookings','anon_insert_waiting_list');
+    El with_check ya NO debe mencionar "FROM businesses".
+
+1.4 PRUEBA FUNCIONAL REAL
+    - Entrar a la pagina publica de un negocio con modulo Reservas
+      (por ejemplo https://bioweblink.com/<slug>/reservas).
+    - Elegir servicio, fecha y hora, completar datos y "Continuar al pago".
+    - RESULTADO ESPERADO: la reserva se crea (llega a confirmacion o a la
+      pantalla de pago). Antes fallaba con "Error al crear la reserva".
+    - Repetir probando el boton "Unirme a la lista de espera" en un dia
+      sin horarios.
+
+========================================================================
+PASO 2 - DESPLEGAR LAS 3 EDGE FUNCTIONS
+========================================================================
+Ejecutar (una por una) desde PowerShell en la carpeta del proyecto:
+
+  supabase functions deploy admin-update-bio        --project-ref slsgkbepewxlsmzmcpri
+  supabase functions deploy admin-manage-payments   --project-ref slsgkbepewxlsmzmcpri
+  supabase functions deploy admin-get-bio-stats     --project-ref slsgkbepewxlsmzmcpri
+
+PARA QUE SIRVE CADA UNA:
+  - admin-update-bio:      guarda el color de overlay de la Bio (Apariencia).
+  - admin-manage-payments: permite configurar Mercado Pago a los planes
+                           solo-tienda (antes daba 403).
+  - admin-get-bio-stats:   NUEVA. Da las estadisticas del tab Estadisticas
+                           de la Bio (antes salia vacio).
+
+========================================================================
+PASO 3 - DESPLEGAR EL FRONTEND (commit + push)
+========================================================================
+Los cambios visuales (reserva sin UPDATE anonimo, panel de stats de la Bio)
+solo llegan a produccion al subirlos. Decide con git y Vercel despliega solo.
+
+  3.1 Revisar exactamente que se va a subir:
+        git status
+        git diff
+
+  3.2 Preparar y subir (ejemplo; ajustar el mensaje si queres):
+        git add src/components/BookingForm.tsx
+        git add src/modules/bio/admin/BioAdmin.tsx
+        git add supabase/functions/create-payment/index.ts
+        git add supabase/functions/admin-update-bio/index.ts
+        git add supabase/functions/admin-manage-payments/index.ts
+        git add supabase/functions/admin-get-bio-stats
+        git add supabase/migrations/20261012000000_fix_bookings_waiting_list_businesses_subselect.sql
+        git add supabase/migrations/20261012010000_ensure_rls_services_branding_landing.sql
+        git add supabase/migrations/20261012020000_harden_bio_stats_public_insert.sql
+        git commit -m "recuperar reservas y corregir panel bio/pagos"
+        git push
+
+  NOTA: el dueño tenia cambios propios (.gitignore, LEEME.txt borrado,
+  supabase/.temp/cli-latest). Revisalos en "git diff" y decidi si los
+  incluis o no. No los borres.
+
+========================================================================
+PASO 4 - VERIFICACIONES FINALES (despues de 1, 2 y 3)
+========================================================================
+4.1 RESERVAS
+    - Crear una reserva publica -> debe funcionar.
+    - Anotarse en lista de espera -> debe funcionar.
+
+4.2 PAGOS (H3)
+    - Con un negocio que tenga Mercado Pago conectado, crear una reserva
+      con pago y verificar en la DB que la reserva tiene preference_id:
+        SELECT booking_code, preference_id, payment_status
+        FROM bookings ORDER BY created_at DESC LIMIT 5;
+    - preference_id ya no queda vacio (lo escribe create-payment).
+
+4.3 PANEL BIO - APARIENCIA
+    - Admin -> Bio -> Apariencia -> cambiar el color de overlay del fondo.
+    - Guardar, recargar la pagina y la bio publica: el cambio debe persistir.
+
+4.4 PANEL BIO - ESTADISTICAS
+    - Visitar la bio publica un par de veces y hacer clic en un enlace.
+    - Admin -> Bio -> Estadisticas: deben aparecer visitas y clics.
+
+4.5 PANEL PAGOS EN PLAN SOLO-TIENDA
+    - Con un negocio de plan "Bio + Web + Tienda" (sin reservas),
+      entrar a Pagos y guardar credenciales de Mercado Pago.
+    - NO debe devolver 403 ni "No autorizado".
+
+========================================================================
+PASO 5 (OPCIONAL) - ENDURECER RLS EN services / branding / landing_pages (H2)
+========================================================================
+Es una mejora de seguridad, NO bloquea la app.
+
+5.1 VERIFICAR ESTADO (solo lectura) en el SQL Editor:
+     SELECT relname, relrowsecurity
+     FROM pg_class
+     WHERE relname IN ('services','branding','landing_pages')
+       AND relnamespace = 'public'::regnamespace;
+
+5.2 Si alguno tiene relrowsecurity = false:
+     - Aplicar supabase\migrations\20261012010000_ensure_rls_services_branding_landing.sql
+       (pegar en el SQL Editor y RUN; es idempotente y no rompe lecturas publicas).
+     - Si todos ya tienen true, no hacer nada.
+
+========================================================================
+QUE QUEDA PENDIENTE DE MI LADO (no lo hice por regla)
+========================================================================
+- No aplique migraciones.
+- No desplegue Edge Functions.
+- No modifique datos de produccion.
+- No commitee ni hice push.
+Todas esas acciones las tenes que autorizar/ejecutar vos con los pasos de arriba.
+
+========================================================================
+ARCHIVOS CLAVE
+========================================================================
+- supabase/migrations/20261012000000_fix_bookings_waiting_list_businesses_subselect.sql  (H1)
+- supabase/migrations/20261012010000_ensure_rls_services_branding_landing.sql            (H2)
+- supabase/migrations/20261012020000_harden_bio_stats_public_insert.sql                  (H6)
+- supabase/functions/admin-get-bio-stats/index.ts        (nueva, H4)
+- supabase/functions/admin-update-bio/index.ts           (fix overlay, aplicado en repo)
+- supabase/functions/admin-manage-payments/index.ts      (fix gate pagos, aplicado en repo)
+- supabase/functions/create-payment/index.ts             (H3, aplicado en repo)
+- src/components/BookingForm.tsx                         (H3, aplicado en repo)
+- src/modules/bio/admin/BioAdmin.tsx                     (H4, aplicado en repo)
+- VERIFICAR-RLS-SUPABASE.sql                             (consultas de verificacion)
+- AUDITORIA-RLS-SUPABASE.txt                             (informe de auditoria)
+
+========================================================================
+FIN
+========================================================================

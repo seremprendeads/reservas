@@ -13,9 +13,19 @@ Deno.serve(async (req: Request) => {
       return jsonUnauthorized();
     }
 
-    const access = await checkBusinessAccess(auth.businessId, "reservas");
-    if (!access.allowed) {
-      return jsonAccessDenied(access.message, "reason" in access ? access.reason : undefined);
+    // El panel "Pagos" aparece en el nav para negocios con modulo 'shop' (y
+    // tambien para reservas). Un plan solo-tienda (ej. bio_web_shop) no incluye
+    // 'reservas', asi que gatear solo por 'reservas' dejaba a esos negocios viendo
+    // el panel pero recibiendo 403 al guardar/probar credenciales -> checkout de
+    // tienda sin Mercado Pago. Se acepta con cualquiera de los dos modulos:
+    // create-payment (reservas) y create-shop-payment (tienda) leen
+    // payment_providers de la misma manera.
+    const accesoReservas = await checkBusinessAccess(auth.businessId, "reservas");
+    if (!accesoReservas.allowed) {
+      const accesoShop = await checkBusinessAccess(auth.businessId, "shop");
+      if (!accesoShop.allowed) {
+        return jsonAccessDenied(accesoShop.message, "reason" in accesoShop ? accesoShop.reason : undefined);
+      }
     }
 
     const { action, provider, credentials } = await req.json();

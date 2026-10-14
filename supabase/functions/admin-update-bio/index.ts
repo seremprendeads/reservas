@@ -97,13 +97,18 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === 'save_profile' && profile) {
+      // bg_overlay_color: lo manda BioAdmin.tsx en toSave (lineas 174-185) y la
+      // columna existe en bio_profiles (agregada fuera de banda en produccion).
+      // Sin el allowlist, editar la Apariencia de la bio NUNCA persistia el
+      // color de la capa de overlay: el panel la guardaba en silencio como no
+      // tocada. Corresponde con la seccion de "Fondo" de la Bio (modo imagen).
       const allowed = [
         'slug','name','description','avatar_url','city','whatsapp','email','website',
         'social_instagram','social_tiktok','social_facebook','social_youtube',
         'social_twitter','social_linkedin','social_icon_color',
         'primary_color','title_color','description_color',
         'bg_type','bg_solid_color','bg_gradient_from','bg_gradient_to',
-        'bg_image_url','bg_opacity','button_style','button_shadow',
+        'bg_image_url','bg_opacity','bg_overlay_color','button_style','button_shadow',
       ];
       const safe: Record<string, unknown> = { updated_at: new Date().toISOString() };
       for (const k of allowed) {

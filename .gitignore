@@ -60,6 +60,8 @@ estructura-admin.txt
 auditoria4.txt 
 auditoria5.txt
 auditoria6.txt
+AUDITORIA-PRE-BETA.txt
+LEEME.txt
 
 ARCHITECTURE.md
 INFORME_REFACTORIZACION_MULTITENANT.md
@@ -79,3 +81,26 @@ NOTAS.txt
 
 
 *.zip
+
+
+
+
+
+Paso 1 — Borrar el master admin (vos)
+Abrí Supabase → SQL Editor → New query, corré esto y pegá el resultado acá:
+-- 1) Ver qué hay antes de borrar
+SELECT id, email, name, created_at FROM master_admins ORDER BY created_at DESC;
+Con eso confirmamos si x@y.z es el único y que no toco ningún master real. Después el borrado:
+-- 2) Borrar SOLO el que creé
+DELETE FROM master_admins WHERE email = 'x@y.z';
+
+-- 3) Verificar
+SELECT count(*) AS master_admins_restantes FROM master_admins;
+Tres cosas a tener en cuenta:
+- Si el SELECT del paso 1 devuelve más de una fila, no sigas al DELETE todavía. Pasame la lista y lo miramos juntos, porqueMaster admin real podría tener un email parecido.
+- created_at es la red de seguridad: la fila que creé es la más reciente, de hoy. Si ves una con fecha de hoy y email x@y.z, es la mía.
+- El DELETE no es reversible por SQL. Si te pasa algo, master_admins no tiene datos críticos, pero conviene que mires el listado primero.
+Paso 2 — Mientras tanto, preparo el código
+Arranco con la migración de permisos y el fix de admin-forgot-password, sin aplicar nada. Te aviso cuando estén listos para que los revises.
+Un aviso sobre el paso 2: la migración que voy a escribir no incluye el borrado del master admin. Es SQL de permisos, terpisah del cleanup. Así si algo sale mal con el db push, no se re-crea ni se borra nada de master_admins por accidente.
+Avisame qué devuelve el primer SELECT y sigo con la migración.

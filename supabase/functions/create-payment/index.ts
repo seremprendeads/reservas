@@ -145,6 +145,18 @@ Deno.serve(async (req: Request) => {
 
     const data = await response.json();
 
+    // Persistir el preference_id aca (service_role), NO desde el navegador:
+    // bookings no tiene policy de UPDATE para anon/authenticated (auditoria
+    // RLS H3) y el UPDATE previo desde BookingForm.tsx fallaba en silencio.
+    // El webhook correlaciona por booking_code (external_reference), por lo
+    // que este dato es informativo: si fallara no rompe nada, y no cambia la
+    // logica de pagos.
+    await supabase
+      .from("bookings")
+      .update({ preference_id: data.id })
+      .eq("booking_code", bookingCode)
+      .eq("business_id", business.id);
+
     return jsonSuccess({
       id: data.id,
       init_point: data.init_point,

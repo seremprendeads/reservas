@@ -123,11 +123,10 @@ export function BookingForm() {
         throw new Error('Error al crear preferencia de pago');
       }
 
-      await supabase
-        .from('bookings')
-        .update({ preference_id: preference.id })
-        .eq('booking_code', bookingCode)
-        .eq('business_id', business.id);
+      // El preference_id lo persiste create-payment (service_role): el browser
+      // con la anon key no tiene UPDATE en bookings (RLS). No reintroducir el
+      // UPDATE directo: fallaria en silencio y agregarla como policy abriria
+      // modificaciones de estados/montos de reservas ajenas.
 
       setPaymentInfo(preference.id, bookingCode, bookingData.amount, bookingData.currency);
       setStep('payment');

@@ -321,7 +321,10 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
   const loadStats = useCallback(async () => {
     if (!profile) return;
-    const { data: allStats } = await supabase.from('bio_stats').select('*').eq('profile_id', profile.id).gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString());
+    // H4 (auditoria RLS): no hay SELECT anonimo en bio_stats; las estadisticas
+    // del propio perfil salen de la Edge Function autenticada (service_role).
+    const { data: result } = await authInvoke('admin-get-bio-stats');
+    const allStats = (result as { stats?: Array<Record<string, unknown>> } | undefined)?.stats;
     if (!allStats) return;
 
     const visits = allStats.filter((s: Record<string, unknown>) => s.event_type === 'visit').length;
