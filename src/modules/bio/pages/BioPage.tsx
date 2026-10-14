@@ -177,12 +177,12 @@ const socialLinks = [
 
         {/* Description */}
         {profile.description && (
-          <p className="mt-3 text-base max-w-sm leading-relaxed" style={profile.description_color ? { color: profile.description_color, opacity: 0.8 } : { opacity: 0.7 }}>{profile.description}</p>
+          <p className="mt-3 text-base max-w-sm leading-relaxed" style={profile.description_color ? { color: profile.description_color } : { opacity: 0.7 }}>{profile.description}</p>
         )}
 
         {/* City */}
         {profile.city && (
-          <p className="mt-2 text-xs tracking-wide uppercase" style={profile.description_color ? { color: profile.description_color, opacity: 0.6 } : { opacity: 0.5 }}>{profile.city}</p>
+          <p className="mt-2 text-xs tracking-wide uppercase" style={profile.description_color ? { color: profile.description_color } : { opacity: 0.5 }}>{profile.city}</p>
         )}
 
         {/* Social icons */}
@@ -190,7 +190,7 @@ const socialLinks = [
           <div className="flex items-center gap-4 mt-5">
             {socialLinks.map(s => (
               <a key={s.label} href={s.url!} target="_blank" rel="noopener noreferrer"
-                className="opacity-50 hover:opacity-100 transition-all duration-300 hover:scale-110"
+                className={`transition-all duration-300 hover:scale-110 ${profile.social_icon_color ? '' : 'opacity-50 hover:opacity-100'}`}
                 style={{ color: profile.social_icon_color || undefined }}>
                 <SocialIcon name={s.name} />
               </a>
