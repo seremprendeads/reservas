@@ -33,6 +33,7 @@ export function AboutTab({ sections, updateSection, triggerUpload, uploadingImag
       </div>
       <div>
         <label className="text-sm font-medium text-foreground mb-2 block">Imagen</label>
+        <p className="text-xs text-muted-foreground mb-2">Recomendado: 1200 × 800 px, horizontal (3:2). Se muestra recortada al centro.</p>
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => triggerUpload('about_image')} disabled={!!uploadingImage}>
             {uploadingImage === 'about_image' ? 'Subiendo...' : a.image_url ? 'Cambiar' : 'Subir imagen'}
