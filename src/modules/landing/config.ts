@@ -102,6 +102,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
     description: 'Contá tu historia, tu trayectoria y lo que te hace único. Esta sección genera confianza en tus potenciales clientes.',
     image_url: null,
     alignment: 'left',
+    image_position: 'left',
   },
   about_text: {
     title: '',

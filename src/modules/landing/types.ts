@@ -71,6 +71,7 @@ export interface LandingSections {
     description: string;
     image_url: string | null;
     alignment: 'left' | 'center' | 'right' | 'justify';
+    image_position: 'left' | 'right';
   };
   about_text: {
     title: string;

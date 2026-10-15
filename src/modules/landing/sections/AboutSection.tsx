@@ -31,16 +31,17 @@ function useIsMobile() {
 export function AboutSection({ about, theme, ts, headingStyle, bodyStyle, showTopBorder = true }: AboutSectionProps) {
   const isMobile = useIsMobile();
   const textAlign = isMobile ? 'center' : (about.alignment || 'left');
+  const imageOnRight = about.image_position === 'right';
 
   return (
     <section id="nosotros" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.about_bg_color, borderTop: showTopBorder ? `1px solid ${theme.text_color}08` : 'none' }}>
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
         {about.image_url && (
-          <div className={`${ts.cardRadius} overflow-hidden ${ts.cardShadow}`}>
+          <div className={`${ts.cardRadius} overflow-hidden ${ts.cardShadow} ${imageOnRight && !isMobile ? 'md:order-2' : ''}`}>
             <img src={about.image_url} alt={about.title} className="w-full h-80 sm:h-96 object-cover" />
           </div>
         )}
-        <div style={{ textAlign }}>
+        <div className={imageOnRight && !isMobile ? 'md:order-1' : undefined} style={{ textAlign }}>
           <h2 style={{ ...headingStyle, fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight mb-8">
             {about.title || 'Sobre nosotros'}
           </h2>

@@ -47,6 +47,16 @@ export function AboutTab({ sections, updateSection, triggerUpload, uploadingImag
           )}
         </div>
       </div>
+      {a.image_url && (
+        <div>
+          <label className="text-sm font-medium text-foreground">Posición de la imagen</label>
+          <select value={a.image_position || 'left'} onChange={e => updateSection('about', { ...a, image_position: e.target.value })}
+            className="mt-1.5 w-full h-12 rounded-xl border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <option value="left">Izquierda</option>
+            <option value="right">Derecha</option>
+          </select>
+        </div>
+      )}
     </div>
   );
 }
