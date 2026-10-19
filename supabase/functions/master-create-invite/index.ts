@@ -207,7 +207,9 @@ Deno.serve(async (req: Request) => {
     if (tokenError) throw tokenError;
 
     const SITE_URL =
-      Deno.env.get("SITE_URL") || "https://reservas-two-sigma.vercel.app";
+      Deno.env.get("SITE_URL") ||
+      req.headers.get("origin") ||
+      "https://www.bioweblink.com";
     const inviteLink = `${SITE_URL}/invite/${token}`;
 
     console.log(

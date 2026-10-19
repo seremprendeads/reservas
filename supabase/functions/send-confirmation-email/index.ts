@@ -179,7 +179,7 @@ Deno.serve(async (req: Request) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Reservas <noreply@reservasturnos.com>",
+        from: `BiowebLink <${Deno.env.get("FROM_EMAIL") || "noreply@bioweblink.com"}>`,
         to: email,
         subject: `Confirmacion de Reserva - ${bookingCode}`,
         html: emailHtml,

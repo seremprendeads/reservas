@@ -89,7 +89,11 @@ Deno.serve(async (req: Request) => {
 
       const businessName = biz?.name || "un negocio";
       const roleLabel = role === "admin" ? "Administrador" : role === "viewer" ? "Observador" : "Miembro";
-      const inviteUrl = `${req.headers.get("origin") || "https://reservasturnos.com"}/accept-invite?token=${token}`;
+      const siteUrl =
+        Deno.env.get("SITE_URL") ||
+        req.headers.get("origin") ||
+        "https://www.bioweblink.com";
+      const inviteUrl = `${siteUrl}/invite/${token}`;
 
       await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -98,7 +102,7 @@ Deno.serve(async (req: Request) => {
           Authorization: `Bearer ${RESEND_API_KEY}`,
         },
         body: JSON.stringify({
-          from: "Reservas <noreply@reservasturnos.com>",
+          from: `BiowebLink <${Deno.env.get("FROM_EMAIL") || "noreply@bioweblink.com"}>`,
           to: target_email,
           subject: `Invitación a ${businessName}`,
           html: `
@@ -129,7 +133,7 @@ Deno.serve(async (req: Request) => {
 
     return jsonSuccess({
       message: "Invitación creada",
-      invite_link: `/accept-invite?token=${token}`,
+      invite_link: `/invite/${token}`,
     });
   } catch (err) {
     console.error("admin-invite-user error:", err);
