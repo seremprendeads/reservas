@@ -137,24 +137,13 @@ const socialLinks = [
   return (
     <div className="min-h-screen relative" style={bgStyle}>
       {showBgImage && (
-        <>
-          {/* Mobile / tablet: foto a pantalla completa (sin cambios) */}
-          <div
-            className="lg:hidden fixed inset-0 z-0"
-            style={{ background: `url(${profile.bg_image_url}) center top/cover no-repeat` }}
-          />
-          {/* Desktop: la misma foto desenfocada llena la pantalla y la bio
-              va en una tarjeta centrada con la foto nítida. */}
-          <div className="hidden lg:block fixed inset-0 z-0 overflow-hidden">
-            <div
-              className="absolute -inset-10"
-              style={{
-                background: `url(${profile.bg_image_url}) center/cover no-repeat`,
-                filter: 'blur(28px)',
-              }}
-            />
-          </div>
-        </>
+        /* Mobile / tablet: foto a pantalla completa (sin cambios).
+           Desktop: la foto nítida va dentro de la tarjeta (ver más abajo);
+           detrás se ve el color base de la bio, sin blur ni overlay. */
+        <div
+          className="lg:hidden fixed inset-0 z-0"
+          style={{ background: `url(${profile.bg_image_url}) center top/cover no-repeat` }}
+        />
       )}
       {overlayOpacity > 0 && (
         <div
