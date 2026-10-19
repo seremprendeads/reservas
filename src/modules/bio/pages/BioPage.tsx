@@ -153,10 +153,12 @@ const socialLinks = [
                 filter: 'blur(28px)',
               }}
             />
-            <div
-              className="absolute inset-0"
-              style={{ backgroundColor: overlayColor, opacity: Math.max(overlayOpacity, 0.35) }}
-            />
+            {overlayOpacity > 0 && (
+              <div
+                className="absolute inset-0"
+                style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
+              />
+            )}
           </div>
         </>
       )}
