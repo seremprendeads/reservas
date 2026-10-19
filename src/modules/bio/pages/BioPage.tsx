@@ -175,7 +175,7 @@ const socialLinks = [
 
       <div className="relative z-10 min-h-screen flex">
         <div
-          className="relative isolate w-full max-w-lg mx-auto px-8 py-16 flex flex-col items-center text-center lg:my-auto lg:min-h-[600px] lg:justify-center lg:rounded-[2rem] lg:overflow-hidden lg:shadow-2xl"
+          className="relative isolate w-full max-w-lg mx-auto px-8 py-16 flex flex-col items-center text-center lg:my-auto lg:min-h-[600px] lg:justify-center lg:rounded-[2rem] lg:overflow-hidden"
           style={{ color: textColor }}
         >
           {/* Desktop: la foto nítida va dentro de la tarjeta (mobile usa la capa a pantalla completa) */}
