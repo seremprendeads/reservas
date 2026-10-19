@@ -137,18 +137,32 @@ const socialLinks = [
   return (
     <div className="min-h-screen relative" style={bgStyle}>
       {showBgImage && (
-        /* Foto a pantalla completa en cualquier ancho (mobile, tablet, netbook,
-           desktop). `fixed` la ata al viewport para que no se estire aunque la
-           bio tenga muchos enlaces. `center top` prioriza la parte de arriba
-           de la foto (donde suele estar la cara) al recortar. */
-        <div
-          className="fixed inset-0 z-0"
-          style={{ background: `url(${profile.bg_image_url}) center top/cover no-repeat` }}
-        />
+        <>
+          {/* Mobile / tablet: foto a pantalla completa (sin cambios) */}
+          <div
+            className="lg:hidden fixed inset-0 z-0"
+            style={{ background: `url(${profile.bg_image_url}) center top/cover no-repeat` }}
+          />
+          {/* Desktop: la misma foto desenfocada llena la pantalla y la bio
+              va en una tarjeta centrada con la foto nítida. */}
+          <div className="hidden lg:block fixed inset-0 z-0 overflow-hidden">
+            <div
+              className="absolute -inset-10"
+              style={{
+                background: `url(${profile.bg_image_url}) center/cover no-repeat`,
+                filter: 'blur(28px)',
+              }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{ backgroundColor: overlayColor, opacity: Math.max(overlayOpacity, 0.35) }}
+            />
+          </div>
+        </>
       )}
       {overlayOpacity > 0 && (
         <div
-          className="fixed inset-0 z-0"
+          className="lg:hidden fixed inset-0 z-0"
           style={{
             backgroundColor: overlayColor,
             opacity: overlayOpacity,
@@ -159,7 +173,26 @@ const socialLinks = [
       <meta property="og:description" content={profile.description} />
       <meta property="og:type" content="website" />
 
-      <div className="relative z-10 max-w-lg mx-auto px-8 py-16 flex flex-col items-center text-center" style={{ color: textColor }}>
+      <div className="relative z-10 min-h-screen flex">
+        <div
+          className="relative isolate w-full max-w-lg mx-auto px-8 py-16 flex flex-col items-center text-center lg:my-auto lg:min-h-[600px] lg:justify-center lg:rounded-[2rem] lg:overflow-hidden lg:shadow-2xl"
+          style={{ color: textColor }}
+        >
+          {/* Desktop: la foto nítida va dentro de la tarjeta (mobile usa la capa a pantalla completa) */}
+          {showBgImage && (
+            <>
+              <div
+                className="hidden lg:block absolute inset-0 -z-10"
+                style={{ background: `url(${profile.bg_image_url}) center/cover no-repeat` }}
+              />
+              {overlayOpacity > 0 && (
+                <div
+                  className="hidden lg:block absolute inset-0 -z-10"
+                  style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
+                />
+              )}
+            </>
+          )}
         {/* Avatar */}
         {profile.avatar_url ? (
           <img src={profile.avatar_url} alt={profile.name}
@@ -229,6 +262,7 @@ const socialLinks = [
             Tu Presencia Online
           </span>
         </a>
+        </div>
       </div>
     </div>
   );

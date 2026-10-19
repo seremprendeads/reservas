@@ -288,7 +288,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
           img.onload = () => {
             URL.revokeObjectURL(url);
             const canvas = document.createElement('canvas');
-            const maxW = 1200, maxH = 800;
+            const maxW = 1920, maxH = 1280;
             let w = img.width, h = img.height;
             if (w > maxW) { h = h * maxW / w; w = maxW; }
             if (h > maxH) { w = w * maxH / h; h = maxH; }
@@ -797,12 +797,11 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                 {(profile?.bg_type === 'solid' || profile?.bg_type === 'image') && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
-                      {profile?.bg_type === 'image' ? 'Color de los costados' : 'Color de fondo'}
+                      {profile?.bg_type === 'image' ? 'Color base' : 'Color de fondo'}
                     </label>
                     {profile?.bg_type === 'image' && (
                       <p className="text-xs text-muted-foreground">
-                        Rellena los laterales en pantallas anchas (PC y notebook).
-                        En celular no se ve porque la imagen ocupa todo el ancho.
+                        Se ve detrás de la imagen mientras carga. Recomendado subir la foto horizontal (3:2), con el sujeto centrado y en la parte de arriba.
                       </p>
                     )}
                     <div className="flex items-center gap-3">
