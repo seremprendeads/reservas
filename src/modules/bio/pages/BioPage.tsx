@@ -153,12 +153,6 @@ const socialLinks = [
                 filter: 'blur(28px)',
               }}
             />
-            {overlayOpacity > 0 && (
-              <div
-                className="absolute inset-0"
-                style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
-              />
-            )}
           </div>
         </>
       )}
@@ -199,10 +193,10 @@ const socialLinks = [
         {profile.avatar_url ? (
           <img src={profile.avatar_url} alt={profile.name}
             className="w-28 h-28 rounded-full object-cover mb-6 border-4"
-            style={{ borderColor: `${profile.primary_color}33`, boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }} />
+            style={{ borderColor: `${profile.primary_color}33` }} />
         ) : (
           <div className="w-28 h-28 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-6"
-            style={{ background: profile.primary_color, boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }}>
+            style={{ background: profile.primary_color }}>
             {(profile.name || 'N')[0]?.toUpperCase()}
           </div>
         )}
