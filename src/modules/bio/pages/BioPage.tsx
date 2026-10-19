@@ -183,7 +183,7 @@ const socialLinks = [
             <>
               <div
                 className="hidden lg:block absolute inset-0 -z-10"
-                style={{ background: `url(${profile.bg_image_url}) center/cover no-repeat` }}
+                style={{ background: `url(${profile.bg_image_url}) center 30%/cover no-repeat` }}
               />
               {overlayOpacity > 0 && (
                 <div
