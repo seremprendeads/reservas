@@ -51,6 +51,9 @@ export function GalleryTab({ sections, updateSection, triggerUpload, uploadingIm
         <label className="text-sm font-medium text-foreground mb-3 block">
           Imágenes ({normalizedImages.length}/{maxImages})
         </label>
+        <p className="text-xs text-muted-foreground -mt-1 mb-3">
+          Recomendación: usá imágenes cuadradas de 1080×1080 px para que se vean completas y sin cortarse en las miniaturas.
+        </p>
         <div className="space-y-4">
           {normalizedImages.map((img, i) => (
             <div key={i} className="rounded-xl border p-4 space-y-3 shadow-[0_8px_30px_rgba(0,0,0,.05)]">
