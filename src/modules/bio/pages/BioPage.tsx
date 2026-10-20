@@ -137,22 +137,45 @@ const socialLinks = [
   return (
     <div className="min-h-screen relative" style={bgStyle}>
       {showBgImage && (
-        /* Mobile / tablet: foto a pantalla completa (sin cambios).
-           Desktop: la foto nítida va dentro de la tarjeta (ver más abajo);
-           detrás se ve el color base de la bio, sin blur ni overlay. */
-        <div
-          className="lg:hidden fixed inset-0 z-0"
-          style={{ background: `url(${profile.bg_image_url}) center top/cover no-repeat` }}
-        />
+        <>
+          {/* Mobile / tablet: foto a pantalla completa, recorte centrado */}
+          <div
+            className="lg:hidden fixed inset-0 z-0"
+            style={{
+              backgroundImage: `url(${profile.bg_image_url})`,
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+          {/* Desktop: foto a pantalla completa con blur suave detrás de la tarjeta */}
+          <div className="hidden lg:block fixed inset-0 z-0 overflow-hidden">
+            <div
+              className="absolute inset-0 scale-110"
+              style={{
+                backgroundImage: `url(${profile.bg_image_url})`,
+                backgroundPosition: 'center',
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+                filter: 'blur(28px)',
+              }}
+            />
+          </div>
+        </>
       )}
       {overlayOpacity > 0 && (
-        <div
-          className="lg:hidden fixed inset-0 z-0"
-          style={{
-            backgroundColor: overlayColor,
-            opacity: overlayOpacity,
-          }}
-        />
+        <>
+          <div
+            className="lg:hidden fixed inset-0 z-0"
+            style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
+          />
+          {showBgImage && (
+            <div
+              className="hidden lg:block fixed inset-0 z-0"
+              style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
+            />
+          )}
+        </>
       )}
       <meta property="og:title" content={profile.name} />
       <meta property="og:description" content={profile.description} />
