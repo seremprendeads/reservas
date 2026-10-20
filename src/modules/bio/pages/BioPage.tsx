@@ -137,45 +137,22 @@ const socialLinks = [
   return (
     <div className="min-h-screen relative" style={bgStyle}>
       {showBgImage && (
-        <>
-          {/* Mobile / tablet: foto a pantalla completa, recorte centrado */}
-          <div
-            className="lg:hidden fixed inset-0 z-0"
-            style={{
-              backgroundImage: `url(${profile.bg_image_url})`,
-              backgroundPosition: 'center',
-              backgroundSize: 'cover',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
-          {/* Desktop: foto a pantalla completa con blur suave detrás de la tarjeta */}
-          <div className="hidden lg:block fixed inset-0 z-0 overflow-hidden">
-            <div
-              className="absolute inset-0 scale-110"
-              style={{
-                backgroundImage: `url(${profile.bg_image_url})`,
-                backgroundPosition: 'center',
-                backgroundSize: 'cover',
-                backgroundRepeat: 'no-repeat',
-                filter: 'blur(28px)',
-              }}
-            />
-          </div>
-        </>
+        /* Foto a pantalla completa (móvil y PC), nítida y centrada */
+        <div
+          className="fixed inset-0 z-0"
+          style={{
+            backgroundImage: `url(${profile.bg_image_url})`,
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
       )}
       {overlayOpacity > 0 && (
-        <>
-          <div
-            className="lg:hidden fixed inset-0 z-0"
-            style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
-          />
-          {showBgImage && (
-            <div
-              className="hidden lg:block fixed inset-0 z-0"
-              style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
-            />
-          )}
-        </>
+        <div
+          className={`fixed inset-0 z-0 ${showBgImage ? '' : 'lg:hidden'}`}
+          style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
+        />
       )}
       <meta property="og:title" content={profile.name} />
       <meta property="og:description" content={profile.description} />
@@ -186,21 +163,6 @@ const socialLinks = [
           className="relative isolate w-full max-w-lg mx-auto px-8 py-16 flex flex-col items-center text-center lg:my-auto lg:min-h-[600px] lg:justify-center lg:rounded-[2rem] lg:overflow-hidden"
           style={{ color: textColor }}
         >
-          {/* Desktop: la foto nítida va dentro de la tarjeta (mobile usa la capa a pantalla completa) */}
-          {showBgImage && (
-            <>
-              <div
-                className="hidden lg:block absolute inset-0 -z-10"
-                style={{ background: `url(${profile.bg_image_url}) center 30%/cover no-repeat` }}
-              />
-              {overlayOpacity > 0 && (
-                <div
-                  className="hidden lg:block absolute inset-0 -z-10"
-                  style={{ backgroundColor: overlayColor, opacity: overlayOpacity }}
-                />
-              )}
-            </>
-          )}
         {/* Avatar */}
         {profile.avatar_url ? (
           <img src={profile.avatar_url} alt={profile.name}
