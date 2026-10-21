@@ -379,7 +379,7 @@ export function AdminPage() {
         }}
       />
 
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden pb-16 lg:pb-0">
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden pb-28 lg:pb-0">
         {/* Barra fina del período de prueba: va arriba del header y queda fija
             porque el scroll ocurre dentro de <main>, no en esta columna. */}
         {isTrial && <TrialBanner trialCountdown={trialCountdown} />}
@@ -396,41 +396,43 @@ export function AdminPage() {
           onToggleDarkMode={() => setDarkMode(!darkMode)}
         />
 
-        {/* Acceso rápido al constructor de sitio web en móvil: abre el menú lateral */}
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="lg:hidden flex w-full items-center justify-center gap-2 border-b border-border bg-card/80 px-4 py-3 text-sm font-semibold text-foreground backdrop-blur-sm transition-colors hover:bg-muted/40"
-        >
-          <Menu className="h-4 w-4" />
-          Constructor de sitio web
-        </button>
-
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">
           {isFreePlan && <FreePlanBanner supportUrl={subConfig.payment_button_url} />}
           {renderView()}
         </main>
 
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between border-t border-border bg-card/95 backdrop-blur-md px-6 py-2.5">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
+          {/* Acceso rápido al constructor de sitio web: abre el menú lateral */}
           <button
-            onClick={() => {
-              if (prevView) { handleNavigate(prevView); }
-              else { handleNavigate(isFreePlan ? 'bio' : 'dashboard'); }
-            }}
-            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => setSidebarOpen(true)}
+            className="flex w-full items-center justify-center gap-2 border-t border-border bg-card/95 px-4 py-3 text-sm font-semibold text-foreground backdrop-blur-md transition-colors hover:bg-muted/40"
           >
-            <ArrowLeft className="h-5 w-5" />
-            <span className="text-[10px] font-bold">Atrás</span>
+            <Menu className="h-4 w-4" />
+            Constructor de sitio web
           </button>
 
-          <span className="text-xs text-gray-500 font-bold">by BiowebLink</span>
+          <div className="flex items-center justify-between border-t border-border bg-card/95 backdrop-blur-md px-6 py-2.5">
+            <button
+              onClick={() => {
+                if (prevView) { handleNavigate(prevView); }
+                else { handleNavigate(isFreePlan ? 'bio' : 'dashboard'); }
+              }}
+              className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span className="text-[10px] font-bold">Atrás</span>
+            </button>
 
-          <button
-            onClick={() => handleNavigate(isFreePlan ? 'bio' : 'dashboard')}
-            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <LayoutDashboard className="h-5 w-5" />
-            <span className="text-[10px] font-bold">Inicio</span>
-          </button>
+            <span className="text-xs text-gray-500 font-bold">by BiowebLink</span>
+
+            <button
+              onClick={() => handleNavigate(isFreePlan ? 'bio' : 'dashboard')}
+              className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LayoutDashboard className="h-5 w-5" />
+              <span className="text-[10px] font-bold">Inicio</span>
+            </button>
+          </div>
         </nav>
       </div>
 
