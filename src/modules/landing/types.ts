@@ -339,6 +339,7 @@ export interface LandingTheme {
   why_choose_us_title_size?: string;
   why_choose_us_subtitle_size?: string;
   why_choose_us_item_title_size?: string;
+  why_choose_us_item_subtitle_size?: string;
   why_choose_us_text_size?: string;
   header_title_size?: string;
   header_subtitle_size?: string;
@@ -514,6 +515,7 @@ export const SECTION_FONT_SIZE_GROUPS: SectionFontSizeGroup[] = [
       { label: 'Título', key: 'why_choose_us_title_size' },
       { label: 'Subtítulo', key: 'why_choose_us_subtitle_size' },
       { label: 'Título de beneficios', key: 'why_choose_us_item_title_size' },
+      { label: 'Subtítulo de beneficios', key: 'why_choose_us_item_subtitle_size' },
       { label: 'Texto', key: 'why_choose_us_text_size' },
     ],
   },

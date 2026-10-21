@@ -46,7 +46,7 @@ export function WhyChooseUsSection({ whyChooseUs, theme, ts, headingStyle, bodyS
                 )}
                 {item.subtitle && (
                   <p
-                    style={{ ...bodyStyle, color: theme.why_choose_us_subtitle_color || theme.text_color, fontSize: fontSize(theme.why_choose_us_subtitle_size) }}
+                    style={{ ...bodyStyle, color: theme.why_choose_us_subtitle_color || theme.text_color, fontSize: fontSize(theme.why_choose_us_item_subtitle_size) || fontSize(theme.why_choose_us_subtitle_size) }}
                     className="text-sm leading-relaxed mb-2"
                   >
                     {item.subtitle}
