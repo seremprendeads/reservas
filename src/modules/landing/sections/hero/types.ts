@@ -18,6 +18,9 @@ export interface HeroBaseData {
   // del tema y de si hay imagen de fondo).
   logo_caption_size: number | null;
   logo_caption_color: string | null;
+  logo_caption_weight: string | null;
+  logo_caption_italic: string | null;
+  logo_caption_transform: string | null;
   title_size: number | null;
   title_color: string | null;
   subtitle_size: number | null;
@@ -73,6 +76,9 @@ export function createDefaultHeroData(template: HeroTemplate, existing?: Partial
     overlay_opacity: existing?.overlay_opacity ?? 40,
     logo_caption_size: existing?.logo_caption_size ?? null,
     logo_caption_color: existing?.logo_caption_color ?? null,
+    logo_caption_weight: existing?.logo_caption_weight ?? null,
+    logo_caption_italic: existing?.logo_caption_italic ?? null,
+    logo_caption_transform: existing?.logo_caption_transform ?? null,
     title_size: existing?.title_size ?? null,
     title_color: existing?.title_color ?? null,
     subtitle_size: existing?.subtitle_size ?? null,

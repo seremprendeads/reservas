@@ -96,7 +96,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
           <nav className="hidden md:flex items-center gap-1">
             {(s.header.menu_items || []).map((item, i) => (
               <a key={i} href={item.href} onClick={handleSmoothScroll}
-                style={{ ...bodyStyle, color: menuTextColor, ...textStyleExtras(theme, 'header_text') }}
+                style={{ ...bodyStyle, color: menuTextColor, fontSize: fontSize(theme.header_text_size), ...textStyleExtras(theme, 'header_text') }}
                 className={`px-4 py-2 text-sm font-medium ${hasCustomText ? '' : 'opacity-60'} hover:opacity-100 transition-all duration-150 rounded-lg hover:bg-black/[0.03]`}>
                 {formatLabel(item.label)}
               </a>
@@ -132,7 +132,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
           <div className="px-5 py-5 space-y-1">
             {(s.header.menu_items || []).map((item, i) => (
               <a key={i} href={item.href} onClick={handleSmoothScroll}
-                style={{ color: menuTextColor, ...bodyStyle, ...textStyleExtras(theme, 'header_text') }}
+                style={{ color: menuTextColor, ...bodyStyle, fontSize: fontSize(theme.header_text_size), ...textStyleExtras(theme, 'header_text') }}
                 className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-black/[0.03] transition-colors">
                 {formatLabel(item.label)}
               </a>

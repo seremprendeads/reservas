@@ -168,10 +168,10 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <FaqTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'cta' && (
-                  <CtaTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                  <CtaTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'plans' && (
-                  <PlansTab sections={sections} updateSection={updateSection} />
+                  <PlansTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'map' && (
                   <MapTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />

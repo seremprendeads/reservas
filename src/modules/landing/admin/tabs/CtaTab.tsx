@@ -2,14 +2,16 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import type { LandingSections } from '../../types';
+import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface CtaTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
   triggerUpload: (t: string) => void; uploadingImage: string | null;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function CtaTab({ sections, updateSection, triggerUpload, uploadingImage }: CtaTabProps) {
+export function CtaTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: CtaTabProps) {
   const c = sections.cta;
   return (
     <div className="space-y-5">
@@ -71,6 +73,7 @@ export function CtaTab({ sections, updateSection, triggerUpload, uploadingImage 
           </div>
         </>
       )}
+      <SectionTextStyleFields sectionKey="cta" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

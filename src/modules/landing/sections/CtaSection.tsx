@@ -1,5 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import type { LandingSections, LandingTheme } from '../types';
+import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 type TemplateStyles = { sectionSpacing: string; buttonRadius: string };
 
@@ -38,10 +40,10 @@ export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, b
             }
           />
         )}
-        <h2 style={{ ...headingStyle, color: '#ffffff', fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight mb-6">
+        <h2 style={{ ...headingStyle, color: theme.cta_title_color || '#ffffff', fontWeight: 700, fontSize: fontSize(theme.cta_title_size), ...textStyleExtras(theme, 'cta_title') }} className="text-4xl sm:text-5xl tracking-tight mb-6">
           {cta.title}
         </h2>
-        <p style={{ ...bodyStyle, color: 'rgba(255,255,255,0.7)' }} className="text-base sm:text-lg mb-10 leading-relaxed">
+        <p style={{ ...bodyStyle, color: theme.cta_text_color || 'rgba(255,255,255,0.7)', fontSize: fontSize(theme.cta_text_size), ...textStyleExtras(theme, 'cta_text') }} className="text-base sm:text-lg mb-10 leading-relaxed">
           {cta.description}
         </p>
         <a href="#contacto" onClick={handleSmoothScroll}

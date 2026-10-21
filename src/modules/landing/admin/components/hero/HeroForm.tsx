@@ -164,6 +164,10 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
               onSizeChange={v => update('logo_caption_size', v)}
               onColorChange={v => update('logo_caption_color', v)}
               onResetColor={() => update('logo_caption_color', null)}
+              weight={data.logo_caption_weight || ''} italic={data.logo_caption_italic || ''} transform={data.logo_caption_transform || ''}
+              onWeightChange={v => update('logo_caption_weight', v || null)}
+              onItalicChange={v => update('logo_caption_italic', v || null)}
+              onTransformChange={v => update('logo_caption_transform', v || null)}
             />
           </div>
         )}

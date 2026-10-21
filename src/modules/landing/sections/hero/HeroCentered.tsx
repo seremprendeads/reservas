@@ -36,7 +36,7 @@ export function HeroCentered({ data, theme, ts, headingStyle, bodyStyle, handleS
             <div className="mb-6 flex flex-col items-center gap-2">
               <img src={data.logo_url} alt="" className="h-12 sm:h-16 w-auto max-w-[220px] object-contain" />
               {data.logo_caption && (
-                <span style={{ ...bodyStyle, color: data.logo_caption_color || 'rgba(255,255,255,0.5)', fontSize: data.logo_caption_size ? `${data.logo_caption_size}px` : undefined }} className="text-xs sm:text-sm tracking-wide">
+                <span style={{ ...bodyStyle, color: data.logo_caption_color || 'rgba(255,255,255,0.5)', fontSize: data.logo_caption_size ? `${data.logo_caption_size}px` : undefined, fontWeight: data.logo_caption_weight || undefined, fontStyle: data.logo_caption_italic ? 'italic' : undefined, textTransform: (data.logo_caption_transform as React.CSSProperties['textTransform']) || undefined }} className="text-xs sm:text-sm tracking-wide">
                   {data.logo_caption}
                 </span>
               )}

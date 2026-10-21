@@ -343,6 +343,7 @@ export interface LandingTheme {
   why_choose_us_text_size?: string;
   header_title_size?: string;
   header_subtitle_size?: string;
+  header_text_size?: string;
   hero_title_size?: string;
   hero_subtitle_size?: string;
   hero_text_size?: string;
@@ -379,6 +380,14 @@ export interface LandingTheme {
   footer_title_size?: string;
   footer_subtitle_size?: string;
   footer_text_size?: string;
+  cta_title_color?: string;
+  cta_text_color?: string;
+  cta_title_size?: string;
+  cta_text_size?: string;
+  plans_title_color?: string;
+  plans_text_color?: string;
+  plans_title_size?: string;
+  plans_text_size?: string;
   gallery_title_color?: string;
   gallery_subtitle_color?: string;
   gallery_text_color?: string;
@@ -434,7 +443,7 @@ export const SECTION_TEXT_STYLE_GROUPS: SectionTextStyleGroup[] = [
     key: 'header', label: 'Menú', slots: [
       { label: 'Título', color: 'header_title_color', size: 'header_title_size' },
       { label: 'Subtítulo', color: 'header_subtitle_color', size: 'header_subtitle_size' },
-      { label: 'Texto', color: 'header_text_color' },
+      { label: 'Texto', color: 'header_text_color', size: 'header_text_size' },
     ],
   },
   {
@@ -521,6 +530,18 @@ export const SECTION_TEXT_STYLE_GROUPS: SectionTextStyleGroup[] = [
       { label: 'Título', color: 'map_title_color', size: 'map_title_size' },
       { label: 'Subtítulo', color: 'map_subtitle_color', size: 'map_subtitle_size' },
       { label: 'Texto', color: 'map_text_color', size: 'map_text_size' },
+    ],
+  },
+  {
+    key: 'cta', label: 'Llamada a la Acción', slots: [
+      { label: 'Título', color: 'cta_title_color', size: 'cta_title_size' },
+      { label: 'Texto', color: 'cta_text_color', size: 'cta_text_size' },
+    ],
+  },
+  {
+    key: 'plans', label: 'Planes', slots: [
+      { label: 'Título', color: 'plans_title_color', size: 'plans_title_size' },
+      { label: 'Texto', color: 'plans_text_color', size: 'plans_text_size' },
     ],
   },
   {

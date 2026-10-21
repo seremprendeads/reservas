@@ -1,5 +1,7 @@
 import type { LandingSections, LandingTheme } from '../types';
 import type { TEMPLATE_STYLES } from '../config';
+import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -27,7 +29,7 @@ export function PlansSection({ plans, whatsapp, theme, ts, headingStyle, bodySty
   return (
     <section id="planes" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.plans_bg_color }}>
       <div className="max-w-6xl mx-auto">
-        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.text_color }} className="text-4xl sm:text-5xl tracking-tight text-center mb-16">
+        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.plans_title_color || theme.text_color, fontSize: fontSize(theme.plans_title_size), ...textStyleExtras(theme, 'plans_title') }} className="text-4xl sm:text-5xl tracking-tight text-center mb-16">
           {plans.title || 'Elegí tu plan'}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -38,10 +40,10 @@ export function PlansSection({ plans, whatsapp, theme, ts, headingStyle, bodySty
             return (
               <div key={i} className={`${ts.cardRadius} ${ts.cardShadow} p-8 flex flex-col transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5`}
                 style={{ backgroundColor: bg }}>
-                <h3 style={{ ...headingStyle, fontWeight: 700, color: button }} className="text-xl mb-3">
+                <h3 style={{ ...headingStyle, fontWeight: 700, color: button, fontSize: fontSize(theme.plans_title_size), ...textStyleExtras(theme, 'plans_title') }} className="text-xl mb-3">
                   {plan.name}
                 </h3>
-                <p style={{ ...bodyStyle, color: text, opacity: 0.75 }} className="text-sm leading-relaxed flex-1 mb-6 whitespace-pre-line">
+                <p style={{ ...bodyStyle, color: text, opacity: 0.75, fontSize: fontSize(theme.plans_text_size), ...textStyleExtras(theme, 'plans_text') }} className="text-sm leading-relaxed flex-1 mb-6 whitespace-pre-line">
                   {plan.detail}
                 </p>
                 {whatsapp && (
