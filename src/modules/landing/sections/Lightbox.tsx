@@ -1,4 +1,4 @@
-import { X, ChevronDown } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { GalleryImage } from '../lib/landing-utils';
 
 interface LightboxProps {
@@ -25,17 +25,19 @@ export function Lightbox({ galleryImages, lightboxIndex, onClose, onPrev, onNext
       {galleryImages.length > 1 && (
         <>
           <button onClick={(e) => { e.stopPropagation(); onPrev(); }}
-            className="absolute left-4 z-10 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all duration-150 backdrop-blur-sm">
-            <ChevronDown className="h-6 w-6 rotate-90" />
+            aria-label="Imagen anterior"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/50 text-white shadow-lg ring-1 ring-white/20 hover:bg-black/70 active:scale-95 transition-all duration-150">
+            <ChevronLeft className="h-6 w-6" />
           </button>
           <button onClick={(e) => { e.stopPropagation(); onNext(); }}
-            className="absolute right-4 z-10 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all duration-150 backdrop-blur-sm">
-            <ChevronDown className="h-6 w-6 -rotate-90" />
+            aria-label="Imagen siguiente"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/50 text-white shadow-lg ring-1 ring-white/20 hover:bg-black/70 active:scale-95 transition-all duration-150">
+            <ChevronRight className="h-6 w-6" />
           </button>
         </>
       )}
       <img src={currentImage.url} alt=""
-        className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
+        className="relative z-0 max-w-[88vw] max-h-[80vh] sm:max-h-[85vh] object-contain rounded-lg"
         onClick={(e) => e.stopPropagation()} />
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-sm font-medium">
         {lightboxIndex + 1} / {galleryImages.length}
