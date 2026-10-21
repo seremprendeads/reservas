@@ -1,6 +1,7 @@
 import { MapPin, Phone, Mail, Instagram, Facebook } from 'lucide-react';
 import type { LandingSections, LandingTheme } from '../types';
 import { LegalFooterLinks } from '../../../components/legal/LegalFooterLinks';
+import { fontSize } from '../lib/font-size';
 
 type TemplateStyles = { buttonRadius: string; cardRadius: string };
 
@@ -81,29 +82,29 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
             {(footer.logo_title || footer.logo_description) && (
               <div className="mb-3">
                 {footer.logo_title && (
-                  <p style={{ ...headingStyle, color: footerTitleColor }} className="text-lg font-bold">{footer.logo_title}</p>
+                  <p style={{ ...headingStyle, color: footerTitleColor, fontSize: fontSize(theme.footer_title_size) }} className="text-lg font-bold">{footer.logo_title}</p>
                 )}
                 {footer.logo_description && (
-                  <p style={{ ...bodyStyle, color: footerSubtitleColor }} className={`text-sm ${hasCustomSubtitle ? '' : 'opacity-50'}`}>{footer.logo_description}</p>
+                  <p style={{ ...bodyStyle, color: footerSubtitleColor, fontSize: fontSize(theme.footer_subtitle_size) }} className={`text-sm ${hasCustomSubtitle ? '' : 'opacity-50'}`}>{footer.logo_description}</p>
                 )}
               </div>
             )}
             {footer.frases && (
-              <p style={{ ...bodyStyle, color: footerSubtitleColor }} className={`text-base italic mt-3 leading-relaxed ${hasCustomSubtitle ? '' : 'opacity-40'}`}>{footer.frases}</p>
+              <p style={{ ...bodyStyle, color: footerSubtitleColor, fontSize: fontSize(theme.footer_text_size) }} className={`text-base italic mt-3 leading-relaxed ${hasCustomSubtitle ? '' : 'opacity-40'}`}>{footer.frases}</p>
             )}
             {footer.copyright && (
-              <p style={{ ...bodyStyle, opacity: 0.5 }} className="text-sm mt-4">{footer.copyright}</p>
+              <p style={{ ...bodyStyle, opacity: 0.5, fontSize: fontSize(theme.footer_text_size) }} className="text-sm mt-4">{footer.copyright}</p>
             )}
           </div>
 
           <div className="text-center sm:text-left">
-            <h4 style={{ ...headingStyle, color: footerTitleColor, opacity: hasCustomTitle ? 1 : 0.4, fontWeight: 500 }} className="text-xs uppercase tracking-widest mb-5">
+            <h4 style={{ ...headingStyle, color: footerTitleColor, opacity: hasCustomTitle ? 1 : 0.4, fontWeight: 500, fontSize: fontSize(theme.footer_title_size) }} className="text-xs uppercase tracking-widest mb-5">
               Navegacion
             </h4>
             <nav className="space-y-2.5">
               {menuItems.map((item, i) => (
                 <a key={i} href={item.href} onClick={handleSmoothScroll}
-                  style={{ ...bodyStyle, opacity: 0.6 }}
+                  style={{ ...bodyStyle, opacity: 0.6, fontSize: fontSize(theme.footer_text_size) }}
                   className="block text-sm hover:opacity-100 transition-opacity duration-150">
                   {item.label}
                 </a>
@@ -112,20 +113,20 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
           </div>
 
           <div className="text-center sm:text-left">
-            <h4 style={{ ...headingStyle, color: footerTitleColor, opacity: hasCustomTitle ? 1 : 0.4, fontWeight: 500 }} className="text-xs uppercase tracking-widest mb-5">
+            <h4 style={{ ...headingStyle, color: footerTitleColor, opacity: hasCustomTitle ? 1 : 0.4, fontWeight: 500, fontSize: fontSize(theme.footer_title_size) }} className="text-xs uppercase tracking-widest mb-5">
               Contacto
             </h4>
             <div className="space-y-3 inline-block text-center sm:text-left">
               {footer.address && (
                 <div className="flex items-start justify-center sm:justify-start gap-2">
                   <MapPin className="h-4 w-4 mt-0.5 shrink-0" style={{ opacity: 0.5 }} />
-                  <span style={{ ...bodyStyle, opacity: 0.7 }} className="text-sm">{footer.address}</span>
+                  <span style={{ ...bodyStyle, opacity: 0.7, fontSize: fontSize(theme.footer_text_size) }} className="text-sm">{footer.address}</span>
                 </div>
               )}
               {footer.phone && (
                 <div className="flex items-center justify-center sm:justify-start gap-2">
                   <Phone className="h-4 w-4 shrink-0" style={{ opacity: 0.5 }} />
-                  <a href={`tel:${footer.phone}`} style={{ ...bodyStyle, opacity: 0.7 }} className="text-sm hover:opacity-100 transition-opacity duration-150">
+                  <a href={`tel:${footer.phone}`} style={{ ...bodyStyle, opacity: 0.7, fontSize: fontSize(theme.footer_text_size) }} className="text-sm hover:opacity-100 transition-opacity duration-150">
                     {footer.phone}
                   </a>
                 </div>
@@ -133,7 +134,7 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
               {footer.email && (
                 <div className="flex items-center justify-center sm:justify-start gap-2">
                   <Mail className="h-4 w-4 shrink-0" style={{ opacity: 0.5 }} />
-                  <a href={`mailto:${footer.email}`} style={{ ...bodyStyle, opacity: 0.7 }} className="text-sm hover:opacity-100 transition-opacity duration-150">
+                  <a href={`mailto:${footer.email}`} style={{ ...bodyStyle, opacity: 0.7, fontSize: fontSize(theme.footer_text_size) }} className="text-sm hover:opacity-100 transition-opacity duration-150">
                     {footer.email}
                   </a>
                 </div>
@@ -142,7 +143,7 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
           </div>
 
           <div className="text-center sm:text-left">
-            <h4 style={{ ...headingStyle, color: footerTitleColor, opacity: hasCustomTitle ? 1 : 0.4, fontWeight: 500 }} className="text-xs uppercase tracking-widest mb-5">
+            <h4 style={{ ...headingStyle, color: footerTitleColor, opacity: hasCustomTitle ? 1 : 0.4, fontWeight: 500, fontSize: fontSize(theme.footer_title_size) }} className="text-xs uppercase tracking-widest mb-5">
               Redes sociales
             </h4>
             <div className="flex items-center justify-center sm:justify-start gap-4">
@@ -196,7 +197,7 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
               )}
             </div>
             <a href="https://bioweblink.com" target="_blank" rel="noopener noreferrer" className="inline-block mt-8 group">
-              <span style={{ ...bodyStyle, color: footerTextColor }} className="text-sm font-black tracking-tight opacity-30 group-hover:opacity-60 transition-opacity">
+                <span style={{ ...bodyStyle, color: footerTextColor, fontSize: fontSize(theme.footer_text_size) }} className="text-sm font-black tracking-tight opacity-30 group-hover:opacity-60 transition-opacity">
                 by BiowebLink
               </span>
             </a>
@@ -204,7 +205,7 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
         </div>
 
         <div style={{ borderTop: `1px solid ${footerTextColor}10` }} className="pt-8 text-center">
-          <p style={{ ...bodyStyle, opacity: 0.3 }} className="text-sm">
+                <p style={{ ...bodyStyle, opacity: 0.3, fontSize: fontSize(theme.footer_text_size) }} className="text-sm">
             {footer.copyright || `\u00A9 ${new Date().getFullYear()} ${slug}. Todos los derechos reservados.`}
           </p>
           <LegalFooterLinks
@@ -212,7 +213,7 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
             businessId={businessId}
             newTab={legalLinksNewTab}
             className="justify-center mt-3 text-sm"
-            style={{ ...bodyStyle, color: footerTextColor, opacity: 0.5 }}
+              style={{ ...bodyStyle, color: footerTextColor, opacity: 0.5, fontSize: fontSize(theme.footer_text_size) }}
           />
         </div>
       </div>

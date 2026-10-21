@@ -340,6 +340,44 @@ export interface LandingTheme {
   why_choose_us_subtitle_size?: string;
   why_choose_us_item_title_size?: string;
   why_choose_us_text_size?: string;
+  header_title_size?: string;
+  header_subtitle_size?: string;
+  hero_title_size?: string;
+  hero_subtitle_size?: string;
+  hero_text_size?: string;
+  about_title_size?: string;
+  about_subtitle_size?: string;
+  about_text_size?: string;
+  about_text_title_size?: string;
+  about_text_subtitle_size?: string;
+  about_text_text_size?: string;
+  main_service_title_size?: string;
+  main_service_subtitle_size?: string;
+  main_service_text_size?: string;
+  secondary_services_title_size?: string;
+  secondary_services_subtitle_size?: string;
+  secondary_services_text_size?: string;
+  gallery_title_size?: string;
+  gallery_subtitle_size?: string;
+  gallery_text_size?: string;
+  banner_title_size?: string;
+  banner_subtitle_size?: string;
+  banner_text_size?: string;
+  shop_invite_title_size?: string;
+  shop_invite_subtitle_size?: string;
+  shop_invite_text_size?: string;
+  testimonials_title_size?: string;
+  testimonials_subtitle_size?: string;
+  testimonials_text_size?: string;
+  faq_title_size?: string;
+  faq_subtitle_size?: string;
+  faq_text_size?: string;
+  map_title_size?: string;
+  map_subtitle_size?: string;
+  map_text_size?: string;
+  footer_title_size?: string;
+  footer_subtitle_size?: string;
+  footer_text_size?: string;
   gallery_title_color?: string;
   gallery_subtitle_color?: string;
   gallery_text_color?: string;
@@ -397,6 +435,151 @@ export const SECTION_COLOR_GROUPS: SectionColorGroup[] = [
   { key: 'faq', label: 'Preguntas Frecuentes', slots: { title: 'faq_title_color', subtitle: 'faq_subtitle_color', text: 'faq_text_color' } },
   { key: 'map', label: 'Mapa', slots: { title: 'map_title_color', subtitle: 'map_subtitle_color', text: 'map_text_color' } },
   { key: 'footer', label: 'Footer', slots: { title: 'footer_title_color', subtitle: 'footer_subtitle_color', text: 'footer_text_color' } },
+];
+
+/**
+ * Tamaños de letra configurables desde "Tamaños de fuentes" (Diseño). Cada
+ * grupo es una sección de la landing y cada slot un tipo de texto. El valor se
+ * guarda en px como string; vacío = tamaño automático.
+ */
+export interface SectionFontSizeSlot {
+  label: string;
+  key: keyof LandingTheme;
+}
+
+export interface SectionFontSizeGroup {
+  key: string;
+  label: string;
+  slots: SectionFontSizeSlot[];
+}
+
+export const SECTION_FONT_SIZE_GROUPS: SectionFontSizeGroup[] = [
+  {
+    key: 'header',
+    label: 'Menú',
+    slots: [
+      { label: 'Título', key: 'header_title_size' },
+      { label: 'Subtítulo', key: 'header_subtitle_size' },
+    ],
+  },
+  {
+    key: 'hero',
+    label: 'Home / Portada',
+    slots: [
+      { label: 'Título', key: 'hero_title_size' },
+      { label: 'Subtítulo', key: 'hero_subtitle_size' },
+      { label: 'Texto', key: 'hero_text_size' },
+    ],
+  },
+  {
+    key: 'about',
+    label: 'Nosotros',
+    slots: [
+      { label: 'Título', key: 'about_title_size' },
+      { label: 'Subtítulo', key: 'about_subtitle_size' },
+      { label: 'Texto', key: 'about_text_size' },
+    ],
+  },
+  {
+    key: 'about_text',
+    label: 'Texto Nosotros',
+    slots: [
+      { label: 'Título', key: 'about_text_title_size' },
+      { label: 'Subtítulo', key: 'about_text_subtitle_size' },
+      { label: 'Texto', key: 'about_text_text_size' },
+    ],
+  },
+  {
+    key: 'main_service',
+    label: 'Servicio Principal',
+    slots: [
+      { label: 'Título', key: 'main_service_title_size' },
+      { label: 'Subtítulo', key: 'main_service_subtitle_size' },
+      { label: 'Texto', key: 'main_service_text_size' },
+    ],
+  },
+  {
+    key: 'secondary_services',
+    label: 'Todos los Servicios',
+    slots: [
+      { label: 'Título', key: 'secondary_services_title_size' },
+      { label: 'Subtítulo', key: 'secondary_services_subtitle_size' },
+      { label: 'Texto', key: 'secondary_services_text_size' },
+    ],
+  },
+  {
+    key: 'why_choose_us',
+    label: 'Por Qué Elegirnos',
+    slots: [
+      { label: 'Título', key: 'why_choose_us_title_size' },
+      { label: 'Subtítulo', key: 'why_choose_us_subtitle_size' },
+      { label: 'Título de beneficios', key: 'why_choose_us_item_title_size' },
+      { label: 'Texto', key: 'why_choose_us_text_size' },
+    ],
+  },
+  {
+    key: 'gallery',
+    label: 'Galería',
+    slots: [
+      { label: 'Título', key: 'gallery_title_size' },
+      { label: 'Subtítulo', key: 'gallery_subtitle_size' },
+      { label: 'Texto', key: 'gallery_text_size' },
+    ],
+  },
+  {
+    key: 'banner',
+    label: 'Banner',
+    slots: [
+      { label: 'Título', key: 'banner_title_size' },
+      { label: 'Subtítulo', key: 'banner_subtitle_size' },
+      { label: 'Texto', key: 'banner_text_size' },
+    ],
+  },
+  {
+    key: 'shop_invite',
+    label: 'Visítanos la Tienda',
+    slots: [
+      { label: 'Título', key: 'shop_invite_title_size' },
+      { label: 'Subtítulo', key: 'shop_invite_subtitle_size' },
+      { label: 'Texto', key: 'shop_invite_text_size' },
+    ],
+  },
+  {
+    key: 'testimonials',
+    label: 'Testimonios',
+    slots: [
+      { label: 'Título', key: 'testimonials_title_size' },
+      { label: 'Subtítulo', key: 'testimonials_subtitle_size' },
+      { label: 'Texto', key: 'testimonials_text_size' },
+    ],
+  },
+  {
+    key: 'faq',
+    label: 'Preguntas Frecuentes',
+    slots: [
+      { label: 'Título', key: 'faq_title_size' },
+      { label: 'Subtítulo', key: 'faq_subtitle_size' },
+      { label: 'Texto', key: 'faq_text_size' },
+    ],
+  },
+  {
+    key: 'map',
+    label: 'Mapa',
+    slots: [
+      { label: 'Título', key: 'map_title_size' },
+      { label: 'Subtítulo', key: 'map_subtitle_size' },
+      { label: 'Texto', key: 'map_text_size' },
+    ],
+  },
+  {
+    key: 'footer',
+    label: 'Footer',
+    slots: [
+      { label: 'Título', key: 'footer_title_size' },
+      { label: 'Subtítulo', key: 'footer_subtitle_size' },
+      { label: 'Texto', key: 'footer_text_size' },
+    ],
+  },
 ];
 
 export interface LandingSEO {

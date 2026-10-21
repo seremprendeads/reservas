@@ -1,5 +1,6 @@
 import { Menu, X } from 'lucide-react';
 import type { LandingSections, LandingPage as LandingPageType, LandingTheme } from '../types';
+import { fontSize } from '../lib/font-size';
 
 type TemplateStyles = { headerStyle: string; buttonRadius: string };
 
@@ -81,10 +82,10 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
             {(s.header.logo_title || s.header.logo_description) && (
               <div className="hidden sm:block">
                 {s.header.logo_title && (
-                  <p style={{ ...headingStyle, color: menuTitleColor }} className="text-sm leading-tight">{s.header.logo_title}</p>
+                  <p style={{ ...headingStyle, color: menuTitleColor, fontSize: fontSize(theme.header_title_size) }} className="text-sm leading-tight">{s.header.logo_title}</p>
                 )}
                 {s.header.logo_description && (
-                  <p style={{ ...bodyStyle, color: menuSubtitleColor }} className={`text-xs leading-tight ${hasCustomSubtitle ? '' : 'opacity-50'}`}>{s.header.logo_description}</p>
+                  <p style={{ ...bodyStyle, color: menuSubtitleColor, fontSize: fontSize(theme.header_subtitle_size) }} className={`text-xs leading-tight ${hasCustomSubtitle ? '' : 'opacity-50'}`}>{s.header.logo_description}</p>
                 )}
               </div>
             )}

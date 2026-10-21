@@ -1,5 +1,6 @@
 import type { LandingSections, LandingTheme } from '../types';
 import type { TEMPLATE_STYLES } from '../config';
+import { fontSize } from '../lib/font-size';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -16,11 +17,11 @@ export function SecondaryServicesSection({ secondaryServices, theme, ts, heading
   return (
     <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`}>
       <div className="max-w-6xl mx-auto">
-        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.secondary_services_title_color || undefined }} className={`text-4xl sm:text-5xl tracking-tight text-center ${secondaryServices.subtitle ? 'mb-4' : 'mb-16'}`}>
+        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.secondary_services_title_color || undefined, fontSize: fontSize(theme.secondary_services_title_size) }} className={`text-4xl sm:text-5xl tracking-tight text-center ${secondaryServices.subtitle ? 'mb-4' : 'mb-16'}`}>
           {secondaryServices.title || 'Servicios'}
         </h2>
         {secondaryServices.subtitle && (
-          <p style={{ ...bodyStyle, color: theme.secondary_services_subtitle_color || undefined }} className="text-lg text-center mb-16">
+          <p style={{ ...bodyStyle, color: theme.secondary_services_subtitle_color || undefined, fontSize: fontSize(theme.secondary_services_subtitle_size) }} className="text-lg text-center mb-16">
             {secondaryServices.subtitle}
           </p>
         )}
@@ -39,8 +40,8 @@ export function SecondaryServicesSection({ secondaryServices, theme, ts, heading
                     <Icon className="h-6 w-6" style={{ color: theme.service_icon_color }} />
                   </div>
                 )}
-                <h3 style={{ ...headingStyle, fontWeight: 500, color: theme.secondary_services_title_color || undefined }} className="text-lg mb-3">{service.title}</h3>
-                <p style={{ ...bodyStyle, color: theme.secondary_services_text_color || '#666666' }} className="text-sm leading-relaxed">{service.description}</p>
+              <h3 style={{ ...headingStyle, fontWeight: 500, color: theme.secondary_services_title_color || undefined, fontSize: fontSize(theme.secondary_services_title_size) }} className="text-lg mb-3">{service.title}</h3>
+              <p style={{ ...bodyStyle, color: theme.secondary_services_text_color || '#666666', fontSize: fontSize(theme.secondary_services_text_size) }} className="text-sm leading-relaxed">{service.description}</p>
               </div>
             );
           })}

@@ -1,6 +1,7 @@
 import type { HeroCenteredData } from './types';
 import type { LandingTheme } from '../../types';
 import type { TEMPLATE_STYLES } from '../../config';
+import { fontSize } from '../../lib/font-size';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -41,20 +42,20 @@ export function HeroCentered({ data, theme, ts, headingStyle, bodyStyle, handleS
             </div>
           )}
           <h1
-            style={{ ...headingStyle, color: titleColor, fontWeight: 700, fontSize: data.title_size ? `${data.title_size}px` : undefined }}
+            style={{ ...headingStyle, color: titleColor, fontWeight: 700, fontSize: fontSize(theme.hero_title_size) || (data.title_size ? `${data.title_size}px` : undefined) }}
             className="text-5xl sm:text-6xl lg:text-8xl leading-[1.05] tracking-tight mb-8"
           >
             {data.title}
           </h1>
           <p
-            style={{ ...bodyStyle, color: subtitleColor, fontSize: data.subtitle_size ? `${data.subtitle_size}px` : undefined }}
+            style={{ ...bodyStyle, color: subtitleColor, fontSize: fontSize(theme.hero_subtitle_size) || (data.subtitle_size ? `${data.subtitle_size}px` : undefined) }}
             className="text-lg sm:text-xl mb-4 max-w-2xl mx-auto leading-relaxed"
           >
             {data.subtitle}
           </p>
           {data.description && (
             <p
-              style={{ ...bodyStyle, color: descriptionColor, fontSize: data.description_size ? `${data.description_size}px` : undefined }}
+              style={{ ...bodyStyle, color: descriptionColor, fontSize: fontSize(theme.hero_text_size) || (data.description_size ? `${data.description_size}px` : undefined) }}
               className="text-lg sm:text-xl mb-12 max-w-2xl mx-auto leading-relaxed"
             >
               {data.description}
