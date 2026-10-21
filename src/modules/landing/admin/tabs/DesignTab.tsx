@@ -194,6 +194,11 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
     });
     // Color propio de los títulos de cada beneficio (Por qué elegirnos).
     updateTheme('why_choose_us_item_title_color', '');
+    // Tamaños de letra propios de Por qué elegirnos.
+    updateTheme('why_choose_us_title_size', '');
+    updateTheme('why_choose_us_subtitle_size', '');
+    updateTheme('why_choose_us_item_title_size', '');
+    updateTheme('why_choose_us_text_size', '');
   };
 
   return (

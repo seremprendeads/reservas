@@ -44,7 +44,7 @@ export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: 
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
-          <IconSelector value={item.icon} onChange={v => updateItem(i, 'icon', v)} />
+          <IconSelector value={item.icon} onChange={v => updateItem(i, 'icon', v)} allowEmpty />
           <div>
             <label className="text-xs text-muted-foreground">Título de beneficio</label>
             <Input value={item.title || ''} onChange={e => updateItem(i, 'title', e.target.value)} placeholder="Título del beneficio" className="mt-1 h-12 rounded-xl" />
@@ -107,6 +107,39 @@ export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: 
           fallback={theme.why_choose_us_title_color || colorFallback}
           onChange={v => updateTheme('why_choose_us_item_title_color', v)}
         />
+      </div>
+
+      <Separator />
+      <div>
+        <label className="text-xs font-medium text-foreground mb-1 block">Tamaños de letra</label>
+        <p className="text-[11px] text-muted-foreground mb-3 leading-snug">
+          En píxeles. Dejá vacío para usar el tamaño automático.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {[
+            { label: 'Título principal', key: 'why_choose_us_title_size', placeholder: '36' },
+            { label: 'Subtítulos', key: 'why_choose_us_subtitle_size', placeholder: '18' },
+            { label: 'Títulos de beneficios', key: 'why_choose_us_item_title_size', placeholder: '18' },
+            { label: 'Textos', key: 'why_choose_us_text_size', placeholder: '14' },
+          ].map(s => (
+            <div key={s.key} className="space-y-1">
+              <label className="text-xs text-muted-foreground">{s.label}</label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={8}
+                  max={120}
+                  step={1}
+                  value={(theme[s.key as keyof LandingTheme] as string) || ''}
+                  placeholder={`Auto (${s.placeholder})`}
+                  onChange={e => updateTheme(s.key, e.target.value)}
+                  className="h-9"
+                />
+                <span className="text-xs text-muted-foreground">px</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

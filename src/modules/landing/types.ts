@@ -336,6 +336,10 @@ export interface LandingTheme {
   why_choose_us_subtitle_color?: string;
   why_choose_us_text_color?: string;
   why_choose_us_item_title_color?: string;
+  why_choose_us_title_size?: string;
+  why_choose_us_subtitle_size?: string;
+  why_choose_us_item_title_size?: string;
+  why_choose_us_text_size?: string;
   gallery_title_color?: string;
   gallery_subtitle_color?: string;
   gallery_text_color?: string;
