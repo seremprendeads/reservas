@@ -192,6 +192,10 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
       g.slots.forEach(s => {
         if (!(s.color in DEFAULT_THEME)) updateTheme(s.color as string, '');
         if (s.size) updateTheme(s.size as string, '');
+        const baseKey = s.styleKey || String(s.color).replace(/_color$/, '');
+        updateTheme(`${baseKey}_weight`, '');
+        updateTheme(`${baseKey}_italic`, '');
+        updateTheme(`${baseKey}_transform`, '');
       });
     });
   };

@@ -1,6 +1,7 @@
 import { MapPin } from 'lucide-react';
 import type { LandingSections, LandingTheme } from '../types';
 import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 type TemplateStyles = { sectionSpacing: string; cardRadius: string };
 
@@ -41,16 +42,16 @@ export function MapSection({ map, theme, ts, headingStyle, bodyStyle }: MapSecti
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10">
           <MapPin className="h-7 w-7 mx-auto mb-4" style={{ color: theme.primary_color }} />
-          <h2 style={{ ...headingStyle, color: theme.map_title_color || theme.text_color, fontWeight: 700, fontSize: fontSize(theme.map_title_size) }} className="text-4xl sm:text-5xl tracking-tight mb-3">
+          <h2 style={{ ...headingStyle, color: theme.map_title_color || theme.text_color, fontWeight: 700, fontSize: fontSize(theme.map_title_size), ...textStyleExtras(theme, 'map_title') }} className="text-4xl sm:text-5xl tracking-tight mb-3">
             {map.title || '¿Dónde estamos?'}
           </h2>
           {map.subtitle && (
-            <p style={{ ...bodyStyle, color: theme.map_subtitle_color || undefined, fontSize: fontSize(theme.map_subtitle_size) }} className="text-lg mb-2">
+            <p style={{ ...bodyStyle, color: theme.map_subtitle_color || undefined, fontSize: fontSize(theme.map_subtitle_size), ...textStyleExtras(theme, 'map_subtitle') }} className="text-lg mb-2">
               {map.subtitle}
             </p>
           )}
           {map.address && (
-            <p style={{ ...bodyStyle, color: theme.map_text_color || '#666666', fontSize: fontSize(theme.map_text_size) }} className="text-sm">
+            <p style={{ ...bodyStyle, color: theme.map_text_color || '#666666', fontSize: fontSize(theme.map_text_size), ...textStyleExtras(theme, 'map_text') }} className="text-sm">
               {map.address}
             </p>
           )}

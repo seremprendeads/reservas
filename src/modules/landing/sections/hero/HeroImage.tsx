@@ -3,6 +3,7 @@ import type { HeroImageData } from './types';
 import type { LandingTheme } from '../../types';
 import type { TEMPLATE_STYLES } from '../../config';
 import { fontSize } from '../../lib/font-size';
+import { textStyleExtras } from '../../lib/text-style';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -50,14 +51,14 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
                 )}
               </div>
             )}
-            <h1 style={{ ...headingStyle, color: titleColor, fontWeight: 700, fontSize: fontSize(theme.hero_title_size) || (data.title_size ? `${data.title_size}px` : undefined) }} className="text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight mb-8">
+            <h1 style={{ ...headingStyle, color: titleColor, fontWeight: 700, fontSize: fontSize(theme.hero_title_size) || (data.title_size ? `${data.title_size}px` : undefined), ...textStyleExtras(theme, 'hero_title') }} className="text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight mb-8">
               {data.title}
             </h1>
-            <p style={{ ...bodyStyle, color: subtitleColor, fontSize: fontSize(theme.hero_subtitle_size) || (data.subtitle_size ? `${data.subtitle_size}px` : undefined) }} className="text-lg sm:text-xl mb-4 leading-relaxed">
+            <p style={{ ...bodyStyle, color: subtitleColor, fontSize: fontSize(theme.hero_subtitle_size) || (data.subtitle_size ? `${data.subtitle_size}px` : undefined), ...textStyleExtras(theme, 'hero_subtitle') }} className="text-lg sm:text-xl mb-4 leading-relaxed">
               {data.subtitle}
             </p>
             {data.description && (
-              <p style={{ ...bodyStyle, color: descriptionColor, fontSize: fontSize(theme.hero_text_size) || (data.description_size ? `${data.description_size}px` : undefined) }} className="text-lg sm:text-xl leading-relaxed">
+              <p style={{ ...bodyStyle, color: descriptionColor, fontSize: fontSize(theme.hero_text_size) || (data.description_size ? `${data.description_size}px` : undefined), ...textStyleExtras(theme, 'hero_text') }} className="text-lg sm:text-xl leading-relaxed">
                 {data.description}
               </p>
             )}

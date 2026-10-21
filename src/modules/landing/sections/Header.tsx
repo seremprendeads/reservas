@@ -1,6 +1,7 @@
 import { Menu, X } from 'lucide-react';
 import type { LandingSections, LandingPage as LandingPageType, LandingTheme } from '../types';
 import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 type TemplateStyles = { headerStyle: string; buttonRadius: string };
 
@@ -75,17 +76,17 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
                 }
               />
             ) : (
-              <span style={{ ...headingStyle, color: menuTitleColor, fontWeight: 500 }} className="text-lg tracking-tight">
+              <span style={{ ...headingStyle, color: menuTitleColor, fontWeight: 500, ...textStyleExtras(theme, 'header_title') }} className="text-lg tracking-tight">
                 {landing.slug}
               </span>
             )}
             {(s.header.logo_title || s.header.logo_description) && (
               <div className="hidden sm:block">
                 {s.header.logo_title && (
-                  <p style={{ ...headingStyle, color: menuTitleColor, fontSize: fontSize(theme.header_title_size) }} className="text-sm leading-tight">{s.header.logo_title}</p>
+                  <p style={{ ...headingStyle, color: menuTitleColor, fontSize: fontSize(theme.header_title_size), ...textStyleExtras(theme, 'header_title') }} className="text-sm leading-tight">{s.header.logo_title}</p>
                 )}
                 {s.header.logo_description && (
-                  <p style={{ ...bodyStyle, color: menuSubtitleColor, fontSize: fontSize(theme.header_subtitle_size) }} className={`text-xs leading-tight ${hasCustomSubtitle ? '' : 'opacity-50'}`}>{s.header.logo_description}</p>
+                  <p style={{ ...bodyStyle, color: menuSubtitleColor, fontSize: fontSize(theme.header_subtitle_size), ...textStyleExtras(theme, 'header_subtitle') }} className={`text-xs leading-tight ${hasCustomSubtitle ? '' : 'opacity-50'}`}>{s.header.logo_description}</p>
                 )}
               </div>
             )}
@@ -95,7 +96,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
           <nav className="hidden md:flex items-center gap-1">
             {(s.header.menu_items || []).map((item, i) => (
               <a key={i} href={item.href} onClick={handleSmoothScroll}
-                style={{ ...bodyStyle, color: menuTextColor }}
+                style={{ ...bodyStyle, color: menuTextColor, ...textStyleExtras(theme, 'header_text') }}
                 className={`px-4 py-2 text-sm font-medium ${hasCustomText ? '' : 'opacity-60'} hover:opacity-100 transition-all duration-150 rounded-lg hover:bg-black/[0.03]`}>
                 {formatLabel(item.label)}
               </a>
@@ -131,7 +132,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
           <div className="px-5 py-5 space-y-1">
             {(s.header.menu_items || []).map((item, i) => (
               <a key={i} href={item.href} onClick={handleSmoothScroll}
-                style={{ color: menuTextColor, ...bodyStyle }}
+                style={{ color: menuTextColor, ...bodyStyle, ...textStyleExtras(theme, 'header_text') }}
                 className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-black/[0.03] transition-colors">
                 {formatLabel(item.label)}
               </a>

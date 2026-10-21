@@ -1,6 +1,7 @@
 import type { LandingSections, LandingTheme } from '../types';
 import type { TEMPLATE_STYLES } from '../config';
 import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -17,11 +18,11 @@ export function WhyChooseUsSection({ whyChooseUs, theme, ts, headingStyle, bodyS
   return (
     <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.why_choose_us_bg_color }}>
       <div className="max-w-6xl mx-auto">
-        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.why_choose_us_title_color || undefined, fontSize: fontSize(theme.why_choose_us_title_size) }} className={`text-4xl sm:text-5xl tracking-tight text-center ${whyChooseUs.subtitle ? 'mb-4' : 'mb-16'}`}>
+        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.why_choose_us_title_color || undefined, fontSize: fontSize(theme.why_choose_us_title_size), ...textStyleExtras(theme, 'why_choose_us_title') }} className={`text-4xl sm:text-5xl tracking-tight text-center ${whyChooseUs.subtitle ? 'mb-4' : 'mb-16'}`}>
           {whyChooseUs.title || 'Por que elegirnos'}
         </h2>
         {whyChooseUs.subtitle && (
-          <p style={{ ...bodyStyle, color: theme.why_choose_us_subtitle_color || undefined, fontSize: fontSize(theme.why_choose_us_subtitle_size) }} className="text-lg text-center mb-16">
+          <p style={{ ...bodyStyle, color: theme.why_choose_us_subtitle_color || undefined, fontSize: fontSize(theme.why_choose_us_subtitle_size), ...textStyleExtras(theme, 'why_choose_us_subtitle') }} className="text-lg text-center mb-16">
             {whyChooseUs.subtitle}
           </p>
         )}
@@ -38,7 +39,7 @@ export function WhyChooseUsSection({ whyChooseUs, theme, ts, headingStyle, bodyS
                 )}
                 {item.title && (
                   <p
-                    style={{ ...headingStyle, color: theme.why_choose_us_item_title_color || theme.why_choose_us_title_color || undefined, fontSize: fontSize(theme.why_choose_us_item_title_size) }}
+                    style={{ ...headingStyle, color: theme.why_choose_us_item_title_color || theme.why_choose_us_title_color || undefined, fontSize: fontSize(theme.why_choose_us_item_title_size), ...textStyleExtras(theme, 'why_choose_us_item_title') }}
                     className="text-lg font-semibold leading-snug mb-1"
                   >
                     {item.title}
@@ -46,7 +47,7 @@ export function WhyChooseUsSection({ whyChooseUs, theme, ts, headingStyle, bodyS
                 )}
                 {item.subtitle && (
                   <p
-                    style={{ ...bodyStyle, color: theme.why_choose_us_subtitle_color || theme.text_color, fontSize: fontSize(theme.why_choose_us_item_subtitle_size) || fontSize(theme.why_choose_us_subtitle_size) }}
+                    style={{ ...bodyStyle, color: theme.why_choose_us_subtitle_color || theme.text_color, fontSize: fontSize(theme.why_choose_us_item_subtitle_size) || fontSize(theme.why_choose_us_subtitle_size), ...textStyleExtras(theme, 'why_choose_us_item_subtitle') }}
                     className="text-sm leading-relaxed mb-2"
                   >
                     {item.subtitle}
@@ -54,7 +55,7 @@ export function WhyChooseUsSection({ whyChooseUs, theme, ts, headingStyle, bodyS
                 )}
                 {item.text && (
                   <p
-                    style={{ ...bodyStyle, color: theme.why_choose_us_text_color || theme.text_color, fontSize: fontSize(theme.why_choose_us_text_size) }}
+                    style={{ ...bodyStyle, color: theme.why_choose_us_text_color || theme.text_color, fontSize: fontSize(theme.why_choose_us_text_size), ...textStyleExtras(theme, 'why_choose_us_text') }}
                     className={item.title ? 'text-sm leading-relaxed' : 'text-sm font-medium leading-relaxed'}
                   >
                     {item.text}

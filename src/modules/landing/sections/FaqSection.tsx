@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react';
 import type { LandingSections, LandingTheme } from '../types';
 import type { TEMPLATE_STYLES } from '../config';
 import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -17,11 +18,11 @@ export function FaqSection({ faq, theme, ts, headingStyle, bodyStyle }: FaqSecti
   return (
     <section id="faq" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.faq_bg_color }}>
       <div className="max-w-3xl mx-auto">
-        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.faq_title_color || undefined, fontSize: fontSize(theme.faq_title_size) }} className={`text-4xl sm:text-5xl tracking-tight text-center ${faq.subtitle ? 'mb-4' : 'mb-16'}`}>
+        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.faq_title_color || undefined, fontSize: fontSize(theme.faq_title_size), ...textStyleExtras(theme, 'faq_title') }} className={`text-4xl sm:text-5xl tracking-tight text-center ${faq.subtitle ? 'mb-4' : 'mb-16'}`}>
           {faq.title || 'Preguntas frecuentes'}
         </h2>
         {faq.subtitle && (
-          <p style={{ ...bodyStyle, color: theme.faq_subtitle_color || undefined, fontSize: fontSize(theme.faq_subtitle_size) }} className="text-lg text-center mb-16">
+          <p style={{ ...bodyStyle, color: theme.faq_subtitle_color || undefined, fontSize: fontSize(theme.faq_subtitle_size), ...textStyleExtras(theme, 'faq_subtitle') }} className="text-lg text-center mb-16">
             {faq.subtitle}
           </p>
         )}
@@ -29,13 +30,13 @@ export function FaqSection({ faq, theme, ts, headingStyle, bodyStyle }: FaqSecti
           {faq.items.map((item, i) => (
             <details key={i} className={`group ${ts.cardRadius} ${ts.cardShadow} overflow-hidden`}
               style={{ backgroundColor: theme.faq_item_bg_color, border: `1px solid ${theme.text_color}06` }}>
-              <summary style={{ ...headingStyle, color: theme.faq_title_color || theme.text_color, fontWeight: 500, fontSize: fontSize(theme.faq_title_size) }}
+              <summary style={{ ...headingStyle, color: theme.faq_title_color || theme.text_color, fontWeight: 500, fontSize: fontSize(theme.faq_title_size), ...textStyleExtras(theme, 'faq_title') }}
                 className="flex items-center justify-center sm:justify-between p-6 cursor-pointer list-none select-none text-center sm:text-left gap-3 transition-colors hover:bg-black/[0.01]">
                 {item.question}
                 <ChevronRight className="h-5 w-5 shrink-ml-2 transition-transform duration-200 group-open:rotate-90"
                   style={{ color: '#a1a1aa' }} />
               </summary>
-              <div style={{ ...bodyStyle, color: theme.faq_text_color || '#666666', fontSize: fontSize(theme.faq_text_size) }} className="px-6 pb-6 text-sm leading-relaxed text-center sm:text-left">
+              <div style={{ ...bodyStyle, color: theme.faq_text_color || '#666666', fontSize: fontSize(theme.faq_text_size), ...textStyleExtras(theme, 'faq_text') }} className="px-6 pb-6 text-sm leading-relaxed text-center sm:text-left">
                 {item.answer}
               </div>
             </details>

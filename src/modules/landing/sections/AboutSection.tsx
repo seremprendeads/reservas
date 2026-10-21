@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { LandingSections, LandingTheme } from '../types';
 import type { TEMPLATE_STYLES } from '../config';
 import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -43,15 +44,15 @@ export function AboutSection({ about, theme, ts, headingStyle, bodyStyle, showTo
           </div>
         )}
         <div className={imageOnRight && !isMobile ? 'md:order-1' : undefined} style={{ textAlign }}>
-          <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.about_title_color || undefined, fontSize: fontSize(theme.about_title_size) }} className="text-4xl sm:text-5xl tracking-tight mb-8">
+          <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.about_title_color || undefined, fontSize: fontSize(theme.about_title_size), ...textStyleExtras(theme, 'about_title') }} className="text-4xl sm:text-5xl tracking-tight mb-8">
             {about.title || 'Sobre nosotros'}
           </h2>
           {about.subtitle && (
-            <p style={{ ...bodyStyle, color: theme.about_subtitle_color || undefined, fontSize: fontSize(theme.about_subtitle_size) }} className="text-lg sm:text-xl leading-relaxed mb-6">
+            <p style={{ ...bodyStyle, color: theme.about_subtitle_color || undefined, fontSize: fontSize(theme.about_subtitle_size), ...textStyleExtras(theme, 'about_subtitle') }} className="text-lg sm:text-xl leading-relaxed mb-6">
               {about.subtitle}
             </p>
           )}
-          <p style={{ ...bodyStyle, color: theme.about_text_color || '#666666', fontSize: fontSize(theme.about_text_size) }} className="text-base sm:text-lg leading-relaxed whitespace-pre-line">
+          <p style={{ ...bodyStyle, color: theme.about_text_color || '#666666', fontSize: fontSize(theme.about_text_size), ...textStyleExtras(theme, 'about_text') }} className="text-base sm:text-lg leading-relaxed whitespace-pre-line">
             {about.description}
           </p>
         </div>

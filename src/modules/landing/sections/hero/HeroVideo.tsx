@@ -2,6 +2,7 @@ import { AlertCircle } from 'lucide-react';
 import type { HeroVideoData } from './types';
 import type { LandingTheme } from '../../types';
 import { fontSize } from '../../lib/font-size';
+import { textStyleExtras } from '../../lib/text-style';
 import type { TEMPLATE_STYLES } from '../../config';
 import { extractVideoEmbedUrl, isValidVideoUrl } from './helpers';
 
@@ -48,20 +49,20 @@ export function HeroVideo({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
             </div>
           )}
           <h1
-            style={{ ...headingStyle, color: titleColor, fontWeight: 700, fontSize: fontSize(theme.hero_title_size) || (data.title_size ? `${data.title_size}px` : undefined) }}
+            style={{ ...headingStyle, color: titleColor, fontWeight: 700, fontSize: fontSize(theme.hero_title_size) || (data.title_size ? `${data.title_size}px` : undefined), ...textStyleExtras(theme, 'hero_title') }}
             className="text-5xl sm:text-6xl lg:text-8xl leading-[1.05] tracking-tight mb-8"
           >
             {data.title}
           </h1>
           <p
-            style={{ ...bodyStyle, color: subtitleColor, fontSize: fontSize(theme.hero_subtitle_size) || (data.subtitle_size ? `${data.subtitle_size}px` : undefined) }}
+            style={{ ...bodyStyle, color: subtitleColor, fontSize: fontSize(theme.hero_subtitle_size) || (data.subtitle_size ? `${data.subtitle_size}px` : undefined), ...textStyleExtras(theme, 'hero_subtitle') }}
             className="text-lg sm:text-xl mb-4 max-w-2xl mx-auto leading-relaxed"
           >
             {data.subtitle}
           </p>
           {data.description && (
             <p
-              style={{ ...bodyStyle, color: descriptionColor, fontSize: fontSize(theme.hero_text_size) || (data.description_size ? `${data.description_size}px` : undefined) }}
+              style={{ ...bodyStyle, color: descriptionColor, fontSize: fontSize(theme.hero_text_size) || (data.description_size ? `${data.description_size}px` : undefined), ...textStyleExtras(theme, 'hero_text') }}
               className="text-lg sm:text-xl mb-12 max-w-2xl mx-auto leading-relaxed"
             >
               {data.description}

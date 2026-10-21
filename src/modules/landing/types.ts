@@ -401,6 +401,11 @@ export interface LandingTheme {
   footer_subtitle_color?: string;
   // El color de texto del footer ya existe arriba (footer_text_color) y se
   // reutiliza como el control "Texto" de la sección Footer.
+  // Estilos de texto por sección. Se derivan de la clave base del texto (ej.
+  // about_title_weight). Vacío = automático.
+  [key: `${string}_weight`]: string | undefined;
+  [key: `${string}_italic`]: string | undefined;
+  [key: `${string}_transform`]: string | undefined;
 }
 
 /**
@@ -412,6 +417,9 @@ export interface SectionTextStyleSlot {
   label: string;
   color: keyof LandingTheme;
   size?: keyof LandingTheme;
+  // Clave base para peso/estilo/mayúsculas cuando no coincide con el color
+  // (ej. el subtítulo de cada beneficio). Si no se pasa, se deriva del color.
+  styleKey?: string;
 }
 
 export interface SectionTextStyleGroup {
@@ -469,7 +477,7 @@ export const SECTION_TEXT_STYLE_GROUPS: SectionTextStyleGroup[] = [
       { label: 'Título', color: 'why_choose_us_title_color', size: 'why_choose_us_title_size' },
       { label: 'Subtítulo', color: 'why_choose_us_subtitle_color', size: 'why_choose_us_subtitle_size' },
       { label: 'Título de beneficios', color: 'why_choose_us_item_title_color', size: 'why_choose_us_item_title_size' },
-      { label: 'Subtítulo de beneficios', color: 'why_choose_us_subtitle_color', size: 'why_choose_us_item_subtitle_size' },
+      { label: 'Subtítulo de beneficios', color: 'why_choose_us_subtitle_color', size: 'why_choose_us_item_subtitle_size', styleKey: 'why_choose_us_item_subtitle' },
       { label: 'Texto', color: 'why_choose_us_text_color', size: 'why_choose_us_text_size' },
     ],
   },

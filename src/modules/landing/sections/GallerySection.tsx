@@ -2,6 +2,7 @@ import type { LandingSections, LandingTheme } from '../types';
 import type { GalleryImage } from '../lib/landing-utils';
 import type { TEMPLATE_STYLES } from '../config';
 import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -19,11 +20,11 @@ export function GallerySection({ gallery, galleryImages, theme, ts, headingStyle
   return (
     <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.gallery_bg_color }}>
       <div className="max-w-6xl mx-auto">
-        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.gallery_title_color || undefined, fontSize: fontSize(theme.gallery_title_size) }} className={`text-4xl sm:text-5xl tracking-tight text-center ${gallery.subtitle ? 'mb-4' : 'mb-16'}`}>
+        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.gallery_title_color || undefined, fontSize: fontSize(theme.gallery_title_size), ...textStyleExtras(theme, 'gallery_title') }} className={`text-4xl sm:text-5xl tracking-tight text-center ${gallery.subtitle ? 'mb-4' : 'mb-16'}`}>
           {gallery.title || 'Galeria'}
         </h2>
         {gallery.subtitle && (
-          <p style={{ ...bodyStyle, color: theme.gallery_subtitle_color || undefined, fontSize: fontSize(theme.gallery_subtitle_size) }} className="text-lg text-center mb-16">
+          <p style={{ ...bodyStyle, color: theme.gallery_subtitle_color || undefined, fontSize: fontSize(theme.gallery_subtitle_size), ...textStyleExtras(theme, 'gallery_subtitle') }} className="text-lg text-center mb-16">
             {gallery.subtitle}
           </p>
         )}
@@ -39,12 +40,12 @@ export function GallerySection({ gallery, galleryImages, theme, ts, headingStyle
                   style={{ backgroundColor: `${gallery.overlay_color || theme.text_color}dd` }}>
                   <div className="p-4 text-center sm:text-left">
                     {img.title && (
-                      <p style={{ ...headingStyle, color: theme.gallery_title_color || '#ffffff', fontWeight: 500, fontSize: fontSize(theme.gallery_title_size) }} className="text-sm leading-tight">
+                      <p style={{ ...headingStyle, color: theme.gallery_title_color || '#ffffff', fontWeight: 500, fontSize: fontSize(theme.gallery_title_size), ...textStyleExtras(theme, 'gallery_title') }} className="text-sm leading-tight">
                         {img.title}
                       </p>
                     )}
                     {img.description && (
-                      <p style={{ ...bodyStyle, color: theme.gallery_text_color || 'rgba(255,255,255,0.7)', fontWeight: 500, fontSize: fontSize(theme.gallery_text_size) }} className="text-sm leading-snug mt-1">
+                      <p style={{ ...bodyStyle, color: theme.gallery_text_color || 'rgba(255,255,255,0.7)', fontWeight: 500, fontSize: fontSize(theme.gallery_text_size), ...textStyleExtras(theme, 'gallery_text') }} className="text-sm leading-snug mt-1">
                         {img.description}
                       </p>
                     )}

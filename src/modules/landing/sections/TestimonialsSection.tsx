@@ -2,6 +2,7 @@ import { Star } from 'lucide-react';
 import type { LandingSections, LandingTheme } from '../types';
 import type { TEMPLATE_STYLES } from '../config';
 import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -17,11 +18,11 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
   return (
     <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.testimonials_bg_color }}>
       <div className="max-w-6xl mx-auto">
-        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.testimonials_title_color || undefined, fontSize: fontSize(theme.testimonials_title_size) }} className={`text-4xl sm:text-5xl tracking-tight text-center ${testimonials.subtitle ? 'mb-4' : 'mb-16'}`}>
+        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.testimonials_title_color || undefined, fontSize: fontSize(theme.testimonials_title_size), ...textStyleExtras(theme, 'testimonials_title') }} className={`text-4xl sm:text-5xl tracking-tight text-center ${testimonials.subtitle ? 'mb-4' : 'mb-16'}`}>
           {testimonials.title || 'Testimonios'}
         </h2>
         {testimonials.subtitle && (
-          <p style={{ ...bodyStyle, color: theme.testimonials_subtitle_color || undefined, fontSize: fontSize(theme.testimonials_subtitle_size) }} className="text-lg text-center mb-16">
+          <p style={{ ...bodyStyle, color: theme.testimonials_subtitle_color || undefined, fontSize: fontSize(theme.testimonials_subtitle_size), ...textStyleExtras(theme, 'testimonials_subtitle') }} className="text-lg text-center mb-16">
             {testimonials.subtitle}
           </p>
         )}
@@ -34,7 +35,7 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
                   <Star key={j} className="h-4 w-4" style={{ color: j < t.rating ? '#f59e0b' : '#e5e7eb', fill: j < t.rating ? '#f59e0b' : 'none' }} />
                 ))}
               </div>
-              <p style={{ ...bodyStyle, color: theme.testimonials_text_color || '#666666', fontSize: fontSize(theme.testimonials_text_size) }} className="text-sm leading-relaxed mb-6">
+              <p style={{ ...bodyStyle, color: theme.testimonials_text_color || '#666666', fontSize: fontSize(theme.testimonials_text_size), ...textStyleExtras(theme, 'testimonials_text') }} className="text-sm leading-relaxed mb-6">
                 &ldquo;{t.text}&rdquo;
               </p>
               <div className="flex items-center justify-center sm:justify-start gap-3">
@@ -42,7 +43,7 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
                   style={{ background: `linear-gradient(135deg, ${theme.primary_color}, ${theme.secondary_color})` }}>
                   {t.name.charAt(0).toUpperCase()}
                 </div>
-                <span style={{ ...bodyStyle, color: theme.testimonials_text_color || theme.text_color, fontWeight: 500, fontSize: fontSize(theme.testimonials_text_size) }} className="text-sm">{t.name}</span>
+                <span style={{ ...bodyStyle, color: theme.testimonials_text_color || theme.text_color, fontWeight: 500, fontSize: fontSize(theme.testimonials_text_size), ...textStyleExtras(theme, 'testimonials_text') }} className="text-sm">{t.name}</span>
               </div>
             </div>
           ))}

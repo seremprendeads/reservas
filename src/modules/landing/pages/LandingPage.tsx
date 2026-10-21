@@ -15,6 +15,7 @@ import type {
 import { DEFAULT_THEME } from '../config';
 import { normalizeImages, injectScriptsFromHtml } from '../lib/landing-utils';
 import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 import { useLandingData } from '../hooks/useLandingData';
 import { HeroSection } from '../sections/HeroSection';
 import { AboutSection } from '../sections/AboutSection';
@@ -402,17 +403,17 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
           </div>
           <div className="relative z-10 max-w-4xl mx-auto text-center">
             {s.banner.title && (
-              <h2 style={{ ...headingStyle, color: theme.banner_title_color || '#ffffff', fontWeight: 300, fontFamily: "'Dancing Script', cursive", fontSize: fontSize(theme.banner_title_size) }} className="text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-6">
+              <h2 style={{ ...headingStyle, color: theme.banner_title_color || '#ffffff', fontWeight: 300, fontFamily: "'Dancing Script', cursive", fontSize: fontSize(theme.banner_title_size), ...textStyleExtras(theme, 'banner_title') }} className="text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-6">
                 {s.banner.title}
               </h2>
             )}
             {s.banner.subtitle && (
-              <p style={{ ...bodyStyle, color: theme.banner_subtitle_color || 'rgba(255,255,255,0.7)', fontFamily: "'Dancing Script', cursive", fontSize: fontSize(theme.banner_subtitle_size) }} className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
+              <p style={{ ...bodyStyle, color: theme.banner_subtitle_color || 'rgba(255,255,255,0.7)', fontFamily: "'Dancing Script', cursive", fontSize: fontSize(theme.banner_subtitle_size), ...textStyleExtras(theme, 'banner_subtitle') }} className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
                 {s.banner.subtitle}
               </p>
             )}
             {s.banner.description && (
-              <p style={{ ...bodyStyle, color: theme.banner_text_color || 'rgba(255,255,255,0.5)', fontSize: fontSize(theme.banner_text_size) }} className="text-base max-w-2xl mx-auto leading-relaxed mt-4">
+              <p style={{ ...bodyStyle, color: theme.banner_text_color || 'rgba(255,255,255,0.5)', fontSize: fontSize(theme.banner_text_size), ...textStyleExtras(theme, 'banner_text') }} className="text-base max-w-2xl mx-auto leading-relaxed mt-4">
                 {s.banner.description}
               </p>
             )}

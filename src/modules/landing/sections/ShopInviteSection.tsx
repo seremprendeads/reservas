@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import type { LandingSections, LandingTheme } from '../types';
 import type { TemplateStyles } from '../hooks/useLandingData';
 import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 interface ShopInviteSectionProps {
   shopInvite: LandingSections['shop_invite'];
@@ -24,17 +25,17 @@ export function ShopInviteSection({ shopInvite, theme, ts, headingStyle, bodySty
       </div>
       <div className="relative z-10 max-w-3xl mx-auto text-center">
         {shopInvite.title && (
-          <h2 style={{ ...headingStyle, color: theme.shop_invite_title_color || '#ffffff', fontWeight: 300, fontFamily: "'Dancing Script', cursive", fontSize: fontSize(theme.shop_invite_title_size) }} className="text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-6">
+          <h2 style={{ ...headingStyle, color: theme.shop_invite_title_color || '#ffffff', fontWeight: 300, fontFamily: "'Dancing Script', cursive", fontSize: fontSize(theme.shop_invite_title_size), ...textStyleExtras(theme, 'shop_invite_title') }} className="text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-6">
             {shopInvite.title}
           </h2>
         )}
         {shopInvite.subtitle && (
-          <p style={{ ...bodyStyle, color: theme.shop_invite_subtitle_color || 'rgba(255,255,255,0.7)', fontSize: fontSize(theme.shop_invite_subtitle_size) }} className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
+          <p style={{ ...bodyStyle, color: theme.shop_invite_subtitle_color || 'rgba(255,255,255,0.7)', fontSize: fontSize(theme.shop_invite_subtitle_size), ...textStyleExtras(theme, 'shop_invite_subtitle') }} className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
             {shopInvite.subtitle}
           </p>
         )}
         {shopInvite.description && (
-          <p style={{ ...bodyStyle, color: theme.shop_invite_text_color || 'rgba(255,255,255,0.5)', fontSize: fontSize(theme.shop_invite_text_size) }} className="text-base max-w-2xl mx-auto leading-relaxed mt-4">
+          <p style={{ ...bodyStyle, color: theme.shop_invite_text_color || 'rgba(255,255,255,0.5)', fontSize: fontSize(theme.shop_invite_text_size), ...textStyleExtras(theme, 'shop_invite_text') }} className="text-base max-w-2xl mx-auto leading-relaxed mt-4">
             {shopInvite.description}
           </p>
         )}
