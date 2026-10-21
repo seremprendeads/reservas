@@ -22,41 +22,83 @@ interface HeroFormProps {
 // pisa al color que el Hero tenía guardado, que queda como valor previo.
 function TextStyleRow({
   size, color, onSizeChange, onColorChange, onResetColor,
+  weight, italic, transform, onWeightChange, onItalicChange, onTransformChange,
 }: {
   size: number | null; color: string;
   onSizeChange: (v: number | null) => void;
   onColorChange: (v: string) => void;
   onResetColor: () => void;
+  weight?: string; italic?: string; transform?: string;
+  onWeightChange?: (v: string) => void;
+  onItalicChange?: (v: string) => void;
+  onTransformChange?: (v: string) => void;
 }) {
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-4">
-      <div className="flex items-center gap-1.5">
-        <label className="text-xs text-muted-foreground">Tamaño</label>
-        <input
-          type="number" min={8} max={160}
-          placeholder="Auto"
-          value={size ?? ''}
-          onChange={e => onSizeChange(e.target.value === '' ? null : Number(e.target.value))}
-          className="h-8 w-16 rounded-lg border border-input bg-background px-2 text-xs"
-        />
-        <span className="text-xs text-muted-foreground">px</span>
+    <div className="mt-2 space-y-2">
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs text-muted-foreground">Tamaño</label>
+          <input
+            type="number" min={8} max={160}
+            placeholder="Auto"
+            value={size ?? ''}
+            onChange={e => onSizeChange(e.target.value === '' ? null : Number(e.target.value))}
+            className="h-8 w-16 rounded-lg border border-input bg-background px-2 text-xs"
+          />
+          <span className="text-xs text-muted-foreground">px</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs text-muted-foreground">Color</label>
+          <input
+            type="color"
+            value={color || '#000000'}
+            onChange={e => onColorChange(e.target.value)}
+            className="h-7 w-7 cursor-pointer rounded-lg border bg-transparent p-0.5"
+          />
+          <button
+            type="button"
+            onClick={onResetColor}
+            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+          >
+            Automático
+          </button>
+        </div>
       </div>
-      <div className="flex items-center gap-1.5">
-        <label className="text-xs text-muted-foreground">Color</label>
-        <input
-          type="color"
-          value={color || '#000000'}
-          onChange={e => onColorChange(e.target.value)}
-          className="h-7 w-7 cursor-pointer rounded-lg border bg-transparent p-0.5"
-        />
-        <button
-          type="button"
-          onClick={onResetColor}
-          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
-        >
-          Automático
-        </button>
-      </div>
+      {onWeightChange && onItalicChange && onTransformChange && (
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={weight || ''}
+            onChange={e => onWeightChange(e.target.value)}
+            className="h-8 rounded-lg border border-input bg-background px-2 text-xs"
+          >
+            <option value="">Peso auto</option>
+            <option value="400">Normal</option>
+            <option value="600">Semi negrita</option>
+            <option value="700">Negrita</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => onItalicChange(italic === 'italic' ? '' : 'italic')}
+            aria-pressed={italic === 'italic'}
+            className={`h-8 rounded-lg border px-3 text-xs italic transition-colors ${
+              italic === 'italic'
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-input bg-background text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Cursiva
+          </button>
+          <select
+            value={transform || ''}
+            onChange={e => onTransformChange(e.target.value)}
+            className="h-8 rounded-lg border border-input bg-background px-2 text-xs"
+          >
+            <option value="">Letra auto</option>
+            <option value="uppercase">MAYÚSCULAS</option>
+            <option value="lowercase">minúsculas</option>
+          </select>
+        </div>
+      )}
     </div>
   );
 }
@@ -133,6 +175,10 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
             onSizeChange={setSize('hero_title_size', 'title_size')}
             onColorChange={v => updateTheme('hero_title_color', v)}
             onResetColor={() => { updateTheme('hero_title_color', ''); update('title_color', null); }}
+            weight={theme.hero_title_weight} italic={theme.hero_title_italic} transform={theme.hero_title_transform}
+            onWeightChange={v => updateTheme('hero_title_weight', v)}
+            onItalicChange={v => updateTheme('hero_title_italic', v)}
+            onTransformChange={v => updateTheme('hero_title_transform', v)}
           />
         </div>
         <div>
@@ -143,6 +189,10 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
             onSizeChange={setSize('hero_subtitle_size', 'subtitle_size')}
             onColorChange={v => updateTheme('hero_subtitle_color', v)}
             onResetColor={() => { updateTheme('hero_subtitle_color', ''); update('subtitle_color', null); }}
+            weight={theme.hero_subtitle_weight} italic={theme.hero_subtitle_italic} transform={theme.hero_subtitle_transform}
+            onWeightChange={v => updateTheme('hero_subtitle_weight', v)}
+            onItalicChange={v => updateTheme('hero_subtitle_italic', v)}
+            onTransformChange={v => updateTheme('hero_subtitle_transform', v)}
           />
         </div>
         <div>
@@ -153,6 +203,10 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
             onSizeChange={setSize('hero_text_size', 'description_size')}
             onColorChange={v => updateTheme('hero_text_color', v)}
             onResetColor={() => { updateTheme('hero_text_color', ''); update('description_color', null); }}
+            weight={theme.hero_text_weight} italic={theme.hero_text_italic} transform={theme.hero_text_transform}
+            onWeightChange={v => updateTheme('hero_text_weight', v)}
+            onItalicChange={v => updateTheme('hero_text_italic', v)}
+            onTransformChange={v => updateTheme('hero_text_transform', v)}
           />
         </div>
       </div>
