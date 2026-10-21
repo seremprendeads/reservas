@@ -12,7 +12,7 @@ export function MainServiceTab({ sections, updateSection }: MainServiceTabProps)
     <div className="space-y-5">
       <div>
         <label className="text-sm font-medium text-foreground">Ícono</label>
-        <IconSelector value={ms.icon} onChange={v => updateSection('main_service', { ...ms, icon: v })} />
+        <IconSelector value={ms.icon} onChange={v => updateSection('main_service', { ...ms, icon: v })} allowEmpty />
       </div>
       <div>
         <label className="text-sm font-medium text-foreground">Título</label>

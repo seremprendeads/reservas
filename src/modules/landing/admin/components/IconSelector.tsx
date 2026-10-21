@@ -43,12 +43,14 @@ const ICON_LABELS: Record<string, string> = {
 interface IconSelectorProps {
   value: string;
   onChange: (v: string) => void;
+  allowEmpty?: boolean;
 }
 
-export function IconSelector({ value, onChange }: IconSelectorProps) {
+export function IconSelector({ value, onChange, allowEmpty }: IconSelectorProps) {
   return (
     <select value={value} onChange={e => onChange(e.target.value)}
       className="w-full h-12 rounded-xl border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      {allowEmpty && <option value="">Sin ícono</option>}
       {LUCIDE_ICON_NAMES.map(name => <option key={name} value={name}>{ICON_LABELS[name] || name}</option>)}
     </select>
   );
