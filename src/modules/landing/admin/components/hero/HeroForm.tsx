@@ -2,23 +2,31 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../../components/ui/button';
 import { Input } from '../../../../../components/ui/input';
 import { Separator } from '../../../../../components/ui/separator';
-import type { HeroData, HeroTemplate } from '../../../sections/hero/types';
+import type { HeroData } from '../../../sections/hero/types';
 import { isValidVideoUrl } from '../../../sections/hero/helpers';
+import type { LandingTheme } from '../../../types';
 
 interface HeroFormProps {
   data: HeroData;
   onChange: (data: HeroData) => void;
   triggerUpload: (target: string) => void;
   uploadingImage: string | null;
+  theme: LandingTheme;
+  updateTheme: (k: string, v: string) => void;
 }
 
 // Tamaño (px) y color inline para un texto del Hero. null = usar el estilo
 // por defecto de la plantilla — el botón "Restablecer" vuelve a null.
+// El color del título, el subtítulo y la descripción se guarda en el theme
+// de la sección (hero_title_color, hero_subtitle_color, hero_text_color) y
+// pisa al color que el Hero tenía guardado, que queda como valor previo.
 function TextStyleRow({
-  size, color, onSizeChange, onColorChange,
+  size, color, onSizeChange, onColorChange, onResetColor,
 }: {
-  size: number | null; color: string | null;
-  onSizeChange: (v: number | null) => void; onColorChange: (v: string | null) => void;
+  size: number | null; color: string;
+  onSizeChange: (v: number | null) => void;
+  onColorChange: (v: string) => void;
+  onResetColor: () => void;
 }) {
   return (
     <div className="mt-2 flex flex-wrap items-center gap-4">
@@ -41,24 +49,35 @@ function TextStyleRow({
           onChange={e => onColorChange(e.target.value)}
           className="h-7 w-7 cursor-pointer rounded-lg border bg-transparent p-0.5"
         />
-        {(size !== null || color !== null) && (
-          <button
-            type="button"
-            onClick={() => { onSizeChange(null); onColorChange(null); }}
-            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
-          >
-            Restablecer
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onResetColor}
+          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+        >
+          Automático
+        </button>
       </div>
     </div>
   );
 }
 
-export function HeroForm({ data, onChange, triggerUpload, uploadingImage }: HeroFormProps) {
+export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme, updateTheme }: HeroFormProps) {
   const update = <K extends keyof HeroData>(key: K, value: HeroData[K]) => {
     onChange({ ...data, [key]: value });
   };
+
+  // Con la plantilla de imagen y sin foto de fondo los textos se leen sobre
+  // el color plano del hero, asi que usan el color de texto del tema en vez
+  // de blanco. Son los mismos defaults que aplica la sección publica.
+  const hasBgImage = !!data.background_image;
+  const isImageWithoutBg = data.hero_template === 'image' && !hasBgImage;
+  const defaultTitleColor = isImageWithoutBg ? theme.text_color : '#ffffff';
+  const defaultSubtitleColor = isImageWithoutBg ? '#666666' : 'rgba(255,255,255,0.65)';
+  const defaultDescriptionColor = isImageWithoutBg ? '#888888' : 'rgba(255,255,255,0.5)';
+
+  const titleColor = theme.hero_title_color || data.title_color || defaultTitleColor;
+  const subtitleColor = theme.hero_subtitle_color || data.subtitle_color || defaultSubtitleColor;
+  const descriptionColor = theme.hero_text_color || data.description_color || defaultDescriptionColor;
 
   return (
     <div className="space-y-5">
@@ -87,8 +106,10 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage }: Hero
             <label className="text-sm font-medium text-foreground">Texto debajo del logo (opcional)</label>
             <Input value={data.logo_caption} onChange={e => update('logo_caption', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Ej: Desde 2020" />
             <TextStyleRow
-              size={data.logo_caption_size} color={data.logo_caption_color}
-              onSizeChange={v => update('logo_caption_size', v)} onColorChange={v => update('logo_caption_color', v)}
+              size={data.logo_caption_size} color={data.logo_caption_color || 'rgba(255,255,255,0.5)'}
+              onSizeChange={v => update('logo_caption_size', v)}
+              onColorChange={v => update('logo_caption_color', v)}
+              onResetColor={() => update('logo_caption_color', null)}
             />
           </div>
         )}
@@ -96,24 +117,30 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage }: Hero
           <label className="text-sm font-medium text-foreground">Título</label>
           <Input value={data.title} onChange={e => update('title', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Tu negocio de confianza" />
           <TextStyleRow
-            size={data.title_size} color={data.title_color}
-            onSizeChange={v => update('title_size', v)} onColorChange={v => update('title_color', v)}
+            size={data.title_size} color={titleColor}
+            onSizeChange={v => update('title_size', v)}
+            onColorChange={v => updateTheme('hero_title_color', v)}
+            onResetColor={() => { updateTheme('hero_title_color', ''); update('title_color', null); }}
           />
         </div>
         <div>
           <label className="text-sm font-medium text-foreground">Subtítulo</label>
           <Input value={data.subtitle} onChange={e => update('subtitle', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Descripción breve" />
           <TextStyleRow
-            size={data.subtitle_size} color={data.subtitle_color}
-            onSizeChange={v => update('subtitle_size', v)} onColorChange={v => update('subtitle_color', v)}
+            size={data.subtitle_size} color={subtitleColor}
+            onSizeChange={v => update('subtitle_size', v)}
+            onColorChange={v => updateTheme('hero_subtitle_color', v)}
+            onResetColor={() => { updateTheme('hero_subtitle_color', ''); update('subtitle_color', null); }}
           />
         </div>
         <div>
           <label className="text-sm font-medium text-foreground">Descripción (opcional)</label>
           <Input value={data.description} onChange={e => update('description', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Texto descriptivo adicional" />
           <TextStyleRow
-            size={data.description_size} color={data.description_color}
-            onSizeChange={v => update('description_size', v)} onColorChange={v => update('description_color', v)}
+            size={data.description_size} color={descriptionColor}
+            onSizeChange={v => update('description_size', v)}
+            onColorChange={v => updateTheme('hero_text_color', v)}
+            onResetColor={() => { updateTheme('hero_text_color', ''); update('description_color', null); }}
           />
         </div>
       </div>
@@ -200,7 +227,7 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage }: Hero
                 <>
                   <img src={data.cover_image} alt="" className="h-16 w-16 rounded-xl object-cover border"
                     style={{ objectPosition: data.cover_position || '50% 50%' }} />
-                  <Button variant="ghost" size="sm" className="text-destructive" onClick={() => update('cover_image', null)}>
+                  <Button variant="ghost" size="sm" className="text-destructive" onClick={() => (update as (k: string, v: unknown) => void)('cover_image', null)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </>
@@ -251,7 +278,7 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage }: Hero
         {data.hero_template === 'video' && (
           <div>
             <label className="text-sm font-medium text-foreground">URL del video (YouTube o Vimeo)</label>
-            <Input value={data.video_url} onChange={e => update('video_url', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="https://youtube.com/watch?v=..." />
+            <Input value={data.video_url} onChange={e => (update as (k: string, v: unknown) => void)('video_url', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="https://youtube.com/watch?v=..." />
             {data.video_url && !isValidVideoUrl(data.video_url) && (
               <p className="text-xs text-amber-500 mt-1">URL no válida. Usá un enlace de YouTube o Vimeo.</p>
             )}

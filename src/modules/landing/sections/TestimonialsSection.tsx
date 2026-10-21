@@ -16,9 +16,14 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
   return (
     <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.testimonials_bg_color }}>
       <div className="max-w-6xl mx-auto">
-        <h2 style={{ ...headingStyle, fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight text-center mb-16">
+        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.testimonials_title_color || undefined }} className={`text-4xl sm:text-5xl tracking-tight text-center ${testimonials.subtitle ? 'mb-4' : 'mb-16'}`}>
           {testimonials.title || 'Testimonios'}
         </h2>
+        {testimonials.subtitle && (
+          <p style={{ ...bodyStyle, color: theme.testimonials_subtitle_color || undefined }} className="text-lg text-center mb-16">
+            {testimonials.subtitle}
+          </p>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {testimonials.items.map((t, i) => (
             <div key={i} className={`${ts.cardRadius} ${ts.cardShadow} p-8 text-center sm:text-left`}
@@ -28,7 +33,7 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
                   <Star key={j} className="h-4 w-4" style={{ color: j < t.rating ? '#f59e0b' : '#e5e7eb', fill: j < t.rating ? '#f59e0b' : 'none' }} />
                 ))}
               </div>
-              <p style={{ ...bodyStyle, color: '#666666' }} className="text-sm leading-relaxed mb-6">
+              <p style={{ ...bodyStyle, color: theme.testimonials_text_color || '#666666' }} className="text-sm leading-relaxed mb-6">
                 &ldquo;{t.text}&rdquo;
               </p>
               <div className="flex items-center justify-center sm:justify-start gap-3">
@@ -36,7 +41,7 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
                   style={{ background: `linear-gradient(135deg, ${theme.primary_color}, ${theme.secondary_color})` }}>
                   {t.name.charAt(0).toUpperCase()}
                 </div>
-                <span style={{ ...bodyStyle, color: theme.text_color, fontWeight: 500 }} className="text-sm">{t.name}</span>
+                <span style={{ ...bodyStyle, color: theme.testimonials_text_color || theme.text_color, fontWeight: 500 }} className="text-sm">{t.name}</span>
               </div>
             </div>
           ))}

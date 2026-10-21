@@ -22,10 +22,15 @@ export function MainServiceSection({ mainService, theme, ts, headingStyle, bodyS
             <Icon className="h-12 w-12" style={{ color: theme.service_icon_color }} />
           </div>
         )}
-        <h2 style={{ ...headingStyle, fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight mb-6">
+        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.main_service_title_color || undefined }} className="text-4xl sm:text-5xl tracking-tight mb-6">
           {mainService.title}
         </h2>
-        <p style={{ ...bodyStyle, color: '#666666' }} className="text-base sm:text-lg leading-relaxed">
+        {mainService.subtitle && (
+          <p style={{ ...bodyStyle, color: theme.main_service_subtitle_color || undefined }} className="text-lg sm:text-xl leading-relaxed mb-4">
+            {mainService.subtitle}
+          </p>
+        )}
+        <p style={{ ...bodyStyle, color: theme.main_service_text_color || '#666666' }} className="text-base sm:text-lg leading-relaxed">
           {mainService.description}
         </p>
       </div>

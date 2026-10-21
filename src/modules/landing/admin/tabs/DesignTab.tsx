@@ -6,7 +6,7 @@ import { Separator } from '../../../../components/ui/separator';
 import { supabase } from '../../../../lib/supabase';
 import { AVAILABLE_FONTS, DEFAULT_THEME, getGoogleFontsUrl } from '../../config';
 import { allThemes } from '../../../../themes';
-import type { LandingTheme } from '../../types';
+import { SECTION_COLOR_GROUPS, type LandingTheme } from '../../types';
 
 // Carga todas las tipografías disponibles una sola vez, para que el selector
 // pueda mostrar cada opción en su letra real (si no, el <select> las muestra
@@ -184,6 +184,14 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
   const resetToDefaults = () => {
     setSelectedThemeId('');
     (Object.entries(DEFAULT_THEME) as [string, string][]).forEach(([k, v]) => updateTheme(k, v));
+    // Los colores de texto por sección no viven en DEFAULT_THEME: vuelven a
+    // "Automático" (vacío) para que hereden otra vez. Las claves que sí están
+    // en DEFAULT_THEME (ej. footer_text_color) ya se restauraron arriba.
+    SECTION_COLOR_GROUPS.forEach(g => {
+      Object.values(g.slots).forEach(k => {
+        if (!(k in DEFAULT_THEME)) updateTheme(k as string, '');
+      });
+    });
   };
 
   return (
@@ -229,7 +237,7 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
             <div key={c.key} className="space-y-1">
               <label className="text-xs text-muted-foreground">{c.label}</label>
               <div className="flex items-center gap-2">
-                <input type="color" value={theme[c.key as keyof LandingTheme] as string}
+                <input type="color" value={(theme[c.key as keyof LandingTheme] as string) || '#000000'}
                   onChange={e => updateTheme(c.key, e.target.value)}
                   className="h-7 w-7 cursor-pointer rounded-lg border bg-transparent p-0.5 shrink-0" />
                 <Input type="text" value={theme[c.key as keyof LandingTheme] as string}

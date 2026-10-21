@@ -33,12 +33,18 @@ export function AboutTextSection({ aboutText, theme, ts, headingStyle, bodyStyle
   const textBlock = (
     <div style={{ textAlign: alignment }}>
       {aboutText.title && (
-        <h2 style={{ ...headingStyle, fontWeight: 700, textAlign: alignment }} className="text-4xl sm:text-5xl tracking-tight mb-8">
+        <h2 style={{ ...headingStyle, fontWeight: 700, textAlign: alignment, color: theme.about_text_title_color || undefined }} className="text-4xl sm:text-5xl tracking-tight mb-8">
           {aboutText.title}
         </h2>
       )}
+      {aboutText.subtitle && (
+        <p style={{ ...bodyStyle, textAlign: alignment, color: theme.about_text_subtitle_color || undefined }}
+          className="text-lg sm:text-xl leading-relaxed mb-6">
+          {aboutText.subtitle}
+        </p>
+      )}
       {aboutText.text && (
-        <p style={{ ...bodyStyle, color: '#666666', textAlign: alignment }}
+        <p style={{ ...bodyStyle, color: theme.about_text_text_color || '#666666', textAlign: alignment }}
           className="text-base sm:text-lg leading-relaxed whitespace-pre-line">
           {aboutText.text}
         </p>

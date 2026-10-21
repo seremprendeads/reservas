@@ -2,14 +2,16 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface BannerTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
   triggerUpload: (t: string) => void; uploadingImage: string | null;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function BannerTab({ sections, updateSection, triggerUpload, uploadingImage }: BannerTabProps) {
+export function BannerTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: BannerTabProps) {
   const b = sections.banner;
   return (
     <div className="space-y-5">
@@ -20,6 +22,12 @@ export function BannerTab({ sections, updateSection, triggerUpload, uploadingIma
       <div>
         <label className="text-sm font-medium text-foreground">Subtítulo</label>
         <Input value={b.subtitle} onChange={e => updateSection('banner', { ...b, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Texto</label>
+        <textarea value={b.description || ''} onChange={e => updateSection('banner', { ...b, description: e.target.value })} rows={3}
+          placeholder="Párrafo opcional debajo del subtítulo..."
+          className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-200" />
       </div>
       <Separator />
       <div>
@@ -59,6 +67,13 @@ export function BannerTab({ sections, updateSection, triggerUpload, uploadingIma
           </div>
         </>
       )}
+
+      <SectionColorFields
+        sectionKey="banner"
+        theme={theme}
+        updateTheme={updateTheme}
+        fallbacks={{ title: '#ffffff', subtitle: 'rgba(255,255,255,0.7)', text: 'rgba(255,255,255,0.5)' }}
+      />
     </div>
   );
 }

@@ -1,12 +1,14 @@
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface FooterTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function FooterTab({ sections, updateSection }: FooterTabProps) {
+export function FooterTab({ sections, updateSection, theme, updateTheme }: FooterTabProps) {
   const f = sections.footer;
   const update = (field: string, value: string) => updateSection('footer', { ...f, [field]: value });
   return (
@@ -89,6 +91,14 @@ export function FooterTab({ sections, updateSection }: FooterTabProps) {
         <label className="text-sm font-medium text-foreground">Copyright</label>
         <Input value={f.copyright} onChange={e => update('copyright', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="© 2026 Tu Negocio. Todos los derechos reservados." />
       </div>
+
+      <SectionColorFields
+        sectionKey="footer"
+        theme={theme}
+        updateTheme={updateTheme}
+        fallbacks={{ title: theme.footer_text_color, subtitle: theme.footer_text_color, text: theme.footer_text_color }}
+        autoValues={{ text: theme.footer_text_color || '#f3f4f6' }}
+      />
     </div>
   );
 }

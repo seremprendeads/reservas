@@ -14,6 +14,10 @@ interface HeroCenteredProps {
 }
 
 export function HeroCentered({ data, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: HeroCenteredProps) {
+  // El color de la sección (hero_*) pisa al que el propio Hero tenía guardado.
+  const titleColor = theme.hero_title_color || data.title_color || '#ffffff';
+  const subtitleColor = theme.hero_subtitle_color || data.subtitle_color || 'rgba(255,255,255,0.65)';
+  const descriptionColor = theme.hero_text_color || data.description_color || 'rgba(255,255,255,0.5)';
   return (
     <section id="inicio" className="relative overflow-hidden">
       <div className="relative min-h-screen flex items-center justify-center pt-24 pb-20">
@@ -37,20 +41,20 @@ export function HeroCentered({ data, theme, ts, headingStyle, bodyStyle, handleS
             </div>
           )}
           <h1
-            style={{ ...headingStyle, color: data.title_color || '#ffffff', fontWeight: 700, fontSize: data.title_size ? `${data.title_size}px` : undefined }}
+            style={{ ...headingStyle, color: titleColor, fontWeight: 700, fontSize: data.title_size ? `${data.title_size}px` : undefined }}
             className="text-5xl sm:text-6xl lg:text-8xl leading-[1.05] tracking-tight mb-8"
           >
             {data.title}
           </h1>
           <p
-            style={{ ...bodyStyle, color: data.subtitle_color || 'rgba(255,255,255,0.65)', fontSize: data.subtitle_size ? `${data.subtitle_size}px` : undefined }}
+            style={{ ...bodyStyle, color: subtitleColor, fontSize: data.subtitle_size ? `${data.subtitle_size}px` : undefined }}
             className="text-lg sm:text-xl mb-4 max-w-2xl mx-auto leading-relaxed"
           >
             {data.subtitle}
           </p>
           {data.description && (
             <p
-              style={{ ...bodyStyle, color: data.description_color || 'rgba(255,255,255,0.5)', fontSize: data.description_size ? `${data.description_size}px` : undefined }}
+              style={{ ...bodyStyle, color: descriptionColor, fontSize: data.description_size ? `${data.description_size}px` : undefined }}
               className="text-lg sm:text-xl mb-12 max-w-2xl mx-auto leading-relaxed"
             >
               {data.description}

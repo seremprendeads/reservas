@@ -40,11 +40,16 @@ export function MapSection({ map, theme, ts, headingStyle, bodyStyle }: MapSecti
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10">
           <MapPin className="h-7 w-7 mx-auto mb-4" style={{ color: theme.primary_color }} />
-          <h2 style={{ ...headingStyle, color: theme.text_color, fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight mb-3">
-            ¿Dónde estamos?
+          <h2 style={{ ...headingStyle, color: theme.map_title_color || theme.text_color, fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight mb-3">
+            {map.title || '¿Dónde estamos?'}
           </h2>
+          {map.subtitle && (
+            <p style={{ ...bodyStyle, color: theme.map_subtitle_color || undefined }} className="text-lg mb-2">
+              {map.subtitle}
+            </p>
+          )}
           {map.address && (
-            <p style={{ ...bodyStyle, color: '#666666' }} className="text-sm">
+            <p style={{ ...bodyStyle, color: theme.map_text_color || '#666666' }} className="text-sm">
               {map.address}
             </p>
           )}

@@ -18,9 +18,14 @@ export function GallerySection({ gallery, galleryImages, theme, ts, headingStyle
   return (
     <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.gallery_bg_color }}>
       <div className="max-w-6xl mx-auto">
-        <h2 style={{ ...headingStyle, fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight text-center mb-16">
+        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.gallery_title_color || undefined }} className={`text-4xl sm:text-5xl tracking-tight text-center ${gallery.subtitle ? 'mb-4' : 'mb-16'}`}>
           {gallery.title || 'Galeria'}
         </h2>
+        {gallery.subtitle && (
+          <p style={{ ...bodyStyle, color: theme.gallery_subtitle_color || undefined }} className="text-lg text-center mb-16">
+            {gallery.subtitle}
+          </p>
+        )}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-5">
           {galleryImages.map((img, i) => (
             <button key={i} onClick={() => onImageClick(i)}
@@ -33,12 +38,12 @@ export function GallerySection({ gallery, galleryImages, theme, ts, headingStyle
                   style={{ backgroundColor: `${gallery.overlay_color || theme.text_color}dd` }}>
                   <div className="p-4 text-center sm:text-left">
                     {img.title && (
-                      <p style={{ ...headingStyle, color: '#ffffff', fontWeight: 500 }} className="text-sm leading-tight">
+                      <p style={{ ...headingStyle, color: theme.gallery_title_color || '#ffffff', fontWeight: 500 }} className="text-sm leading-tight">
                         {img.title}
                       </p>
                     )}
                     {img.description && (
-                      <p style={{ ...bodyStyle, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }} className="text-sm leading-snug mt-1">
+                      <p style={{ ...bodyStyle, color: theme.gallery_text_color || 'rgba(255,255,255,0.7)', fontWeight: 500 }} className="text-sm leading-snug mt-1">
                         {img.description}
                       </p>
                     )}

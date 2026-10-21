@@ -16,9 +16,14 @@ export function WhyChooseUsSection({ whyChooseUs, theme, ts, headingStyle, bodyS
   return (
     <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.why_choose_us_bg_color }}>
       <div className="max-w-6xl mx-auto">
-        <h2 style={{ ...headingStyle, fontWeight: 700 }} className="text-4xl sm:text-5xl tracking-tight text-center mb-16">
+        <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.why_choose_us_title_color || undefined }} className={`text-4xl sm:text-5xl tracking-tight text-center ${whyChooseUs.subtitle ? 'mb-4' : 'mb-16'}`}>
           {whyChooseUs.title || 'Por que elegirnos'}
         </h2>
+        {whyChooseUs.subtitle && (
+          <p style={{ ...bodyStyle, color: theme.why_choose_us_subtitle_color || undefined }} className="text-lg text-center mb-16">
+            {whyChooseUs.subtitle}
+          </p>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {whyChooseUs.items.map((item, i) => {
             const Icon = getIcon(item.icon);
@@ -28,7 +33,7 @@ export function WhyChooseUsSection({ whyChooseUs, theme, ts, headingStyle, bodyS
                 <div className="inline-flex items-center justify-center w-24 h-24 mb-5">
                   <Icon className="h-12 w-12" style={{ color: theme.why_choose_us_icon_color }} />
                 </div>
-                <p style={{ ...bodyStyle, color: theme.text_color }} className="text-sm font-medium leading-relaxed">{item.text}</p>
+                <p style={{ ...bodyStyle, color: theme.why_choose_us_text_color || theme.text_color }} className="text-sm font-medium leading-relaxed">{item.text}</p>
               </div>
             );
           })}

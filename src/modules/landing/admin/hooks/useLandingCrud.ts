@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { type Business } from '../../../../lib/supabase';
 import { authInvoke, describeFunctionError } from '../../../../pages/admin/helpers';
 import type { LandingSections, LandingPage, LandingTheme, LandingTemplate } from '../../types';
-import { DEFAULT_SECTIONS, DEFAULT_THEME } from '../../config';
+import { DEFAULT_SECTIONS, DEFAULT_THEME, mergeSections } from '../../config';
 import { SECTION_DEFINITIONS } from '../../types';
 
 interface UseLandingCrudOptions {
@@ -61,17 +61,7 @@ export function useLandingCrud({ business }: UseLandingCrudOptions): UseLandingC
       if (data) {
         setLanding(data as unknown as LandingPage);
         const loadedSections = data.sections as unknown as LandingSections;
-        setSections({
-          ...loadedSections,
-          banner: (loadedSections as any).banner || DEFAULT_SECTIONS.banner,
-          map: (loadedSections as any).map || DEFAULT_SECTIONS.map,
-          about_text: { ...DEFAULT_SECTIONS.about_text, ...((loadedSections as any).about_text) },
-          plans: { ...DEFAULT_SECTIONS.plans, ...((loadedSections as any).plans) },
-          dividers: {
-            hero_about: { ...DEFAULT_SECTIONS.dividers.hero_about, ...((loadedSections as any).dividers?.hero_about) },
-            cta_footer: { ...DEFAULT_SECTIONS.dividers.cta_footer, ...((loadedSections as any).dividers?.cta_footer) },
-          },
-        });
+        setSections(mergeSections(loadedSections));
         setTheme({ ...DEFAULT_THEME, ...(data.theme as unknown as LandingTheme) });
         setTemplate((data.template as LandingTemplate) || 'creative');
         setSlug(data.slug || '');

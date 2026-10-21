@@ -54,7 +54,13 @@ interface FooterSectionProps {
 
 export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, businessId, legalLinksNewTab, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: FooterSectionProps) {
   const footerBgColor = theme.footer_bg_color;
-  const footerTextColor = theme.footer_text_color;
+  const footerTextColor = theme.footer_text_color || '#f3f4f6';
+  // El color de título y subtítulo propios pisan al de texto del footer. Cuando
+  // se eligen, se quita la opacidad para que se vea el color tal cual.
+  const footerTitleColor = theme.footer_title_color || footerTextColor;
+  const footerSubtitleColor = theme.footer_subtitle_color || footerTextColor;
+  const hasCustomTitle = !!theme.footer_title_color;
+  const hasCustomSubtitle = !!theme.footer_subtitle_color;
 
   return (
     <footer className="px-5 sm:px-8 lg:px-12 pt-20 pb-10" style={{ backgroundColor: footerBgColor, color: footerTextColor }}>
@@ -75,15 +81,15 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
             {(footer.logo_title || footer.logo_description) && (
               <div className="mb-3">
                 {footer.logo_title && (
-                  <p style={{ ...headingStyle, color: footerTextColor }} className="text-lg font-bold">{footer.logo_title}</p>
+                  <p style={{ ...headingStyle, color: footerTitleColor }} className="text-lg font-bold">{footer.logo_title}</p>
                 )}
                 {footer.logo_description && (
-                  <p style={{ ...bodyStyle, color: footerTextColor }} className="text-sm opacity-50">{footer.logo_description}</p>
+                  <p style={{ ...bodyStyle, color: footerSubtitleColor }} className={`text-sm ${hasCustomSubtitle ? '' : 'opacity-50'}`}>{footer.logo_description}</p>
                 )}
               </div>
             )}
             {footer.frases && (
-              <p style={{ ...bodyStyle, color: footerTextColor }} className="text-base italic opacity-40 mt-3 leading-relaxed">{footer.frases}</p>
+              <p style={{ ...bodyStyle, color: footerSubtitleColor }} className={`text-base italic mt-3 leading-relaxed ${hasCustomSubtitle ? '' : 'opacity-40'}`}>{footer.frases}</p>
             )}
             {footer.copyright && (
               <p style={{ ...bodyStyle, opacity: 0.5 }} className="text-sm mt-4">{footer.copyright}</p>
@@ -91,7 +97,7 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
           </div>
 
           <div className="text-center sm:text-left">
-            <h4 style={{ ...headingStyle, opacity: 0.4, fontWeight: 500 }} className="text-xs uppercase tracking-widest mb-5">
+            <h4 style={{ ...headingStyle, color: footerTitleColor, opacity: hasCustomTitle ? 1 : 0.4, fontWeight: 500 }} className="text-xs uppercase tracking-widest mb-5">
               Navegacion
             </h4>
             <nav className="space-y-2.5">
@@ -106,7 +112,7 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
           </div>
 
           <div className="text-center sm:text-left">
-            <h4 style={{ ...headingStyle, opacity: 0.4, fontWeight: 500 }} className="text-xs uppercase tracking-widest mb-5">
+            <h4 style={{ ...headingStyle, color: footerTitleColor, opacity: hasCustomTitle ? 1 : 0.4, fontWeight: 500 }} className="text-xs uppercase tracking-widest mb-5">
               Contacto
             </h4>
             <div className="space-y-3 inline-block text-center sm:text-left">
@@ -136,7 +142,7 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
           </div>
 
           <div className="text-center sm:text-left">
-            <h4 style={{ ...headingStyle, opacity: 0.4, fontWeight: 500 }} className="text-xs uppercase tracking-widest mb-5">
+            <h4 style={{ ...headingStyle, color: footerTitleColor, opacity: hasCustomTitle ? 1 : 0.4, fontWeight: 500 }} className="text-xs uppercase tracking-widest mb-5">
               Redes sociales
             </h4>
             <div className="flex items-center justify-center sm:justify-start gap-4">

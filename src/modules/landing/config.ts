@@ -99,6 +99,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
   },
   about: {
     title: 'Sobre nosotros',
+    subtitle: '',
     description: 'Contá tu historia, tu trayectoria y lo que te hace único. Esta sección genera confianza en tus potenciales clientes.',
     image_url: null,
     alignment: 'left',
@@ -106,6 +107,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
   },
   about_text: {
     title: '',
+    subtitle: '',
     text: '',
     alignment: 'left',
     image_url: null,
@@ -114,10 +116,12 @@ export const DEFAULT_SECTIONS: LandingSections = {
   main_service: {
     icon: 'Star',
     title: 'Nuestro servicio principal',
+    subtitle: '',
     description: 'Describí el servicio estrella de tu negocio. Explicá qué lo hace especial y por qué los clientes lo eligen.',
   },
   secondary_services: {
     title: 'Otros servicios',
+    subtitle: '',
     items: [
       { icon: 'Wrench', image_url: null, title: 'Servicio 1', description: 'Descripción del servicio' },
       { icon: 'Palette', image_url: null, title: 'Servicio 2', description: 'Descripción del servicio' },
@@ -126,6 +130,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
   },
   why_choose_us: {
     title: '¿Por qué elegirnos?',
+    subtitle: '',
     items: [
       { icon: 'Shield', text: 'Profesionales certificados' },
       { icon: 'Clock', text: 'Trámites ágiles y rápidos' },
@@ -135,12 +140,14 @@ export const DEFAULT_SECTIONS: LandingSections = {
   },
   gallery: {
     title: 'Galería',
+    subtitle: '',
     images: [],
     overlay_color: '#111827',
   },
   banner: {
     title: 'Tu banner',
     subtitle: 'Texto del banner',
+    description: '',
     image_url: null,
     overlay_color: '#111827',
     overlay_opacity: 60,
@@ -148,6 +155,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
   shop_invite: {
     title: 'Visitanos en nuestra Tienda',
     subtitle: 'Descubrí todos nuestros productos disponibles online',
+    description: '',
     button_text: 'IR A LA TIENDA',
     image_url: null,
     overlay_color: '#111827',
@@ -155,11 +163,13 @@ export const DEFAULT_SECTIONS: LandingSections = {
   },
   testimonials: {
     title: 'Lo que dicen nuestros clientes',
+    subtitle: '',
     items: [],
     google_review_url: null,
   },
   faq: {
     title: 'Preguntas frecuentes',
+    subtitle: '',
     items: [],
   },
   cta: {
@@ -176,6 +186,8 @@ export const DEFAULT_SECTIONS: LandingSections = {
     items: [],
   },
   map: {
+    title: '¿Dónde estamos?',
+    subtitle: '',
     address: '',
     map_url: '',
   },
@@ -303,6 +315,62 @@ export const DEFAULT_SECTIONS: LandingSections = {
     },
   },
 };
+
+/**
+ * Mergea las secciones guardadas en la base con los valores por defecto.
+ *
+ * Las landings publicadas antes de que existieran los subtítulos (o cualquier
+ * campo nuevo) guardan la sección sin ese campo. Si lo leyésemos tal cual,
+ * el input del admin quedaría sin controlar y el color de la sección no
+ * tendría a qué aplicarse. Mergear sección por sección completa los huecos
+ * sin pisar lo que el negocio ya configuró.
+ *
+ * El Hero queda exceptuado: tiene su propia migración por plantilla
+ * (hero_template) y mergearlo con los defaults le cambiaría la plantilla a
+ * las landings viejas.
+ */
+export function mergeSections(loaded: Partial<LandingSections> | null | undefined): LandingSections {
+  // Se mergea sección por sección y el contenido guardado puede venir de
+  // versiones anteriores con otras formas, así que se accede de forma laxa.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const src = (loaded || {}) as any;
+  return {
+    ...DEFAULT_SECTIONS,
+    ...src,
+    header: { ...DEFAULT_SECTIONS.header, ...src.header },
+    about: { ...DEFAULT_SECTIONS.about, ...src.about },
+    about_text: { ...DEFAULT_SECTIONS.about_text, ...src.about_text },
+    main_service: { ...DEFAULT_SECTIONS.main_service, ...src.main_service },
+    secondary_services: { ...DEFAULT_SECTIONS.secondary_services, ...src.secondary_services },
+    why_choose_us: { ...DEFAULT_SECTIONS.why_choose_us, ...src.why_choose_us },
+    gallery: { ...DEFAULT_SECTIONS.gallery, ...src.gallery },
+    testimonials: { ...DEFAULT_SECTIONS.testimonials, ...src.testimonials },
+    faq: { ...DEFAULT_SECTIONS.faq, ...src.faq },
+    banner: { ...DEFAULT_SECTIONS.banner, ...src.banner },
+    shop_invite: { ...DEFAULT_SECTIONS.shop_invite, ...src.shop_invite },
+    cta: { ...DEFAULT_SECTIONS.cta, ...src.cta },
+    map: { ...DEFAULT_SECTIONS.map, ...src.map },
+    popup: { ...DEFAULT_SECTIONS.popup, ...src.popup },
+    footer: { ...DEFAULT_SECTIONS.footer, ...src.footer },
+    plans: { ...DEFAULT_SECTIONS.plans, ...src.plans },
+    hero: (src.hero || DEFAULT_SECTIONS.hero) as LandingSections['hero'],
+    dividers: {
+      hero_about: { ...DEFAULT_SECTIONS.dividers.hero_about, ...src.dividers?.hero_about },
+      cta_footer: { ...DEFAULT_SECTIONS.dividers.cta_footer, ...src.dividers?.cta_footer },
+    },
+    seo_marketing: {
+      ...DEFAULT_SECTIONS.seo_marketing,
+      ...src.seo_marketing,
+      general: { ...DEFAULT_SECTIONS.seo_marketing.general, ...src.seo_marketing?.general },
+      social: { ...DEFAULT_SECTIONS.seo_marketing.social, ...src.seo_marketing?.social },
+      pixel_analytics: { ...DEFAULT_SECTIONS.seo_marketing.pixel_analytics, ...src.seo_marketing?.pixel_analytics },
+      schema: { ...DEFAULT_SECTIONS.seo_marketing.schema, ...src.seo_marketing?.schema },
+      sitemap: { ...DEFAULT_SECTIONS.seo_marketing.sitemap, ...src.seo_marketing?.sitemap },
+      verification: { ...DEFAULT_SECTIONS.seo_marketing.verification, ...src.seo_marketing?.verification },
+      performance: { ...DEFAULT_SECTIONS.seo_marketing.performance, ...src.seo_marketing?.performance },
+    },
+  };
+}
 
 export const DEFAULT_THEME: LandingTheme = {
   primary_color: '#059669',

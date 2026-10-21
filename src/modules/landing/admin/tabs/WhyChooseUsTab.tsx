@@ -3,13 +3,15 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { IconSelector } from '../components/IconSelector';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface WhyChooseUsTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function WhyChooseUsTab({ sections, updateSection }: WhyChooseUsTabProps) {
+export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: WhyChooseUsTabProps) {
   const w = sections.why_choose_us;
   const addItem = () => {
     updateSection('why_choose_us', { ...w, items: [...w.items, { icon: 'CheckCircle', text: '' }] });
@@ -28,6 +30,10 @@ export function WhyChooseUsTab({ sections, updateSection }: WhyChooseUsTabProps)
         <label className="text-sm font-medium text-foreground">Título de sección</label>
         <Input value={w.title} onChange={e => updateSection('why_choose_us', { ...w, title: e.target.value })} className="mt-1.5 h-12 rounded-xl" />
       </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Subtítulo</label>
+        <Input value={w.subtitle || ''} onChange={e => updateSection('why_choose_us', { ...w, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
+      </div>
       <Separator />
       {w.items.map((item, i) => (
         <div key={i} className="rounded-xl border p-5 space-y-4 shadow-[0_8px_30px_rgba(0,0,0,.05)]">
@@ -44,6 +50,8 @@ export function WhyChooseUsTab({ sections, updateSection }: WhyChooseUsTabProps)
       <Button variant="outline" size="sm" onClick={addItem}>
         <Plus className="h-4 w-4 mr-1" /> Agregar beneficio
       </Button>
+
+      <SectionColorFields sectionKey="why_choose_us" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

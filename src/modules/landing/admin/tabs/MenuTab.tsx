@@ -1,13 +1,15 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface MenuTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function MenuTab({ sections, updateSection }: MenuTabProps) {
+export function MenuTab({ sections, updateSection, theme, updateTheme }: MenuTabProps) {
   const header = sections.header;
   const menuItems = header.menu_items || [];
 
@@ -51,6 +53,8 @@ export function MenuTab({ sections, updateSection }: MenuTabProps) {
           <Plus className="h-4 w-4 mr-1" /> Agregar link
         </Button>
       </div>
+
+      <SectionColorFields sectionKey="header" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

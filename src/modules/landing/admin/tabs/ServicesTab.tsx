@@ -2,14 +2,16 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface ServicesTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
   triggerUpload: (t: string) => void; uploadingImage: string | null;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function ServicesTab({ sections, updateSection, triggerUpload, uploadingImage }: ServicesTabProps) {
+export function ServicesTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: ServicesTabProps) {
   const ss = sections.secondary_services;
   const addItem = () => {
     updateSection('secondary_services', {
@@ -33,6 +35,10 @@ export function ServicesTab({ sections, updateSection, triggerUpload, uploadingI
       <div>
         <label className="text-sm font-medium text-foreground">Título de sección</label>
         <Input value={ss.title} onChange={e => updateSection('secondary_services', { ...ss, title: e.target.value })} className="mt-1.5 h-12 rounded-xl" />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Subtítulo</label>
+        <Input value={ss.subtitle || ''} onChange={e => updateSection('secondary_services', { ...ss, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
       </div>
       <Separator />
       {ss.items.map((item, i) => (
@@ -66,6 +72,8 @@ export function ServicesTab({ sections, updateSection, triggerUpload, uploadingI
       <Button variant="outline" size="sm" onClick={addItem}>
         <Plus className="h-4 w-4 mr-1" /> Agregar servicio
       </Button>
+
+      <SectionColorFields sectionKey="secondary_services" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

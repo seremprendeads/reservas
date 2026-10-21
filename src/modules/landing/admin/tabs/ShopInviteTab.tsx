@@ -2,15 +2,17 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 import { DEFAULT_SECTIONS } from '../../config';
 
 interface ShopInviteTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
   triggerUpload: (t: string) => void; uploadingImage: string | null;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function ShopInviteTab({ sections, updateSection, triggerUpload, uploadingImage }: ShopInviteTabProps) {
+export function ShopInviteTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: ShopInviteTabProps) {
   const si = { ...DEFAULT_SECTIONS.shop_invite, ...(sections.shop_invite || {}) };
   return (
     <div className="space-y-5">
@@ -21,6 +23,12 @@ export function ShopInviteTab({ sections, updateSection, triggerUpload, uploadin
       <div>
         <label className="text-sm font-medium text-foreground">Subtítulo</label>
         <Input value={si.subtitle} onChange={e => updateSection('shop_invite', { ...si, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Descubrí todos nuestros productos" />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Texto</label>
+        <textarea value={si.description || ''} onChange={e => updateSection('shop_invite', { ...si, description: e.target.value })} rows={3}
+          placeholder="Párrafo opcional debajo del subtítulo..."
+          className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-200" />
       </div>
       <div>
         <label className="text-sm font-medium text-foreground">Texto del botón</label>
@@ -66,6 +74,13 @@ export function ShopInviteTab({ sections, updateSection, triggerUpload, uploadin
           </div>
         </>
       )}
+
+      <SectionColorFields
+        sectionKey="shop_invite"
+        theme={theme}
+        updateTheme={updateTheme}
+        fallbacks={{ title: '#ffffff', subtitle: 'rgba(255,255,255,0.7)', text: 'rgba(255,255,255,0.5)' }}
+      />
     </div>
   );
 }

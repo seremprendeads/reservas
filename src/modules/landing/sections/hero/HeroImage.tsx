@@ -16,6 +16,10 @@ interface HeroImageProps {
 
 export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: HeroImageProps) {
   const hasBgImage = !!data.background_image;
+  // El color de la sección (hero_*) pisa al que el propio Hero tenía guardado.
+  const titleColor = theme.hero_title_color || data.title_color || (hasBgImage ? '#ffffff' : theme.text_color);
+  const subtitleColor = theme.hero_subtitle_color || data.subtitle_color || (hasBgImage ? 'rgba(255,255,255,0.65)' : '#666666');
+  const descriptionColor = theme.hero_text_color || data.description_color || (hasBgImage ? 'rgba(255,255,255,0.5)' : '#888888');
 
   return (
     <section id="inicio" className="relative overflow-hidden pt-24 pb-20 px-4">
@@ -45,14 +49,14 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
                 )}
               </div>
             )}
-            <h1 style={{ ...headingStyle, color: data.title_color || (hasBgImage ? '#ffffff' : theme.text_color), fontWeight: 700, fontSize: data.title_size ? `${data.title_size}px` : undefined }} className="text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight mb-8">
+            <h1 style={{ ...headingStyle, color: titleColor, fontWeight: 700, fontSize: data.title_size ? `${data.title_size}px` : undefined }} className="text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight mb-8">
               {data.title}
             </h1>
-            <p style={{ ...bodyStyle, color: data.subtitle_color || (hasBgImage ? 'rgba(255,255,255,0.65)' : '#666666'), fontSize: data.subtitle_size ? `${data.subtitle_size}px` : undefined }} className="text-lg sm:text-xl mb-4 leading-relaxed">
+            <p style={{ ...bodyStyle, color: subtitleColor, fontSize: data.subtitle_size ? `${data.subtitle_size}px` : undefined }} className="text-lg sm:text-xl mb-4 leading-relaxed">
               {data.subtitle}
             </p>
             {data.description && (
-              <p style={{ ...bodyStyle, color: data.description_color || (hasBgImage ? 'rgba(255,255,255,0.5)' : '#888888'), fontSize: data.description_size ? `${data.description_size}px` : undefined }} className="text-lg sm:text-xl leading-relaxed">
+              <p style={{ ...bodyStyle, color: descriptionColor, fontSize: data.description_size ? `${data.description_size}px` : undefined }} className="text-lg sm:text-xl leading-relaxed">
                 {data.description}
               </p>
             )}

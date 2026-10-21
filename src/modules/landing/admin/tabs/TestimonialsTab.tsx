@@ -2,13 +2,15 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface TestimonialsTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function TestimonialsTab({ sections, updateSection }: TestimonialsTabProps) {
+export function TestimonialsTab({ sections, updateSection, theme, updateTheme }: TestimonialsTabProps) {
   const t = sections.testimonials;
   const addItem = () => {
     updateSection('testimonials', { ...t, items: [...t.items, { name: '', text: '', rating: 5 }] });
@@ -26,6 +28,10 @@ export function TestimonialsTab({ sections, updateSection }: TestimonialsTabProp
       <div>
         <label className="text-sm font-medium text-foreground">Título de sección</label>
         <Input value={t.title} onChange={e => updateSection('testimonials', { ...t, title: e.target.value })} className="mt-1.5 h-12 rounded-xl" />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Subtítulo</label>
+        <Input value={t.subtitle || ''} onChange={e => updateSection('testimonials', { ...t, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
       </div>
       <div>
         <label className="text-sm font-medium text-foreground">Link a reseñas de Google (opcional)</label>
@@ -62,6 +68,8 @@ export function TestimonialsTab({ sections, updateSection }: TestimonialsTabProp
       <Button variant="outline" size="sm" onClick={addItem}>
         <Plus className="h-4 w-4 mr-1" /> Agregar testimonio
       </Button>
+
+      <SectionColorFields sectionKey="testimonials" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

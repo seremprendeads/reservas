@@ -36,6 +36,15 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
     return theme.text_color;
   })();
 
+  // Colores propios de la sección del menú. Si no se definen, se usa el
+  // color que ya tenía el header. Cuando el usuario elige un color propio
+  // se saca la opacidad para que se vea tal cual lo eligió.
+  const menuTextColor = theme.header_text_color || headerTextColor;
+  const menuTitleColor = theme.header_title_color || menuTextColor;
+  const menuSubtitleColor = theme.header_subtitle_color || menuTextColor;
+  const hasCustomText = !!theme.header_text_color;
+  const hasCustomSubtitle = !!theme.header_subtitle_color;
+
   const isTransparent = ts.headerStyle === 'transparent' && !scrolled;
 
   const navLogoUrl = s.header.logo_image_url || landing.logo_url;
@@ -65,17 +74,17 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
                 }
               />
             ) : (
-              <span style={{ ...headingStyle, color: headerTextColor, fontWeight: 500 }} className="text-lg tracking-tight">
+              <span style={{ ...headingStyle, color: menuTitleColor, fontWeight: 500 }} className="text-lg tracking-tight">
                 {landing.slug}
               </span>
             )}
             {(s.header.logo_title || s.header.logo_description) && (
               <div className="hidden sm:block">
                 {s.header.logo_title && (
-                  <p style={{ ...headingStyle, color: headerTextColor }} className="text-sm leading-tight">{s.header.logo_title}</p>
+                  <p style={{ ...headingStyle, color: menuTitleColor }} className="text-sm leading-tight">{s.header.logo_title}</p>
                 )}
                 {s.header.logo_description && (
-                  <p style={{ ...bodyStyle, color: headerTextColor }} className="text-xs leading-tight opacity-50">{s.header.logo_description}</p>
+                  <p style={{ ...bodyStyle, color: menuSubtitleColor }} className={`text-xs leading-tight ${hasCustomSubtitle ? '' : 'opacity-50'}`}>{s.header.logo_description}</p>
                 )}
               </div>
             )}
@@ -85,8 +94,8 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
           <nav className="hidden md:flex items-center gap-1">
             {(s.header.menu_items || []).map((item, i) => (
               <a key={i} href={item.href} onClick={handleSmoothScroll}
-                style={{ ...bodyStyle, color: headerTextColor }}
-                className="px-4 py-2 text-sm font-medium opacity-60 hover:opacity-100 transition-all duration-150 rounded-lg hover:bg-black/[0.03]">
+                style={{ ...bodyStyle, color: menuTextColor }}
+                className={`px-4 py-2 text-sm font-medium ${hasCustomText ? '' : 'opacity-60'} hover:opacity-100 transition-all duration-150 rounded-lg hover:bg-black/[0.03]`}>
                 {formatLabel(item.label)}
               </a>
             ))}
@@ -105,7 +114,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
           {/* Mobile hamburger */}
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-lg transition-colors"
-            style={{ color: headerTextColor }}>
+            style={{ color: menuTextColor }}>
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
@@ -121,7 +130,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
           <div className="px-5 py-5 space-y-1">
             {(s.header.menu_items || []).map((item, i) => (
               <a key={i} href={item.href} onClick={handleSmoothScroll}
-                style={{ color: theme.text_color, ...bodyStyle }}
+                style={{ color: menuTextColor, ...bodyStyle }}
                 className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-black/[0.03] transition-colors">
                 {formatLabel(item.label)}
               </a>

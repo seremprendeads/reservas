@@ -1,4 +1,4 @@
-import type { LandingSections } from '../../types';
+import type { LandingSections, LandingTheme } from '../../types';
 import type { HeroData, HeroTemplate } from '../../sections/hero/types';
 import { createDefaultHeroData, migrateHeroData } from '../../sections/hero/types';
 import { HeroSelector } from '../components/hero/HeroSelector';
@@ -7,6 +7,7 @@ import { HeroForm } from '../components/hero/HeroForm';
 interface HeroTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
   triggerUpload: (t: string) => void; uploadingImage: string | null;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
 function getHeroData(sections: LandingSections): HeroData {
@@ -17,7 +18,7 @@ function getHeroData(sections: LandingSections): HeroData {
   return migrateHeroData(h);
 }
 
-export function HeroTab({ sections, updateSection, triggerUpload, uploadingImage }: HeroTabProps) {
+export function HeroTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: HeroTabProps) {
   const heroData = getHeroData(sections);
 
   const handleTemplateChange = (template: HeroTemplate) => {
@@ -43,7 +44,7 @@ export function HeroTab({ sections, updateSection, triggerUpload, uploadingImage
     <div className="space-y-5">
       <HeroSelector value={heroData.hero_template} onChange={handleTemplateChange} />
       <div className="border-t pt-5">
-        <HeroForm data={heroData} onChange={handleDataChange} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+        <HeroForm data={heroData} onChange={handleDataChange} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
       </div>
     </div>
   );

@@ -390,7 +390,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       )}
 
       {/* ─── BANNER ─── */}
-      {(s.banner.title || s.banner.subtitle || s.banner.image_url) && (
+      {(s.banner.title || s.banner.subtitle || s.banner.description || s.banner.image_url) && (
         <section className="relative py-32 sm:py-40 px-5 sm:px-8 lg:px-12 overflow-hidden">
           <div className="absolute inset-0 bg-fixed bg-cover bg-center" style={{ backgroundImage: s.banner.image_url ? `url(${s.banner.image_url})` : undefined }}>
             {s.banner.image_url ? (
@@ -401,13 +401,18 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
           </div>
           <div className="relative z-10 max-w-4xl mx-auto text-center">
             {s.banner.title && (
-              <h2 style={{ ...headingStyle, color: '#ffffff', fontWeight: 300, fontFamily: "'Dancing Script', cursive" }} className="text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-6">
+              <h2 style={{ ...headingStyle, color: theme.banner_title_color || '#ffffff', fontWeight: 300, fontFamily: "'Dancing Script', cursive" }} className="text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-6">
                 {s.banner.title}
               </h2>
             )}
             {s.banner.subtitle && (
-              <p style={{ ...bodyStyle, color: 'rgba(255,255,255,0.7)', fontFamily: "'Dancing Script', cursive" }} className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
+              <p style={{ ...bodyStyle, color: theme.banner_subtitle_color || 'rgba(255,255,255,0.7)', fontFamily: "'Dancing Script', cursive" }} className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
                 {s.banner.subtitle}
+              </p>
+            )}
+            {s.banner.description && (
+              <p style={{ ...bodyStyle, color: theme.banner_text_color || 'rgba(255,255,255,0.5)' }} className="text-base max-w-2xl mx-auto leading-relaxed mt-4">
+                {s.banner.description}
               </p>
             )}
           </div>
@@ -507,7 +512,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
             businessId={isPreview ? null : landing.business_id}
             newTab={isPreview}
             className="justify-center text-sm"
-            style={{ ...bodyStyle, color: theme.footer_text_color, opacity: 0.6 }}
+            style={{ ...bodyStyle, color: theme.footer_text_color || '#f3f4f6', opacity: 0.6 }}
           />
         </div>
       )}

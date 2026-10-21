@@ -68,6 +68,7 @@ export interface LandingSections {
   };
   about: {
     title: string;
+    subtitle: string;
     description: string;
     image_url: string | null;
     alignment: 'left' | 'center' | 'right' | 'justify';
@@ -75,6 +76,7 @@ export interface LandingSections {
   };
   about_text: {
     title: string;
+    subtitle: string;
     text: string;
     alignment: 'left' | 'center' | 'justify';
     image_url: string | null;
@@ -83,28 +85,34 @@ export interface LandingSections {
   main_service: {
     icon: string;
     title: string;
+    subtitle: string;
     description: string;
   };
   secondary_services: {
     title: string;
+    subtitle: string;
     items: { icon: string; image_url: string | null; title: string; description: string }[];
   };
   why_choose_us: {
     title: string;
+    subtitle: string;
     items: { icon: string; text: string }[];
   };
   gallery: {
     title: string;
+    subtitle: string;
     images: { url: string; title: string; description: string }[];
     overlay_color: string;
   };
   testimonials: {
     title: string;
+    subtitle: string;
     items: { name: string; text: string; rating: number }[];
     google_review_url: string | null;
   };
   faq: {
     title: string;
+    subtitle: string;
     items: { question: string; answer: string }[];
   };
   cta: {
@@ -143,11 +151,14 @@ export interface LandingSections {
   banner: {
     title: string;
     subtitle: string;
+    description: string;
     image_url: string | null;
     overlay_color: string;
     overlay_opacity: number;
   };
   map: {
+    title: string;
+    subtitle: string;
     address: string;
     map_url: string;
   };
@@ -165,6 +176,7 @@ export interface LandingSections {
   shop_invite: {
     title: string;
     subtitle: string;
+    description: string;
     button_text: string;
     image_url: string | null;
     overlay_color: string;
@@ -296,7 +308,91 @@ export interface LandingTheme {
   // fondo de la seccion de abajo, como antes de existir estos controles.
   divider_hero_about_color: string;
   divider_cta_footer_color: string;
+
+  // ── Colores de texto por sección ──────────────────────────────────
+  // Tres controles por sección: Título (encabezados), Subtítulo (la línea
+  // de entrada) y Texto (cuerpo). Todas opcionales y con la misma semántica
+  // que los separadores: si faltan o están vacías = "Auto", la sección
+  // conserva el color que ya tenía y no se emite ninguna propiedad CSS.
+  header_title_color?: string;
+  header_subtitle_color?: string;
+  header_text_color?: string;
+  hero_title_color?: string;
+  hero_subtitle_color?: string;
+  hero_text_color?: string;
+  about_title_color?: string;
+  about_subtitle_color?: string;
+  about_text_color?: string;
+  about_text_title_color?: string;
+  about_text_subtitle_color?: string;
+  about_text_text_color?: string;
+  main_service_title_color?: string;
+  main_service_subtitle_color?: string;
+  main_service_text_color?: string;
+  secondary_services_title_color?: string;
+  secondary_services_subtitle_color?: string;
+  secondary_services_text_color?: string;
+  why_choose_us_title_color?: string;
+  why_choose_us_subtitle_color?: string;
+  why_choose_us_text_color?: string;
+  gallery_title_color?: string;
+  gallery_subtitle_color?: string;
+  gallery_text_color?: string;
+  banner_title_color?: string;
+  banner_subtitle_color?: string;
+  banner_text_color?: string;
+  shop_invite_title_color?: string;
+  shop_invite_subtitle_color?: string;
+  shop_invite_text_color?: string;
+  testimonials_title_color?: string;
+  testimonials_subtitle_color?: string;
+  testimonials_text_color?: string;
+  faq_title_color?: string;
+  faq_subtitle_color?: string;
+  faq_text_color?: string;
+  map_title_color?: string;
+  map_subtitle_color?: string;
+  map_text_color?: string;
+  footer_title_color?: string;
+  footer_subtitle_color?: string;
+  // El color de texto del footer ya existe arriba (footer_text_color) y se
+  // reutiliza como el control "Texto" de la sección Footer.
 }
+
+/**
+ * Los tres controles de color de una sección y las claves del theme donde se
+ * guardan. Se usa en el admin para pintar el bloque de colores de cada
+ * pestaña de sección sin repetir el mapa clave -> clave a mano.
+ */
+export interface SectionColorSlots {
+  title: keyof LandingTheme;
+  subtitle: keyof LandingTheme;
+  text: keyof LandingTheme;
+}
+
+export interface SectionColorGroup {
+  /** Id de la sección a la que pertenece (mismo key que en SECTION_DEFINITIONS). */
+  key: string;
+  label: string;
+  slots: SectionColorSlots;
+}
+
+export const SECTION_COLOR_GROUPS: SectionColorGroup[] = [
+  { key: 'header', label: 'Menú', slots: { title: 'header_title_color', subtitle: 'header_subtitle_color', text: 'header_text_color' } },
+  { key: 'hero', label: 'Home / Portada', slots: { title: 'hero_title_color', subtitle: 'hero_subtitle_color', text: 'hero_text_color' } },
+  { key: 'about', label: 'Nosotros', slots: { title: 'about_title_color', subtitle: 'about_subtitle_color', text: 'about_text_color' } },
+  { key: 'about_text', label: 'Texto Nosotros', slots: { title: 'about_text_title_color', subtitle: 'about_text_subtitle_color', text: 'about_text_text_color' } },
+  { key: 'main_service', label: 'Servicio Principal', slots: { title: 'main_service_title_color', subtitle: 'main_service_subtitle_color', text: 'main_service_text_color' } },
+  { key: 'secondary_services', label: 'Todos los Servicios', slots: { title: 'secondary_services_title_color', subtitle: 'secondary_services_subtitle_color', text: 'secondary_services_text_color' } },
+  { key: 'why_choose_us', label: 'Por Qué Elegirnos', slots: { title: 'why_choose_us_title_color', subtitle: 'why_choose_us_subtitle_color', text: 'why_choose_us_text_color' } },
+  { key: 'gallery', label: 'Galería', slots: { title: 'gallery_title_color', subtitle: 'gallery_subtitle_color', text: 'gallery_text_color' } },
+  { key: 'banner', label: 'Banner', slots: { title: 'banner_title_color', subtitle: 'banner_subtitle_color', text: 'banner_text_color' } },
+  { key: 'shop_invite', label: 'Visítanos la Tienda', slots: { title: 'shop_invite_title_color', subtitle: 'shop_invite_subtitle_color', text: 'shop_invite_text_color' } },
+  { key: 'testimonials', label: 'Testimonios', slots: { title: 'testimonials_title_color', subtitle: 'testimonials_subtitle_color', text: 'testimonials_text_color' } },
+  { key: 'faq', label: 'Preguntas Frecuentes', slots: { title: 'faq_title_color', subtitle: 'faq_subtitle_color', text: 'faq_text_color' } },
+  { key: 'map', label: 'Mapa', slots: { title: 'map_title_color', subtitle: 'map_subtitle_color', text: 'map_text_color' } },
+  { key: 'footer', label: 'Footer', slots: { title: 'footer_title_color', subtitle: 'footer_subtitle_color', text: 'footer_text_color' } },
+];
 
 export interface LandingSEO {
   title: string;

@@ -1,20 +1,26 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface AboutTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
   triggerUpload: (t: string) => void; uploadingImage: string | null;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function AboutTab({ sections, updateSection, triggerUpload, uploadingImage }: AboutTabProps) {
+export function AboutTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: AboutTabProps) {
   const a = sections.about;
   return (
     <div className="space-y-5">
       <div>
         <label className="text-sm font-medium text-foreground">Título</label>
         <Input value={a.title} onChange={e => updateSection('about', { ...a, title: e.target.value })} className="mt-1.5 h-12 rounded-xl" />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Subtítulo</label>
+        <Input value={a.subtitle || ''} onChange={e => updateSection('about', { ...a, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
       </div>
       <div>
         <label className="text-sm font-medium text-foreground">Descripción</label>
@@ -58,6 +64,8 @@ export function AboutTab({ sections, updateSection, triggerUpload, uploadingImag
           </select>
         </div>
       )}
+
+      <SectionColorFields sectionKey="about" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

@@ -23,19 +23,24 @@ export function ShopInviteSection({ shopInvite, theme, ts, headingStyle, bodySty
       </div>
       <div className="relative z-10 max-w-3xl mx-auto text-center">
         {shopInvite.title && (
-          <h2 style={{ ...headingStyle, color: '#ffffff', fontWeight: 300, fontFamily: "'Dancing Script', cursive" }} className="text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-6">
+          <h2 style={{ ...headingStyle, color: theme.shop_invite_title_color || '#ffffff', fontWeight: 300, fontFamily: "'Dancing Script', cursive" }} className="text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-6">
             {shopInvite.title}
           </h2>
         )}
         {shopInvite.subtitle && (
-          <p style={{ ...bodyStyle, color: 'rgba(255,255,255,0.7)' }} className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mb-8">
+          <p style={{ ...bodyStyle, color: theme.shop_invite_subtitle_color || 'rgba(255,255,255,0.7)' }} className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
             {shopInvite.subtitle}
+          </p>
+        )}
+        {shopInvite.description && (
+          <p style={{ ...bodyStyle, color: theme.shop_invite_text_color || 'rgba(255,255,255,0.5)' }} className="text-base max-w-2xl mx-auto leading-relaxed mt-4">
+            {shopInvite.description}
           </p>
         )}
         {shopInvite.button_text && (
           <a
             href={shopUrl}
-            className={`inline-flex items-center gap-2 px-8 py-4 text-sm font-black uppercase tracking-wider text-white transition-all duration-200 hover:scale-[1.03] hover:shadow-xl active:scale-[0.98] ${ts.buttonRadius}`}
+            className={`inline-flex items-center gap-2 mt-8 px-8 py-4 text-sm font-black uppercase tracking-wider text-white transition-all duration-200 hover:scale-[1.03] hover:shadow-xl active:scale-[0.98] ${ts.buttonRadius}`}
             style={{ backgroundColor: theme.button_color || theme.primary_color }}
           >
             {shopInvite.button_text}

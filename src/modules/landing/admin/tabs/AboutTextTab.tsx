@@ -1,21 +1,29 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface AboutTextTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
   triggerUpload: (t: string) => void; uploadingImage: string | null;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function AboutTextTab({ sections, updateSection, triggerUpload, uploadingImage }: AboutTextTabProps) {
-  const at = sections.about_text || { title: '', text: '', alignment: 'left', image_url: null, image_position: 'left' };
+export function AboutTextTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: AboutTextTabProps) {
+  const at = sections.about_text || { title: '', subtitle: '', text: '', alignment: 'left', image_url: null, image_position: 'left' };
   return (
     <div className="space-y-5">
       <div>
         <label className="text-sm font-medium text-foreground">Título</label>
         <Input value={at.title} onChange={e => updateSection('about_text', { ...at, title: e.target.value })}
           placeholder="Título del bloque de texto..."
+          className="mt-1.5 h-12 rounded-xl" />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Subtítulo</label>
+        <Input value={at.subtitle || ''} onChange={e => updateSection('about_text', { ...at, subtitle: e.target.value })}
+          placeholder="Frase corta que acompaña al título..."
           className="mt-1.5 h-12 rounded-xl" />
       </div>
       <div>
@@ -59,6 +67,8 @@ export function AboutTextTab({ sections, updateSection, triggerUpload, uploading
           </select>
         </div>
       )}
+
+      <SectionColorFields sectionKey="about_text" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

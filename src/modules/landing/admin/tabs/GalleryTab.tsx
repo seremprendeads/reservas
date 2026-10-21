@@ -3,14 +3,16 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { normalizeImages } from '../../lib/landing-utils';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface GalleryTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
   triggerUpload: (t: string) => void; uploadingImage: string | null;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function GalleryTab({ sections, updateSection, triggerUpload, uploadingImage }: GalleryTabProps) {
+export function GalleryTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: GalleryTabProps) {
   const g = sections.gallery;
   const maxImages = 6;
 
@@ -34,6 +36,10 @@ export function GalleryTab({ sections, updateSection, triggerUpload, uploadingIm
       <div>
         <label className="text-sm font-medium text-foreground">Título de sección</label>
         <Input value={g.title} onChange={e => updateSection('gallery', { ...g, title: e.target.value })} className="mt-1.5 h-12 rounded-xl" />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Subtítulo</label>
+        <Input value={g.subtitle || ''} onChange={e => updateSection('gallery', { ...g, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
       </div>
       <div>
         <label className="text-sm font-medium text-foreground">Color de fondo hover</label>
@@ -89,6 +95,8 @@ export function GalleryTab({ sections, updateSection, triggerUpload, uploadingIm
           )}
         </div>
       </div>
+
+      <SectionColorFields sectionKey="gallery" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

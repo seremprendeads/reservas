@@ -2,13 +2,15 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import type { LandingSections } from '../../types';
+import { SectionColorFields } from '../components/SectionColorFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface FaqTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function FaqTab({ sections, updateSection }: FaqTabProps) {
+export function FaqTab({ sections, updateSection, theme, updateTheme }: FaqTabProps) {
   const f = sections.faq;
   const addItem = () => {
     updateSection('faq', { ...f, items: [...f.items, { question: '', answer: '' }] });
@@ -27,6 +29,10 @@ export function FaqTab({ sections, updateSection }: FaqTabProps) {
         <label className="text-sm font-medium text-foreground">Título de sección</label>
         <Input value={f.title} onChange={e => updateSection('faq', { ...f, title: e.target.value })} className="mt-1.5 h-12 rounded-xl" />
       </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Subtítulo</label>
+        <Input value={f.subtitle || ''} onChange={e => updateSection('faq', { ...f, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
+      </div>
       <Separator />
       {f.items.map((item, i) => (
         <div key={i} className="rounded-xl border p-5 space-y-4 shadow-[0_8px_30px_rgba(0,0,0,.05)]">
@@ -44,6 +50,8 @@ export function FaqTab({ sections, updateSection }: FaqTabProps) {
       <Button variant="outline" size="sm" onClick={addItem}>
         <Plus className="h-4 w-4 mr-1" /> Agregar FAQ
       </Button>
+
+      <SectionColorFields sectionKey="faq" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }
