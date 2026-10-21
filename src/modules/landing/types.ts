@@ -96,7 +96,7 @@ export interface LandingSections {
   why_choose_us: {
     title: string;
     subtitle: string;
-    items: { icon: string; text: string }[];
+    items: { icon: string; title?: string; subtitle?: string; text: string }[];
   };
   gallery: {
     title: string;
@@ -335,6 +335,7 @@ export interface LandingTheme {
   why_choose_us_title_color?: string;
   why_choose_us_subtitle_color?: string;
   why_choose_us_text_color?: string;
+  why_choose_us_item_title_color?: string;
   gallery_title_color?: string;
   gallery_subtitle_color?: string;
   gallery_text_color?: string;

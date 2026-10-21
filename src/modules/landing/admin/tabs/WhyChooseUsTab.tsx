@@ -3,7 +3,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { IconSelector } from '../components/IconSelector';
-import { SectionColorFields } from '../components/SectionColorFields';
+import { ColorRow } from '../components/SectionColorFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface WhyChooseUsTabProps {
@@ -14,7 +14,7 @@ interface WhyChooseUsTabProps {
 export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: WhyChooseUsTabProps) {
   const w = sections.why_choose_us;
   const addItem = () => {
-    updateSection('why_choose_us', { ...w, items: [...w.items, { icon: 'CheckCircle', text: '' }] });
+    updateSection('why_choose_us', { ...w, items: [...w.items, { icon: 'CheckCircle', title: '', subtitle: '', text: '' }] });
   };
   const removeItem = (i: number) => {
     updateSection('why_choose_us', { ...w, items: w.items.filter((_, idx) => idx !== i) });
@@ -24,6 +24,7 @@ export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: 
     items[i] = { ...items[i], [field]: value };
     updateSection('why_choose_us', { ...w, items });
   };
+  const colorFallback = theme.text_color || '#111111';
   return (
     <div className="space-y-5">
       <div>
@@ -44,14 +45,69 @@ export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: 
             </Button>
           </div>
           <IconSelector value={item.icon} onChange={v => updateItem(i, 'icon', v)} />
-          <Input value={item.text} onChange={e => updateItem(i, 'text', e.target.value)} placeholder="Texto del beneficio" className="h-12 rounded-xl" />
+          <div>
+            <label className="text-xs text-muted-foreground">Título de beneficio</label>
+            <Input value={item.title || ''} onChange={e => updateItem(i, 'title', e.target.value)} placeholder="Título del beneficio" className="mt-1 h-12 rounded-xl" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Subtítulo de beneficio</label>
+            <Input value={item.subtitle || ''} onChange={e => updateItem(i, 'subtitle', e.target.value)} placeholder="Subtítulo del beneficio" className="mt-1 h-12 rounded-xl" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Texto</label>
+            <Input value={item.text} onChange={e => updateItem(i, 'text', e.target.value)} placeholder="Texto del beneficio" className="mt-1 h-12 rounded-xl" />
+          </div>
         </div>
       ))}
       <Button variant="outline" size="sm" onClick={addItem}>
         <Plus className="h-4 w-4 mr-1" /> Agregar beneficio
       </Button>
 
-      <SectionColorFields sectionKey="why_choose_us" theme={theme} updateTheme={updateTheme} />
+      <Separator />
+      <div>
+        <label className="text-xs font-medium text-foreground mb-1 block">Colores de la sección</label>
+        <p className="text-[11px] text-muted-foreground mb-3 leading-snug">
+          Cambian solo esta sección. En Automático se usa el color que ya tenía.
+        </p>
+        <div className="grid grid-cols-1 gap-3">
+          <ColorRow
+            label="Título principal"
+            hint="El encabezado de la sección."
+            value={theme.why_choose_us_title_color || ''}
+            fallback={colorFallback}
+            onChange={v => updateTheme('why_choose_us_title_color', v)}
+          />
+          <ColorRow
+            label="Subtítulo"
+            hint="La línea de entrada, debajo del título."
+            value={theme.why_choose_us_subtitle_color || ''}
+            fallback={colorFallback}
+            onChange={v => updateTheme('why_choose_us_subtitle_color', v)}
+          />
+          <ColorRow
+            label="Texto"
+            hint="Las descripciones y textos de los beneficios."
+            value={theme.why_choose_us_text_color || ''}
+            fallback={colorFallback}
+            onChange={v => updateTheme('why_choose_us_text_color', v)}
+          />
+        </div>
+      </div>
+
+      <Separator />
+      <div>
+        <label className="text-xs font-medium text-foreground mb-1 block">Colores de los beneficios</label>
+        <p className="text-[11px] text-muted-foreground mb-3 leading-snug">
+          Solo los títulos. En Automático heredan del título principal de la sección.
+        </p>
+        <ColorRow
+          label="Título de beneficios"
+          hint="Los títulos de cada beneficio."
+          value={theme.why_choose_us_item_title_color || ''}
+          fallback={theme.why_choose_us_title_color || colorFallback}
+          onChange={v => updateTheme('why_choose_us_item_title_color', v)}
+        />
+      </div>
     </div>
   );
 }

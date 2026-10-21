@@ -132,10 +132,10 @@ export const DEFAULT_SECTIONS: LandingSections = {
     title: '¿Por qué elegirnos?',
     subtitle: '',
     items: [
-      { icon: 'Shield', text: 'Profesionales certificados' },
-      { icon: 'Clock', text: 'Trámites ágiles y rápidos' },
-      { icon: 'Heart', text: 'Atención personalizada' },
-      { icon: 'Award', text: 'Años de experiencia' },
+      { icon: 'Shield', title: '', subtitle: '', text: 'Profesionales certificados' },
+      { icon: 'Clock', title: '', subtitle: '', text: 'Trámites ágiles y rápidos' },
+      { icon: 'Heart', title: '', subtitle: '', text: 'Atención personalizada' },
+      { icon: 'Award', title: '', subtitle: '', text: 'Años de experiencia' },
     ],
   },
   gallery: {

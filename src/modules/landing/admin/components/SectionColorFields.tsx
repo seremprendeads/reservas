@@ -34,7 +34,7 @@ interface SectionColorFieldsProps {
 // no puede representar "sin color", así que mientras está en Automático se
 // muestra el color heredado y el campo de texto queda bloqueado: el botón
 // "Automático" es el que vuelve al modo por defecto.
-function ColorRow({
+export function ColorRow({
   label, hint, value, fallback, onChange,
 }: {
   label: string; hint: string; value: string; fallback: string; onChange: (v: string) => void;

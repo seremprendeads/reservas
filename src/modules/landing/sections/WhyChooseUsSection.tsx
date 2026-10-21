@@ -33,7 +33,30 @@ export function WhyChooseUsSection({ whyChooseUs, theme, ts, headingStyle, bodyS
                 <div className="inline-flex items-center justify-center w-24 h-24 mb-5">
                   <Icon className="h-12 w-12" style={{ color: theme.why_choose_us_icon_color }} />
                 </div>
-                <p style={{ ...bodyStyle, color: theme.why_choose_us_text_color || theme.text_color }} className="text-sm font-medium leading-relaxed">{item.text}</p>
+                {item.title && (
+                  <p
+                    style={{ ...headingStyle, color: theme.why_choose_us_item_title_color || theme.why_choose_us_title_color || undefined }}
+                    className="text-lg font-semibold leading-snug mb-1"
+                  >
+                    {item.title}
+                  </p>
+                )}
+                {item.subtitle && (
+                  <p
+                    style={{ ...bodyStyle, color: theme.why_choose_us_subtitle_color || theme.text_color }}
+                    className="text-sm leading-relaxed mb-2"
+                  >
+                    {item.subtitle}
+                  </p>
+                )}
+                {item.text && (
+                  <p
+                    style={{ ...bodyStyle, color: theme.why_choose_us_text_color || theme.text_color }}
+                    className={item.title ? 'text-sm leading-relaxed' : 'text-sm font-medium leading-relaxed'}
+                  >
+                    {item.text}
+                  </p>
+                )}
               </div>
             );
           })}

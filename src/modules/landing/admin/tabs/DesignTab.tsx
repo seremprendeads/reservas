@@ -192,6 +192,8 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
         if (!(k in DEFAULT_THEME)) updateTheme(k as string, '');
       });
     });
+    // Color propio de los títulos de cada beneficio (Por qué elegirnos).
+    updateTheme('why_choose_us_item_title_color', '');
   };
 
   return (
