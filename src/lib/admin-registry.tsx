@@ -35,9 +35,9 @@ export const adminModules: AdminModuleEntry[] = [
   {
     id: 'landing',
     component: LandingAdmin,
-    navLabel: 'Landing Page',
+    navLabel: 'Constructor de sitio web',
     navIcon: <Sparkles className="h-5 w-5" />,
-    viewTitle: 'Landing Page',
+    viewTitle: 'Constructor de sitio web',
     navPosition: 9,
   },
   {
