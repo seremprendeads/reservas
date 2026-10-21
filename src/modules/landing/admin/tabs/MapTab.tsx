@@ -1,5 +1,5 @@
 import { Input } from '../../../../components/ui/input';
-import { SectionColorFields } from '../components/SectionColorFields';
+import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface MapTabProps {
@@ -34,7 +34,7 @@ export function MapTab({ sections, updateSection, theme, updateTheme }: MapTabPr
         <p className="text-xs text-muted-foreground mt-1">Pegá el link de Google Maps, la dirección, o el código iframe completo</p>
       </div>
 
-      <SectionColorFields sectionKey="map" theme={theme} updateTheme={updateTheme} />
+      <SectionTextStyleFields sectionKey="map" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

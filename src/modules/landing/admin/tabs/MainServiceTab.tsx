@@ -1,6 +1,6 @@
 import { Input } from '../../../../components/ui/input';
 import { IconSelector } from '../components/IconSelector';
-import { SectionColorFields } from '../components/SectionColorFields';
+import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface MainServiceTabProps {
@@ -30,7 +30,7 @@ export function MainServiceTab({ sections, updateSection, theme, updateTheme }: 
           className="mt-1.5 w-full h-24 rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-200" />
       </div>
 
-      <SectionColorFields sectionKey="main_service" theme={theme} updateTheme={updateTheme} />
+      <SectionTextStyleFields sectionKey="main_service" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

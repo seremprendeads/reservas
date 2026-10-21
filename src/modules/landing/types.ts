@@ -404,182 +404,122 @@ export interface LandingTheme {
 }
 
 /**
- * Los tres controles de color de una sección y las claves del theme donde se
- * guardan. Se usa en el admin para pintar el bloque de colores de cada
- * pestaña de sección sin repetir el mapa clave -> clave a mano.
+ * Estilos de texto por sección (tamaño + color). Cada grupo es una pestaña de
+ * sección y cada slot un tipo de texto con las claves del theme donde se
+ * guardan. El tamaño se guarda en px como string; vacío = automático.
  */
-export interface SectionColorSlots {
-  title: keyof LandingTheme;
-  subtitle: keyof LandingTheme;
-  text: keyof LandingTheme;
+export interface SectionTextStyleSlot {
+  label: string;
+  color: keyof LandingTheme;
+  size?: keyof LandingTheme;
 }
 
-export interface SectionColorGroup {
+export interface SectionTextStyleGroup {
   /** Id de la sección a la que pertenece (mismo key que en SECTION_DEFINITIONS). */
   key: string;
   label: string;
-  slots: SectionColorSlots;
+  slots: SectionTextStyleSlot[];
 }
 
-export const SECTION_COLOR_GROUPS: SectionColorGroup[] = [
-  { key: 'header', label: 'Menú', slots: { title: 'header_title_color', subtitle: 'header_subtitle_color', text: 'header_text_color' } },
-  { key: 'hero', label: 'Home / Portada', slots: { title: 'hero_title_color', subtitle: 'hero_subtitle_color', text: 'hero_text_color' } },
-  { key: 'about', label: 'Nosotros', slots: { title: 'about_title_color', subtitle: 'about_subtitle_color', text: 'about_text_color' } },
-  { key: 'about_text', label: 'Texto Nosotros', slots: { title: 'about_text_title_color', subtitle: 'about_text_subtitle_color', text: 'about_text_text_color' } },
-  { key: 'main_service', label: 'Servicio Principal', slots: { title: 'main_service_title_color', subtitle: 'main_service_subtitle_color', text: 'main_service_text_color' } },
-  { key: 'secondary_services', label: 'Todos los Servicios', slots: { title: 'secondary_services_title_color', subtitle: 'secondary_services_subtitle_color', text: 'secondary_services_text_color' } },
-  { key: 'why_choose_us', label: 'Por Qué Elegirnos', slots: { title: 'why_choose_us_title_color', subtitle: 'why_choose_us_subtitle_color', text: 'why_choose_us_text_color' } },
-  { key: 'gallery', label: 'Galería', slots: { title: 'gallery_title_color', subtitle: 'gallery_subtitle_color', text: 'gallery_text_color' } },
-  { key: 'banner', label: 'Banner', slots: { title: 'banner_title_color', subtitle: 'banner_subtitle_color', text: 'banner_text_color' } },
-  { key: 'shop_invite', label: 'Visítanos la Tienda', slots: { title: 'shop_invite_title_color', subtitle: 'shop_invite_subtitle_color', text: 'shop_invite_text_color' } },
-  { key: 'testimonials', label: 'Testimonios', slots: { title: 'testimonials_title_color', subtitle: 'testimonials_subtitle_color', text: 'testimonials_text_color' } },
-  { key: 'faq', label: 'Preguntas Frecuentes', slots: { title: 'faq_title_color', subtitle: 'faq_subtitle_color', text: 'faq_text_color' } },
-  { key: 'map', label: 'Mapa', slots: { title: 'map_title_color', subtitle: 'map_subtitle_color', text: 'map_text_color' } },
-  { key: 'footer', label: 'Footer', slots: { title: 'footer_title_color', subtitle: 'footer_subtitle_color', text: 'footer_text_color' } },
-];
-
-/**
- * Tamaños de letra configurables desde "Tamaños de fuentes" (Diseño). Cada
- * grupo es una sección de la landing y cada slot un tipo de texto. El valor se
- * guarda en px como string; vacío = tamaño automático.
- */
-export interface SectionFontSizeSlot {
-  label: string;
-  key: keyof LandingTheme;
-}
-
-export interface SectionFontSizeGroup {
-  key: string;
-  label: string;
-  slots: SectionFontSizeSlot[];
-}
-
-export const SECTION_FONT_SIZE_GROUPS: SectionFontSizeGroup[] = [
+export const SECTION_TEXT_STYLE_GROUPS: SectionTextStyleGroup[] = [
   {
-    key: 'header',
-    label: 'Menú',
-    slots: [
-      { label: 'Título', key: 'header_title_size' },
-      { label: 'Subtítulo', key: 'header_subtitle_size' },
+    key: 'header', label: 'Menú', slots: [
+      { label: 'Título', color: 'header_title_color', size: 'header_title_size' },
+      { label: 'Subtítulo', color: 'header_subtitle_color', size: 'header_subtitle_size' },
+      { label: 'Texto', color: 'header_text_color' },
     ],
   },
   {
-    key: 'hero',
-    label: 'Home / Portada',
-    slots: [
-      { label: 'Título', key: 'hero_title_size' },
-      { label: 'Subtítulo', key: 'hero_subtitle_size' },
-      { label: 'Texto', key: 'hero_text_size' },
+    key: 'hero', label: 'Home / Portada', slots: [
+      { label: 'Título', color: 'hero_title_color', size: 'hero_title_size' },
+      { label: 'Subtítulo', color: 'hero_subtitle_color', size: 'hero_subtitle_size' },
+      { label: 'Texto', color: 'hero_text_color', size: 'hero_text_size' },
     ],
   },
   {
-    key: 'about',
-    label: 'Nosotros',
-    slots: [
-      { label: 'Título', key: 'about_title_size' },
-      { label: 'Subtítulo', key: 'about_subtitle_size' },
-      { label: 'Texto', key: 'about_text_size' },
+    key: 'about', label: 'Nosotros', slots: [
+      { label: 'Título', color: 'about_title_color', size: 'about_title_size' },
+      { label: 'Subtítulo', color: 'about_subtitle_color', size: 'about_subtitle_size' },
+      { label: 'Texto', color: 'about_text_color', size: 'about_text_size' },
     ],
   },
   {
-    key: 'about_text',
-    label: 'Texto Nosotros',
-    slots: [
-      { label: 'Título', key: 'about_text_title_size' },
-      { label: 'Subtítulo', key: 'about_text_subtitle_size' },
-      { label: 'Texto', key: 'about_text_text_size' },
+    key: 'about_text', label: 'Texto Nosotros', slots: [
+      { label: 'Título', color: 'about_text_title_color', size: 'about_text_title_size' },
+      { label: 'Subtítulo', color: 'about_text_subtitle_color', size: 'about_text_subtitle_size' },
+      { label: 'Texto', color: 'about_text_text_color', size: 'about_text_text_size' },
     ],
   },
   {
-    key: 'main_service',
-    label: 'Servicio Principal',
-    slots: [
-      { label: 'Título', key: 'main_service_title_size' },
-      { label: 'Subtítulo', key: 'main_service_subtitle_size' },
-      { label: 'Texto', key: 'main_service_text_size' },
+    key: 'main_service', label: 'Servicio Principal', slots: [
+      { label: 'Título', color: 'main_service_title_color', size: 'main_service_title_size' },
+      { label: 'Subtítulo', color: 'main_service_subtitle_color', size: 'main_service_subtitle_size' },
+      { label: 'Texto', color: 'main_service_text_color', size: 'main_service_text_size' },
     ],
   },
   {
-    key: 'secondary_services',
-    label: 'Todos los Servicios',
-    slots: [
-      { label: 'Título', key: 'secondary_services_title_size' },
-      { label: 'Subtítulo', key: 'secondary_services_subtitle_size' },
-      { label: 'Texto', key: 'secondary_services_text_size' },
+    key: 'secondary_services', label: 'Todos los Servicios', slots: [
+      { label: 'Título', color: 'secondary_services_title_color', size: 'secondary_services_title_size' },
+      { label: 'Subtítulo', color: 'secondary_services_subtitle_color', size: 'secondary_services_subtitle_size' },
+      { label: 'Texto', color: 'secondary_services_text_color', size: 'secondary_services_text_size' },
     ],
   },
   {
-    key: 'why_choose_us',
-    label: 'Por Qué Elegirnos',
-    slots: [
-      { label: 'Título', key: 'why_choose_us_title_size' },
-      { label: 'Subtítulo', key: 'why_choose_us_subtitle_size' },
-      { label: 'Título de beneficios', key: 'why_choose_us_item_title_size' },
-      { label: 'Subtítulo de beneficios', key: 'why_choose_us_item_subtitle_size' },
-      { label: 'Texto', key: 'why_choose_us_text_size' },
+    key: 'why_choose_us', label: 'Por Qué Elegirnos', slots: [
+      { label: 'Título', color: 'why_choose_us_title_color', size: 'why_choose_us_title_size' },
+      { label: 'Subtítulo', color: 'why_choose_us_subtitle_color', size: 'why_choose_us_subtitle_size' },
+      { label: 'Título de beneficios', color: 'why_choose_us_item_title_color', size: 'why_choose_us_item_title_size' },
+      { label: 'Subtítulo de beneficios', color: 'why_choose_us_subtitle_color', size: 'why_choose_us_item_subtitle_size' },
+      { label: 'Texto', color: 'why_choose_us_text_color', size: 'why_choose_us_text_size' },
     ],
   },
   {
-    key: 'gallery',
-    label: 'Galería',
-    slots: [
-      { label: 'Título', key: 'gallery_title_size' },
-      { label: 'Subtítulo', key: 'gallery_subtitle_size' },
-      { label: 'Texto', key: 'gallery_text_size' },
+    key: 'gallery', label: 'Galería', slots: [
+      { label: 'Título', color: 'gallery_title_color', size: 'gallery_title_size' },
+      { label: 'Subtítulo', color: 'gallery_subtitle_color', size: 'gallery_subtitle_size' },
+      { label: 'Texto', color: 'gallery_text_color', size: 'gallery_text_size' },
     ],
   },
   {
-    key: 'banner',
-    label: 'Banner',
-    slots: [
-      { label: 'Título', key: 'banner_title_size' },
-      { label: 'Subtítulo', key: 'banner_subtitle_size' },
-      { label: 'Texto', key: 'banner_text_size' },
+    key: 'banner', label: 'Banner', slots: [
+      { label: 'Título', color: 'banner_title_color', size: 'banner_title_size' },
+      { label: 'Subtítulo', color: 'banner_subtitle_color', size: 'banner_subtitle_size' },
+      { label: 'Texto', color: 'banner_text_color', size: 'banner_text_size' },
     ],
   },
   {
-    key: 'shop_invite',
-    label: 'Visítanos la Tienda',
-    slots: [
-      { label: 'Título', key: 'shop_invite_title_size' },
-      { label: 'Subtítulo', key: 'shop_invite_subtitle_size' },
-      { label: 'Texto', key: 'shop_invite_text_size' },
+    key: 'shop_invite', label: 'Visítanos la Tienda', slots: [
+      { label: 'Título', color: 'shop_invite_title_color', size: 'shop_invite_title_size' },
+      { label: 'Subtítulo', color: 'shop_invite_subtitle_color', size: 'shop_invite_subtitle_size' },
+      { label: 'Texto', color: 'shop_invite_text_color', size: 'shop_invite_text_size' },
     ],
   },
   {
-    key: 'testimonials',
-    label: 'Testimonios',
-    slots: [
-      { label: 'Título', key: 'testimonials_title_size' },
-      { label: 'Subtítulo', key: 'testimonials_subtitle_size' },
-      { label: 'Texto', key: 'testimonials_text_size' },
+    key: 'testimonials', label: 'Testimonios', slots: [
+      { label: 'Título', color: 'testimonials_title_color', size: 'testimonials_title_size' },
+      { label: 'Subtítulo', color: 'testimonials_subtitle_color', size: 'testimonials_subtitle_size' },
+      { label: 'Texto', color: 'testimonials_text_color', size: 'testimonials_text_size' },
     ],
   },
   {
-    key: 'faq',
-    label: 'Preguntas Frecuentes',
-    slots: [
-      { label: 'Título', key: 'faq_title_size' },
-      { label: 'Subtítulo', key: 'faq_subtitle_size' },
-      { label: 'Texto', key: 'faq_text_size' },
+    key: 'faq', label: 'Preguntas Frecuentes', slots: [
+      { label: 'Título', color: 'faq_title_color', size: 'faq_title_size' },
+      { label: 'Subtítulo', color: 'faq_subtitle_color', size: 'faq_subtitle_size' },
+      { label: 'Texto', color: 'faq_text_color', size: 'faq_text_size' },
     ],
   },
   {
-    key: 'map',
-    label: 'Mapa',
-    slots: [
-      { label: 'Título', key: 'map_title_size' },
-      { label: 'Subtítulo', key: 'map_subtitle_size' },
-      { label: 'Texto', key: 'map_text_size' },
+    key: 'map', label: 'Mapa', slots: [
+      { label: 'Título', color: 'map_title_color', size: 'map_title_size' },
+      { label: 'Subtítulo', color: 'map_subtitle_color', size: 'map_subtitle_size' },
+      { label: 'Texto', color: 'map_text_color', size: 'map_text_size' },
     ],
   },
   {
-    key: 'footer',
-    label: 'Footer',
-    slots: [
-      { label: 'Título', key: 'footer_title_size' },
-      { label: 'Subtítulo', key: 'footer_subtitle_size' },
-      { label: 'Texto', key: 'footer_text_size' },
+    key: 'footer', label: 'Footer', slots: [
+      { label: 'Título', color: 'footer_title_color', size: 'footer_title_size' },
+      { label: 'Subtítulo', color: 'footer_subtitle_color', size: 'footer_subtitle_size' },
+      { label: 'Texto', color: 'footer_text_color', size: 'footer_text_size' },
     ],
   },
 ];

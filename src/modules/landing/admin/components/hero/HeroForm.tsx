@@ -79,6 +79,18 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
   const subtitleColor = theme.hero_subtitle_color || data.subtitle_color || defaultSubtitleColor;
   const descriptionColor = theme.hero_text_color || data.description_color || defaultDescriptionColor;
 
+  // El tamaño ahora se guarda en el theme (igual que en el resto de las
+  // secciones). El valor del hero queda como respaldo para las landings que ya
+  // lo tenían guardado.
+  const sizeValue = (themeSize: string | undefined, dataSize: number | null) => {
+    const v = themeSize || (dataSize != null ? String(dataSize) : '');
+    return v === '' ? null : Number(v);
+  };
+  const setSize = (themeKey: string, dataKey: 'title_size' | 'subtitle_size' | 'description_size') => (v: number | null) => {
+    updateTheme(themeKey, v == null ? '' : String(v));
+    update(dataKey, null);
+  };
+
   return (
     <div className="space-y-5">
       <div className="space-y-5">
@@ -117,8 +129,8 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
           <label className="text-sm font-medium text-foreground">Título</label>
           <Input value={data.title} onChange={e => update('title', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Tu negocio de confianza" />
           <TextStyleRow
-            size={data.title_size} color={titleColor}
-            onSizeChange={v => update('title_size', v)}
+            size={sizeValue(theme.hero_title_size, data.title_size)} color={titleColor}
+            onSizeChange={setSize('hero_title_size', 'title_size')}
             onColorChange={v => updateTheme('hero_title_color', v)}
             onResetColor={() => { updateTheme('hero_title_color', ''); update('title_color', null); }}
           />
@@ -127,8 +139,8 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
           <label className="text-sm font-medium text-foreground">Subtítulo</label>
           <Input value={data.subtitle} onChange={e => update('subtitle', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Descripción breve" />
           <TextStyleRow
-            size={data.subtitle_size} color={subtitleColor}
-            onSizeChange={v => update('subtitle_size', v)}
+            size={sizeValue(theme.hero_subtitle_size, data.subtitle_size)} color={subtitleColor}
+            onSizeChange={setSize('hero_subtitle_size', 'subtitle_size')}
             onColorChange={v => updateTheme('hero_subtitle_color', v)}
             onResetColor={() => { updateTheme('hero_subtitle_color', ''); update('subtitle_color', null); }}
           />
@@ -137,8 +149,8 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
           <label className="text-sm font-medium text-foreground">Descripción (opcional)</label>
           <Input value={data.description} onChange={e => update('description', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Texto descriptivo adicional" />
           <TextStyleRow
-            size={data.description_size} color={descriptionColor}
-            onSizeChange={v => update('description_size', v)}
+            size={sizeValue(theme.hero_text_size, data.description_size)} color={descriptionColor}
+            onSizeChange={setSize('hero_text_size', 'description_size')}
             onColorChange={v => updateTheme('hero_text_color', v)}
             onResetColor={() => { updateTheme('hero_text_color', ''); update('description_color', null); }}
           />

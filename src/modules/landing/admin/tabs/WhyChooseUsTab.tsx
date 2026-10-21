@@ -3,7 +3,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { IconSelector } from '../components/IconSelector';
-import { ColorRow } from '../components/SectionColorFields';
+import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface WhyChooseUsTabProps {
@@ -24,7 +24,6 @@ export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: 
     items[i] = { ...items[i], [field]: value };
     updateSection('why_choose_us', { ...w, items });
   };
-  const colorFallback = theme.text_color || '#111111';
   return (
     <div className="space-y-5">
       <div>
@@ -63,51 +62,7 @@ export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: 
         <Plus className="h-4 w-4 mr-1" /> Agregar beneficio
       </Button>
 
-      <Separator />
-      <div>
-        <label className="text-xs font-medium text-foreground mb-1 block">Colores de la sección</label>
-        <p className="text-[11px] text-muted-foreground mb-3 leading-snug">
-          Cambian solo esta sección. En Automático se usa el color que ya tenía.
-        </p>
-        <div className="grid grid-cols-1 gap-3">
-          <ColorRow
-            label="Título principal"
-            hint="El encabezado de la sección."
-            value={theme.why_choose_us_title_color || ''}
-            fallback={colorFallback}
-            onChange={v => updateTheme('why_choose_us_title_color', v)}
-          />
-          <ColorRow
-            label="Subtítulo"
-            hint="La línea de entrada, debajo del título."
-            value={theme.why_choose_us_subtitle_color || ''}
-            fallback={colorFallback}
-            onChange={v => updateTheme('why_choose_us_subtitle_color', v)}
-          />
-          <ColorRow
-            label="Texto"
-            hint="Las descripciones y textos de los beneficios."
-            value={theme.why_choose_us_text_color || ''}
-            fallback={colorFallback}
-            onChange={v => updateTheme('why_choose_us_text_color', v)}
-          />
-        </div>
-      </div>
-
-      <Separator />
-      <div>
-        <label className="text-xs font-medium text-foreground mb-1 block">Colores de los beneficios</label>
-        <p className="text-[11px] text-muted-foreground mb-3 leading-snug">
-          Solo los títulos. En Automático heredan del título principal de la sección.
-        </p>
-        <ColorRow
-          label="Título de beneficios"
-          hint="Los títulos de cada beneficio."
-          value={theme.why_choose_us_item_title_color || ''}
-          fallback={theme.why_choose_us_title_color || colorFallback}
-          onChange={v => updateTheme('why_choose_us_item_title_color', v)}
-        />
-      </div>
+      <SectionTextStyleFields sectionKey="why_choose_us" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

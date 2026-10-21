@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { RotateCcw, ChevronDown } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { Input } from '../../../../components/ui/input';
 import { Button } from '../../../../components/ui/button';
 import { Separator } from '../../../../components/ui/separator';
 import { supabase } from '../../../../lib/supabase';
 import { AVAILABLE_FONTS, DEFAULT_THEME, getGoogleFontsUrl } from '../../config';
 import { allThemes } from '../../../../themes';
-import { SECTION_COLOR_GROUPS, SECTION_FONT_SIZE_GROUPS, type LandingTheme } from '../../types';
+import { SECTION_TEXT_STYLE_GROUPS, type LandingTheme } from '../../types';
 
 // Carga todas las tipografías disponibles una sola vez, para que el selector
 // pueda mostrar cada opción en su letra real (si no, el <select> las muestra
@@ -184,19 +184,15 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
   const resetToDefaults = () => {
     setSelectedThemeId('');
     (Object.entries(DEFAULT_THEME) as [string, string][]).forEach(([k, v]) => updateTheme(k, v));
-    // Los colores de texto por sección no viven en DEFAULT_THEME: vuelven a
-    // "Automático" (vacío) para que hereden otra vez. Las claves que sí están
-    // en DEFAULT_THEME (ej. footer_text_color) ya se restauraron arriba.
-    SECTION_COLOR_GROUPS.forEach(g => {
-      Object.values(g.slots).forEach(k => {
-        if (!(k in DEFAULT_THEME)) updateTheme(k as string, '');
+    // Los estilos de texto por sección (tamaños y colores) no viven en
+    // DEFAULT_THEME: vuelven a "Automático" (vacío) para que hereden otra vez.
+    // Las claves que sí están en DEFAULT_THEME (ej. footer_text_color) ya se
+    // restauraron arriba.
+    SECTION_TEXT_STYLE_GROUPS.forEach(g => {
+      g.slots.forEach(s => {
+        if (!(s.color in DEFAULT_THEME)) updateTheme(s.color as string, '');
+        if (s.size) updateTheme(s.size as string, '');
       });
-    });
-    // Color propio de los títulos de cada beneficio (Por qué elegirnos).
-    updateTheme('why_choose_us_item_title_color', '');
-    // Tamaños de fuentes por sección: vuelven a automático (vacío).
-    SECTION_FONT_SIZE_GROUPS.forEach(g => {
-      g.slots.forEach(s => updateTheme(s.key as string, ''));
     });
   };
 
@@ -387,45 +383,6 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
         </div>
       </div>
 
-      <Separator />
-
-      <div>
-        <label className="text-xs font-medium text-foreground mb-2 block">Tamaños de fuentes</label>
-        <p className="text-[11px] text-muted-foreground mb-3 leading-snug">
-          En píxeles, por sección y por tipo de texto. Vacío = tamaño automático.
-          Se aplican a la landing y a la vista previa.
-        </p>
-        <div className="space-y-2">
-          {SECTION_FONT_SIZE_GROUPS.map(g => (
-            <details key={g.key} className="group rounded-lg border bg-background/50">
-              <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2.5 text-xs font-medium text-foreground [&::-webkit-details-marker]:hidden">
-                {g.label}
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform group-open:rotate-180" />
-              </summary>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 border-t px-3 py-3">
-                {g.slots.map(s => (
-                  <div key={s.key as string} className="space-y-1">
-                    <label className="text-xs text-muted-foreground">{s.label}</label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min={8}
-                        max={160}
-                        step={1}
-                        value={(theme[s.key] as string) || ''}
-                        placeholder="Auto"
-                        onChange={e => updateTheme(s.key as string, e.target.value)}
-                        className="h-9"
-                      />
-                      <span className="text-xs text-muted-foreground">px</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </details>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { normalizeImages } from '../../lib/landing-utils';
-import { SectionColorFields } from '../components/SectionColorFields';
+import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface GalleryTabProps {
@@ -96,7 +96,7 @@ export function GalleryTab({ sections, updateSection, triggerUpload, uploadingIm
         </div>
       </div>
 
-      <SectionColorFields sectionKey="gallery" theme={theme} updateTheme={updateTheme} />
+      <SectionTextStyleFields sectionKey="gallery" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

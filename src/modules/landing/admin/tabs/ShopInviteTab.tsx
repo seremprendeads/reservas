@@ -2,7 +2,7 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import { SectionColorFields } from '../components/SectionColorFields';
+import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 import { DEFAULT_SECTIONS } from '../../config';
 
@@ -75,7 +75,7 @@ export function ShopInviteTab({ sections, updateSection, triggerUpload, uploadin
         </>
       )}
 
-      <SectionColorFields
+      <SectionTextStyleFields
         sectionKey="shop_invite"
         theme={theme}
         updateTheme={updateTheme}

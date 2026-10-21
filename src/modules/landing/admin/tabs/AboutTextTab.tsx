@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
-import { SectionColorFields } from '../components/SectionColorFields';
+import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface AboutTextTabProps {
@@ -68,7 +68,7 @@ export function AboutTextTab({ sections, updateSection, triggerUpload, uploading
         </div>
       )}
 
-      <SectionColorFields sectionKey="about_text" theme={theme} updateTheme={updateTheme} />
+      <SectionTextStyleFields sectionKey="about_text" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import { SectionColorFields } from '../components/SectionColorFields';
+import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface FaqTabProps {
@@ -51,7 +51,7 @@ export function FaqTab({ sections, updateSection, theme, updateTheme }: FaqTabPr
         <Plus className="h-4 w-4 mr-1" /> Agregar FAQ
       </Button>
 
-      <SectionColorFields sectionKey="faq" theme={theme} updateTheme={updateTheme} />
+      <SectionTextStyleFields sectionKey="faq" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

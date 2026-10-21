@@ -1,6 +1,6 @@
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import { SectionColorFields } from '../components/SectionColorFields';
+import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface FooterTabProps {
@@ -92,7 +92,7 @@ export function FooterTab({ sections, updateSection, theme, updateTheme }: Foote
         <Input value={f.copyright} onChange={e => update('copyright', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="© 2026 Tu Negocio. Todos los derechos reservados." />
       </div>
 
-      <SectionColorFields
+      <SectionTextStyleFields
         sectionKey="footer"
         theme={theme}
         updateTheme={updateTheme}
