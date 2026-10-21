@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, LayoutDashboard, Mail } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, Mail, Menu } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Booking, supabase } from '../lib/supabase';
 import { setName as setSessionName, setAvatar as setSessionAvatar } from '../lib/admin-session';
@@ -395,6 +395,15 @@ export function AdminPage() {
           darkMode={darkMode}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
         />
+
+        {/* Acceso rápido al constructor de sitio web en móvil: abre el menú lateral */}
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="lg:hidden flex w-full items-center justify-center gap-2 border-b border-border bg-card/80 px-4 py-3 text-sm font-semibold text-foreground backdrop-blur-sm transition-colors hover:bg-muted/40"
+        >
+          <Menu className="h-4 w-4" />
+          Constructor de sitio web
+        </button>
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">
           {isFreePlan && <FreePlanBanner supportUrl={subConfig.payment_button_url} />}
