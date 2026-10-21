@@ -177,7 +177,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <MapTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'popup' && (
-                  <PopupTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                  <PopupTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'seo_marketing' && (
                   <SeoMarketingTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />

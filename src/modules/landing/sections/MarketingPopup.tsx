@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { LandingSections, LandingTheme } from '../types';
+import { fontSize } from '../lib/font-size';
+import { textStyleExtras } from '../lib/text-style';
 
 interface MarketingPopupProps {
   popup: LandingSections['popup'];
@@ -62,17 +64,17 @@ export function MarketingPopup({ popup, theme, headingStyle, bodyStyle }: Market
         {(popup.title || popup.subtitle || popup.description) && (
           <div className="px-6 pt-8 pb-4 text-center">
             {popup.title && (
-              <h3 style={{ ...headingStyle, color: '#ffffff', fontWeight: 700 }} className="text-xl sm:text-2xl mb-1">
+              <h3 style={{ ...headingStyle, color: theme.popup_title_color || '#ffffff', fontWeight: 700, fontSize: fontSize(theme.popup_title_size), ...textStyleExtras(theme, 'popup_title') }} className="text-xl sm:text-2xl mb-1">
                 {popup.title}
               </h3>
             )}
             {popup.subtitle && (
-              <p style={{ ...bodyStyle, color: 'rgba(255,255,255,0.85)' }} className="text-sm sm:text-base">
+              <p style={{ ...bodyStyle, color: theme.popup_subtitle_color || 'rgba(255,255,255,0.85)', fontSize: fontSize(theme.popup_subtitle_size), ...textStyleExtras(theme, 'popup_subtitle') }} className="text-sm sm:text-base">
                 {popup.subtitle}
               </p>
             )}
             {popup.description && (
-              <p style={{ ...bodyStyle, color: 'rgba(255,255,255,0.7)' }} className="text-xs leading-relaxed mt-1">
+              <p style={{ ...bodyStyle, color: theme.popup_text_color || 'rgba(255,255,255,0.7)', fontSize: fontSize(theme.popup_text_size), ...textStyleExtras(theme, 'popup_text') }} className="text-xs leading-relaxed mt-1">
                 {popup.description}
               </p>
             )}

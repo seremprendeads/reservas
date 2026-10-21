@@ -388,6 +388,12 @@ export interface LandingTheme {
   plans_text_color?: string;
   plans_title_size?: string;
   plans_text_size?: string;
+  popup_title_color?: string;
+  popup_subtitle_color?: string;
+  popup_text_color?: string;
+  popup_title_size?: string;
+  popup_subtitle_size?: string;
+  popup_text_size?: string;
   gallery_title_color?: string;
   gallery_subtitle_color?: string;
   gallery_text_color?: string;
@@ -542,6 +548,13 @@ export const SECTION_TEXT_STYLE_GROUPS: SectionTextStyleGroup[] = [
     key: 'plans', label: 'Planes', slots: [
       { label: 'Título', color: 'plans_title_color', size: 'plans_title_size' },
       { label: 'Texto', color: 'plans_text_color', size: 'plans_text_size' },
+    ],
+  },
+  {
+    key: 'popup', label: 'Popup Marketing', slots: [
+      { label: 'Título', color: 'popup_title_color', size: 'popup_title_size' },
+      { label: 'Subtítulo', color: 'popup_subtitle_color', size: 'popup_subtitle_size' },
+      { label: 'Texto', color: 'popup_text_color', size: 'popup_text_size' },
     ],
   },
   {

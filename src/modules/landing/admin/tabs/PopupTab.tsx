@@ -2,14 +2,16 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
-import type { LandingSections } from '../../types';
+import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface PopupTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
   triggerUpload: (t: string) => void; uploadingImage: string | null;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function PopupTab({ sections, updateSection, triggerUpload, uploadingImage }: PopupTabProps) {
+export function PopupTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: PopupTabProps) {
   const p = sections.popup ?? { enabled: false, title: '', subtitle: '', description: '', button_text: '', button_url: '', image_url: null, overlay_color: '#111827', overlay_opacity: 80 };
   return (
     <div className="space-y-5">
@@ -69,6 +71,12 @@ export function PopupTab({ sections, updateSection, triggerUpload, uploadingImag
           </div>
         </>
       )}
+      <SectionTextStyleFields
+        sectionKey="popup"
+        theme={theme}
+        updateTheme={updateTheme}
+        fallbacks={{ title: '#ffffff', subtitle: 'rgba(255,255,255,0.85)', text: 'rgba(255,255,255,0.7)' }}
+      />
     </div>
   );
 }
