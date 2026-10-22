@@ -8,7 +8,7 @@ interface ParallaxImageProps {
   children?: React.ReactNode;
 }
 
-export function ParallaxImage({ imageUrl, enabled = true, strength = 0.35, className = '', children }: ParallaxImageProps) {
+export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, className = '', children }: ParallaxImageProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
 
@@ -30,8 +30,12 @@ export function ParallaxImage({ imageUrl, enabled = true, strength = 0.35, class
         ? scroller.getBoundingClientRect().top + scroller.getBoundingClientRect().height / 2
         : window.innerHeight / 2;
       const delta = rect.top + rect.height / 2 - centerY;
-      const offset = Math.max(-200, Math.min(200, -delta * strength));
-      layer.style.transform = `translate3d(0, ${offset}px, 0) scale(1.12)`;
+      // La capa mide 156% de alto (28% extra arriba y abajo) + el zoom, asi
+      // que un desplazamiento de hasta el 25% de la seccion nunca deja ver
+      // los bordes del fondo.
+      const limit = rect.height * 0.25;
+      const offset = Math.max(-limit, Math.min(limit, -delta * strength));
+      layer.style.transform = `translate3d(0, ${offset}px, 0) scale(1.08)`;
     };
 
     update();
@@ -53,7 +57,7 @@ export function ParallaxImage({ imageUrl, enabled = true, strength = 0.35, class
     <div ref={wrapperRef} className={`absolute inset-0 overflow-hidden ${className}`}>
       <div
         ref={layerRef}
-        className="absolute -inset-y-[15%] inset-x-0 bg-cover bg-center will-change-transform"
+        className="absolute -inset-y-[28%] inset-x-0 bg-cover bg-center will-change-transform"
         style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : undefined }}
       />
       {children}
