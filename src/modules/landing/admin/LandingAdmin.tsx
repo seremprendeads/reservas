@@ -218,7 +218,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                 <span className="text-xs font-medium text-muted-foreground">Vista previa</span>
               </div>
               <div data-preview-container className="h-[600px] overflow-auto">
-                <PreviewPanel sections={sections} theme={theme} template={template} slug={slug} logoUrl={logoUrl} />
+                <PreviewPanel sections={sections} theme={theme} template={template} slug={slug} logoUrl={logoUrl} visibleSections={visibleSections} />
               </div>
             </CardContent>
           </Card>

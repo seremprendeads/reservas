@@ -1,5 +1,4 @@
 import type { LandingSections, LandingPage, LandingTheme, LandingTemplate } from '../../types';
-import { SECTION_DEFINITIONS } from '../../types';
 import { LandingPage as LandingPageComponent } from '../../pages/LandingPage';
 
 interface PreviewPanelProps {
@@ -8,9 +7,10 @@ interface PreviewPanelProps {
   template: LandingTemplate;
   slug: string;
   logoUrl: string;
+  visibleSections: string[];
 }
 
-export function PreviewPanel({ sections, theme, template, slug, logoUrl }: PreviewPanelProps) {
+export function PreviewPanel({ sections, theme, template, slug, logoUrl, visibleSections }: PreviewPanelProps) {
   const previewData: LandingPage = {
     id: 'preview',
     business_id: 'preview',
@@ -19,7 +19,7 @@ export function PreviewPanel({ sections, theme, template, slug, logoUrl }: Previ
     sections: sections as unknown as Record<string, unknown>,
     theme: theme as unknown as Record<string, unknown>,
     status: 'published',
-    visible_sections: SECTION_DEFINITIONS.map(s => s.key),
+    visible_sections: visibleSections,
     logo_url: logoUrl || null,
     seo: { title: '', description: '', og_image: null },
     created_at: new Date().toISOString(),
