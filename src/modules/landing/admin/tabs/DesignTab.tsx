@@ -198,6 +198,7 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
         updateTheme(`${baseKey}_transform`, '');
       });
     });
+    updateTheme('why_choose_us_icon_size', '');
     ['header_cta', 'hero_primary', 'hero_secondary', 'shop_invite_button', 'cta_button'].forEach(base => {
       updateTheme(`${base}_bg`, '');
       updateTheme(`${base}_color`, '');

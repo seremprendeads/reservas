@@ -341,6 +341,7 @@ export interface LandingTheme {
   why_choose_us_item_title_size?: string;
   why_choose_us_item_subtitle_size?: string;
   why_choose_us_text_size?: string;
+  why_choose_us_icon_size?: string;
   header_title_size?: string;
   header_subtitle_size?: string;
   header_text_size?: string;

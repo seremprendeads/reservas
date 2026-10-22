@@ -62,6 +62,52 @@ export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: 
         <Plus className="h-4 w-4 mr-1" /> Agregar beneficio
       </Button>
 
+      <Separator />
+      <div>
+        <label className="text-xs font-medium text-foreground mb-1 block">Iconos</label>
+        <p className="text-[11px] text-muted-foreground mb-3 leading-snug">
+          Color y tamaño de los iconos de cada beneficio. En tamaño vacío se usa el que ya tenían.
+        </p>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-xl border bg-muted/20 p-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-muted-foreground">Color</span>
+            <input
+              type="color"
+              value={theme.why_choose_us_icon_color || '#000000'}
+              onChange={e => updateTheme('why_choose_us_icon_color', e.target.value)}
+              className="h-7 w-7 shrink-0 cursor-pointer rounded-lg border bg-transparent p-0.5"
+            />
+            <Input
+              type="text"
+              value={theme.why_choose_us_icon_color || ''}
+              onChange={e => updateTheme('why_choose_us_icon_color', e.target.value)}
+              className="h-8 w-28 font-mono text-xs"
+            />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] text-muted-foreground">Tamaño</span>
+            <input
+              type="number"
+              min={8}
+              max={160}
+              placeholder="Auto"
+              value={theme.why_choose_us_icon_size || ''}
+              onChange={e => updateTheme('why_choose_us_icon_size', e.target.value)}
+              className="h-8 w-16 rounded-lg border border-input bg-background px-2 text-xs"
+            />
+            <span className="text-[11px] text-muted-foreground">px</span>
+            <button
+              type="button"
+              onClick={() => updateTheme('why_choose_us_icon_size', '')}
+              disabled={!theme.why_choose_us_icon_size}
+              className="text-[11px] text-primary hover:underline disabled:text-muted-foreground/50 disabled:no-underline disabled:cursor-default"
+            >
+              Automático
+            </button>
+          </div>
+        </div>
+      </div>
+
       <SectionTextStyleFields sectionKey="why_choose_us" theme={theme} updateTheme={updateTheme} />
     </div>
   );
