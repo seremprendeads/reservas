@@ -3,6 +3,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface ServicesTabProps {
@@ -39,6 +40,31 @@ export function ServicesTab({ sections, updateSection, triggerUpload, uploadingI
       <div>
         <label className="text-sm font-medium text-foreground">Subtítulo</label>
         <Input value={ss.subtitle || ''} onChange={e => updateSection('secondary_services', { ...ss, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground">Fondo de las tarjetas</label>
+        <p className="text-xs text-muted-foreground mb-2">Color de fondo de cada tarjeta de servicio.</p>
+        <div className="flex items-center gap-2">
+          <input
+            type="color"
+            value={theme.secondary_services_card_bg_color || '#ffffff'}
+            onChange={e => updateTheme('secondary_services_card_bg_color', e.target.value)}
+            className="h-9 w-9 shrink-0 cursor-pointer rounded-lg border bg-transparent p-0.5"
+          />
+          <Input
+            type="text"
+            value={theme.secondary_services_card_bg_color || ''}
+            onChange={e => updateTheme('secondary_services_card_bg_color', e.target.value)}
+            className="h-9 w-32 font-mono text-xs"
+          />
+          <button
+            type="button"
+            onClick={() => updateTheme('secondary_services_card_bg_color', DEFAULT_THEME.secondary_services_card_bg_color)}
+            className="text-[11px] text-primary hover:underline"
+          >
+            Restablecer
+          </button>
+        </div>
       </div>
       <Separator />
       {ss.items.map((item, i) => (
