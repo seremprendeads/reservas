@@ -84,8 +84,8 @@ export function DividersTab({ sections, updateSection, theme }: DividersTabProps
           </span>
         </label>
         <p className="text-xs text-amber-600 leading-relaxed">
-          El parallax y los separadores no se pueden usar juntos. Si activǭs el parallax,
-          se desactivan los separadores; y si activǭs un separador, se desactiva el parallax.
+          El parallax y los separadores no se pueden usar juntos. Si activás el parallax,
+          se desactivan los separadores; y si activás un separador, se desactiva el parallax.
           Elegí uno de los dos efectos.
         </p>
       </div>
