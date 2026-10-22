@@ -67,9 +67,10 @@ export function useLandingCrud({ business }: UseLandingCrudOptions): UseLandingC
         setSlug(data.slug || '');
         setLogoUrl(data.logo_url || '');
         if (data.visible_sections) {
-          const dbSections = data.visible_sections as string[];
-          const newKeys = SECTION_DEFINITIONS.map(s => s.key).filter(k => !dbSections.includes(k));
-          setVisibleSections([...dbSections, ...newKeys]);
+          // Se respeta tal cual lo guardado: antes se volvian a agregar todas
+          // las secciones que faltaban, asi que desmarcar una (ej. Banner o
+          // Tienda) no se podia guardar porque al recargar reaparecia marcada.
+          setVisibleSections(data.visible_sections as string[]);
         }
       } else {
         setSlug(business.slug || 'mi-landing');
