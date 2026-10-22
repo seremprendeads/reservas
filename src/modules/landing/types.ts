@@ -282,6 +282,8 @@ export interface LandingTheme {
   footer_text_color: string;
   social_icon_color: string;
   service_icon_color: string;
+  main_service_icon_color?: string;
+  main_service_icon_size?: string;
   button_border_radius: string;
   font_heading: string;
   font_body: string;

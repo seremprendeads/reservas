@@ -384,6 +384,8 @@ export const DEFAULT_THEME: LandingTheme = {
   footer_text_color: '#f3f4f6',
   social_icon_color: '#a1a1aa',
   service_icon_color: '#059669',
+  main_service_icon_color: '',
+  main_service_icon_size: '',
   button_border_radius: 'rounded-xl',
   font_heading: 'Geist',
   font_body: 'Inter',

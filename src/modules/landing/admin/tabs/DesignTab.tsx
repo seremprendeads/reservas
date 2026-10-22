@@ -148,6 +148,7 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
     updateTheme('social_icon_color', t.tokens.textMuted);
     updateTheme('button_color', t.tokens.primary);
     updateTheme('service_icon_color', t.tokens.primary);
+    updateTheme('main_service_icon_color', t.tokens.primary);
     // Fondos por seccion: alternan entre el fondo base y el de las tarjetas,
     // asi las secciones se distinguen entre si en vez de quedar todas iguales.
     updateTheme('about_bg_color', t.tokens.background);
@@ -179,6 +180,7 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
     updateTheme('social_icon_color', data.muted_color || DEFAULT_THEME.social_icon_color);
     updateTheme('button_color', data.primary_color || DEFAULT_THEME.button_color);
     updateTheme('service_icon_color', data.primary_color || DEFAULT_THEME.service_icon_color);
+    updateTheme('main_service_icon_color', data.primary_color || DEFAULT_THEME.service_icon_color);
   };
 
   const resetToDefaults = () => {
