@@ -392,7 +392,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       )}
 
       {/* ─── BANNER ─── */}
-      {(s.banner.title || s.banner.subtitle || s.banner.description || s.banner.image_url) && (
+      {hasSection('banner') && (s.banner.title || s.banner.subtitle || s.banner.description || s.banner.image_url) && (
         <section className="relative py-32 sm:py-40 px-5 sm:px-8 lg:px-12 overflow-hidden">
           <div className="absolute inset-0 bg-fixed bg-cover bg-center" style={{ backgroundImage: s.banner.image_url ? `url(${s.banner.image_url})` : undefined }}>
             {s.banner.image_url ? (
@@ -456,7 +456,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       )}
 
       {/* ─── MAP ─── */}
-      {(s.map.address || s.map.map_url) && (
+      {hasSection('map') && (s.map.address || s.map.map_url) && (
         <MapSection
           map={s.map}
           theme={theme}
