@@ -8,7 +8,7 @@ interface ParallaxImageProps {
   children?: React.ReactNode;
 }
 
-export function ParallaxImage({ imageUrl, enabled = true, strength = 0.18, className = '', children }: ParallaxImageProps) {
+export function ParallaxImage({ imageUrl, enabled = true, strength = 0.35, className = '', children }: ParallaxImageProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
 
@@ -30,16 +30,21 @@ export function ParallaxImage({ imageUrl, enabled = true, strength = 0.18, class
         ? scroller.getBoundingClientRect().top + scroller.getBoundingClientRect().height / 2
         : window.innerHeight / 2;
       const delta = rect.top + rect.height / 2 - centerY;
-      const offset = Math.max(-140, Math.min(140, -delta * strength));
+      const offset = Math.max(-200, Math.min(200, -delta * strength));
       layer.style.transform = `translate3d(0, ${offset}px, 0) scale(1.12)`;
     };
 
     update();
+    // En el preview el scroll ocurre dentro de un contenedor, no en la
+    // ventana; el listener en captura sobre window atrapa tambien esos
+    // eventos sin depender de encontrar el contenedor exacto.
     const target: HTMLElement | Window = scroller ?? window;
     target.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('scroll', update, { capture: true, passive: true });
     window.addEventListener('resize', update);
     return () => {
       target.removeEventListener('scroll', update);
+      window.removeEventListener('scroll', update, true);
       window.removeEventListener('resize', update);
     };
   }, [enabled, strength, imageUrl]);
