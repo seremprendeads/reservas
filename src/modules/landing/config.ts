@@ -313,6 +313,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
       height: DIVIDER_DEFAULT_HEIGHT,
       flip: false,
     },
+    parallax: true,
   },
 };
 
@@ -357,6 +358,7 @@ export function mergeSections(loaded: Partial<LandingSections> | null | undefine
     dividers: {
       hero_about: { ...DEFAULT_SECTIONS.dividers.hero_about, ...src.dividers?.hero_about },
       cta_footer: { ...DEFAULT_SECTIONS.dividers.cta_footer, ...src.dividers?.cta_footer },
+      parallax: src.dividers?.parallax ?? DEFAULT_SECTIONS.dividers.parallax,
     },
     seo_marketing: {
       ...DEFAULT_SECTIONS.seo_marketing,

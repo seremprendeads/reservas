@@ -54,6 +54,11 @@ function getIcon(name: string) {
 export function LandingPage({ initialData, isPreview, slug }: { initialData?: LandingPageType; isPreview?: boolean; slug?: string } = {}) {
   const { landing, loading, notFound, s, theme, seo, ts, hasSection, headingStyle, bodyStyle } = useLandingData({ initialData, slug });
   const { isModuleEnabled } = useModuleAccess();
+  // Parallax y separadores son excluyentes: si hay un separador activo, el
+  // fondo fijo no se aplica aunque el interruptor siga guardado en true.
+  const parallaxEnabled = s.dividers?.parallax !== false
+    && !s.dividers?.hero_about?.enabled
+    && !s.dividers?.cta_footer?.enabled;
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -394,7 +399,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── BANNER ─── */}
       {hasSection('banner') && (s.banner.title || s.banner.subtitle || s.banner.description || s.banner.image_url) && (
         <section className="relative py-32 sm:py-40 px-5 sm:px-8 lg:px-12 overflow-hidden">
-          <div className="absolute inset-0 bg-fixed bg-cover bg-center" style={{ backgroundImage: s.banner.image_url ? `url(${s.banner.image_url})` : undefined }}>
+          <div className={`absolute inset-0 ${parallaxEnabled ? 'bg-fixed' : 'bg-scroll'} bg-cover bg-center`} style={{ backgroundImage: s.banner.image_url ? `url(${s.banner.image_url})` : undefined }}>
             {s.banner.image_url ? (
               <div className="absolute inset-0" style={{ backgroundColor: s.banner.overlay_color, opacity: s.banner.overlay_opacity / 100 }} />
             ) : (
@@ -441,6 +446,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
           shopUrl={`/tienda/${landing.slug}`}
+          parallax={parallaxEnabled}
         />
       )}
 

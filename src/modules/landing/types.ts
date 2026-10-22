@@ -266,6 +266,9 @@ export interface LandingSections {
   dividers: {
     hero_about: LandingDivider;
     cta_footer: LandingDivider;
+    // Fondo de imagen fijo (efecto parallax) en Banner y Tienda. No se puede
+    // combinar con separadores: si hay alguno activo, el parallax no se aplica.
+    parallax: boolean;
   };
 }
 

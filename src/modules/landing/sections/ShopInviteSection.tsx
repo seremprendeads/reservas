@@ -11,12 +11,13 @@ interface ShopInviteSectionProps {
   headingStyle: React.CSSProperties;
   bodyStyle: React.CSSProperties;
   shopUrl: string;
+  parallax?: boolean;
 }
 
-export function ShopInviteSection({ shopInvite, theme, ts, headingStyle, bodyStyle, shopUrl }: ShopInviteSectionProps) {
+export function ShopInviteSection({ shopInvite, theme, ts, headingStyle, bodyStyle, shopUrl, parallax = true }: ShopInviteSectionProps) {
   return (
     <section className="relative py-24 sm:py-32 px-5 sm:px-8 lg:px-12 overflow-hidden">
-      <div className="absolute inset-0 bg-fixed bg-cover bg-center" style={{ backgroundImage: shopInvite.image_url ? `url(${shopInvite.image_url})` : undefined }}>
+      <div className={`absolute inset-0 ${parallax ? 'bg-fixed' : 'bg-scroll'} bg-cover bg-center`} style={{ backgroundImage: shopInvite.image_url ? `url(${shopInvite.image_url})` : undefined }}>
         {shopInvite.image_url ? (
           <div className="absolute inset-0" style={{ backgroundColor: shopInvite.overlay_color, opacity: shopInvite.overlay_opacity / 100 }} />
         ) : (

@@ -36,11 +36,30 @@ const DIVIDER_BLOCKS: { key: DividerKey; label: string; help: string }[] = [
 
 export function DividersTab({ sections, updateSection, theme }: DividersTabProps) {
   const d = sections.dividers ?? DEFAULT_SECTIONS.dividers;
+  const hasDivider = d.hero_about.enabled || d.cta_footer.enabled;
+  const parallaxActive = d.parallax !== false && !hasDivider;
 
   const patch = (key: DividerKey, changes: Partial<LandingDivider>) => {
     updateSection('dividers', {
       ...d,
+      // Parallax y separadores son excluyentes: al activar un separador se
+      // apaga el fondo fijo.
+      ...(changes.enabled ? { parallax: false } : {}),
       [key]: { ...d[key], ...changes },
+    });
+  };
+
+  const toggleParallax = () => {
+    if (parallaxActive) {
+      updateSection('dividers', { ...d, parallax: false });
+      return;
+    }
+    // Al activar parallax se desactivan los dos separadores.
+    updateSection('dividers', {
+      ...d,
+      parallax: true,
+      hero_about: { ...d.hero_about, enabled: false },
+      cta_footer: { ...d.cta_footer, enabled: false },
     });
   };
 
@@ -51,6 +70,25 @@ export function DividersTab({ sections, updateSection, theme }: DividersTabProps
         (bloque Separadores): si lo dejás en Automático, el separador toma el fondo de la
         sección de abajo, así que cambia solo con la paleta.
       </p>
+
+      <div className="space-y-2">
+        <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-muted/40 transition-all duration-200">
+          <input
+            type="checkbox"
+            checked={parallaxActive}
+            onChange={toggleParallax}
+            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <span className="text-sm font-medium text-foreground">
+            Fondo de imágenes fijo (efecto parallax)
+          </span>
+        </label>
+        <p className="text-xs text-amber-600 leading-relaxed">
+          El parallax y los separadores no se pueden usar juntos. Si activǭs el parallax,
+          se desactivan los separadores; y si activǭs un separador, se desactiva el parallax.
+          Elegí uno de los dos efectos.
+        </p>
+      </div>
 
       {DIVIDER_BLOCKS.map(({ key, label, help }, i) => {
         const cfg = d[key] ?? DEFAULT_SECTIONS.dividers[key];
