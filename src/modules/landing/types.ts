@@ -394,6 +394,16 @@ export interface LandingTheme {
   popup_title_size?: string;
   popup_subtitle_size?: string;
   popup_text_size?: string;
+  header_cta_color?: string;
+  header_cta_size?: string;
+  hero_primary_color?: string;
+  hero_primary_size?: string;
+  hero_secondary_color?: string;
+  hero_secondary_size?: string;
+  shop_invite_button_color?: string;
+  shop_invite_button_size?: string;
+  cta_button_color?: string;
+  cta_button_size?: string;
   gallery_title_color?: string;
   gallery_subtitle_color?: string;
   gallery_text_color?: string;

@@ -3,6 +3,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { ButtonStyleFields } from '../components/ButtonStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface CtaTabProps {
@@ -74,6 +75,7 @@ export function CtaTab({ sections, updateSection, triggerUpload, uploadingImage,
         </>
       )}
       <SectionTextStyleFields sectionKey="cta" theme={theme} updateTheme={updateTheme} />
+      <ButtonStyleFields baseKey="cta_button" label="Botón de la llamada a la acción" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

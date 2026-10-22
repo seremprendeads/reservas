@@ -5,6 +5,7 @@ import { Separator } from '../../../../../components/ui/separator';
 import type { HeroData } from '../../../sections/hero/types';
 import { isValidVideoUrl } from '../../../sections/hero/helpers';
 import type { LandingTheme } from '../../../types';
+import { ButtonStyleFields } from '../ButtonStyleFields';
 
 interface HeroFormProps {
   data: HeroData;
@@ -240,6 +241,9 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
           </div>
         </div>
       </div>
+
+      <ButtonStyleFields baseKey="hero_primary" label="Botón principal" theme={theme} updateTheme={updateTheme} />
+      <ButtonStyleFields baseKey="hero_secondary" label="Botón secundario" theme={theme} updateTheme={updateTheme} />
 
       <Separator />
 

@@ -51,6 +51,9 @@ export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, b
           style={{
             background: `linear-gradient(135deg, ${theme.button_color}, ${theme.secondary_color})`,
             boxShadow: `0 8px 30px ${theme.button_color}30`,
+            color: theme.cta_button_color || undefined,
+            fontSize: fontSize(theme.cta_button_size),
+            ...textStyleExtras(theme, 'cta_button'),
           }}>
           {cta.button_text || 'Reservar ahora'}
           <ArrowRight className="h-5 w-5 ml-2" />

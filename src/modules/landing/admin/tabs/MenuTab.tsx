@@ -2,6 +2,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { ButtonStyleFields } from '../components/ButtonStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface MenuTabProps {
@@ -55,6 +56,7 @@ export function MenuTab({ sections, updateSection, theme, updateTheme }: MenuTab
       </div>
 
       <SectionTextStyleFields sectionKey="header" theme={theme} updateTheme={updateTheme} />
+      <ButtonStyleFields baseKey="header_cta" label="Botón de contacto / Reservar" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }

@@ -198,6 +198,13 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
         updateTheme(`${baseKey}_transform`, '');
       });
     });
+    ['header_cta', 'hero_primary', 'hero_secondary', 'shop_invite_button', 'cta_button'].forEach(base => {
+      updateTheme(`${base}_color`, '');
+      updateTheme(`${base}_size`, '');
+      updateTheme(`${base}_weight`, '');
+      updateTheme(`${base}_italic`, '');
+      updateTheme(`${base}_transform`, '');
+    });
   };
 
   return (

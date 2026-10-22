@@ -3,6 +3,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { ButtonStyleFields } from '../components/ButtonStyleFields';
 import type { LandingSections, LandingTheme } from '../../types';
 import { DEFAULT_SECTIONS } from '../../config';
 
@@ -81,6 +82,7 @@ export function ShopInviteTab({ sections, updateSection, triggerUpload, uploadin
         updateTheme={updateTheme}
         fallbacks={{ title: '#ffffff', subtitle: 'rgba(255,255,255,0.7)', text: 'rgba(255,255,255,0.5)' }}
       />
+      <ButtonStyleFields baseKey="shop_invite_button" label="Botón Ver tienda" theme={theme} updateTheme={updateTheme} />
     </div>
   );
 }
