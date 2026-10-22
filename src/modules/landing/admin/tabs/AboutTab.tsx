@@ -39,7 +39,12 @@ export function AboutTab({ sections, updateSection, triggerUpload, uploadingImag
       </div>
       <div>
         <label className="text-sm font-medium text-foreground mb-2 block">Imagen</label>
-        <p className="text-xs text-muted-foreground mb-2">Recomendado: 1200 × 800 px, horizontal (3:2). Se muestra recortada al centro.</p>
+        <div className="mb-3 rounded-xl border bg-muted/20 p-3 text-[11px] leading-relaxed text-muted-foreground space-y-1">
+          <p><span className="font-medium text-foreground">Medida recomendada:</span> 1200 × 800 px (horizontal, proporción 3:2).</p>
+          <p><span className="font-medium text-foreground">Para pantallas de alta resolución:</span> 1600 × 1067 px.</p>
+          <p>En celular la imagen se recorta casi cuadrada: dejá el sujeto principal centrado y evitá detalles importantes en los bordes.</p>
+          <p>Formato JPG o WebP, idealmente de menos de 500 KB para que la web cargue rápido.</p>
+        </div>
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => triggerUpload('about_image')} disabled={!!uploadingImage}>
             {uploadingImage === 'about_image' ? 'Subiendo...' : a.image_url ? 'Cambiar' : 'Subir imagen'}
