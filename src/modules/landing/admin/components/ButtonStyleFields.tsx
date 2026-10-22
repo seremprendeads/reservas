@@ -8,26 +8,30 @@ interface ButtonStyleFieldsProps {
   theme: LandingTheme;
   updateTheme: (k: string, v: string) => void;
   defaultColor?: string;
+  defaultBg?: string;
 }
 
 export function ButtonStyleFields({
-  baseKey, label, theme, updateTheme, defaultColor = '#ffffff',
+  baseKey, label, theme, updateTheme, defaultColor = '#ffffff', defaultBg,
 }: ButtonStyleFieldsProps) {
+  const bgKey = `${baseKey}_bg`;
   const colorKey = `${baseKey}_color`;
   const sizeKey = `${baseKey}_size`;
   const weightKey = `${baseKey}_weight`;
   const italicKey = `${baseKey}_italic`;
   const transformKey = `${baseKey}_transform`;
 
+  const bg = (theme[bgKey] as string | undefined) || '';
   const color = (theme[colorKey] as string | undefined) || '';
   const size = (theme[sizeKey] as string | undefined) || '';
   const weight = theme[weightKey] || '';
   const italic = theme[italicKey] || '';
   const transform = theme[transformKey] || '';
-  const isAuto = !color && !size && !weight && !italic && !transform;
+  const isAuto = !bg && !color && !size && !weight && !italic && !transform;
   const effectiveColor = color || defaultColor;
 
   const reset = () => {
+    updateTheme(bgKey, '');
     updateTheme(colorKey, '');
     updateTheme(sizeKey, '');
     updateTheme(weightKey, '');
@@ -56,6 +60,23 @@ export function ButtonStyleFields({
             </button>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-muted-foreground">Fondo</span>
+              <input
+                type="color"
+                value={bg || defaultBg || '#000000'}
+                onChange={e => updateTheme(bgKey, e.target.value)}
+                className="h-7 w-7 shrink-0 cursor-pointer rounded-lg border bg-transparent p-0.5"
+              />
+              <Input
+                type="text"
+                value={bg}
+                readOnly={!bg}
+                placeholder="Automático"
+                onChange={e => updateTheme(bgKey, e.target.value)}
+                className={`h-8 w-28 font-mono text-xs ${bg ? '' : 'opacity-60'}`}
+              />
+            </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] text-muted-foreground">Tamaño</span>
               <input

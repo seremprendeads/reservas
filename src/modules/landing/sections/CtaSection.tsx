@@ -49,7 +49,7 @@ export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, b
         <a href="#contacto" onClick={handleSmoothScroll}
           className={`inline-flex items-center px-10 py-5 ${theme.button_border_radius} font-medium text-lg text-white transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]`}
           style={{
-            background: `linear-gradient(135deg, ${theme.button_color}, ${theme.secondary_color})`,
+            background: theme.cta_button_bg || `linear-gradient(135deg, ${theme.button_color}, ${theme.secondary_color})`,
             boxShadow: `0 8px 30px ${theme.button_color}30`,
             color: theme.cta_button_color || undefined,
             fontSize: fontSize(theme.cta_button_size),

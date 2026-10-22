@@ -56,7 +56,7 @@ export function MenuTab({ sections, updateSection, theme, updateTheme }: MenuTab
       </div>
 
       <SectionTextStyleFields sectionKey="header" theme={theme} updateTheme={updateTheme} />
-      <ButtonStyleFields baseKey="header_cta" label="Botón de contacto / Reservar" theme={theme} updateTheme={updateTheme} />
+      <ButtonStyleFields baseKey="header_cta" label="Botón de contacto / Reservar" theme={theme} updateTheme={updateTheme} defaultBg={theme.button_color} />
     </div>
   );
 }

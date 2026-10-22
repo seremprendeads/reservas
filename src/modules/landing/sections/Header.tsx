@@ -105,7 +105,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
               <a href="#contacto" onClick={handleSmoothScroll}
                 className={`ml-4 inline-flex items-center px-6 py-2.5 ${theme.button_border_radius} text-sm font-semibold transition-all duration-200 hover:shadow-lg active:scale-[0.98]`}
                 style={{
-                  backgroundColor: isTransparent || ts.headerStyle === 'gradient' ? 'rgba(255,255,255,0.15)' : theme.button_color,
+                  backgroundColor: theme.header_cta_bg || (isTransparent || ts.headerStyle === 'gradient' ? 'rgba(255,255,255,0.15)' : theme.button_color),
                   color: theme.header_cta_color || '#ffffff',
                   fontSize: fontSize(theme.header_cta_size),
                   ...textStyleExtras(theme, 'header_cta'),
@@ -143,7 +143,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
               <a href="#contacto" onClick={handleSmoothScroll}
                 className={`block text-center mt-3 px-5 py-3 ${theme.button_border_radius} text-sm font-semibold text-white transition-all`}
                 style={{
-                  backgroundColor: theme.button_color,
+                  backgroundColor: theme.header_cta_bg || theme.button_color,
                   color: theme.header_cta_color || '#ffffff',
                   fontSize: fontSize(theme.header_cta_size),
                   ...textStyleExtras(theme, 'header_cta'),

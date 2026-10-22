@@ -44,7 +44,7 @@ export function ShopInviteSection({ shopInvite, theme, ts, headingStyle, bodySty
             href={shopUrl}
             className={`inline-flex items-center gap-2 mt-8 px-8 py-4 text-sm font-black uppercase tracking-wider text-white transition-all duration-200 hover:scale-[1.03] hover:shadow-xl active:scale-[0.98] ${ts.buttonRadius}`}
             style={{
-              backgroundColor: theme.button_color || theme.primary_color,
+              backgroundColor: theme.shop_invite_button_bg || theme.button_color || theme.primary_color,
               color: theme.shop_invite_button_color || undefined,
               fontSize: fontSize(theme.shop_invite_button_size),
               ...textStyleExtras(theme, 'shop_invite_button'),

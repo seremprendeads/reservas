@@ -242,7 +242,7 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
         </div>
       </div>
 
-      <ButtonStyleFields baseKey="hero_primary" label="Botón principal" theme={theme} updateTheme={updateTheme} />
+      <ButtonStyleFields baseKey="hero_primary" label="Botón principal" theme={theme} updateTheme={updateTheme} defaultBg={theme.button_color} />
       <ButtonStyleFields baseKey="hero_secondary" label="Botón secundario" theme={theme} updateTheme={updateTheme} />
 
       <Separator />

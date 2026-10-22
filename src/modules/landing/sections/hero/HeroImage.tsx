@@ -90,7 +90,7 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
                 href={data.primary_button_url || '#contacto'}
                 onClick={handleSmoothScroll}
                 className={`inline-flex items-center justify-center px-8 py-4 ${theme.button_border_radius} font-medium text-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]`}
-                style={{ backgroundColor: theme.button_color, color: theme.hero_primary_color || '#ffffff', fontSize: fontSize(theme.hero_primary_size), ...textStyleExtras(theme, 'hero_primary') }}
+                style={{ backgroundColor: theme.hero_primary_bg || theme.button_color, color: theme.hero_primary_color || '#ffffff', fontSize: fontSize(theme.hero_primary_size), ...textStyleExtras(theme, 'hero_primary') }}
               >
                 {data.primary_button_text}
               </a>
@@ -101,6 +101,7 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
                 onClick={handleSmoothScroll}
                 className={`inline-flex items-center justify-center px-8 py-4 ${theme.button_border_radius} font-medium text-lg transition-all duration-200 border-2 ${hasBgImage ? 'border-white/25 text-white hover:border-white/50 hover:bg-white/[0.05]' : ''}`}
                 style={{
+                  backgroundColor: theme.hero_secondary_bg || undefined,
                   borderColor: !hasBgImage ? `${theme.primary_color}40` : undefined,
                   color: theme.hero_secondary_color || (!hasBgImage ? theme.primary_color : undefined),
                   fontSize: fontSize(theme.hero_secondary_size),

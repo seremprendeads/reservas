@@ -75,7 +75,7 @@ export function CtaTab({ sections, updateSection, triggerUpload, uploadingImage,
         </>
       )}
       <SectionTextStyleFields sectionKey="cta" theme={theme} updateTheme={updateTheme} />
-      <ButtonStyleFields baseKey="cta_button" label="Botón de la llamada a la acción" theme={theme} updateTheme={updateTheme} />
+      <ButtonStyleFields baseKey="cta_button" label="Botón de la llamada a la acción" theme={theme} updateTheme={updateTheme} defaultBg={theme.button_color} />
     </div>
   );
 }

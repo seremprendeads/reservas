@@ -82,7 +82,7 @@ export function ShopInviteTab({ sections, updateSection, triggerUpload, uploadin
         updateTheme={updateTheme}
         fallbacks={{ title: '#ffffff', subtitle: 'rgba(255,255,255,0.7)', text: 'rgba(255,255,255,0.5)' }}
       />
-      <ButtonStyleFields baseKey="shop_invite_button" label="Botón Ver tienda" theme={theme} updateTheme={updateTheme} />
+      <ButtonStyleFields baseKey="shop_invite_button" label="Botón Ver tienda" theme={theme} updateTheme={updateTheme} defaultBg={theme.button_color} />
     </div>
   );
 }
