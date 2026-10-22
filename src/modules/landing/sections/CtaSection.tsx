@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import type { LandingSections, LandingTheme } from '../types';
 import { fontSize } from '../lib/font-size';
 import { textStyleExtras } from '../lib/text-style';
+import { ParallaxImage } from '../components/ParallaxImage';
 
 type TemplateStyles = { sectionSpacing: string; buttonRadius: string };
 
@@ -14,19 +15,17 @@ interface CtaSectionProps {
   headingStyle: React.CSSProperties;
   bodyStyle: React.CSSProperties;
   handleSmoothScroll: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  parallax?: boolean;
 }
 
-export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: CtaSectionProps) {
+export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, bodyStyle, handleSmoothScroll, parallax }: CtaSectionProps) {
   return (
     <section id="contacto" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12 relative overflow-hidden`}
       style={{ backgroundColor: cta.image_url ? 'transparent' : theme.cta_bg_color }}>
       {cta.image_url && (
-        <>
-          <div className="absolute inset-0">
-            <img src={cta.image_url} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ backgroundColor: cta.overlay_color, opacity: cta.overlay_opacity / 100 }} />
-          </div>
-        </>
+        <ParallaxImage imageUrl={cta.image_url} enabled={parallax}>
+          <div className="absolute inset-0" style={{ backgroundColor: cta.overlay_color, opacity: cta.overlay_opacity / 100 }} />
+        </ParallaxImage>
       )}
       <div className="max-w-3xl mx-auto text-center relative z-10">
         {logoUrl && (

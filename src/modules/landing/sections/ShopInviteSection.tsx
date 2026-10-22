@@ -3,6 +3,7 @@ import type { LandingSections, LandingTheme } from '../types';
 import type { TemplateStyles } from '../hooks/useLandingData';
 import { fontSize } from '../lib/font-size';
 import { textStyleExtras } from '../lib/text-style';
+import { ParallaxImage } from '../components/ParallaxImage';
 
 interface ShopInviteSectionProps {
   shopInvite: LandingSections['shop_invite'];
@@ -17,13 +18,13 @@ interface ShopInviteSectionProps {
 export function ShopInviteSection({ shopInvite, theme, ts, headingStyle, bodyStyle, shopUrl, parallax = true }: ShopInviteSectionProps) {
   return (
     <section className="relative py-24 sm:py-32 px-5 sm:px-8 lg:px-12 overflow-hidden">
-      <div className={`absolute inset-0 ${parallax ? 'bg-fixed' : 'bg-scroll'} bg-cover bg-center`} style={{ backgroundImage: shopInvite.image_url ? `url(${shopInvite.image_url})` : undefined }}>
+      <ParallaxImage imageUrl={shopInvite.image_url} enabled={parallax}>
         {shopInvite.image_url ? (
           <div className="absolute inset-0" style={{ backgroundColor: shopInvite.overlay_color, opacity: shopInvite.overlay_opacity / 100 }} />
         ) : (
           <div className="absolute inset-0" style={{ backgroundColor: shopInvite.overlay_color }} />
         )}
-      </div>
+      </ParallaxImage>
       <div className="relative z-10 max-w-3xl mx-auto text-center">
         {shopInvite.title && (
           <h2 style={{ ...headingStyle, color: theme.shop_invite_title_color || '#ffffff', fontWeight: 300, fontFamily: "'Dancing Script', cursive", fontSize: fontSize(theme.shop_invite_title_size), ...textStyleExtras(theme, 'shop_invite_title') }} className="text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-6">

@@ -3,6 +3,7 @@ import type { HeroVideoData } from './types';
 import type { LandingTheme } from '../../types';
 import { fontSize } from '../../lib/font-size';
 import { textStyleExtras } from '../../lib/text-style';
+import { ParallaxImage } from '../../components/ParallaxImage';
 import type { TEMPLATE_STYLES } from '../../config';
 import { extractVideoEmbedUrl, isValidVideoUrl } from './helpers';
 
@@ -15,9 +16,10 @@ interface HeroVideoProps {
   headingStyle: React.CSSProperties;
   bodyStyle: React.CSSProperties;
   handleSmoothScroll: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  parallax?: boolean;
 }
 
-export function HeroVideo({ data, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: HeroVideoProps) {
+export function HeroVideo({ data, theme, ts, headingStyle, bodyStyle, handleSmoothScroll, parallax }: HeroVideoProps) {
   const embedUrl = data.video_url ? extractVideoEmbedUrl(data.video_url) : null;
   const hasValidVideo = data.video_url ? isValidVideoUrl(data.video_url) : false;
   const hasBgImage = !!data.background_image;
@@ -30,9 +32,9 @@ export function HeroVideo({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
     <section id="inicio" className="relative overflow-hidden">
       <div className="relative min-h-screen flex items-center justify-center pt-24 pb-20">
         {hasBgImage && (
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${data.background_image})` }}>
+          <ParallaxImage imageUrl={data.background_image} enabled={parallax}>
             <div className="absolute inset-0" style={{ backgroundColor: data.background_color, opacity: data.overlay_opacity / 100 }} />
-          </div>
+          </ParallaxImage>
         )}
         {!hasBgImage && (
           <div className="absolute inset-0" style={{ backgroundColor: data.background_color }} />

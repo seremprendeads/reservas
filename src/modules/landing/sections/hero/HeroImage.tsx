@@ -4,6 +4,7 @@ import type { LandingTheme } from '../../types';
 import type { TEMPLATE_STYLES } from '../../config';
 import { fontSize } from '../../lib/font-size';
 import { textStyleExtras } from '../../lib/text-style';
+import { ParallaxImage } from '../../components/ParallaxImage';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -14,9 +15,10 @@ interface HeroImageProps {
   headingStyle: React.CSSProperties;
   bodyStyle: React.CSSProperties;
   handleSmoothScroll: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  parallax?: boolean;
 }
 
-export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: HeroImageProps) {
+export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoothScroll, parallax }: HeroImageProps) {
   const hasBgImage = !!data.background_image;
   // El color de la sección (hero_*) pisa al que el propio Hero tenía guardado.
   const titleColor = theme.hero_title_color || data.title_color || (hasBgImage ? '#ffffff' : theme.text_color);
@@ -26,9 +28,9 @@ export function HeroImage({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
   return (
     <section id="inicio" className="relative overflow-hidden pt-24 pb-20 px-4">
       {hasBgImage && (
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${data.background_image})` }}>
+        <ParallaxImage imageUrl={data.background_image} enabled={parallax}>
           <div className="absolute inset-0" style={{ backgroundColor: data.background_color, opacity: data.overlay_opacity / 100 }} />
-        </div>
+        </ParallaxImage>
       )}
       {!hasBgImage && (
         <div className="absolute inset-0" style={{ backgroundColor: data.background_color }} />

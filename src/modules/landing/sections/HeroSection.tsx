@@ -14,6 +14,7 @@ interface HeroSectionProps {
   headingStyle: React.CSSProperties;
   bodyStyle: React.CSSProperties;
   handleSmoothScroll: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  parallax?: boolean;
 }
 
 function getHeroData(hero: LandingSections['hero']): HeroData {
@@ -31,6 +32,7 @@ export function HeroSection({
   headingStyle,
   bodyStyle,
   handleSmoothScroll,
+  parallax,
 }: HeroSectionProps) {
   const heroData = getHeroData(s.hero);
 
@@ -42,6 +44,7 @@ export function HeroSection({
       headingStyle={headingStyle}
       bodyStyle={bodyStyle}
       handleSmoothScroll={handleSmoothScroll}
+      parallax={parallax}
     />
   );
 }

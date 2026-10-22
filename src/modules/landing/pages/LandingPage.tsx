@@ -34,6 +34,7 @@ import { FooterSection } from '../sections/FooterSection';
 import { FloatingWhatsApp } from '../components/FloatingWhatsApp';
 import { MarketingPopup } from '../sections/MarketingPopup';
 import { ShopInviteSection } from '../sections/ShopInviteSection';
+import { ParallaxImage } from '../components/ParallaxImage';
 import { Header } from '../sections/Header';
 import { SectionDivider } from '../components/SectionDivider';
 import { useModuleAccess, ModuleBlockedScreen } from '../../subscription';
@@ -258,6 +259,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
             headingStyle={headingStyle}
             bodyStyle={bodyStyle}
             handleSmoothScroll={handleSmoothScroll}
+            parallax={parallaxEnabled}
           />
         </div>
       ) : (
@@ -289,6 +291,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
               headingStyle={headingStyle}
               bodyStyle={bodyStyle}
               handleSmoothScroll={handleSmoothScroll}
+              parallax={parallaxEnabled}
             />
           )}
         </>
@@ -399,13 +402,13 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── BANNER ─── */}
       {hasSection('banner') && (s.banner.title || s.banner.subtitle || s.banner.description || s.banner.image_url) && (
         <section className="relative py-32 sm:py-40 px-5 sm:px-8 lg:px-12 overflow-hidden">
-          <div className={`absolute inset-0 ${parallaxEnabled ? 'bg-fixed' : 'bg-scroll'} bg-cover bg-center`} style={{ backgroundImage: s.banner.image_url ? `url(${s.banner.image_url})` : undefined }}>
+          <ParallaxImage imageUrl={s.banner.image_url} enabled={parallaxEnabled}>
             {s.banner.image_url ? (
               <div className="absolute inset-0" style={{ backgroundColor: s.banner.overlay_color, opacity: s.banner.overlay_opacity / 100 }} />
             ) : (
               <div className="absolute inset-0" style={{ backgroundColor: s.banner.overlay_color }} />
             )}
-          </div>
+          </ParallaxImage>
           <div className="relative z-10 max-w-4xl mx-auto text-center">
             {s.banner.title && (
               <h2 style={{ ...headingStyle, color: theme.banner_title_color || '#ffffff', fontWeight: 300, fontFamily: "'Dancing Script', cursive", fontSize: fontSize(theme.banner_title_size), ...textStyleExtras(theme, 'banner_title') }} className="text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-6">
@@ -483,6 +486,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
           handleSmoothScroll={handleSmoothScroll}
+          parallax={parallaxEnabled}
         />
       )}
 

@@ -14,17 +14,18 @@ interface HeroPreviewProps {
   headingStyle: React.CSSProperties;
   bodyStyle: React.CSSProperties;
   handleSmoothScroll: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  parallax?: boolean;
 }
 
-export function HeroPreview({ data, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: HeroPreviewProps) {
+export function HeroPreview({ data, theme, ts, headingStyle, bodyStyle, handleSmoothScroll, parallax }: HeroPreviewProps) {
   switch (data.hero_template) {
     case 'centered':
-      return <HeroCentered data={data} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} />;
+      return <HeroCentered data={data} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} parallax={parallax} />;
     case 'image':
-      return <HeroImage data={data} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} />;
+      return <HeroImage data={data} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} parallax={parallax} />;
     case 'video':
-      return <HeroVideo data={data} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} />;
+      return <HeroVideo data={data} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} parallax={parallax} />;
     default:
-      return <HeroCentered data={{ ...data, hero_template: 'centered' }} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} />;
+      return <HeroCentered data={{ ...data, hero_template: 'centered' }} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} parallax={parallax} />;
   }
 }

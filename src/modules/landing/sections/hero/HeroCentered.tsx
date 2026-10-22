@@ -3,6 +3,7 @@ import type { LandingTheme } from '../../types';
 import type { TEMPLATE_STYLES } from '../../config';
 import { fontSize } from '../../lib/font-size';
 import { textStyleExtras } from '../../lib/text-style';
+import { ParallaxImage } from '../../components/ParallaxImage';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];
 
@@ -13,9 +14,10 @@ interface HeroCenteredProps {
   headingStyle: React.CSSProperties;
   bodyStyle: React.CSSProperties;
   handleSmoothScroll: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  parallax?: boolean;
 }
 
-export function HeroCentered({ data, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: HeroCenteredProps) {
+export function HeroCentered({ data, theme, ts, headingStyle, bodyStyle, handleSmoothScroll, parallax }: HeroCenteredProps) {
   // El color de la sección (hero_*) pisa al que el propio Hero tenía guardado.
   const titleColor = theme.hero_title_color || data.title_color || '#ffffff';
   const subtitleColor = theme.hero_subtitle_color || data.subtitle_color || 'rgba(255,255,255,0.65)';
@@ -24,9 +26,9 @@ export function HeroCentered({ data, theme, ts, headingStyle, bodyStyle, handleS
     <section id="inicio" className="relative overflow-hidden">
       <div className="relative min-h-screen flex items-center justify-center pt-24 pb-20">
         {data.background_image && (
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${data.background_image})` }}>
+          <ParallaxImage imageUrl={data.background_image} enabled={parallax}>
             <div className="absolute inset-0" style={{ backgroundColor: data.background_color, opacity: data.overlay_opacity / 100 }} />
-          </div>
+          </ParallaxImage>
         )}
         {!data.background_image && (
           <div className="absolute inset-0" style={{ backgroundColor: data.background_color }} />
