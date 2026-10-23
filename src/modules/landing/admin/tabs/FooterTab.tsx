@@ -2,6 +2,8 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface FooterTabProps {
@@ -15,6 +17,14 @@ export function FooterTab({ sections, updateSection, triggerUpload, uploadingIma
   const update = (field: string, value: string) => updateSection('footer', { ...f, [field]: value });
   return (
     <div className="space-y-5">
+      <SectionColorField
+        label="Fondo del footer"
+        description="Color de fondo del pie de página."
+        value={theme.footer_bg_color}
+        fallback={DEFAULT_THEME.footer_bg_color}
+        onChange={v => updateTheme('footer_bg_color', v)}
+      />
+      <Separator />
       <div>
         <label className="text-sm font-medium text-foreground">Título del logo (Footer)</label>
         <Input value={f.logo_title} onChange={e => update('logo_title', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="Nombre del negocio" />

@@ -4,6 +4,7 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
 import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
@@ -42,31 +43,13 @@ export function ServicesTab({ sections, updateSection, triggerUpload, uploadingI
         <label className="text-sm font-medium text-foreground">Subtítulo</label>
         <Input value={ss.subtitle || ''} onChange={e => updateSection('secondary_services', { ...ss, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
       </div>
-      <div>
-        <label className="text-sm font-medium text-foreground">Fondo de las tarjetas</label>
-        <p className="text-xs text-muted-foreground mb-2">Color de fondo de cada tarjeta de servicio.</p>
-        <div className="flex items-center gap-2">
-          <input
-            type="color"
-            value={theme.secondary_services_card_bg_color || '#ffffff'}
-            onChange={e => updateTheme('secondary_services_card_bg_color', e.target.value)}
-            className="h-9 w-9 shrink-0 cursor-pointer rounded-lg border bg-transparent p-0.5"
-          />
-          <Input
-            type="text"
-            value={theme.secondary_services_card_bg_color || ''}
-            onChange={e => updateTheme('secondary_services_card_bg_color', e.target.value)}
-            className="h-9 w-32 font-mono text-xs"
-          />
-          <button
-            type="button"
-            onClick={() => updateTheme('secondary_services_card_bg_color', DEFAULT_THEME.secondary_services_card_bg_color)}
-            className="text-[11px] text-primary hover:underline"
-          >
-            Restablecer
-          </button>
-        </div>
-      </div>
+      <SectionColorField
+        label="Fondo de las tarjetas"
+        description="Color de fondo de cada tarjeta de servicio."
+        value={theme.secondary_services_card_bg_color}
+        fallback={DEFAULT_THEME.secondary_services_card_bg_color}
+        onChange={v => updateTheme('secondary_services_card_bg_color', v)}
+      />
       <Separator />
       {ss.items.map((item, i) => (
         <div key={i} className="rounded-xl border p-5 space-y-4 shadow-[0_8px_30px_rgba(0,0,0,.05)]">

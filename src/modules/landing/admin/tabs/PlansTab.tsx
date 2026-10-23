@@ -4,6 +4,8 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface PlansTabProps {
@@ -33,6 +35,20 @@ export function PlansTab({ sections, updateSection, triggerUpload, uploadingImag
         <label className="text-sm font-medium text-foreground">Título de sección</label>
         <Input value={p.title} onChange={e => updateSection('plans', { ...p, title: e.target.value })} className="mt-1.5 h-12 rounded-xl" />
       </div>
+      <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo de Planes."
+        value={theme.plans_bg_color}
+        fallback={DEFAULT_THEME.plans_bg_color}
+        onChange={v => updateTheme('plans_bg_color', v)}
+      />
+      <SectionColorField
+        label="Fondo de las tarjetas"
+        description="Color por defecto de cada tarjeta. Cada plan puede tener su propio color más abajo."
+        value={theme.plans_card_bg_color}
+        fallback={DEFAULT_THEME.plans_card_bg_color}
+        onChange={v => updateTheme('plans_card_bg_color', v)}
+      />
       <p className="text-xs text-muted-foreground">
         Cada plan que agregues acá se muestra como una tarjeta con un botón "Consultar". Al tocarlo, se abre WhatsApp
         (el número que cargaste en Footer) con un mensaje que ya incluye el nombre del plan.

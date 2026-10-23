@@ -1,6 +1,9 @@
 import { Input } from '../../../../components/ui/input';
+import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface MapTabProps {
@@ -35,6 +38,16 @@ export function MapTab({ sections, updateSection, triggerUpload, uploadingImage,
           placeholder="https://www.google.com/maps/embed?..." className="mt-1.5 h-12 rounded-xl" />
         <p className="text-xs text-muted-foreground mt-1">Pegá el link de Google Maps, la dirección, o el código iframe completo</p>
       </div>
+
+      <Separator />
+
+      <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo de Google Maps."
+        value={theme.map_bg_color}
+        fallback={DEFAULT_THEME.map_bg_color}
+        onChange={v => updateTheme('map_bg_color', v)}
+      />
 
       <SectionBackgroundFields
         imageUrl={m.background_image}

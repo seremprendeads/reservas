@@ -5,6 +5,8 @@ import { Separator } from '../../../../components/ui/separator';
 import { normalizeImages } from '../../lib/landing-utils';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface GalleryTabProps {
@@ -42,6 +44,13 @@ export function GalleryTab({ sections, updateSection, triggerUpload, uploadingIm
         <label className="text-sm font-medium text-foreground">Subtítulo</label>
         <Input value={g.subtitle || ''} onChange={e => updateSection('gallery', { ...g, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
       </div>
+      <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo de la Galería."
+        value={theme.gallery_bg_color}
+        fallback={DEFAULT_THEME.gallery_bg_color}
+        onChange={v => updateTheme('gallery_bg_color', v)}
+      />
       <div>
         <label className="text-sm font-medium text-foreground">Color de fondo hover</label>
         <div className="flex items-center gap-2.5 mt-1.5">

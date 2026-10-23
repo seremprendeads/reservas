@@ -4,6 +4,8 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface FaqTabProps {
@@ -35,6 +37,20 @@ export function FaqTab({ sections, updateSection, triggerUpload, uploadingImage,
         <label className="text-sm font-medium text-foreground">Subtítulo</label>
         <Input value={f.subtitle || ''} onChange={e => updateSection('faq', { ...f, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
       </div>
+      <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo de Preguntas frecuentes."
+        value={theme.faq_bg_color}
+        fallback={DEFAULT_THEME.faq_bg_color}
+        onChange={v => updateTheme('faq_bg_color', v)}
+      />
+      <SectionColorField
+        label="Fondo de cada pregunta y respuesta"
+        description="Color de fondo de cada ítem del acordeón."
+        value={theme.faq_item_bg_color}
+        fallback={DEFAULT_THEME.faq_item_bg_color}
+        onChange={v => updateTheme('faq_item_bg_color', v)}
+      />
       <Separator />
       {f.items.map((item, i) => (
         <div key={i} className="rounded-xl border p-5 space-y-4 shadow-[0_8px_30px_rgba(0,0,0,.05)]">

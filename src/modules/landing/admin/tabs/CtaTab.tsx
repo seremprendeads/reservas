@@ -5,6 +5,8 @@ import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { ButtonStyleFields } from '../components/ButtonStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface CtaTabProps {
@@ -38,6 +40,15 @@ export function CtaTab({ sections, updateSection, triggerUpload, uploadingImage,
         </select>
       </div>
       <Separator />
+
+      <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo de la llamada a la acción. Si subís una imagen, se usa esa imagen en su lugar."
+        value={theme.cta_bg_color}
+        fallback={DEFAULT_THEME.cta_bg_color}
+        onChange={v => updateTheme('cta_bg_color', v)}
+      />
+
       <div>
         <label className="text-sm font-medium text-foreground mb-2 block">Imagen de fondo</label>
         <div className="flex items-center gap-4">

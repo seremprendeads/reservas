@@ -2,19 +2,21 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SECTION_DEFINITIONS } from '../../types';
 import { SECTION_ICONS } from '../lib/constants';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import { Sparkles, Circle, Square } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
-import type { LandingSections } from '../../types';
+import type { LandingSections, LandingTheme } from '../../types';
 
 interface GeneralTabProps {
   slug: string; setSlug: (v: string) => void;
-  template: string; setTemplate: (v: string) => void;
   visibleSections: string[]; toggleVisibleSection: (k: string) => void;
   logoUrl: string; triggerUpload: (t: string) => void; uploadingImage: string | null;
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function GeneralTab({ slug, setSlug, template, setTemplate, visibleSections, toggleVisibleSection, logoUrl, triggerUpload, uploadingImage, sections, updateSection }: GeneralTabProps) {
+export function GeneralTab({ slug, setSlug, visibleSections, toggleVisibleSection, logoUrl, triggerUpload, uploadingImage, sections, updateSection, theme, updateTheme }: GeneralTabProps) {
   return (
     <div className="space-y-7">
       <div>
@@ -22,6 +24,14 @@ export function GeneralTab({ slug, setSlug, template, setTemplate, visibleSectio
         <Input value={slug} onChange={e => setSlug(e.target.value)} placeholder="mi-landing" className="mt-1.5 h-12 rounded-xl" />
         <p className="text-xs text-muted-foreground mt-1">URL: /{slug || '...'}</p>
       </div>
+
+      <SectionColorField
+        label="Fondo principal del sitio"
+        description="Fondo base de la página y del header."
+        value={theme.bg_color}
+        fallback={DEFAULT_THEME.bg_color}
+        onChange={v => updateTheme('bg_color', v)}
+      />
 
       <Separator />
 

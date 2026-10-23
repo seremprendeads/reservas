@@ -1,8 +1,11 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
+import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface AboutTabProps {
@@ -70,6 +73,16 @@ export function AboutTab({ sections, updateSection, triggerUpload, uploadingImag
           </select>
         </div>
       )}
+
+      <Separator />
+
+      <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo de Nosotros."
+        value={theme.about_bg_color}
+        fallback={DEFAULT_THEME.about_bg_color}
+        onChange={v => updateTheme('about_bg_color', v)}
+      />
 
       <SectionBackgroundFields
         imageUrl={a.background_image}

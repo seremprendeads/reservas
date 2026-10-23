@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Eye, Save, Loader2, Globe } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
-import { supabase, type Business } from '../../../lib/supabase';
+import type { Business } from '../../../lib/supabase';
 import { ADMIN_TABS, type AdminTab } from './lib/constants';
 import { useLandingCrud } from './hooks/useLandingCrud';
 import { useLandingUpload } from './hooks/useLandingUpload';
@@ -39,7 +39,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
   const {
     landing, sections, theme, template, visibleSections, logoUrl, slug,
     loading, saving, saveMessage,
-    setSections, setTheme, setTemplate, setVisibleSections, setLogoUrl, setSlug, setSaveMessage,
+    setSections, setLogoUrl, setSlug, setSaveMessage,
     updateSection, updateTheme, toggleVisibleSection, handleSave,
   } = useLandingCrud({ business });
 
@@ -124,11 +124,11 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                 {activeTab === 'general' && (
                   <GeneralTab
                     slug={slug} setSlug={setSlug}
-                    template={template} setTemplate={setTemplate}
                     visibleSections={visibleSections} toggleVisibleSection={toggleVisibleSection}
                     logoUrl={logoUrl} triggerUpload={triggerUpload}
                     uploadingImage={uploadingImage}
                     sections={sections} updateSection={updateSection}
+                    theme={theme} updateTheme={updateTheme}
                   />
                 )}
                 {activeTab === 'menu' && (

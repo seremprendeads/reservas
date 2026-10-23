@@ -5,6 +5,7 @@ import { Separator } from '../../../../components/ui/separator';
 import { IconSelector } from '../components/IconSelector';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
 import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
@@ -37,31 +38,20 @@ export function WhyChooseUsTab({ sections, updateSection, triggerUpload, uploadi
         <label className="text-sm font-medium text-foreground">Subtítulo</label>
         <Input value={w.subtitle || ''} onChange={e => updateSection('why_choose_us', { ...w, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
       </div>
-      <div>
-        <label className="text-sm font-medium text-foreground">Fondo de las tarjetas</label>
-        <p className="text-xs text-muted-foreground mb-2">Color de fondo de cada tarjeta de beneficio.</p>
-        <div className="flex items-center gap-2">
-          <input
-            type="color"
-            value={theme.why_choose_us_card_bg_color || '#ffffff'}
-            onChange={e => updateTheme('why_choose_us_card_bg_color', e.target.value)}
-            className="h-9 w-9 shrink-0 cursor-pointer rounded-lg border bg-transparent p-0.5"
-          />
-          <Input
-            type="text"
-            value={theme.why_choose_us_card_bg_color || ''}
-            onChange={e => updateTheme('why_choose_us_card_bg_color', e.target.value)}
-            className="h-9 w-32 font-mono text-xs"
-          />
-          <button
-            type="button"
-            onClick={() => updateTheme('why_choose_us_card_bg_color', DEFAULT_THEME.why_choose_us_card_bg_color)}
-            className="text-[11px] text-primary hover:underline"
-          >
-            Restablecer
-          </button>
-        </div>
-      </div>
+      <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo de Por qué elegirnos."
+        value={theme.why_choose_us_bg_color}
+        fallback={DEFAULT_THEME.why_choose_us_bg_color}
+        onChange={v => updateTheme('why_choose_us_bg_color', v)}
+      />
+      <SectionColorField
+        label="Fondo de las tarjetas"
+        description="Color de fondo de cada tarjeta de beneficio."
+        value={theme.why_choose_us_card_bg_color}
+        fallback={DEFAULT_THEME.why_choose_us_card_bg_color}
+        onChange={v => updateTheme('why_choose_us_card_bg_color', v)}
+      />
       <Separator />
       {w.items.map((item, i) => (
         <div key={i} className="rounded-xl border p-5 space-y-4 shadow-[0_8px_30px_rgba(0,0,0,.05)]">

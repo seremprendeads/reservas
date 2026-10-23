@@ -1,7 +1,10 @@
 import { Input } from '../../../../components/ui/input';
+import { Separator } from '../../../../components/ui/separator';
 import { IconSelector } from '../components/IconSelector';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface MainServiceTabProps {
@@ -85,6 +88,16 @@ export function MainServiceTab({ sections, updateSection, triggerUpload, uploadi
         <textarea value={ms.description} onChange={e => updateSection('main_service', { ...ms, description: e.target.value })} rows={4}
           className="mt-1.5 w-full h-24 rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-200" />
       </div>
+
+      <Separator />
+
+      <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo del servicio principal."
+        value={theme.main_service_bg_color}
+        fallback={DEFAULT_THEME.main_service_bg_color}
+        onChange={v => updateTheme('main_service_bg_color', v)}
+      />
 
       <SectionBackgroundFields
         imageUrl={ms.background_image}

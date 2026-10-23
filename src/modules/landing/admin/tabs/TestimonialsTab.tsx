@@ -4,6 +4,8 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface TestimonialsTabProps {
@@ -35,6 +37,20 @@ export function TestimonialsTab({ sections, updateSection, triggerUpload, upload
         <label className="text-sm font-medium text-foreground">Subtítulo</label>
         <Input value={t.subtitle || ''} onChange={e => updateSection('testimonials', { ...t, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
       </div>
+      <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo de Testimonios."
+        value={theme.testimonials_bg_color}
+        fallback={DEFAULT_THEME.testimonials_bg_color}
+        onChange={v => updateTheme('testimonials_bg_color', v)}
+      />
+      <SectionColorField
+        label="Fondo de las tarjetas"
+        description="Color de fondo de cada testimonio."
+        value={theme.testimonials_card_bg_color}
+        fallback={DEFAULT_THEME.testimonials_card_bg_color}
+        onChange={v => updateTheme('testimonials_card_bg_color', v)}
+      />
       <div>
         <label className="text-sm font-medium text-foreground">Link a reseñas de Google (opcional)</label>
         <Input value={t.google_review_url || ''} onChange={e => updateSection('testimonials', { ...t, google_review_url: e.target.value || null })}
