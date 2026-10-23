@@ -1,13 +1,15 @@
 import { Input } from '../../../../components/ui/input';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface MapTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  triggerUpload: (t: string) => void; uploadingImage: string | null;
   theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function MapTab({ sections, updateSection, theme, updateTheme }: MapTabProps) {
+export function MapTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: MapTabProps) {
   const m = sections.map;
   return (
     <div className="space-y-5">
@@ -33,6 +35,18 @@ export function MapTab({ sections, updateSection, theme, updateTheme }: MapTabPr
           placeholder="https://www.google.com/maps/embed?..." className="mt-1.5 h-12 rounded-xl" />
         <p className="text-xs text-muted-foreground mt-1">Pegá el link de Google Maps, la dirección, o el código iframe completo</p>
       </div>
+
+      <SectionBackgroundFields
+        imageUrl={m.background_image}
+        fixed={m.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        uploadTarget="map_background"
+        triggerUpload={triggerUpload}
+        uploadingImage={uploadingImage}
+        onChange={url => updateSection('map', { ...m, background_image: url })}
+        onFixedChange={v => updateSection('map', { ...m, background_fixed: v })}
+      />
 
       <SectionTextStyleFields sectionKey="map" theme={theme} updateTheme={updateTheme} />
     </div>

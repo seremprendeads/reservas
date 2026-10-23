@@ -3,14 +3,16 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface TestimonialsTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  triggerUpload: (t: string) => void; uploadingImage: string | null;
   theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function TestimonialsTab({ sections, updateSection, theme, updateTheme }: TestimonialsTabProps) {
+export function TestimonialsTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: TestimonialsTabProps) {
   const t = sections.testimonials;
   const addItem = () => {
     updateSection('testimonials', { ...t, items: [...t.items, { name: '', text: '', rating: 5 }] });
@@ -68,6 +70,18 @@ export function TestimonialsTab({ sections, updateSection, theme, updateTheme }:
       <Button variant="outline" size="sm" onClick={addItem}>
         <Plus className="h-4 w-4 mr-1" /> Agregar testimonio
       </Button>
+
+      <SectionBackgroundFields
+        imageUrl={t.background_image}
+        fixed={t.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        uploadTarget="testimonials_background"
+        triggerUpload={triggerUpload}
+        uploadingImage={uploadingImage}
+        onChange={url => updateSection('testimonials', { ...t, background_image: url })}
+        onFixedChange={v => updateSection('testimonials', { ...t, background_fixed: v })}
+      />
 
       <SectionTextStyleFields sectionKey="testimonials" theme={theme} updateTheme={updateTheme} />
     </div>

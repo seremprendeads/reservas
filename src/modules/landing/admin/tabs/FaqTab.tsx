@@ -3,14 +3,16 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface FaqTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  triggerUpload: (t: string) => void; uploadingImage: string | null;
   theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function FaqTab({ sections, updateSection, theme, updateTheme }: FaqTabProps) {
+export function FaqTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: FaqTabProps) {
   const f = sections.faq;
   const addItem = () => {
     updateSection('faq', { ...f, items: [...f.items, { question: '', answer: '' }] });
@@ -50,6 +52,18 @@ export function FaqTab({ sections, updateSection, theme, updateTheme }: FaqTabPr
       <Button variant="outline" size="sm" onClick={addItem}>
         <Plus className="h-4 w-4 mr-1" /> Agregar FAQ
       </Button>
+
+      <SectionBackgroundFields
+        imageUrl={f.background_image}
+        fixed={f.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        uploadTarget="faq_background"
+        triggerUpload={triggerUpload}
+        uploadingImage={uploadingImage}
+        onChange={url => updateSection('faq', { ...f, background_image: url })}
+        onFixedChange={v => updateSection('faq', { ...f, background_fixed: v })}
+      />
 
       <SectionTextStyleFields sectionKey="faq" theme={theme} updateTheme={updateTheme} />
     </div>

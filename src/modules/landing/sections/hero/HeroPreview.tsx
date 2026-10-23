@@ -26,6 +26,6 @@ export function HeroPreview({ data, theme, ts, headingStyle, bodyStyle, handleSm
     case 'video':
       return <HeroVideo data={data} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} parallax={parallax} />;
     default:
-      return <HeroCentered data={{ ...data, hero_template: 'centered' }} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} parallax={parallax} />;
+      return <HeroCentered data={{ ...(data as any), hero_template: 'centered' } as any} theme={theme} ts={ts} headingStyle={headingStyle} bodyStyle={bodyStyle} handleSmoothScroll={handleSmoothScroll} parallax={parallax} />;
   }
 }

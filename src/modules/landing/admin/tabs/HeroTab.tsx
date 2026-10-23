@@ -23,6 +23,7 @@ export function HeroTab({ sections, updateSection, triggerUpload, uploadingImage
 
   const handleTemplateChange = (template: HeroTemplate) => {
     const newData = createDefaultHeroData(template, {
+      background_fixed: heroData.background_fixed,
       logo_url: heroData.logo_url,
       logo_caption: heroData.logo_caption,
       title: heroData.title,
@@ -44,7 +45,16 @@ export function HeroTab({ sections, updateSection, triggerUpload, uploadingImage
     <div className="space-y-5">
       <HeroSelector value={heroData.hero_template} onChange={handleTemplateChange} />
       <div className="border-t pt-5">
-        <HeroForm data={heroData} onChange={handleDataChange} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
+        <HeroForm
+          data={heroData}
+          onChange={handleDataChange}
+          triggerUpload={triggerUpload}
+          uploadingImage={uploadingImage}
+          theme={theme}
+          updateTheme={updateTheme}
+          dividers={sections.dividers}
+          updateSection={updateSection}
+        />
       </div>
     </div>
   );

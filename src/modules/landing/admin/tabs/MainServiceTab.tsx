@@ -1,14 +1,16 @@
 import { Input } from '../../../../components/ui/input';
 import { IconSelector } from '../components/IconSelector';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface MainServiceTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  triggerUpload: (t: string) => void; uploadingImage: string | null;
   theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function MainServiceTab({ sections, updateSection, theme, updateTheme }: MainServiceTabProps) {
+export function MainServiceTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: MainServiceTabProps) {
   const ms = sections.main_service;
   return (
     <div className="space-y-5">
@@ -83,6 +85,18 @@ export function MainServiceTab({ sections, updateSection, theme, updateTheme }: 
         <textarea value={ms.description} onChange={e => updateSection('main_service', { ...ms, description: e.target.value })} rows={4}
           className="mt-1.5 w-full h-24 rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-200" />
       </div>
+
+      <SectionBackgroundFields
+        imageUrl={ms.background_image}
+        fixed={ms.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        uploadTarget="main_service_background"
+        triggerUpload={triggerUpload}
+        uploadingImage={uploadingImage}
+        onChange={url => updateSection('main_service', { ...ms, background_image: url })}
+        onFixedChange={v => updateSection('main_service', { ...ms, background_fixed: v })}
+      />
 
       <SectionTextStyleFields sectionKey="main_service" theme={theme} updateTheme={updateTheme} />
     </div>

@@ -3,6 +3,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
@@ -98,6 +99,18 @@ export function ServicesTab({ sections, updateSection, triggerUpload, uploadingI
       <Button variant="outline" size="sm" onClick={addItem}>
         <Plus className="h-4 w-4 mr-1" /> Agregar servicio
       </Button>
+
+      <SectionBackgroundFields
+        imageUrl={ss.background_image}
+        fixed={ss.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        uploadTarget="secondary_services_background"
+        triggerUpload={triggerUpload}
+        uploadingImage={uploadingImage}
+        onChange={url => updateSection('secondary_services', { ...ss, background_image: url })}
+        onFixedChange={v => updateSection('secondary_services', { ...ss, background_fixed: v })}
+      />
 
       <SectionTextStyleFields sectionKey="secondary_services" theme={theme} updateTheme={updateTheme} />
     </div>

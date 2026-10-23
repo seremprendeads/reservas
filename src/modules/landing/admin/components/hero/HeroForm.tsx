@@ -4,8 +4,9 @@ import { Input } from '../../../../../components/ui/input';
 import { Separator } from '../../../../../components/ui/separator';
 import type { HeroData } from '../../../sections/hero/types';
 import { isValidVideoUrl } from '../../../sections/hero/helpers';
-import type { LandingTheme } from '../../../types';
+import type { LandingSections, LandingTheme } from '../../../types';
 import { ButtonStyleFields } from '../ButtonStyleFields';
+import { SectionBackgroundFields } from '../SectionBackgroundFields';
 
 interface HeroFormProps {
   data: HeroData;
@@ -14,6 +15,8 @@ interface HeroFormProps {
   uploadingImage: string | null;
   theme: LandingTheme;
   updateTheme: (k: string, v: string) => void;
+  dividers: LandingSections['dividers'];
+  updateSection: (k: string, v: unknown) => void;
 }
 
 // Tamaño (px) y color inline para un texto del Hero. null = usar el estilo
@@ -104,7 +107,7 @@ function TextStyleRow({
   );
 }
 
-export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme, updateTheme }: HeroFormProps) {
+export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme, updateTheme, dividers, updateSection }: HeroFormProps) {
   const update = <K extends keyof HeroData>(key: K, value: HeroData[K]) => {
     onChange({ ...data, [key]: value });
   };
@@ -287,6 +290,14 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
                   className="w-full mt-1" />
               </div>
             )}
+            <SectionBackgroundFields
+              imageUrl={data.background_image}
+              fixed={data.background_fixed}
+              dividers={dividers}
+              updateSection={updateSection}
+              hideUpload
+              onFixedChange={v => update('background_fixed', v)}
+            />
           </div>
         )}
 

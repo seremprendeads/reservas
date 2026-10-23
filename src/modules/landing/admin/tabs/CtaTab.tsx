@@ -4,6 +4,7 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { ButtonStyleFields } from '../components/ButtonStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface CtaTabProps {
@@ -74,6 +75,14 @@ export function CtaTab({ sections, updateSection, triggerUpload, uploadingImage,
           </div>
         </>
       )}
+      <SectionBackgroundFields
+        imageUrl={c.image_url}
+        fixed={c.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        hideUpload
+        onFixedChange={v => updateSection('cta', { ...c, background_fixed: v })}
+      />
       <SectionTextStyleFields sectionKey="cta" theme={theme} updateTheme={updateTheme} />
       <ButtonStyleFields baseKey="cta_button" label="Botón de la llamada a la acción" theme={theme} updateTheme={updateTheme} defaultBg={theme.button_color} />
     </div>

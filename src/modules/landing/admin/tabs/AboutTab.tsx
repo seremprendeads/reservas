@@ -2,6 +2,7 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface AboutTabProps {
@@ -69,6 +70,18 @@ export function AboutTab({ sections, updateSection, triggerUpload, uploadingImag
           </select>
         </div>
       )}
+
+      <SectionBackgroundFields
+        imageUrl={a.background_image}
+        fixed={a.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        uploadTarget="about_background"
+        triggerUpload={triggerUpload}
+        uploadingImage={uploadingImage}
+        onChange={url => updateSection('about', { ...a, background_image: url })}
+        onFixedChange={v => updateSection('about', { ...a, background_fixed: v })}
+      />
 
       <SectionTextStyleFields sectionKey="about" theme={theme} updateTheme={updateTheme} />
     </div>

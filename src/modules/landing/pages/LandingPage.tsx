@@ -259,7 +259,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
             headingStyle={headingStyle}
             bodyStyle={bodyStyle}
             handleSmoothScroll={handleSmoothScroll}
-            parallax={parallaxEnabled}
+            parallax={(s.hero.background_fixed ?? parallaxEnabled)}
           />
         </div>
       ) : (
@@ -291,7 +291,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
               headingStyle={headingStyle}
               bodyStyle={bodyStyle}
               handleSmoothScroll={handleSmoothScroll}
-              parallax={parallaxEnabled}
+              parallax={(s.hero.background_fixed ?? parallaxEnabled)}
             />
           )}
         </>
@@ -307,85 +307,106 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
 
       {/* ─── ABOUT ─── */}
       {hasSection('about') && s.about.description && (
-        <AboutSection
-          about={s.about}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-          showTopBorder={!s.dividers?.hero_about?.enabled}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.about.background_image} enabled={(s.about.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <AboutSection
+            about={s.about}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+            showTopBorder={!s.dividers?.hero_about?.enabled}
+          />
+        </div>
       )}
 
       {/* ─── ABOUT TEXT ─── */}
       {hasSection('about_text') && s.about_text && (
-        <AboutTextSection
-          aboutText={s.about_text}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.about_text.background_image} enabled={(s.about_text.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <AboutTextSection
+            aboutText={s.about_text}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+          />
+        </div>
       )}
 
       {/* ─── MAIN SERVICE ─── */}
       {hasSection('main_service') && s.main_service.title && (
-        <MainServiceSection
-          mainService={s.main_service}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-          getIcon={getIcon}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.main_service.background_image} enabled={(s.main_service.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <MainServiceSection
+            mainService={s.main_service}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+            getIcon={getIcon}
+          />
+        </div>
       )}
 
       {/* ─── SECONDARY SERVICES ─── */}
       {hasSection('secondary_services') && s.secondary_services.items.length > 0 && (
-        <SecondaryServicesSection
-          secondaryServices={s.secondary_services}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-          getIcon={getIcon}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.secondary_services.background_image} enabled={(s.secondary_services.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <SecondaryServicesSection
+            secondaryServices={s.secondary_services}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+            getIcon={getIcon}
+          />
+        </div>
       )}
 
       {/* ─── WHY CHOOSE US ─── */}
       {hasSection('why_choose_us') && s.why_choose_us.items.length > 0 && (
-        <WhyChooseUsSection
-          whyChooseUs={s.why_choose_us}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-          getIcon={getIcon}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.why_choose_us.background_image} enabled={(s.why_choose_us.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <WhyChooseUsSection
+            whyChooseUs={s.why_choose_us}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+            getIcon={getIcon}
+          />
+        </div>
       )}
 
       {hasSection('plans') && (
-        <PlansSection
-          plans={s.plans}
-          whatsapp={s.footer?.whatsapp || ''}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.plans.background_image} enabled={(s.plans.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <PlansSection
+            plans={s.plans}
+            whatsapp={s.footer?.whatsapp || ''}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+          />
+        </div>
       )}
 
       {/* ─── GALLERY ─── */}
       {hasSection('gallery') && galleryImages.length > 0 && (
-        <GallerySection
-          gallery={s.gallery}
-          galleryImages={galleryImages}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-          onImageClick={(i) => setLightboxIndex(i)}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.gallery.background_image} enabled={(s.gallery.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <GallerySection
+            gallery={s.gallery}
+            galleryImages={galleryImages}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+            onImageClick={(i) => setLightboxIndex(i)}
+          />
+        </div>
       )}
 
       {/* ─── LIGHTBOX ─── */}
@@ -402,7 +423,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── BANNER ─── */}
       {hasSection('banner') && (s.banner.title || s.banner.subtitle || s.banner.description || s.banner.image_url) && (
         <section className="relative py-32 sm:py-40 px-5 sm:px-8 lg:px-12 overflow-hidden">
-          <ParallaxImage imageUrl={s.banner.image_url} enabled={parallaxEnabled}>
+          <ParallaxImage imageUrl={s.banner.image_url} enabled={(s.banner.background_fixed ?? parallaxEnabled)}>
             {s.banner.image_url ? (
               <div className="absolute inset-0" style={{ backgroundColor: s.banner.overlay_color, opacity: s.banner.overlay_opacity / 100 }} />
             ) : (
@@ -431,13 +452,16 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
 
       {/* ─── TESTIMONIALS ─── */}
       {hasSection('testimonials') && s.testimonials.items.length > 0 && (
-        <TestimonialsSection
-          testimonials={s.testimonials}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.testimonials.background_image} enabled={(s.testimonials.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <TestimonialsSection
+            testimonials={s.testimonials}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+          />
+        </div>
       )}
 
       {/* ─── SHOP INVITE ─── */}
@@ -449,30 +473,36 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
           shopUrl={`/tienda/${landing.slug}`}
-          parallax={parallaxEnabled}
+          parallax={(s.shop_invite.background_fixed ?? parallaxEnabled)}
         />
       )}
 
       {/* ─── FAQ ─── */}
       {hasSection('faq') && s.faq.items.length > 0 && (
-        <FaqSection
-          faq={s.faq}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.faq.background_image} enabled={(s.faq.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <FaqSection
+            faq={s.faq}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+          />
+        </div>
       )}
 
       {/* ─── MAP ─── */}
       {hasSection('map') && (s.map.address || s.map.map_url) && (
-        <MapSection
-          map={s.map}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.map.background_image} enabled={(s.map.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <MapSection
+            map={s.map}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+          />
+        </div>
       )}
 
       {/* ─── CTA ─── */}
@@ -486,7 +516,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
           headingStyle={headingStyle}
           bodyStyle={bodyStyle}
           handleSmoothScroll={handleSmoothScroll}
-          parallax={parallaxEnabled}
+          parallax={(s.cta.background_fixed ?? parallaxEnabled)}
         />
       )}
 
@@ -500,20 +530,23 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
 
       {/* ─── FOOTER ─── */}
       {hasSection('footer') && (
-        <FooterSection
-          footer={s.footer}
-          menuItems={s.header.menu_items || []}
-          logoUrl={s.header.logo_image_url || landing.logo_url}
-          logoShape={s.header.logo_shape}
-          slug={landing.slug}
-          businessId={isPreview ? null : landing.business_id}
-          legalLinksNewTab={isPreview}
-          theme={theme}
-          ts={ts}
-          headingStyle={headingStyle}
-          bodyStyle={bodyStyle}
-          handleSmoothScroll={handleSmoothScroll}
-        />
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.footer.background_image} enabled={(s.footer.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <FooterSection
+            footer={s.footer}
+            menuItems={s.header.menu_items || []}
+            logoUrl={s.header.logo_image_url || landing.logo_url}
+            logoShape={s.header.logo_shape}
+            slug={landing.slug}
+            businessId={isPreview ? null : landing.business_id}
+            legalLinksNewTab={isPreview}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+            handleSmoothScroll={handleSmoothScroll}
+          />
+        </div>
       )}
 
       {/* ─── ENLACES LEGALES si el footer está oculto ─── */}

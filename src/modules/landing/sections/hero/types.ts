@@ -12,6 +12,7 @@ export interface HeroBaseData {
   secondary_button_url: string;
   background_color: string;
   background_image: string | null;
+  background_fixed?: boolean;
   overlay_opacity: number;
   // Tamaño (px) y color propios de cada texto. null = usar el estilo por
   // defecto de la plantilla (tamaño responsive de Tailwind, color derivado
@@ -73,6 +74,7 @@ export function createDefaultHeroData(template: HeroTemplate, existing?: Partial
     secondary_button_url: existing?.secondary_button_url ?? '#nosotros',
     background_color: existing?.background_color ?? '#111827',
     background_image: existing?.background_image ?? null,
+    background_fixed: existing?.background_fixed,
     overlay_opacity: existing?.overlay_opacity ?? 40,
     logo_caption_size: existing?.logo_caption_size ?? null,
     logo_caption_color: existing?.logo_caption_color ?? null,

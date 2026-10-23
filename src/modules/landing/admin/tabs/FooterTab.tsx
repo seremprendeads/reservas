@@ -1,14 +1,16 @@
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface FooterTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  triggerUpload: (t: string) => void; uploadingImage: string | null;
   theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function FooterTab({ sections, updateSection, theme, updateTheme }: FooterTabProps) {
+export function FooterTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: FooterTabProps) {
   const f = sections.footer;
   const update = (field: string, value: string) => updateSection('footer', { ...f, [field]: value });
   return (
@@ -91,6 +93,18 @@ export function FooterTab({ sections, updateSection, theme, updateTheme }: Foote
         <label className="text-sm font-medium text-foreground">Copyright</label>
         <Input value={f.copyright} onChange={e => update('copyright', e.target.value)} className="mt-1.5 h-12 rounded-xl" placeholder="© 2026 Tu Negocio. Todos los derechos reservados." />
       </div>
+
+      <SectionBackgroundFields
+        imageUrl={f.background_image}
+        fixed={f.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        uploadTarget="footer_background"
+        triggerUpload={triggerUpload}
+        uploadingImage={uploadingImage}
+        onChange={url => updateSection('footer', { ...f, background_image: url })}
+        onFixedChange={v => updateSection('footer', { ...f, background_fixed: v })}
+      />
 
       <SectionTextStyleFields
         sectionKey="footer"

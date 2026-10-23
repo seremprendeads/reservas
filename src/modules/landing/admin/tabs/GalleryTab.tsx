@@ -4,6 +4,7 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { normalizeImages } from '../../lib/landing-utils';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface GalleryTabProps {
@@ -95,6 +96,18 @@ export function GalleryTab({ sections, updateSection, triggerUpload, uploadingIm
           )}
         </div>
       </div>
+
+      <SectionBackgroundFields
+        imageUrl={g.background_image}
+        fixed={g.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        uploadTarget="gallery_background"
+        triggerUpload={triggerUpload}
+        uploadingImage={uploadingImage}
+        onChange={url => updateSection('gallery', { ...g, background_image: url })}
+        onFixedChange={v => updateSection('gallery', { ...g, background_fixed: v })}
+      />
 
       <SectionTextStyleFields sectionKey="gallery" theme={theme} updateTheme={updateTheme} />
     </div>

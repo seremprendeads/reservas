@@ -36,6 +36,8 @@ export interface LandingSections {
     logo_description: string;
     logo_image_url: string | null;
     logo_shape: 'circle' | 'square';
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   hero: {
     hero_template: string;
@@ -65,6 +67,7 @@ export interface LandingSections {
     subtitle_color: string | null;
     description_size: number | null;
     description_color: string | null;
+    background_fixed?: boolean;
   };
   about: {
     title: string;
@@ -73,6 +76,8 @@ export interface LandingSections {
     image_url: string | null;
     alignment: 'left' | 'center' | 'right' | 'justify';
     image_position: 'left' | 'right';
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   about_text: {
     title: string;
@@ -81,39 +86,53 @@ export interface LandingSections {
     alignment: 'left' | 'center' | 'justify';
     image_url: string | null;
     image_position: 'left' | 'right';
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   main_service: {
     icon: string;
     title: string;
     subtitle: string;
     description: string;
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   secondary_services: {
     title: string;
     subtitle: string;
     items: { icon: string; image_url: string | null; title: string; description: string }[];
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   why_choose_us: {
     title: string;
     subtitle: string;
     items: { icon: string; title?: string; subtitle?: string; text: string }[];
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   gallery: {
     title: string;
     subtitle: string;
     images: { url: string; title: string; description: string }[];
     overlay_color: string;
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   testimonials: {
     title: string;
     subtitle: string;
     items: { name: string; text: string; rating: number }[];
     google_review_url: string | null;
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   faq: {
     title: string;
     subtitle: string;
     items: { question: string; answer: string }[];
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   cta: {
     title: string;
@@ -123,10 +142,13 @@ export interface LandingSections {
     image_url: string | null;
     overlay_color: string;
     overlay_opacity: number;
+    background_fixed?: boolean;
   };
   plans: {
     title: string;
     items: { name: string; detail: string; bg_color: string; text_color: string; button_color: string }[];
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   footer: {
     address: string;
@@ -147,6 +169,8 @@ export interface LandingSections {
     logo_title: string;
     logo_description: string;
     frases: string;
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   banner: {
     title: string;
@@ -155,12 +179,15 @@ export interface LandingSections {
     image_url: string | null;
     overlay_color: string;
     overlay_opacity: number;
+    background_fixed?: boolean;
   };
   map: {
     title: string;
     subtitle: string;
     address: string;
     map_url: string;
+    background_image?: string | null;
+    background_fixed?: boolean;
   };
   popup: {
     enabled: boolean;
@@ -181,6 +208,7 @@ export interface LandingSections {
     image_url: string | null;
     overlay_color: string;
     overlay_opacity: number;
+    background_fixed?: boolean;
   };
   seo_marketing: {
     general: {

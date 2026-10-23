@@ -1,7 +1,7 @@
 import type { LandingSections, LandingTheme } from '../types';
 import type { TEMPLATE_STYLES } from '../config';
 import type { HeroData } from './hero/types';
-import { createDefaultHeroData, migrateHeroData } from './hero/types';
+import { migrateHeroData } from './hero/types';
 import { HeroPreview } from './hero/HeroPreview';
 
 type TemplateStyles = typeof TEMPLATE_STYLES['creative'];

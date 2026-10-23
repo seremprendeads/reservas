@@ -3,6 +3,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface BannerTabProps {
@@ -67,6 +68,15 @@ export function BannerTab({ sections, updateSection, triggerUpload, uploadingIma
           </div>
         </>
       )}
+
+      <SectionBackgroundFields
+        imageUrl={b.image_url}
+        fixed={b.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        hideUpload
+        onFixedChange={v => updateSection('banner', { ...b, background_fixed: v })}
+      />
 
       <SectionTextStyleFields
         sectionKey="banner"

@@ -4,15 +4,17 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { IconSelector } from '../components/IconSelector';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface WhyChooseUsTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  triggerUpload: (t: string) => void; uploadingImage: string | null;
   theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
-export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: WhyChooseUsTabProps) {
+export function WhyChooseUsTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: WhyChooseUsTabProps) {
   const w = sections.why_choose_us;
   const addItem = () => {
     updateSection('why_choose_us', { ...w, items: [...w.items, { icon: 'CheckCircle', title: '', subtitle: '', text: '' }] });
@@ -133,6 +135,18 @@ export function WhyChooseUsTab({ sections, updateSection, theme, updateTheme }: 
           </div>
         </div>
       </div>
+
+      <SectionBackgroundFields
+        imageUrl={w.background_image}
+        fixed={w.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        uploadTarget="why_choose_us_background"
+        triggerUpload={triggerUpload}
+        uploadingImage={uploadingImage}
+        onChange={url => updateSection('why_choose_us', { ...w, background_image: url })}
+        onFixedChange={v => updateSection('why_choose_us', { ...w, background_fixed: v })}
+      />
 
       <SectionTextStyleFields sectionKey="why_choose_us" theme={theme} updateTheme={updateTheme} />
     </div>

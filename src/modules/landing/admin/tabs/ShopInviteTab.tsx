@@ -4,6 +4,7 @@ import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { ButtonStyleFields } from '../components/ButtonStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 import { DEFAULT_SECTIONS } from '../../config';
 
@@ -75,6 +76,15 @@ export function ShopInviteTab({ sections, updateSection, triggerUpload, uploadin
           </div>
         </>
       )}
+
+      <SectionBackgroundFields
+        imageUrl={si.image_url}
+        fixed={si.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        hideUpload
+        onFixedChange={v => updateSection('shop_invite', { ...si, background_fixed: v })}
+      />
 
       <SectionTextStyleFields
         sectionKey="shop_invite"

@@ -144,13 +144,13 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <AboutTextTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'main_service' && (
-                  <MainServiceTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
+                  <MainServiceTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'services' && (
                   <ServicesTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'why' && (
-                  <WhyChooseUsTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
+                  <WhyChooseUsTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'gallery' && (
                   <GalleryTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
@@ -162,19 +162,19 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <ShopInviteTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'testimonials' && (
-                  <TestimonialsTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
+                  <TestimonialsTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'faq' && (
-                  <FaqTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
+                  <FaqTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'cta' && (
                   <CtaTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'plans' && (
-                  <PlansTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
+                  <PlansTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'map' && (
-                  <MapTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
+                  <MapTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'popup' && (
                   <PopupTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
@@ -183,7 +183,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <SeoMarketingTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
                 )}
                 {activeTab === 'footer' && (
-                  <FooterTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
+                  <FooterTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
                 {activeTab === 'design' && (
                   <DesignTab theme={theme} updateTheme={updateTheme} businessId={business?.id || ''} />

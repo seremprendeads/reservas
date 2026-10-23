@@ -3,16 +3,18 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface PlansTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
+  triggerUpload: (t: string) => void; uploadingImage: string | null;
   theme: LandingTheme; updateTheme: (k: string, v: string) => void;
 }
 
 const NEW_ITEM_DEFAULTS = { bg_color: '#fafafa', text_color: '#111111', button_color: '#059669' };
 
-export function PlansTab({ sections, updateSection, theme, updateTheme }: PlansTabProps) {
+export function PlansTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: PlansTabProps) {
   const p = sections.plans;
   const addItem = () => {
     updateSection('plans', { ...p, items: [...p.items, { name: '', detail: '', ...NEW_ITEM_DEFAULTS }] });
@@ -88,6 +90,18 @@ export function PlansTab({ sections, updateSection, theme, updateTheme }: PlansT
       <Button variant="outline" size="sm" onClick={addItem}>
         <Plus className="h-4 w-4 mr-1" /> Agregar plan
       </Button>
+      <SectionBackgroundFields
+        imageUrl={p.background_image}
+        fixed={p.background_fixed}
+        dividers={sections.dividers}
+        updateSection={updateSection}
+        uploadTarget="plans_background"
+        triggerUpload={triggerUpload}
+        uploadingImage={uploadingImage}
+        onChange={url => updateSection('plans', { ...p, background_image: url })}
+        onFixedChange={v => updateSection('plans', { ...p, background_fixed: v })}
+      />
+
       <SectionTextStyleFields sectionKey="plans" theme={theme} updateTheme={updateTheme} />
     </div>
   );

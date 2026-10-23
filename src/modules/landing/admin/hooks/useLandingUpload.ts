@@ -77,6 +77,16 @@ export function useLandingUpload({ business, setLogoUrl, setSections }: UseLandi
         setSections(prev => ({ ...prev, popup: { ...prev.popup, image_url: publicUrl } }));
       } else if (target === 'shop_invite_image') {
         setSections(prev => ({ ...prev, shop_invite: { ...prev.shop_invite, image_url: publicUrl } }));
+      } else if (target.endsWith('_background')) {
+        const sectionKey = target.slice(0, -'_background'.length);
+        setSections(prev => {
+          const current = prev[sectionKey as keyof LandingSections];
+          if (!current || typeof current !== 'object' || Array.isArray(current)) return prev;
+          return {
+            ...prev,
+            [sectionKey]: { ...(current as Record<string, unknown>), background_image: publicUrl },
+          } as LandingSections;
+        });
       } else if (target.startsWith('secondary_service_')) {
         const idx = parseInt(target.split('_')[2]);
         setSections(prev => {
