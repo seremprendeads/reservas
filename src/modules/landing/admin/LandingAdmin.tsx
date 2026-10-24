@@ -28,6 +28,7 @@ import { PopupTab } from './tabs/PopupTab';
 import { ShopInviteTab } from './tabs/ShopInviteTab';
 import { SeoMarketingTab } from './tabs/SeoMarketingTab';
 import { DividersTab } from './tabs/DividersTab';
+import { PresetJsonTab } from './tabs/PresetJsonTab';
 
 interface Props {
   business: Business | null;
@@ -190,6 +191,18 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                 )}
                 {activeTab === 'dividers' && (
                   <DividersTab sections={sections} updateSection={updateSection} theme={theme} />
+                )}
+                {activeTab === 'preset_json' && (
+                  <PresetJsonTab 
+                    sections={sections} 
+                    theme={theme} 
+                    template={template} 
+                    setTemplate={setTemplate}
+                    setSections={setSections}
+                    setTheme={setTheme}
+                    setVisibleSections={setVisibleSections}
+                    visibleSections={visibleSections}
+                  />
                 )}
               </CardContent>
             </Card>
