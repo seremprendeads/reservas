@@ -27,8 +27,12 @@ import { DesignTab } from './tabs/DesignTab';
 import { PopupTab } from './tabs/PopupTab';
 import { ShopInviteTab } from './tabs/ShopInviteTab';
 import { SeoMarketingTab } from './tabs/SeoMarketingTab';
+import { DesignTab } from './tabs/DesignTab';
 import { DividersTab } from './tabs/DividersTab';
-import { PresetJsonTab } from './tabs/PresetJsonTab';
+import { useState } from 'react';
+import { Button } from '../../../components/ui/button';
+import { Alert, AlertDescription } from '../../../components/ui/alert';
+import { CheckCircle, AlertTriangle, FileJson } from 'lucide-react';
 
 interface Props {
   business: Business | null;
@@ -193,16 +197,47 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <DividersTab sections={sections} updateSection={updateSection} theme={theme} />
                 )}
                 {activeTab === 'preset_json' && (
-                  <PresetJsonTab 
-                    sections={sections} 
-                    theme={theme} 
-                    template={template} 
-                    setTemplate={setTemplate}
-                    setSections={setSections}
-                    setTheme={setTheme}
-                    setVisibleSections={setVisibleSections}
-                    visibleSections={visibleSections}
-                  />
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileJson className="h-5 w-5 text-primary" />
+                        <h3 className="text-base font-medium text-foreground">Plantilla JSON</h3>
+                      </div>
+                      <p className="text-sm text-foreground/60">
+                        Pegá solo el JSON con <code className="text-xs bg-muted px-1 py-0.5 rounded">template</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded">sections</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded">theme</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded">visible_sections</code>. Se aplica únicamente a esta landing.
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">JSON de plantilla</label>
+                      <textarea
+                        id="preset-json-textarea"
+                        placeholder='{\n  "template": "legal",\n  "sections": {...},\n  "theme": {...},\n  "visible_sections": ["header", "hero", ...]\n}'
+                        rows={20}
+                        className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
+                      />
+                    </div>
+                    <Button onClick={() => {
+                      const ta = document.getElementById('preset-json-textarea') as HTMLTextAreaElement;
+                      const txt = ta?.value || '';
+                      if (!txt.trim()) { alert('Pegá el JSON primero'); return; }
+                      try {
+                        const parsed = JSON.parse(txt);
+                        if (parsed.template) setTemplate(parsed.template);
+                        if (parsed.sections) setSections(parsed.sections);
+                        if (parsed.theme) setTheme(parsed.theme);
+                        if (parsed.visible_sections) setVisibleSections(parsed.visible_sections);
+                        alert('Plantilla aplicada correctamente. Guardá desde el constructor.');
+                        ta.value = '';
+                      } catch(e) { alert('JSON inválido'); }
+                    }} className="w-full">
+                      Aplicar a esta landing
+                    </Button>
+                    <div className="text-xs text-foreground/50 space-y-1">
+                      <p>• Solo afecta esta landing, no a otros negocios</p>
+                      <p>• El cliente podrá modificar textos, imágenes, equipo, FAQ, etc. desde las otras pestañas</p>
+                      <p>• Después de aplicar, guardá desde el constructor normal</p>
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>
