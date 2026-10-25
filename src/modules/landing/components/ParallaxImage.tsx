@@ -54,7 +54,7 @@ export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, class
   }, [enabled, strength, imageUrl]);
 
   return (
-    <div ref={wrapperRef} className={`absolute inset-0 overflow-hidden ${className}`}>
+    <div ref={wrapperRef} className={`absolute inset-0 overflow-hidden ${children ? '' : 'pointer-events-none'} ${className}`}>
       <div
         ref={layerRef}
         className="absolute -inset-y-[28%] inset-x-0 bg-cover bg-center will-change-transform"
