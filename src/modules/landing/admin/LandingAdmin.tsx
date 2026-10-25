@@ -126,14 +126,15 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <GeneralTab
                     slug={slug} setSlug={setSlug}
                     visibleSections={visibleSections} toggleVisibleSection={toggleVisibleSection}
-                    logoUrl={logoUrl} triggerUpload={triggerUpload}
-                    uploadingImage={uploadingImage}
-                    sections={sections} updateSection={updateSection}
                     theme={theme} updateTheme={updateTheme}
                   />
                 )}
                 {activeTab === 'menu' && (
-                  <MenuTab sections={sections} updateSection={updateSection} theme={theme} updateTheme={updateTheme} />
+                  <MenuTab
+                    sections={sections} updateSection={updateSection}
+                    theme={theme} updateTheme={updateTheme}
+                    logoUrl={logoUrl} triggerUpload={triggerUpload} uploadingImage={uploadingImage}
+                  />
                 )}
                 {activeTab === 'hero' && (
                   <HeroTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />

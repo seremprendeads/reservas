@@ -62,17 +62,18 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
         color: headerTextColor,
       }}>
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
-        <div className="flex items-center justify-between h-16 sm:h-[72px]">
+        <div className="flex items-center justify-between min-h-16 sm:min-h-[72px] py-1.5">
           {/* Logo */}
           <a href="#inicio" onClick={handleSmoothScroll} className="flex items-center gap-3 shrink-0">
             {navLogoUrl ? (
               <img
                 src={navLogoUrl}
                 alt=""
+                style={{ '--logo-scale': (s.header.logo_size || 100) / 100 } as React.CSSProperties}
                 className={
                   s.header.logo_shape === 'square'
-                    ? 'h-10 sm:h-14 w-auto max-w-[220px] object-contain'
-                    : 'h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover'
+                    ? 'h-[calc(2.5rem*var(--logo-scale,1))] sm:h-[calc(3.5rem*var(--logo-scale,1))] w-auto max-w-[220px] object-contain'
+                    : 'h-[calc(2.25rem*var(--logo-scale,1))] w-[calc(2.25rem*var(--logo-scale,1))] sm:h-[calc(2.5rem*var(--logo-scale,1))] sm:w-[calc(2.5rem*var(--logo-scale,1))] rounded-full object-cover'
                 }
               />
             ) : (

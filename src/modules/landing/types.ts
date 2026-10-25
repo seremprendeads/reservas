@@ -36,6 +36,8 @@ export interface LandingSections {
     logo_description: string;
     logo_image_url: string | null;
     logo_shape: 'circle' | 'square';
+    /** Escala del logo en el header, en % (60–140). Vacío = 100. */
+    logo_size?: number;
     background_image?: string | null;
     background_fixed?: boolean;
   };
