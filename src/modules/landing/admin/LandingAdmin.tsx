@@ -27,12 +27,8 @@ import { DesignTab } from './tabs/DesignTab';
 import { PopupTab } from './tabs/PopupTab';
 import { ShopInviteTab } from './tabs/ShopInviteTab';
 import { SeoMarketingTab } from './tabs/SeoMarketingTab';
-import { DesignTab } from './tabs/DesignTab';
 import { DividersTab } from './tabs/DividersTab';
-import { useState } from 'react';
-import { Button } from '../../../components/ui/button';
-import { Alert, AlertDescription } from '../../../components/ui/alert';
-import { CheckCircle, AlertTriangle, FileJson } from 'lucide-react';
+import { FileJson } from 'lucide-react';
 
 interface Props {
   business: Business | null;
@@ -44,7 +40,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
   const {
     landing, sections, theme, template, visibleSections, logoUrl, slug,
     loading, saving, saveMessage,
-    setSections, setLogoUrl, setSlug, setSaveMessage,
+    setSections, setTheme, setTemplate, setVisibleSections, setLogoUrl, setSlug, setSaveMessage,
     updateSection, updateTheme, toggleVisibleSection, handleSave,
   } = useLandingCrud({ business });
 
