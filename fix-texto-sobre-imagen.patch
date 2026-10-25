@@ -1,0 +1,139 @@
+diff --git a/src/modules/landing/sections/AboutSection.tsx b/src/modules/landing/sections/AboutSection.tsx
+index 9881104..0902c11 100644
+--- a/src/modules/landing/sections/AboutSection.tsx
++++ b/src/modules/landing/sections/AboutSection.tsx
+@@ -36,7 +36,7 @@ export function AboutSection({ about, theme, ts, headingStyle, bodyStyle, showTo
+   const imageOnRight = about.image_position === 'right';
+ 
+   return (
+-    <section id="nosotros" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.about_bg_color, borderTop: showTopBorder ? `1px solid ${theme.text_color}08` : 'none' }}>
++    <section id="nosotros" className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: about.background_image ? 'transparent' : theme.about_bg_color, borderTop: showTopBorder ? `1px solid ${theme.text_color}08` : 'none' }}>
+       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+         {about.image_url && (
+           <div className={`${ts.cardRadius} overflow-hidden ${ts.cardShadow} ${imageOnRight && !isMobile ? 'md:order-2' : ''}`}>
+diff --git a/src/modules/landing/sections/AboutTextSection.tsx b/src/modules/landing/sections/AboutTextSection.tsx
+index 3558fe5..fb3079e 100644
+--- a/src/modules/landing/sections/AboutTextSection.tsx
++++ b/src/modules/landing/sections/AboutTextSection.tsx
+@@ -56,7 +56,7 @@ export function AboutTextSection({ aboutText, theme, ts, headingStyle, bodyStyle
+ 
+   if (!hasImage) {
+     return (
+-      <section className="py-8 px-5 sm:px-8 lg:px-12">
++      <section className="relative py-8 px-5 sm:px-8 lg:px-12">
+         <div className="max-w-6xl mx-auto">
+           {textBlock}
+         </div>
+@@ -65,7 +65,7 @@ export function AboutTextSection({ aboutText, theme, ts, headingStyle, bodyStyle
+   }
+ 
+   return (
+-    <section className="py-8 px-5 sm:px-8 lg:px-12">
++    <section className="relative py-8 px-5 sm:px-8 lg:px-12">
+       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+         <div className={imageOnRight && !isMobile ? 'md:order-2' : undefined}>
+           <div className={`${ts.cardRadius} overflow-hidden ${ts.cardShadow}`}>
+diff --git a/src/modules/landing/sections/FaqSection.tsx b/src/modules/landing/sections/FaqSection.tsx
+index adc3be7..9f14ef1 100644
+--- a/src/modules/landing/sections/FaqSection.tsx
++++ b/src/modules/landing/sections/FaqSection.tsx
+@@ -16,7 +16,7 @@ interface FaqSectionProps {
+ 
+ export function FaqSection({ faq, theme, ts, headingStyle, bodyStyle }: FaqSectionProps) {
+   return (
+-    <section id="faq" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.faq_bg_color }}>
++    <section id="faq" className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: faq.background_image ? 'transparent' : theme.faq_bg_color }}>
+       <div className="max-w-3xl mx-auto">
+         <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.faq_title_color || undefined, fontSize: fontSize(theme.faq_title_size), ...textStyleExtras(theme, 'faq_title') }} className={`text-4xl sm:text-5xl tracking-tight text-center ${faq.subtitle ? 'mb-4' : 'mb-16'}`}>
+           {faq.title || 'Preguntas frecuentes'}
+diff --git a/src/modules/landing/sections/FooterSection.tsx b/src/modules/landing/sections/FooterSection.tsx
+index dc580af..f01f02f 100644
+--- a/src/modules/landing/sections/FooterSection.tsx
++++ b/src/modules/landing/sections/FooterSection.tsx
+@@ -65,7 +65,7 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
+   const hasCustomSubtitle = !!theme.footer_subtitle_color;
+ 
+   return (
+-    <footer className="px-5 sm:px-8 lg:px-12 pt-20 pb-10" style={{ backgroundColor: footerBgColor, color: footerTextColor }}>
++    <footer className="relative px-5 sm:px-8 lg:px-12 pt-20 pb-10" style={{ backgroundColor: footer.background_image ? 'transparent' : footerBgColor, color: footerTextColor }}>
+       <div className="max-w-6xl mx-auto">
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
+           <div className="text-center sm:text-left">
+diff --git a/src/modules/landing/sections/GallerySection.tsx b/src/modules/landing/sections/GallerySection.tsx
+index 392b590..74a22c9 100644
+--- a/src/modules/landing/sections/GallerySection.tsx
++++ b/src/modules/landing/sections/GallerySection.tsx
+@@ -18,7 +18,7 @@ interface GallerySectionProps {
+ 
+ export function GallerySection({ gallery, galleryImages, theme, ts, headingStyle, bodyStyle, onImageClick }: GallerySectionProps) {
+   return (
+-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.gallery_bg_color }}>
++    <section className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: gallery.background_image ? 'transparent' : theme.gallery_bg_color }}>
+       <div className="max-w-6xl mx-auto">
+         <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.gallery_title_color || undefined, fontSize: fontSize(theme.gallery_title_size), ...textStyleExtras(theme, 'gallery_title') }} className={`text-4xl sm:text-5xl tracking-tight text-center ${gallery.subtitle ? 'mb-4' : 'mb-16'}`}>
+           {gallery.title || 'Galeria'}
+diff --git a/src/modules/landing/sections/MainServiceSection.tsx b/src/modules/landing/sections/MainServiceSection.tsx
+index ba8fe01..6ef3677 100644
+--- a/src/modules/landing/sections/MainServiceSection.tsx
++++ b/src/modules/landing/sections/MainServiceSection.tsx
+@@ -19,7 +19,7 @@ export function MainServiceSection({ mainService, theme, ts, headingStyle, bodyS
+   const iconSize = theme.main_service_icon_size ? `${theme.main_service_icon_size}px` : undefined;
+   const iconColor = theme.main_service_icon_color || theme.service_icon_color;
+   return (
+-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.main_service_bg_color }}>
++    <section className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: mainService.background_image ? 'transparent' : theme.main_service_bg_color }}>
+       <div className="max-w-5xl mx-auto text-center">
+         {Icon && (
+           <div
+diff --git a/src/modules/landing/sections/MapSection.tsx b/src/modules/landing/sections/MapSection.tsx
+index a1c68df..794cc0a 100644
+--- a/src/modules/landing/sections/MapSection.tsx
++++ b/src/modules/landing/sections/MapSection.tsx
+@@ -38,7 +38,7 @@ export function MapSection({ map, theme, ts, headingStyle, bodyStyle }: MapSecti
+   if (!embedUrl) return null;
+ 
+   return (
+-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.map_bg_color }}>
++    <section className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: map.background_image ? 'transparent' : theme.map_bg_color }}>
+       <div className="max-w-6xl mx-auto">
+         <div className="text-center mb-10">
+           <MapPin className="h-7 w-7 mx-auto mb-4" style={{ color: theme.primary_color }} />
+diff --git a/src/modules/landing/sections/PlansSection.tsx b/src/modules/landing/sections/PlansSection.tsx
+index 4562c06..03ba2fa 100644
+--- a/src/modules/landing/sections/PlansSection.tsx
++++ b/src/modules/landing/sections/PlansSection.tsx
+@@ -27,7 +27,7 @@ export function PlansSection({ plans, whatsapp, theme, ts, headingStyle, bodySty
+   if (!plans.items.length) return null;
+ 
+   return (
+-    <section id="planes" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.plans_bg_color }}>
++    <section id="planes" className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: plans.background_image ? 'transparent' : theme.plans_bg_color }}>
+       <div className="max-w-6xl mx-auto">
+         <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.plans_title_color || theme.text_color, fontSize: fontSize(theme.plans_title_size), ...textStyleExtras(theme, 'plans_title') }} className="text-4xl sm:text-5xl tracking-tight text-center mb-16">
+           {plans.title || 'Elegí tu plan'}
+diff --git a/src/modules/landing/sections/SecondaryServicesSection.tsx b/src/modules/landing/sections/SecondaryServicesSection.tsx
+index e9b0bb2..0a1c44a 100644
+--- a/src/modules/landing/sections/SecondaryServicesSection.tsx
++++ b/src/modules/landing/sections/SecondaryServicesSection.tsx
+@@ -16,7 +16,7 @@ interface SecondaryServicesSectionProps {
+ 
+ export function SecondaryServicesSection({ secondaryServices, theme, ts, headingStyle, bodyStyle, getIcon }: SecondaryServicesSectionProps) {
+   return (
+-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`}>
++    <section className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`}>
+       <div className="max-w-6xl mx-auto">
+         <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.secondary_services_title_color || undefined, fontSize: fontSize(theme.secondary_services_title_size), ...textStyleExtras(theme, 'secondary_services_title') }} className={`text-4xl sm:text-5xl tracking-tight text-center ${secondaryServices.subtitle ? 'mb-4' : 'mb-16'}`}>
+           {secondaryServices.title || 'Servicios'}
+diff --git a/src/modules/landing/sections/TestimonialsSection.tsx b/src/modules/landing/sections/TestimonialsSection.tsx
+index 12d207c..1314e48 100644
+--- a/src/modules/landing/sections/TestimonialsSection.tsx
++++ b/src/modules/landing/sections/TestimonialsSection.tsx
+@@ -16,7 +16,7 @@ interface TestimonialsSectionProps {
+ 
+ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bodyStyle }: TestimonialsSectionProps) {
+   return (
+-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.testimonials_bg_color }}>
++    <section className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: testimonials.background_image ? 'transparent' : theme.testimonials_bg_color }}>
+       <div className="max-w-6xl mx-auto">
+         <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.testimonials_title_color || undefined, fontSize: fontSize(theme.testimonials_title_size), ...textStyleExtras(theme, 'testimonials_title') }} className={`text-4xl sm:text-5xl tracking-tight text-center ${testimonials.subtitle ? 'mb-4' : 'mb-16'}`}>
+           {testimonials.title || 'Testimonios'}

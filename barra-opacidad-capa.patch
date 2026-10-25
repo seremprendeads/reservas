@@ -1,0 +1,497 @@
+diff --git a/src/modules/landing/admin/components/SectionBackgroundFields.tsx b/src/modules/landing/admin/components/SectionBackgroundFields.tsx
+index 4c9c689..249dd26 100644
+--- a/src/modules/landing/admin/components/SectionBackgroundFields.tsx
++++ b/src/modules/landing/admin/components/SectionBackgroundFields.tsx
+@@ -1,6 +1,7 @@
+ import { Trash2 } from 'lucide-react';
+ import { Button } from '../../../../components/ui/button';
+ import { Separator } from '../../../../components/ui/separator';
++import { Input } from '../../../../components/ui/input';
+ import type { LandingSections } from '../../types';
+ 
+ interface SectionBackgroundFieldsProps {
+@@ -16,6 +17,11 @@ interface SectionBackgroundFieldsProps {
+   uploadTarget?: string;
+   hideUpload?: boolean;
+   recommended?: string;
++  /** Capa de color sobre la imagen. Se muestra solo si se pasa onOverlayOpacityChange. */
++  overlayColor?: string;
++  overlayOpacity?: number;
++  onOverlayColorChange?: (color: string) => void;
++  onOverlayOpacityChange?: (opacity: number) => void;
+ }
+ 
+ export function SectionBackgroundFields({
+@@ -31,6 +37,10 @@ export function SectionBackgroundFields({
+   uploadTarget,
+   hideUpload = false,
+   recommended = '1920 × 1080 px (horizontal). JPG o WebP, idealmente menos de 500 KB.',
++  overlayColor,
++  overlayOpacity,
++  onOverlayColorChange,
++  onOverlayOpacityChange,
+ }: SectionBackgroundFieldsProps) {
+   const setImage = onImageChange || onChange;
+   const dividersEnabled = dividers.hero_about.enabled || dividers.cta_footer.enabled;
+@@ -98,6 +108,50 @@ export function SectionBackgroundFields({
+           </p>
+         </div>
+       )}
++
++      {imageUrl && onOverlayOpacityChange && (
++        <div className="rounded-xl border bg-muted/20 p-3 space-y-3">
++          <div>
++            <label htmlFor="bg-overlay-opacity" className="text-sm font-medium text-foreground">
++              Opacidad de capa — {overlayOpacity ?? 0}%
++            </label>
++            <input
++              id="bg-overlay-opacity"
++              type="range"
++              min="0"
++              max="100"
++              value={overlayOpacity ?? 0}
++              onChange={e => onOverlayOpacityChange(Number(e.target.value))}
++              className="w-full mt-1 cursor-pointer accent-primary"
++            />
++            <p className="text-[11px] leading-relaxed text-muted-foreground">
++              Una capa de color sobre la imagen ayuda a que el texto se lea. En 0% no hay capa.
++            </p>
++          </div>
++          {onOverlayColorChange && (overlayOpacity ?? 0) > 0 && (
++            <div>
++              <label className="text-sm font-medium text-foreground">Color de capa</label>
++              <div className="flex items-center gap-2.5 mt-1.5">
++                <input
++                  type="color"
++                  value={overlayColor || '#000000'}
++                  onChange={e => onOverlayColorChange(e.target.value)}
++                  className="h-8 w-8 cursor-pointer rounded-xl border bg-transparent p-0.5 shrink-0"
++                />
++                <Input
++                  type="text"
++                  value={overlayColor || '#000000'}
++                  onChange={e => onOverlayColorChange(e.target.value)}
++                  className="h-9 font-mono text-xs"
++                />
++              </div>
++              <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
++                Negro oscurece la imagen (para texto claro); blanco la aclara (para texto oscuro).
++              </p>
++            </div>
++          )}
++        </div>
++      )}
+     </>
+   );
+ }
+diff --git a/src/modules/landing/admin/tabs/AboutTab.tsx b/src/modules/landing/admin/tabs/AboutTab.tsx
+index faa6fb3..99861be 100644
+--- a/src/modules/landing/admin/tabs/AboutTab.tsx
++++ b/src/modules/landing/admin/tabs/AboutTab.tsx
+@@ -94,6 +94,10 @@ export function AboutTab({ sections, updateSection, triggerUpload, uploadingImag
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('about', { ...a, background_image: url })}
+         onFixedChange={v => updateSection('about', { ...a, background_fixed: v })}
++        overlayColor={a.background_overlay_color}
++        overlayOpacity={a.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('about', { ...a, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('about', { ...a, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields sectionKey="about" theme={theme} updateTheme={updateTheme} />
+diff --git a/src/modules/landing/admin/tabs/AboutTextTab.tsx b/src/modules/landing/admin/tabs/AboutTextTab.tsx
+index a9d6d33..4d3e7ad 100644
+--- a/src/modules/landing/admin/tabs/AboutTextTab.tsx
++++ b/src/modules/landing/admin/tabs/AboutTextTab.tsx
+@@ -79,6 +79,10 @@ export function AboutTextTab({ sections, updateSection, triggerUpload, uploading
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('about_text', { ...at, background_image: url })}
+         onFixedChange={v => updateSection('about_text', { ...at, background_fixed: v })}
++        overlayColor={at.background_overlay_color}
++        overlayOpacity={at.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('about_text', { ...at, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('about_text', { ...at, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields sectionKey="about_text" theme={theme} updateTheme={updateTheme} />
+diff --git a/src/modules/landing/admin/tabs/FaqTab.tsx b/src/modules/landing/admin/tabs/FaqTab.tsx
+index 391b269..67e6f92 100644
+--- a/src/modules/landing/admin/tabs/FaqTab.tsx
++++ b/src/modules/landing/admin/tabs/FaqTab.tsx
+@@ -79,6 +79,10 @@ export function FaqTab({ sections, updateSection, triggerUpload, uploadingImage,
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('faq', { ...f, background_image: url })}
+         onFixedChange={v => updateSection('faq', { ...f, background_fixed: v })}
++        overlayColor={f.background_overlay_color}
++        overlayOpacity={f.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('faq', { ...f, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('faq', { ...f, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields sectionKey="faq" theme={theme} updateTheme={updateTheme} />
+diff --git a/src/modules/landing/admin/tabs/FooterTab.tsx b/src/modules/landing/admin/tabs/FooterTab.tsx
+index 9242e54..77b15f8 100644
+--- a/src/modules/landing/admin/tabs/FooterTab.tsx
++++ b/src/modules/landing/admin/tabs/FooterTab.tsx
+@@ -114,6 +114,10 @@ export function FooterTab({ sections, updateSection, triggerUpload, uploadingIma
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('footer', { ...f, background_image: url })}
+         onFixedChange={v => updateSection('footer', { ...f, background_fixed: v })}
++        overlayColor={f.background_overlay_color}
++        overlayOpacity={f.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('footer', { ...f, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('footer', { ...f, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields
+diff --git a/src/modules/landing/admin/tabs/GalleryTab.tsx b/src/modules/landing/admin/tabs/GalleryTab.tsx
+index caf6333..fef7ceb 100644
+--- a/src/modules/landing/admin/tabs/GalleryTab.tsx
++++ b/src/modules/landing/admin/tabs/GalleryTab.tsx
+@@ -116,6 +116,10 @@ export function GalleryTab({ sections, updateSection, triggerUpload, uploadingIm
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('gallery', { ...g, background_image: url })}
+         onFixedChange={v => updateSection('gallery', { ...g, background_fixed: v })}
++        overlayColor={g.background_overlay_color}
++        overlayOpacity={g.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('gallery', { ...g, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('gallery', { ...g, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields sectionKey="gallery" theme={theme} updateTheme={updateTheme} />
+diff --git a/src/modules/landing/admin/tabs/MainServiceTab.tsx b/src/modules/landing/admin/tabs/MainServiceTab.tsx
+index 3fcd973..c2ad482 100644
+--- a/src/modules/landing/admin/tabs/MainServiceTab.tsx
++++ b/src/modules/landing/admin/tabs/MainServiceTab.tsx
+@@ -109,6 +109,10 @@ export function MainServiceTab({ sections, updateSection, triggerUpload, uploadi
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('main_service', { ...ms, background_image: url })}
+         onFixedChange={v => updateSection('main_service', { ...ms, background_fixed: v })}
++        overlayColor={ms.background_overlay_color}
++        overlayOpacity={ms.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('main_service', { ...ms, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('main_service', { ...ms, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields sectionKey="main_service" theme={theme} updateTheme={updateTheme} />
+diff --git a/src/modules/landing/admin/tabs/MapTab.tsx b/src/modules/landing/admin/tabs/MapTab.tsx
+index 11c2470..e42cc52 100644
+--- a/src/modules/landing/admin/tabs/MapTab.tsx
++++ b/src/modules/landing/admin/tabs/MapTab.tsx
+@@ -59,6 +59,10 @@ export function MapTab({ sections, updateSection, triggerUpload, uploadingImage,
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('map', { ...m, background_image: url })}
+         onFixedChange={v => updateSection('map', { ...m, background_fixed: v })}
++        overlayColor={m.background_overlay_color}
++        overlayOpacity={m.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('map', { ...m, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('map', { ...m, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields sectionKey="map" theme={theme} updateTheme={updateTheme} />
+diff --git a/src/modules/landing/admin/tabs/PlansTab.tsx b/src/modules/landing/admin/tabs/PlansTab.tsx
+index b7d8b50..f61f660 100644
+--- a/src/modules/landing/admin/tabs/PlansTab.tsx
++++ b/src/modules/landing/admin/tabs/PlansTab.tsx
+@@ -116,6 +116,10 @@ export function PlansTab({ sections, updateSection, triggerUpload, uploadingImag
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('plans', { ...p, background_image: url })}
+         onFixedChange={v => updateSection('plans', { ...p, background_fixed: v })}
++        overlayColor={p.background_overlay_color}
++        overlayOpacity={p.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('plans', { ...p, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('plans', { ...p, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields sectionKey="plans" theme={theme} updateTheme={updateTheme} />
+diff --git a/src/modules/landing/admin/tabs/ServicesTab.tsx b/src/modules/landing/admin/tabs/ServicesTab.tsx
+index 1ded6fc..e36c4fd 100644
+--- a/src/modules/landing/admin/tabs/ServicesTab.tsx
++++ b/src/modules/landing/admin/tabs/ServicesTab.tsx
+@@ -93,6 +93,10 @@ export function ServicesTab({ sections, updateSection, triggerUpload, uploadingI
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('secondary_services', { ...ss, background_image: url })}
+         onFixedChange={v => updateSection('secondary_services', { ...ss, background_fixed: v })}
++        overlayColor={ss.background_overlay_color}
++        overlayOpacity={ss.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('secondary_services', { ...ss, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('secondary_services', { ...ss, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields sectionKey="secondary_services" theme={theme} updateTheme={updateTheme} />
+diff --git a/src/modules/landing/admin/tabs/TestimonialsTab.tsx b/src/modules/landing/admin/tabs/TestimonialsTab.tsx
+index 37bc8c8..1e41f7c 100644
+--- a/src/modules/landing/admin/tabs/TestimonialsTab.tsx
++++ b/src/modules/landing/admin/tabs/TestimonialsTab.tsx
+@@ -97,6 +97,10 @@ export function TestimonialsTab({ sections, updateSection, triggerUpload, upload
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('testimonials', { ...t, background_image: url })}
+         onFixedChange={v => updateSection('testimonials', { ...t, background_fixed: v })}
++        overlayColor={t.background_overlay_color}
++        overlayOpacity={t.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('testimonials', { ...t, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('testimonials', { ...t, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields sectionKey="testimonials" theme={theme} updateTheme={updateTheme} />
+diff --git a/src/modules/landing/admin/tabs/WhyChooseUsTab.tsx b/src/modules/landing/admin/tabs/WhyChooseUsTab.tsx
+index e9d12c9..964c705 100644
+--- a/src/modules/landing/admin/tabs/WhyChooseUsTab.tsx
++++ b/src/modules/landing/admin/tabs/WhyChooseUsTab.tsx
+@@ -136,6 +136,10 @@ export function WhyChooseUsTab({ sections, updateSection, triggerUpload, uploadi
+         uploadingImage={uploadingImage}
+         onChange={url => updateSection('why_choose_us', { ...w, background_image: url })}
+         onFixedChange={v => updateSection('why_choose_us', { ...w, background_fixed: v })}
++        overlayColor={w.background_overlay_color}
++        overlayOpacity={w.background_overlay_opacity}
++        onOverlayColorChange={v => updateSection('why_choose_us', { ...w, background_overlay_color: v })}
++        onOverlayOpacityChange={v => updateSection('why_choose_us', { ...w, background_overlay_opacity: v })}
+       />
+ 
+       <SectionTextStyleFields sectionKey="why_choose_us" theme={theme} updateTheme={updateTheme} />
+diff --git a/src/modules/landing/components/ParallaxImage.tsx b/src/modules/landing/components/ParallaxImage.tsx
+index 52808e5..ef366c6 100644
+--- a/src/modules/landing/components/ParallaxImage.tsx
++++ b/src/modules/landing/components/ParallaxImage.tsx
+@@ -5,10 +5,13 @@ interface ParallaxImageProps {
+   enabled?: boolean;
+   strength?: number;
+   className?: string;
++  /** Capa de color sobre la imagen (solo si hay imagen). Opacidad 0–100. */
++  overlayColor?: string;
++  overlayOpacity?: number;
+   children?: React.ReactNode;
+ }
+ 
+-export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, className = '', children }: ParallaxImageProps) {
++export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, className = '', overlayColor, overlayOpacity, children }: ParallaxImageProps) {
+   const wrapperRef = useRef<HTMLDivElement>(null);
+   const layerRef = useRef<HTMLDivElement>(null);
+ 
+@@ -60,6 +63,9 @@ export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, class
+         className="absolute -inset-y-[28%] inset-x-0 bg-cover bg-center will-change-transform"
+         style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : undefined }}
+       />
++      {imageUrl && overlayOpacity ? (
++        <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ backgroundColor: overlayColor || '#000000', opacity: overlayOpacity / 100 }} />
++      ) : null}
+       {children}
+     </div>
+   );
+diff --git a/src/modules/landing/pages/LandingPage.tsx b/src/modules/landing/pages/LandingPage.tsx
+index dca762f..3542d1f 100644
+--- a/src/modules/landing/pages/LandingPage.tsx
++++ b/src/modules/landing/pages/LandingPage.tsx
+@@ -308,7 +308,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+       {/* ─── ABOUT ─── */}
+       {hasSection('about') && s.about.description && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.about.background_image} enabled={(s.about.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.about.background_image} overlayColor={s.about.background_overlay_color} overlayOpacity={s.about.background_overlay_opacity} enabled={(s.about.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <AboutSection
+             about={s.about}
+             theme={theme}
+@@ -323,7 +323,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+       {/* ─── ABOUT TEXT ─── */}
+       {hasSection('about_text') && s.about_text && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.about_text.background_image} enabled={(s.about_text.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.about_text.background_image} overlayColor={s.about_text.background_overlay_color} overlayOpacity={s.about_text.background_overlay_opacity} enabled={(s.about_text.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <AboutTextSection
+             aboutText={s.about_text}
+             theme={theme}
+@@ -337,7 +337,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+       {/* ─── MAIN SERVICE ─── */}
+       {hasSection('main_service') && s.main_service.title && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.main_service.background_image} enabled={(s.main_service.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.main_service.background_image} overlayColor={s.main_service.background_overlay_color} overlayOpacity={s.main_service.background_overlay_opacity} enabled={(s.main_service.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <MainServiceSection
+             mainService={s.main_service}
+             theme={theme}
+@@ -352,7 +352,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+       {/* ─── SECONDARY SERVICES ─── */}
+       {hasSection('secondary_services') && s.secondary_services.items.length > 0 && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.secondary_services.background_image} enabled={(s.secondary_services.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.secondary_services.background_image} overlayColor={s.secondary_services.background_overlay_color} overlayOpacity={s.secondary_services.background_overlay_opacity} enabled={(s.secondary_services.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <SecondaryServicesSection
+             secondaryServices={s.secondary_services}
+             theme={theme}
+@@ -367,7 +367,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+       {/* ─── WHY CHOOSE US ─── */}
+       {hasSection('why_choose_us') && s.why_choose_us.items.length > 0 && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.why_choose_us.background_image} enabled={(s.why_choose_us.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.why_choose_us.background_image} overlayColor={s.why_choose_us.background_overlay_color} overlayOpacity={s.why_choose_us.background_overlay_opacity} enabled={(s.why_choose_us.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <WhyChooseUsSection
+             whyChooseUs={s.why_choose_us}
+             theme={theme}
+@@ -381,7 +381,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+ 
+       {hasSection('plans') && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.plans.background_image} enabled={(s.plans.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.plans.background_image} overlayColor={s.plans.background_overlay_color} overlayOpacity={s.plans.background_overlay_opacity} enabled={(s.plans.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <PlansSection
+             plans={s.plans}
+             whatsapp={s.footer?.whatsapp || ''}
+@@ -396,7 +396,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+       {/* ─── GALLERY ─── */}
+       {hasSection('gallery') && galleryImages.length > 0 && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.gallery.background_image} enabled={(s.gallery.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.gallery.background_image} overlayColor={s.gallery.background_overlay_color} overlayOpacity={s.gallery.background_overlay_opacity} enabled={(s.gallery.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <GallerySection
+             gallery={s.gallery}
+             galleryImages={galleryImages}
+@@ -453,7 +453,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+       {/* ─── TESTIMONIALS ─── */}
+       {hasSection('testimonials') && s.testimonials.items.length > 0 && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.testimonials.background_image} enabled={(s.testimonials.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.testimonials.background_image} overlayColor={s.testimonials.background_overlay_color} overlayOpacity={s.testimonials.background_overlay_opacity} enabled={(s.testimonials.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <TestimonialsSection
+             testimonials={s.testimonials}
+             theme={theme}
+@@ -480,7 +480,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+       {/* ─── FAQ ─── */}
+       {hasSection('faq') && s.faq.items.length > 0 && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.faq.background_image} enabled={(s.faq.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.faq.background_image} overlayColor={s.faq.background_overlay_color} overlayOpacity={s.faq.background_overlay_opacity} enabled={(s.faq.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <FaqSection
+             faq={s.faq}
+             theme={theme}
+@@ -494,7 +494,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+       {/* ─── MAP ─── */}
+       {hasSection('map') && (s.map.address || s.map.map_url) && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.map.background_image} enabled={(s.map.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.map.background_image} overlayColor={s.map.background_overlay_color} overlayOpacity={s.map.background_overlay_opacity} enabled={(s.map.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <MapSection
+             map={s.map}
+             theme={theme}
+@@ -531,7 +531,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
+       {/* ─── FOOTER ─── */}
+       {hasSection('footer') && (
+         <div className="relative overflow-hidden">
+-          <ParallaxImage imageUrl={s.footer.background_image} enabled={(s.footer.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
++          <ParallaxImage imageUrl={s.footer.background_image} overlayColor={s.footer.background_overlay_color} overlayOpacity={s.footer.background_overlay_opacity} enabled={(s.footer.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+           <FooterSection
+             footer={s.footer}
+             menuItems={s.header.menu_items || []}
+diff --git a/src/modules/landing/types.ts b/src/modules/landing/types.ts
+index 46c7ccc..f2f6728 100644
+--- a/src/modules/landing/types.ts
++++ b/src/modules/landing/types.ts
+@@ -80,6 +80,9 @@ export interface LandingSections {
+     image_position: 'left' | 'right';
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   about_text: {
+     title: string;
+@@ -90,6 +93,9 @@ export interface LandingSections {
+     image_position: 'left' | 'right';
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   main_service: {
+     icon: string;
+@@ -98,6 +104,9 @@ export interface LandingSections {
+     description: string;
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   secondary_services: {
+     title: string;
+@@ -105,6 +114,9 @@ export interface LandingSections {
+     items: { icon: string; image_url: string | null; title: string; description: string }[];
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   why_choose_us: {
+     title: string;
+@@ -112,6 +124,9 @@ export interface LandingSections {
+     items: { icon: string; title?: string; subtitle?: string; text: string }[];
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   gallery: {
+     title: string;
+@@ -120,6 +135,9 @@ export interface LandingSections {
+     overlay_color: string;
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   testimonials: {
+     title: string;
+@@ -128,6 +146,9 @@ export interface LandingSections {
+     google_review_url: string | null;
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   faq: {
+     title: string;
+@@ -135,6 +156,9 @@ export interface LandingSections {
+     items: { question: string; answer: string }[];
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   cta: {
+     title: string;
+@@ -151,6 +175,9 @@ export interface LandingSections {
+     items: { name: string; detail: string; bg_color: string; text_color: string; button_color: string }[];
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   footer: {
+     address: string;
+@@ -173,6 +200,9 @@ export interface LandingSections {
+     frases: string;
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   banner: {
+     title: string;
+@@ -190,6 +220,9 @@ export interface LandingSections {
+     map_url: string;
+     background_image?: string | null;
+     background_fixed?: boolean;
++    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
++    background_overlay_color?: string;
++    background_overlay_opacity?: number;
+   };
+   popup: {
+     enabled: boolean;
