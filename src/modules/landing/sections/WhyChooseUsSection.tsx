@@ -16,7 +16,7 @@ interface WhyChooseUsSectionProps {
 
 export function WhyChooseUsSection({ whyChooseUs, theme, ts, headingStyle, bodyStyle, getIcon }: WhyChooseUsSectionProps) {
   return (
-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.why_choose_us_bg_color }}>
+    <section className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: whyChooseUs.background_image ? 'transparent' : theme.why_choose_us_bg_color }}>
       <div className="max-w-6xl mx-auto">
         <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.why_choose_us_title_color || undefined, fontSize: fontSize(theme.why_choose_us_title_size), ...textStyleExtras(theme, 'why_choose_us_title') }} className={`text-4xl sm:text-5xl tracking-tight text-center ${whyChooseUs.subtitle ? 'mb-4' : 'mb-16'}`}>
           {whyChooseUs.title || 'Por que elegirnos'}
