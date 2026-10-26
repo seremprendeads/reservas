@@ -1,8 +1,11 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
+import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
+import { SectionColorField } from '../components/SectionColorField';
+import { DEFAULT_THEME } from '../../config';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface AboutTextTabProps {
@@ -68,6 +71,16 @@ export function AboutTextTab({ sections, updateSection, triggerUpload, uploading
           </select>
         </div>
       )}
+
+      <Separator />
+
+      <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo de Texto Nosotros."
+        value={theme.about_text_bg_color}
+        fallback={DEFAULT_THEME.bg_color}
+        onChange={v => updateTheme('about_text_bg_color', v)}
+      />
 
       <SectionBackgroundFields
         imageUrl={at.background_image}

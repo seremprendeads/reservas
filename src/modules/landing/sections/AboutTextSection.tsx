@@ -31,6 +31,7 @@ export function AboutTextSection({ aboutText, theme, ts, headingStyle, bodyStyle
   const alignment = isMobile ? 'center' : (aboutText.alignment || 'left');
   const hasImage = !!aboutText.image_url;
   const imageOnRight = aboutText.image_position === 'right';
+  const sectionStyle = { backgroundColor: aboutText.background_image ? 'transparent' : (theme.about_text_bg_color || theme.bg_color) };
 
   const textBlock = (
     <div style={{ textAlign: alignment }}>
@@ -56,7 +57,7 @@ export function AboutTextSection({ aboutText, theme, ts, headingStyle, bodyStyle
 
   if (!hasImage) {
     return (
-      <section className="py-8 px-5 sm:px-8 lg:px-12">
+      <section className="py-8 px-5 sm:px-8 lg:px-12" style={sectionStyle}>
         <div className="max-w-6xl mx-auto">
           {textBlock}
         </div>
@@ -65,7 +66,7 @@ export function AboutTextSection({ aboutText, theme, ts, headingStyle, bodyStyle
   }
 
   return (
-    <section className="py-8 px-5 sm:px-8 lg:px-12">
+    <section className="py-8 px-5 sm:px-8 lg:px-12" style={sectionStyle}>
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
         <div className={imageOnRight && !isMobile ? 'md:order-2' : undefined}>
           <div className={`${ts.cardRadius} overflow-hidden ${ts.cardShadow}`}>

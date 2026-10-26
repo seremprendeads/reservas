@@ -375,6 +375,7 @@ export interface LandingTheme {
   font_body_tracking: string;
   font_body_line_height: string;
   about_bg_color: string;
+  about_text_bg_color: string;
   main_service_bg_color: string;
   secondary_services_card_bg_color: string;
   why_choose_us_bg_color: string;

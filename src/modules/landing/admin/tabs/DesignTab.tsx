@@ -152,6 +152,7 @@ export function DesignTab({ theme, updateTheme, businessId }: DesignTabProps) {
     // Fondos por seccion: alternan entre el fondo base y el de las tarjetas,
     // asi las secciones se distinguen entre si en vez de quedar todas iguales.
     updateTheme('about_bg_color', t.tokens.background);
+    updateTheme('about_text_bg_color', t.tokens.background);
     updateTheme('main_service_bg_color', t.tokens.cardBg);
     updateTheme('secondary_services_card_bg_color', t.tokens.cardBg);
     updateTheme('why_choose_us_bg_color', t.tokens.background);
