@@ -42,7 +42,8 @@ export function ImagePositionField({ imageUrl, value, onChange }: ImagePositionF
         })}
       </div>
       <p className="text-xs text-muted-foreground mt-2">
-        Elegí qué parte de la foto querés que se vea. Útil cuando la portada te corta una cara.
+        Elegí qué parte de la foto querés que se vea. La fila de arriba muestra el inicio de la imagen,
+        la del medio el centro y la de abajo el final. Usá la posición central para centrarla.
       </p>
     </div>
   );

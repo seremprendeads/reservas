@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ParallaxImageProps {
   imageUrl?: string;
@@ -16,6 +16,47 @@ interface ParallaxImageProps {
 export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, className = '', overlayColor, overlayOpacity, backgroundPosition, children }: ParallaxImageProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
+  const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
+  const [backgroundSize, setBackgroundSize] = useState('cover');
+
+  // Con `cover` la imagen suele llenar el alto exacto de la capa, así que
+  // `background-position` no puede moverla verticalmente. Medimos la imagen y
+  // la agrandamos un poco para que siempre haya sobrante arriba/abajo (y a los
+  // costados) y el encuadre elegido funcione.
+  useEffect(() => {
+    if (!imageUrl) {
+      setNaturalSize(null);
+      return;
+    }
+    let cancelled = false;
+    const img = new Image();
+    img.onload = () => {
+      if (!cancelled && img.naturalWidth && img.naturalHeight) {
+        setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
+      }
+    };
+    img.src = imageUrl;
+    return () => { cancelled = true; };
+  }, [imageUrl]);
+
+  useEffect(() => {
+    const layer = layerRef.current;
+    if (!layer || !naturalSize) {
+      setBackgroundSize('cover');
+      return;
+    }
+    const apply = () => {
+      const lw = layer.offsetWidth;
+      const lh = layer.offsetHeight;
+      if (!lw || !lh) return;
+      const scale = Math.max(lw / naturalSize.w, lh / naturalSize.h) * 1.18;
+      setBackgroundSize(`${Math.round(naturalSize.w * scale)}px ${Math.round(naturalSize.h * scale)}px`);
+    };
+    apply();
+    const observer = new ResizeObserver(apply);
+    observer.observe(layer);
+    return () => observer.disconnect();
+  }, [naturalSize]);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -66,6 +107,8 @@ export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, class
         style={{
           backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
           backgroundPosition: backgroundPosition || '50% 50%',
+          backgroundSize,
+          backgroundRepeat: 'no-repeat',
         }}
       />
       {imageUrl && overlayOpacity ? (
