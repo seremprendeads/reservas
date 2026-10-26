@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, Save, Loader2, Globe } from 'lucide-react';
+import { Eye, Save, Loader2, Globe, Download } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
 import type { Business } from '../../../lib/supabase';
@@ -53,6 +53,19 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
   const handleSaveAndClose = async () => {
     await handleSave();
     setActiveTab(null);
+  };
+
+  const handleDownloadJson = () => {
+    const preset = { template, sections, theme, visible_sections: visibleSections };
+    const blob = new Blob([JSON.stringify(preset, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `plantilla-${(slug || 'landing').replace(/[^a-z0-9-_]+/gi, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -213,6 +226,10 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                         className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
                       />
                     </div>
+                    <Button variant="outline" onClick={handleDownloadJson} className="w-full gap-1.5">
+                      <Download className="h-4 w-4" />
+                      Descargar JSON actual
+                    </Button>
                     <Button onClick={() => {
                       const ta = document.getElementById('preset-json-textarea') as HTMLTextAreaElement;
                       const txt = ta?.value || '';
@@ -230,6 +247,8 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                       Aplicar a esta landing
                     </Button>
                     <div className="text-xs text-foreground/50 space-y-1">
+                      <p>• La descarga incluye plantilla, secciones, tema y secciones visibles</p>
+                      <p>• Las imágenes se guardan como URLs, no como archivos</p>
                       <p>• Solo afecta esta landing, no a otros negocios</p>
                       <p>• El cliente podrá modificar textos, imágenes, equipo, FAQ, etc. desde las otras pestañas</p>
                       <p>• Después de aplicar, guardá desde el constructor normal</p>
