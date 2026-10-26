@@ -116,6 +116,10 @@ export function PlansTab({ sections, updateSection, triggerUpload, uploadingImag
         uploadingImage={uploadingImage}
         onChange={url => updateSection('plans', { ...p, background_image: url })}
         onFixedChange={v => updateSection('plans', { ...p, background_fixed: v })}
+        overlayColor={p.background_overlay_color}
+        overlayOpacity={p.background_overlay_opacity}
+        onOverlayColorChange={v => updateSection('plans', { ...p, background_overlay_color: v })}
+        onOverlayOpacityChange={v => updateSection('plans', { ...p, background_overlay_opacity: v })}
       />
 
       <SectionTextStyleFields sectionKey="plans" theme={theme} updateTheme={updateTheme} />

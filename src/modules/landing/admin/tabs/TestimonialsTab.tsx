@@ -97,6 +97,10 @@ export function TestimonialsTab({ sections, updateSection, triggerUpload, upload
         uploadingImage={uploadingImage}
         onChange={url => updateSection('testimonials', { ...t, background_image: url })}
         onFixedChange={v => updateSection('testimonials', { ...t, background_fixed: v })}
+        overlayColor={t.background_overlay_color}
+        overlayOpacity={t.background_overlay_opacity}
+        onOverlayColorChange={v => updateSection('testimonials', { ...t, background_overlay_color: v })}
+        onOverlayOpacityChange={v => updateSection('testimonials', { ...t, background_overlay_opacity: v })}
       />
 
       <SectionTextStyleFields sectionKey="testimonials" theme={theme} updateTheme={updateTheme} />

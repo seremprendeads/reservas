@@ -93,6 +93,10 @@ export function ServicesTab({ sections, updateSection, triggerUpload, uploadingI
         uploadingImage={uploadingImage}
         onChange={url => updateSection('secondary_services', { ...ss, background_image: url })}
         onFixedChange={v => updateSection('secondary_services', { ...ss, background_fixed: v })}
+        overlayColor={ss.background_overlay_color}
+        overlayOpacity={ss.background_overlay_opacity}
+        onOverlayColorChange={v => updateSection('secondary_services', { ...ss, background_overlay_color: v })}
+        onOverlayOpacityChange={v => updateSection('secondary_services', { ...ss, background_overlay_opacity: v })}
       />
 
       <SectionTextStyleFields sectionKey="secondary_services" theme={theme} updateTheme={updateTheme} />

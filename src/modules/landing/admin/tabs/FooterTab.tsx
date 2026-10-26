@@ -114,6 +114,10 @@ export function FooterTab({ sections, updateSection, triggerUpload, uploadingIma
         uploadingImage={uploadingImage}
         onChange={url => updateSection('footer', { ...f, background_image: url })}
         onFixedChange={v => updateSection('footer', { ...f, background_fixed: v })}
+        overlayColor={f.background_overlay_color}
+        overlayOpacity={f.background_overlay_opacity}
+        onOverlayColorChange={v => updateSection('footer', { ...f, background_overlay_color: v })}
+        onOverlayOpacityChange={v => updateSection('footer', { ...f, background_overlay_opacity: v })}
       />
 
       <SectionTextStyleFields

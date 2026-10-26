@@ -80,6 +80,9 @@ export interface LandingSections {
     image_position: 'left' | 'right';
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   about_text: {
     title: string;
@@ -90,6 +93,9 @@ export interface LandingSections {
     image_position: 'left' | 'right';
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   main_service: {
     icon: string;
@@ -98,6 +104,9 @@ export interface LandingSections {
     description: string;
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   secondary_services: {
     title: string;
@@ -105,6 +114,9 @@ export interface LandingSections {
     items: { icon: string; image_url: string | null; title: string; description: string }[];
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   why_choose_us: {
     title: string;
@@ -112,6 +124,9 @@ export interface LandingSections {
     items: { icon: string; title?: string; subtitle?: string; text: string }[];
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   gallery: {
     title: string;
@@ -120,6 +135,9 @@ export interface LandingSections {
     overlay_color: string;
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   testimonials: {
     title: string;
@@ -128,6 +146,9 @@ export interface LandingSections {
     google_review_url: string | null;
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   faq: {
     title: string;
@@ -135,6 +156,9 @@ export interface LandingSections {
     items: { question: string; answer: string }[];
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   cta: {
     title: string;
@@ -151,6 +175,9 @@ export interface LandingSections {
     items: { name: string; detail: string; bg_color: string; text_color: string; button_color: string }[];
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   footer: {
     address: string;
@@ -173,6 +200,9 @@ export interface LandingSections {
     frases: string;
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   banner: {
     title: string;
@@ -190,6 +220,9 @@ export interface LandingSections {
     map_url: string;
     background_image?: string | null;
     background_fixed?: boolean;
+    /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
+    background_overlay_color?: string;
+    background_overlay_opacity?: number;
   };
   popup: {
     enabled: boolean;

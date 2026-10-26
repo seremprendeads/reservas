@@ -1,6 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Separator } from '../../../../components/ui/separator';
+import { Input } from '../../../../components/ui/input';
 import type { LandingSections } from '../../types';
 
 interface SectionBackgroundFieldsProps {
@@ -16,6 +17,11 @@ interface SectionBackgroundFieldsProps {
   uploadTarget?: string;
   hideUpload?: boolean;
   recommended?: string;
+  /** Capa de color sobre la imagen. Se muestra solo si se pasa onOverlayOpacityChange. */
+  overlayColor?: string;
+  overlayOpacity?: number;
+  onOverlayColorChange?: (color: string) => void;
+  onOverlayOpacityChange?: (opacity: number) => void;
 }
 
 export function SectionBackgroundFields({
@@ -31,6 +37,10 @@ export function SectionBackgroundFields({
   uploadTarget,
   hideUpload = false,
   recommended = '1920 × 1080 px (horizontal). JPG o WebP, idealmente menos de 500 KB.',
+  overlayColor,
+  overlayOpacity,
+  onOverlayColorChange,
+  onOverlayOpacityChange,
 }: SectionBackgroundFieldsProps) {
   const setImage = onImageChange || onChange;
   const dividersEnabled = dividers.hero_about.enabled || dividers.cta_footer.enabled;
@@ -96,6 +106,50 @@ export function SectionBackgroundFields({
           <p className="mt-2 pl-7 text-[11px] leading-relaxed text-muted-foreground">
             El fondo fijo y los separadores no se pueden usar juntos. Al activarlo, los separadores se desactivan automáticamente.
           </p>
+        </div>
+      )}
+
+      {imageUrl && onOverlayOpacityChange && (
+        <div className="rounded-xl border bg-muted/20 p-3 space-y-3">
+          <div>
+            <label htmlFor="bg-overlay-opacity" className="text-sm font-medium text-foreground">
+              Opacidad de capa — {overlayOpacity ?? 0}%
+            </label>
+            <input
+              id="bg-overlay-opacity"
+              type="range"
+              min="0"
+              max="100"
+              value={overlayOpacity ?? 0}
+              onChange={e => onOverlayOpacityChange(Number(e.target.value))}
+              className="w-full mt-1 cursor-pointer accent-primary"
+            />
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              Una capa de color sobre la imagen ayuda a que el texto se lea. En 0% no hay capa.
+            </p>
+          </div>
+          {onOverlayColorChange && (overlayOpacity ?? 0) > 0 && (
+            <div>
+              <label className="text-sm font-medium text-foreground">Color de capa</label>
+              <div className="flex items-center gap-2.5 mt-1.5">
+                <input
+                  type="color"
+                  value={overlayColor || '#000000'}
+                  onChange={e => onOverlayColorChange(e.target.value)}
+                  className="h-8 w-8 cursor-pointer rounded-xl border bg-transparent p-0.5 shrink-0"
+                />
+                <Input
+                  type="text"
+                  value={overlayColor || '#000000'}
+                  onChange={e => onOverlayColorChange(e.target.value)}
+                  className="h-9 font-mono text-xs"
+                />
+              </div>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+                Negro oscurece la imagen (para texto claro); blanco la aclara (para texto oscuro).
+              </p>
+            </div>
+          )}
         </div>
       )}
     </>

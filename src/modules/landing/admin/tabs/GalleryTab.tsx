@@ -116,6 +116,10 @@ export function GalleryTab({ sections, updateSection, triggerUpload, uploadingIm
         uploadingImage={uploadingImage}
         onChange={url => updateSection('gallery', { ...g, background_image: url })}
         onFixedChange={v => updateSection('gallery', { ...g, background_fixed: v })}
+        overlayColor={g.background_overlay_color}
+        overlayOpacity={g.background_overlay_opacity}
+        onOverlayColorChange={v => updateSection('gallery', { ...g, background_overlay_color: v })}
+        onOverlayOpacityChange={v => updateSection('gallery', { ...g, background_overlay_opacity: v })}
       />
 
       <SectionTextStyleFields sectionKey="gallery" theme={theme} updateTheme={updateTheme} />

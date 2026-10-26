@@ -59,6 +59,10 @@ export function MapTab({ sections, updateSection, triggerUpload, uploadingImage,
         uploadingImage={uploadingImage}
         onChange={url => updateSection('map', { ...m, background_image: url })}
         onFixedChange={v => updateSection('map', { ...m, background_fixed: v })}
+        overlayColor={m.background_overlay_color}
+        overlayOpacity={m.background_overlay_opacity}
+        onOverlayColorChange={v => updateSection('map', { ...m, background_overlay_color: v })}
+        onOverlayOpacityChange={v => updateSection('map', { ...m, background_overlay_opacity: v })}
       />
 
       <SectionTextStyleFields sectionKey="map" theme={theme} updateTheme={updateTheme} />

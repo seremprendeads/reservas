@@ -79,6 +79,10 @@ export function FaqTab({ sections, updateSection, triggerUpload, uploadingImage,
         uploadingImage={uploadingImage}
         onChange={url => updateSection('faq', { ...f, background_image: url })}
         onFixedChange={v => updateSection('faq', { ...f, background_fixed: v })}
+        overlayColor={f.background_overlay_color}
+        overlayOpacity={f.background_overlay_opacity}
+        onOverlayColorChange={v => updateSection('faq', { ...f, background_overlay_color: v })}
+        onOverlayOpacityChange={v => updateSection('faq', { ...f, background_overlay_opacity: v })}
       />
 
       <SectionTextStyleFields sectionKey="faq" theme={theme} updateTheme={updateTheme} />

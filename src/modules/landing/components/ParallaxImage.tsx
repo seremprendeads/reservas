@@ -5,10 +5,13 @@ interface ParallaxImageProps {
   enabled?: boolean;
   strength?: number;
   className?: string;
+  /** Capa de color sobre la imagen (solo si hay imagen). Opacidad 0–100. */
+  overlayColor?: string;
+  overlayOpacity?: number;
   children?: React.ReactNode;
 }
 
-export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, className = '', children }: ParallaxImageProps) {
+export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, className = '', overlayColor, overlayOpacity, children }: ParallaxImageProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +63,9 @@ export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, class
         className="absolute -inset-y-[28%] inset-x-0 bg-cover bg-center will-change-transform"
         style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : undefined }}
       />
+      {imageUrl && overlayOpacity ? (
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ backgroundColor: overlayColor || '#000000', opacity: overlayOpacity / 100 }} />
+      ) : null}
       {children}
     </div>
   );
