@@ -2,6 +2,7 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Separator } from '../../../../components/ui/separator';
 import { Input } from '../../../../components/ui/input';
+import { ImagePositionField } from './ImagePositionField';
 import type { LandingSections } from '../../types';
 
 interface SectionBackgroundFieldsProps {
@@ -22,6 +23,9 @@ interface SectionBackgroundFieldsProps {
   overlayOpacity?: number;
   onOverlayColorChange?: (color: string) => void;
   onOverlayOpacityChange?: (opacity: number) => void;
+  /** Encuadre de la imagen de fondo. Se muestra solo si se pasa onBackgroundPositionChange. */
+  backgroundPosition?: string;
+  onBackgroundPositionChange?: (position: string) => void;
 }
 
 export function SectionBackgroundFields({
@@ -41,6 +45,8 @@ export function SectionBackgroundFields({
   overlayOpacity,
   onOverlayColorChange,
   onOverlayOpacityChange,
+  backgroundPosition,
+  onBackgroundPositionChange,
 }: SectionBackgroundFieldsProps) {
   const setImage = onImageChange || onChange;
   const dividersEnabled = dividers.hero_about.enabled || dividers.cta_footer.enabled;
@@ -150,6 +156,16 @@ export function SectionBackgroundFields({
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {imageUrl && onBackgroundPositionChange && (
+        <div className="rounded-xl border bg-muted/20 p-3">
+          <ImagePositionField
+            imageUrl={imageUrl}
+            value={backgroundPosition}
+            onChange={onBackgroundPositionChange}
+          />
         </div>
       )}
     </>

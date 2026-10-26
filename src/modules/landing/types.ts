@@ -40,6 +40,7 @@ export interface LandingSections {
     logo_size?: number;
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
   };
   hero: {
     hero_template: string;
@@ -70,6 +71,7 @@ export interface LandingSections {
     description_size: number | null;
     description_color: string | null;
     background_fixed?: boolean;
+    background_position?: string;
   };
   about: {
     title: string;
@@ -80,6 +82,7 @@ export interface LandingSections {
     image_position: 'left' | 'right';
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -93,6 +96,7 @@ export interface LandingSections {
     image_position: 'left' | 'right';
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -104,6 +108,7 @@ export interface LandingSections {
     description: string;
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -114,6 +119,7 @@ export interface LandingSections {
     items: { icon: string; image_url: string | null; title: string; description: string }[];
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -124,6 +130,7 @@ export interface LandingSections {
     items: { icon: string; title?: string; subtitle?: string; text: string }[];
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -135,6 +142,7 @@ export interface LandingSections {
     overlay_color: string;
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -146,6 +154,7 @@ export interface LandingSections {
     google_review_url: string | null;
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -156,6 +165,7 @@ export interface LandingSections {
     items: { question: string; answer: string }[];
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -169,12 +179,14 @@ export interface LandingSections {
     overlay_color: string;
     overlay_opacity: number;
     background_fixed?: boolean;
+    background_position?: string;
   };
   plans: {
     title: string;
     items: { name: string; detail: string; bg_color: string; text_color: string; button_color: string }[];
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -200,6 +212,7 @@ export interface LandingSections {
     frases: string;
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -212,6 +225,7 @@ export interface LandingSections {
     overlay_color: string;
     overlay_opacity: number;
     background_fixed?: boolean;
+    background_position?: string;
   };
   map: {
     title: string;
@@ -220,6 +234,7 @@ export interface LandingSections {
     map_url: string;
     background_image?: string | null;
     background_fixed?: boolean;
+    background_position?: string;
     /** Capa de color sobre la imagen de fondo (opacidad 0–100). Vacío = sin capa. */
     background_overlay_color?: string;
     background_overlay_opacity?: number;
@@ -234,6 +249,7 @@ export interface LandingSections {
     image_url: string | null;
     overlay_color: string;
     overlay_opacity: number;
+    background_position?: string;
   };
   shop_invite: {
     title: string;
@@ -244,6 +260,7 @@ export interface LandingSections {
     overlay_color: string;
     overlay_opacity: number;
     background_fixed?: boolean;
+    background_position?: string;
   };
   seo_marketing: {
     general: {

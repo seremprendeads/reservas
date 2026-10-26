@@ -8,10 +8,12 @@ interface ParallaxImageProps {
   /** Capa de color sobre la imagen (solo si hay imagen). Opacidad 0–100. */
   overlayColor?: string;
   overlayOpacity?: number;
+  /** Encuadre de la imagen de fondo, en formato CSS background-position. */
+  backgroundPosition?: string;
   children?: React.ReactNode;
 }
 
-export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, className = '', overlayColor, overlayOpacity, children }: ParallaxImageProps) {
+export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, className = '', overlayColor, overlayOpacity, backgroundPosition, children }: ParallaxImageProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +63,10 @@ export function ParallaxImage({ imageUrl, enabled = true, strength = 0.55, class
       <div
         ref={layerRef}
         className="absolute -inset-y-[28%] inset-x-0 bg-cover bg-center will-change-transform"
-        style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : undefined }}
+        style={{
+          backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
+          backgroundPosition: backgroundPosition || '50% 50%',
+        }}
       />
       {imageUrl && overlayOpacity ? (
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ backgroundColor: overlayColor || '#000000', opacity: overlayOpacity / 100 }} />

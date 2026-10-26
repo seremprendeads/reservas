@@ -32,7 +32,7 @@ export function HeroVideo({ data, theme, ts, headingStyle, bodyStyle, handleSmoo
     <section id="inicio" className="relative overflow-hidden">
       <div className="relative min-h-screen flex items-center justify-center pt-24 pb-20">
         {hasBgImage && (
-          <ParallaxImage imageUrl={data.background_image} enabled={parallax}>
+          <ParallaxImage imageUrl={data.background_image} backgroundPosition={data.background_position} enabled={parallax}>
             <div className="absolute inset-0" style={{ backgroundColor: data.background_color, opacity: data.overlay_opacity / 100 }} />
           </ParallaxImage>
         )}

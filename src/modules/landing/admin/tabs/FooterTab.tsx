@@ -118,6 +118,8 @@ export function FooterTab({ sections, updateSection, triggerUpload, uploadingIma
         overlayOpacity={f.background_overlay_opacity}
         onOverlayColorChange={v => updateSection('footer', { ...f, background_overlay_color: v })}
         onOverlayOpacityChange={v => updateSection('footer', { ...f, background_overlay_opacity: v })}
+        backgroundPosition={f.background_position}
+        onBackgroundPositionChange={v => updateSection('footer', { ...f, background_position: v })}
       />
 
       <SectionTextStyleFields

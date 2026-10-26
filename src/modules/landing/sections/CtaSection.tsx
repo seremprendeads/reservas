@@ -23,7 +23,7 @@ export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, b
     <section id="contacto" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12 relative overflow-hidden`}
       style={{ backgroundColor: cta.image_url ? 'transparent' : theme.cta_bg_color }}>
       {cta.image_url && (
-        <ParallaxImage imageUrl={cta.image_url} enabled={parallax}>
+        <ParallaxImage imageUrl={cta.image_url} backgroundPosition={cta.background_position} enabled={parallax}>
           <div className="absolute inset-0" style={{ backgroundColor: cta.overlay_color, opacity: cta.overlay_opacity / 100 }} />
         </ParallaxImage>
       )}

@@ -98,6 +98,8 @@ export function AboutTab({ sections, updateSection, triggerUpload, uploadingImag
         overlayOpacity={a.background_overlay_opacity}
         onOverlayColorChange={v => updateSection('about', { ...a, background_overlay_color: v })}
         onOverlayOpacityChange={v => updateSection('about', { ...a, background_overlay_opacity: v })}
+        backgroundPosition={a.background_position}
+        onBackgroundPositionChange={v => updateSection('about', { ...a, background_position: v })}
       />
 
       <SectionTextStyleFields sectionKey="about" theme={theme} updateTheme={updateTheme} />

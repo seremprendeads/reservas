@@ -308,7 +308,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── ABOUT ─── */}
       {hasSection('about') && s.about.description && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.about.background_image} overlayColor={s.about.background_overlay_color} overlayOpacity={s.about.background_overlay_opacity} enabled={(s.about.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.about.background_image} overlayColor={s.about.background_overlay_color} overlayOpacity={s.about.background_overlay_opacity} backgroundPosition={s.about.background_position} enabled={(s.about.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <AboutSection
             about={s.about}
             theme={theme}
@@ -323,7 +323,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── ABOUT TEXT ─── */}
       {hasSection('about_text') && s.about_text && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.about_text.background_image} overlayColor={s.about_text.background_overlay_color} overlayOpacity={s.about_text.background_overlay_opacity} enabled={(s.about_text.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.about_text.background_image} overlayColor={s.about_text.background_overlay_color} overlayOpacity={s.about_text.background_overlay_opacity} backgroundPosition={s.about_text.background_position} enabled={(s.about_text.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <AboutTextSection
             aboutText={s.about_text}
             theme={theme}
@@ -337,7 +337,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── MAIN SERVICE ─── */}
       {hasSection('main_service') && s.main_service.title && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.main_service.background_image} overlayColor={s.main_service.background_overlay_color} overlayOpacity={s.main_service.background_overlay_opacity} enabled={(s.main_service.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.main_service.background_image} overlayColor={s.main_service.background_overlay_color} overlayOpacity={s.main_service.background_overlay_opacity} backgroundPosition={s.main_service.background_position} enabled={(s.main_service.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <MainServiceSection
             mainService={s.main_service}
             theme={theme}
@@ -352,7 +352,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── SECONDARY SERVICES ─── */}
       {hasSection('secondary_services') && s.secondary_services.items.length > 0 && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.secondary_services.background_image} overlayColor={s.secondary_services.background_overlay_color} overlayOpacity={s.secondary_services.background_overlay_opacity} enabled={(s.secondary_services.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.secondary_services.background_image} overlayColor={s.secondary_services.background_overlay_color} overlayOpacity={s.secondary_services.background_overlay_opacity} backgroundPosition={s.secondary_services.background_position} enabled={(s.secondary_services.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <SecondaryServicesSection
             secondaryServices={s.secondary_services}
             theme={theme}
@@ -367,7 +367,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── WHY CHOOSE US ─── */}
       {hasSection('why_choose_us') && s.why_choose_us.items.length > 0 && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.why_choose_us.background_image} overlayColor={s.why_choose_us.background_overlay_color} overlayOpacity={s.why_choose_us.background_overlay_opacity} enabled={(s.why_choose_us.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.why_choose_us.background_image} overlayColor={s.why_choose_us.background_overlay_color} overlayOpacity={s.why_choose_us.background_overlay_opacity} backgroundPosition={s.why_choose_us.background_position} enabled={(s.why_choose_us.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <WhyChooseUsSection
             whyChooseUs={s.why_choose_us}
             theme={theme}
@@ -381,7 +381,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
 
       {hasSection('plans') && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.plans.background_image} overlayColor={s.plans.background_overlay_color} overlayOpacity={s.plans.background_overlay_opacity} enabled={(s.plans.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.plans.background_image} overlayColor={s.plans.background_overlay_color} overlayOpacity={s.plans.background_overlay_opacity} backgroundPosition={s.plans.background_position} enabled={(s.plans.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <PlansSection
             plans={s.plans}
             whatsapp={s.footer?.whatsapp || ''}
@@ -396,7 +396,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── GALLERY ─── */}
       {hasSection('gallery') && galleryImages.length > 0 && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.gallery.background_image} overlayColor={s.gallery.background_overlay_color} overlayOpacity={s.gallery.background_overlay_opacity} enabled={(s.gallery.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.gallery.background_image} overlayColor={s.gallery.background_overlay_color} overlayOpacity={s.gallery.background_overlay_opacity} backgroundPosition={s.gallery.background_position} enabled={(s.gallery.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <GallerySection
             gallery={s.gallery}
             galleryImages={galleryImages}
@@ -423,7 +423,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── BANNER ─── */}
       {hasSection('banner') && (s.banner.title || s.banner.subtitle || s.banner.description || s.banner.image_url) && (
         <section className="relative py-32 sm:py-40 px-5 sm:px-8 lg:px-12 overflow-hidden">
-          <ParallaxImage imageUrl={s.banner.image_url} enabled={(s.banner.background_fixed ?? parallaxEnabled)}>
+          <ParallaxImage imageUrl={s.banner.image_url} backgroundPosition={s.banner.background_position} enabled={(s.banner.background_fixed ?? parallaxEnabled)}>
             {s.banner.image_url ? (
               <div className="absolute inset-0" style={{ backgroundColor: s.banner.overlay_color, opacity: s.banner.overlay_opacity / 100 }} />
             ) : (
@@ -453,7 +453,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── TESTIMONIALS ─── */}
       {hasSection('testimonials') && s.testimonials.items.length > 0 && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.testimonials.background_image} overlayColor={s.testimonials.background_overlay_color} overlayOpacity={s.testimonials.background_overlay_opacity} enabled={(s.testimonials.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.testimonials.background_image} overlayColor={s.testimonials.background_overlay_color} overlayOpacity={s.testimonials.background_overlay_opacity} backgroundPosition={s.testimonials.background_position} enabled={(s.testimonials.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <TestimonialsSection
             testimonials={s.testimonials}
             theme={theme}
@@ -480,7 +480,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── FAQ ─── */}
       {hasSection('faq') && s.faq.items.length > 0 && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.faq.background_image} overlayColor={s.faq.background_overlay_color} overlayOpacity={s.faq.background_overlay_opacity} enabled={(s.faq.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.faq.background_image} overlayColor={s.faq.background_overlay_color} overlayOpacity={s.faq.background_overlay_opacity} backgroundPosition={s.faq.background_position} enabled={(s.faq.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <FaqSection
             faq={s.faq}
             theme={theme}
@@ -494,7 +494,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── MAP ─── */}
       {hasSection('map') && (s.map.address || s.map.map_url) && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.map.background_image} overlayColor={s.map.background_overlay_color} overlayOpacity={s.map.background_overlay_opacity} enabled={(s.map.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.map.background_image} overlayColor={s.map.background_overlay_color} overlayOpacity={s.map.background_overlay_opacity} backgroundPosition={s.map.background_position} enabled={(s.map.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <MapSection
             map={s.map}
             theme={theme}
@@ -531,7 +531,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
       {/* ─── FOOTER ─── */}
       {hasSection('footer') && (
         <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.footer.background_image} overlayColor={s.footer.background_overlay_color} overlayOpacity={s.footer.background_overlay_opacity} enabled={(s.footer.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <ParallaxImage imageUrl={s.footer.background_image} overlayColor={s.footer.background_overlay_color} overlayOpacity={s.footer.background_overlay_opacity} backgroundPosition={s.footer.background_position} enabled={(s.footer.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
           <FooterSection
             footer={s.footer}
             menuItems={s.header.menu_items || []}

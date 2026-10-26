@@ -113,6 +113,8 @@ export function MainServiceTab({ sections, updateSection, triggerUpload, uploadi
         overlayOpacity={ms.background_overlay_opacity}
         onOverlayColorChange={v => updateSection('main_service', { ...ms, background_overlay_color: v })}
         onOverlayOpacityChange={v => updateSection('main_service', { ...ms, background_overlay_opacity: v })}
+        backgroundPosition={ms.background_position}
+        onBackgroundPositionChange={v => updateSection('main_service', { ...ms, background_position: v })}
       />
 
       <SectionTextStyleFields sectionKey="main_service" theme={theme} updateTheme={updateTheme} />

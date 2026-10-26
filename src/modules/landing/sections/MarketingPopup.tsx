@@ -84,7 +84,7 @@ export function MarketingPopup({ popup, theme, headingStyle, bodyStyle }: Market
         {/* Imagen de Canva en el centro */}
         {popup.image_url && (
           <div className="w-full">
-            <img src={popup.image_url} alt="" className="w-full object-cover" />
+            <img src={popup.image_url} alt="" className="w-full object-cover" style={{ objectPosition: popup.background_position || '50% 50%' }} />
           </div>
         )}
 

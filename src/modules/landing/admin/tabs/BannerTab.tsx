@@ -76,6 +76,8 @@ export function BannerTab({ sections, updateSection, triggerUpload, uploadingIma
         updateSection={updateSection}
         hideUpload
         onFixedChange={v => updateSection('banner', { ...b, background_fixed: v })}
+        backgroundPosition={b.background_position}
+        onBackgroundPositionChange={v => updateSection('banner', { ...b, background_position: v })}
       />
 
       <SectionTextStyleFields

@@ -140,6 +140,8 @@ export function WhyChooseUsTab({ sections, updateSection, triggerUpload, uploadi
         overlayOpacity={w.background_overlay_opacity}
         onOverlayColorChange={v => updateSection('why_choose_us', { ...w, background_overlay_color: v })}
         onOverlayOpacityChange={v => updateSection('why_choose_us', { ...w, background_overlay_opacity: v })}
+        backgroundPosition={w.background_position}
+        onBackgroundPositionChange={v => updateSection('why_choose_us', { ...w, background_position: v })}
       />
 
       <SectionTextStyleFields sectionKey="why_choose_us" theme={theme} updateTheme={updateTheme} />

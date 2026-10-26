@@ -3,6 +3,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
+import { ImagePositionField } from '../components/ImagePositionField';
 import type { LandingSections, LandingTheme } from '../../types';
 
 interface PopupTabProps {
@@ -68,6 +69,13 @@ export function PopupTab({ sections, updateSection, triggerUpload, uploadingImag
             <input type="range" min="0" max="100" value={p.overlay_opacity}
               onChange={e => updateSection('popup', { ...p, overlay_opacity: Number(e.target.value) })}
               className="w-full mt-1" />
+          </div>
+          <div className="rounded-xl border bg-muted/20 p-3">
+            <ImagePositionField
+              imageUrl={p.image_url}
+              value={p.background_position}
+              onChange={v => updateSection('popup', { ...p, background_position: v })}
+            />
           </div>
         </>
       )}

@@ -84,6 +84,8 @@ export function ShopInviteTab({ sections, updateSection, triggerUpload, uploadin
         updateSection={updateSection}
         hideUpload
         onFixedChange={v => updateSection('shop_invite', { ...si, background_fixed: v })}
+        backgroundPosition={si.background_position}
+        onBackgroundPositionChange={v => updateSection('shop_invite', { ...si, background_position: v })}
       />
 
       <SectionTextStyleFields

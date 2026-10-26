@@ -297,6 +297,8 @@ export function HeroForm({ data, onChange, triggerUpload, uploadingImage, theme,
               updateSection={updateSection}
               hideUpload
               onFixedChange={v => update('background_fixed', v)}
+              backgroundPosition={data.background_position}
+              onBackgroundPositionChange={v => update('background_position', v)}
             />
           </div>
         )}

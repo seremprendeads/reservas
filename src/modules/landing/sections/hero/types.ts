@@ -13,6 +13,9 @@ export interface HeroBaseData {
   background_color: string;
   background_image: string | null;
   background_fixed?: boolean;
+  // Que parte de la foto de fondo queda a la vista. Formato CSS
+  // background-position, ej. '50% 20%'. Por defecto, centrada.
+  background_position?: string;
   overlay_opacity: number;
   // Tamaño (px) y color propios de cada texto. null = usar el estilo por
   // defecto de la plantilla (tamaño responsive de Tailwind, color derivado
@@ -75,6 +78,7 @@ export function createDefaultHeroData(template: HeroTemplate, existing?: Partial
     background_color: existing?.background_color ?? '#111827',
     background_image: existing?.background_image ?? null,
     background_fixed: existing?.background_fixed,
+    background_position: existing?.background_position,
     overlay_opacity: existing?.overlay_opacity ?? 40,
     logo_caption_size: existing?.logo_caption_size ?? null,
     logo_caption_color: existing?.logo_caption_color ?? null,
