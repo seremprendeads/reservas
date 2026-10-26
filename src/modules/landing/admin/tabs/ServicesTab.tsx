@@ -44,6 +44,13 @@ export function ServicesTab({ sections, updateSection, triggerUpload, uploadingI
         <Input value={ss.subtitle || ''} onChange={e => updateSection('secondary_services', { ...ss, subtitle: e.target.value })} className="mt-1.5 h-12 rounded-xl" placeholder="Frase corta que acompaña al título" />
       </div>
       <SectionColorField
+        label="Fondo de la sección"
+        description="Color de fondo de la sección de servicios."
+        value={theme.secondary_services_bg_color}
+        fallback={DEFAULT_THEME.bg_color}
+        onChange={v => updateTheme('secondary_services_bg_color', v)}
+      />
+      <SectionColorField
         label="Fondo de las tarjetas"
         description="Color de fondo de cada tarjeta de servicio."
         value={theme.secondary_services_card_bg_color}

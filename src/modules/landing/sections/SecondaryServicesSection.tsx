@@ -16,7 +16,7 @@ interface SecondaryServicesSectionProps {
 
 export function SecondaryServicesSection({ secondaryServices, theme, ts, headingStyle, bodyStyle, getIcon }: SecondaryServicesSectionProps) {
   return (
-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`}>
+    <section className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: secondaryServices.background_image ? 'transparent' : (theme.secondary_services_bg_color || theme.bg_color) }}>
       <div className="max-w-6xl mx-auto">
         <h2 style={{ ...headingStyle, fontWeight: 700, color: theme.secondary_services_title_color || undefined, fontSize: fontSize(theme.secondary_services_title_size), ...textStyleExtras(theme, 'secondary_services_title') }} className={`text-4xl sm:text-5xl tracking-tight text-center ${secondaryServices.subtitle ? 'mb-4' : 'mb-16'}`}>
           {secondaryServices.title || 'Servicios'}

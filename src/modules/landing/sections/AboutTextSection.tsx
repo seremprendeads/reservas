@@ -57,7 +57,7 @@ export function AboutTextSection({ aboutText, theme, ts, headingStyle, bodyStyle
 
   if (!hasImage) {
     return (
-      <section className="py-8 px-5 sm:px-8 lg:px-12" style={sectionStyle}>
+      <section className="relative py-8 px-5 sm:px-8 lg:px-12" style={sectionStyle}>
         <div className="max-w-6xl mx-auto">
           {textBlock}
         </div>
@@ -66,7 +66,7 @@ export function AboutTextSection({ aboutText, theme, ts, headingStyle, bodyStyle
   }
 
   return (
-    <section className="py-8 px-5 sm:px-8 lg:px-12" style={sectionStyle}>
+    <section className="relative py-8 px-5 sm:px-8 lg:px-12" style={sectionStyle}>
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
         <div className={imageOnRight && !isMobile ? 'md:order-2' : undefined}>
           <div className={`${ts.cardRadius} overflow-hidden ${ts.cardShadow}`}>

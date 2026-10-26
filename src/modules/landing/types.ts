@@ -377,6 +377,7 @@ export interface LandingTheme {
   about_bg_color: string;
   about_text_bg_color: string;
   main_service_bg_color: string;
+  secondary_services_bg_color: string;
   secondary_services_card_bg_color: string;
   why_choose_us_bg_color: string;
   why_choose_us_card_bg_color: string;

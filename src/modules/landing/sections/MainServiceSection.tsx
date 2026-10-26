@@ -19,7 +19,7 @@ export function MainServiceSection({ mainService, theme, ts, headingStyle, bodyS
   const iconSize = theme.main_service_icon_size ? `${theme.main_service_icon_size}px` : undefined;
   const iconColor = theme.main_service_icon_color || theme.service_icon_color;
   return (
-    <section className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: theme.main_service_bg_color }}>
+    <section className={`relative ${ts.sectionSpacing} px-5 sm:px-8 lg:px-12`} style={{ backgroundColor: mainService.background_image ? 'transparent' : theme.main_service_bg_color }}>
       <div className="max-w-5xl mx-auto text-center">
         {Icon && (
           <div

@@ -396,6 +396,7 @@ export const DEFAULT_THEME: LandingTheme = {
   about_bg_color: '#ffffff',
   about_text_bg_color: '',
   main_service_bg_color: '#fafafa',
+  secondary_services_bg_color: '',
   secondary_services_card_bg_color: '#ffffff',
   why_choose_us_bg_color: '#fafafa',
   why_choose_us_card_bg_color: '#ffffff',
