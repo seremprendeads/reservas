@@ -537,6 +537,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
             menuItems={s.header.menu_items || []}
             logoUrl={s.header.logo_image_url || landing.logo_url}
             logoShape={s.header.logo_shape}
+            logoSize={s.header.logo_size}
             slug={landing.slug}
             businessId={isPreview ? null : landing.business_id}
             legalLinksNewTab={isPreview}

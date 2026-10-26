@@ -43,6 +43,7 @@ interface FooterSectionProps {
   menuItems: { label: string; href: string }[];
   logoUrl: string | null;
   logoShape?: 'circle' | 'square';
+  logoSize?: number;
   slug: string;
   // Id del negocio dueño de la landing: se usa para resolver el slug de las páginas legales.
   businessId?: string | null;
@@ -54,7 +55,7 @@ interface FooterSectionProps {
   handleSmoothScroll: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, businessId, legalLinksNewTab, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: FooterSectionProps) {
+export function FooterSection({ footer, menuItems, logoUrl, logoShape, logoSize, slug, businessId, legalLinksNewTab, theme, ts, headingStyle, bodyStyle, handleSmoothScroll }: FooterSectionProps) {
   const footerBgColor = theme.footer_bg_color;
   const footerTextColor = theme.footer_text_color || '#f3f4f6';
   // El color de título y subtítulo propios pisan al de texto del footer. Cuando
@@ -73,10 +74,11 @@ export function FooterSection({ footer, menuItems, logoUrl, logoShape, slug, bus
               <img
                 src={logoUrl}
                 alt=""
+                style={{ '--logo-scale': (logoSize || 100) / 100 } as React.CSSProperties}
                 className={
                   logoShape === 'square'
-                    ? 'h-16 sm:h-20 w-auto max-w-[220px] object-contain mb-5 mx-auto sm:mx-0'
-                    : 'h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover mb-5 mx-auto sm:mx-0'
+                    ? 'h-[calc(2.5rem*var(--logo-scale,1))] sm:h-[calc(3.5rem*var(--logo-scale,1))] w-auto max-w-[220px] object-contain mb-5 mx-auto sm:mx-0'
+                    : 'h-[calc(2.25rem*var(--logo-scale,1))] w-[calc(2.25rem*var(--logo-scale,1))] sm:h-[calc(2.5rem*var(--logo-scale,1))] sm:w-[calc(2.5rem*var(--logo-scale,1))] rounded-full object-cover mb-5 mx-auto sm:mx-0'
                 }
               />
             )}

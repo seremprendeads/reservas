@@ -185,7 +185,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                   <SeoMarketingTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
                 )}
                 {activeTab === 'footer' && (
-                  <FooterTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
+                  <FooterTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} logoUrl={logoUrl} />
                 )}
                 {activeTab === 'design' && (
                   <DesignTab theme={theme} updateTheme={updateTheme} businessId={business?.id || ''} />

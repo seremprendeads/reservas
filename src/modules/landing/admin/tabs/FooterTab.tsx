@@ -1,5 +1,7 @@
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
+import { Button } from '../../../../components/ui/button';
+import { cn } from '../../../../lib/utils';
 import { SectionTextStyleFields } from '../components/SectionTextStyleFields';
 import { SectionBackgroundFields } from '../components/SectionBackgroundFields';
 import { SectionColorField } from '../components/SectionColorField';
@@ -10,13 +12,69 @@ interface FooterTabProps {
   sections: LandingSections; updateSection: (k: string, v: unknown) => void;
   triggerUpload: (t: string) => void; uploadingImage: string | null;
   theme: LandingTheme; updateTheme: (k: string, v: string) => void;
+  logoUrl: string;
 }
 
-export function FooterTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: FooterTabProps) {
+export function FooterTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme, logoUrl }: FooterTabProps) {
   const f = sections.footer;
+  const header = sections.header;
+  const logoSize = header.logo_size || 100;
+  const setHeader = (patch: Partial<LandingSections['header']>) => updateSection('header', { ...header, ...patch });
   const update = (field: string, value: string) => updateSection('footer', { ...f, [field]: value });
   return (
     <div className="space-y-5">
+      <div>
+        <label className="text-sm font-medium text-foreground mb-3 block">Logo</label>
+        <div className="flex items-center gap-4">
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt="Logo"
+              className={cn(
+                'border bg-muted/20',
+                header.logo_shape === 'square'
+                  ? 'h-12 w-auto max-w-[140px] object-contain rounded-lg p-1'
+                  : 'h-12 w-12 object-cover rounded-full'
+              )}
+            />
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => triggerUpload('logo')}
+            disabled={!!uploadingImage}
+          >
+            {uploadingImage === 'logo' ? 'Subiendo...' : logoUrl ? 'Cambiar logo' : 'Subir logo'}
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">Es el mismo logo que se usa en el menú.</p>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between">
+          <label htmlFor="footer-logo-size" className="text-sm font-medium text-foreground">Tamaño del logo</label>
+          <span className="text-sm text-muted-foreground tabular-nums">{logoSize}%</span>
+        </div>
+        <input
+          id="footer-logo-size"
+          type="range"
+          min={60}
+          max={140}
+          step={5}
+          value={logoSize}
+          onChange={e => setHeader({ logo_size: Number(e.target.value) })}
+          className="mt-3 w-full cursor-pointer accent-primary"
+        />
+        <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+          <span>Más chico</span>
+          <button type="button" className="underline-offset-2 hover:underline" onClick={() => setHeader({ logo_size: 100 })}>Restablecer</button>
+          <span>Más grande</span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">Se comparte con el menú para que se vean del mismo tamaño.</p>
+      </div>
+
+      <Separator />
+
       <SectionColorField
         label="Fondo del footer"
         description="Color de fondo del pie de página."
