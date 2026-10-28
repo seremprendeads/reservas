@@ -3,6 +3,7 @@ import type { LandingSections, LandingTheme } from '../types';
 import { fontSize } from '../lib/font-size';
 import { textStyleExtras } from '../lib/text-style';
 import { ParallaxImage } from '../components/ParallaxImage';
+import { useScrollPulse } from '../hooks/useScrollPulse';
 
 type TemplateStyles = { sectionSpacing: string; buttonRadius: string };
 
@@ -19,6 +20,9 @@ interface CtaSectionProps {
 }
 
 export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, bodyStyle, handleSmoothScroll, parallax }: CtaSectionProps) {
+  const pulse = useScrollPulse();
+  const buttonBackground = theme.cta_button_bg || `linear-gradient(135deg, ${theme.button_color}, ${theme.secondary_color})`;
+
   return (
     <section id="contacto" className={`${ts.sectionSpacing} px-5 sm:px-8 lg:px-12 relative overflow-hidden`}
       style={{ backgroundColor: cta.image_url ? 'transparent' : theme.cta_bg_color }}>
@@ -46,16 +50,23 @@ export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, b
           {cta.description}
         </p>
         <a href="#contacto" onClick={handleSmoothScroll}
-          className={`inline-flex items-center px-10 py-5 ${theme.button_border_radius} font-medium text-lg text-white transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]`}
+          className={`relative inline-flex items-center px-10 py-5 ${theme.button_border_radius} font-medium text-lg text-white transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]`}
           style={{
-            background: theme.cta_button_bg || `linear-gradient(135deg, ${theme.button_color}, ${theme.secondary_color})`,
+            background: buttonBackground,
             boxShadow: `0 8px 30px ${theme.button_color}30`,
             color: theme.cta_button_color || undefined,
             fontSize: fontSize(theme.cta_button_size),
             ...textStyleExtras(theme, 'cta_button'),
           }}>
-          {cta.button_text || 'Reservar ahora'}
-          <ArrowRight className="h-5 w-5 ml-2" />
+          <span
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-0 ${theme.button_border_radius} ${pulse ? 'animate-whatsapp-pulse motion-reduce:animate-none' : 'opacity-0'}`}
+            style={{ background: buttonBackground }}
+          />
+          <span className="relative z-10 inline-flex items-center">
+            {cta.button_text || 'Reservar ahora'}
+            <ArrowRight className="h-5 w-5 ml-2" />
+          </span>
         </a>
       </div>
     </section>

@@ -1,28 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
 import whatsappIcon from '../../../../imagenes/WhatsApp_icon.png';
+import { useScrollPulse } from '../hooks/useScrollPulse';
 
 type FloatingWhatsAppProps = {
   phone: string;
 };
 
 export function FloatingWhatsApp({ phone }: FloatingWhatsAppProps) {
-  const [scrolling, setScrolling] = useState(false);
-  const timeoutRef = useRef<number | undefined>(undefined);
-
-  useEffect(() => {
-    const onScroll = () => {
-      setScrolling(true);
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = window.setTimeout(() => setScrolling(false), 350);
-    };
-    // En el preview del admin el scroll ocurre dentro de un contenedor, por eso
-    // se escucha en captura sobre window.
-    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll, true);
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-    };
-  }, []);
+  const scrolling = useScrollPulse();
 
   if (!phone) return null;
 
