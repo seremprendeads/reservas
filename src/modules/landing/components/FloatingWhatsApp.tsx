@@ -34,13 +34,17 @@ export function FloatingWhatsApp({ phone }: FloatingWhatsAppProps) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/30 transition-all duration-200 hover:scale-110 hover:shadow-xl hover:shadow-[#25D366]/40 ${scrolling ? 'animate-whatsapp-scroll motion-reduce:animate-none' : ''}`}
+      className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/30 transition-all duration-200 hover:scale-110 hover:shadow-xl hover:shadow-[#25D366]/40"
       aria-label="Contactar por WhatsApp"
     >
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 rounded-full bg-[#25D366] ${scrolling ? 'animate-whatsapp-pulse motion-reduce:animate-none' : 'opacity-0'}`}
+      />
       <img
         src={whatsappIcon}
         alt="WhatsApp"
-        className="h-7 w-7"
+        className="relative z-10 h-7 w-7"
       />
     </a>
   );
