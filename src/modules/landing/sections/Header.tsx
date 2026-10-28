@@ -135,7 +135,7 @@ export function Header({ s, theme, ts, scrolled, mobileMenuOpen, setMobileMenuOp
           <div className="px-5 py-5 space-y-1">
             {(s.header.menu_items || []).map((item, i) => (
               <a key={i} href={item.href} onClick={handleSmoothScroll}
-                style={{ color: menuTextColor, ...bodyStyle, fontSize: fontSize(theme.header_text_size), ...textStyleExtras(theme, 'header_text') }}
+                style={{ color: theme.header_text_color || theme.text_color, ...bodyStyle, fontSize: fontSize(theme.header_text_size), ...textStyleExtras(theme, 'header_text') }}
                 className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-black/[0.03] transition-colors">
                 {formatLabel(item.label)}
               </a>
