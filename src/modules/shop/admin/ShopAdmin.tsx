@@ -93,11 +93,18 @@ export function ShopAdmin() {
   };
 
   const saveShopColors = async () => {
-    await persistShopConfig({
+    setTemplateError('');
+    setTemplateNotice('');
+    const saved = await persistShopConfig({
       banner: bannerCfg,
       popup: popupCfg,
       colors: colorsCfg,
     });
+    if (saved) {
+      setTemplateNotice('Cambios guardados en la tienda.');
+    } else {
+      setTemplateError('No se pudieron guardar los cambios. Revisá la sesión e intentá de nuevo.');
+    }
   };
 
   const discardShopColors = () => {
@@ -148,23 +155,6 @@ export function ShopAdmin() {
     },
   });
 
-  const fillTemplateFromCurrent = () => {
-    setTemplateJson(JSON.stringify(getShopPreset(), null, 2));
-    setTemplateError('');
-    setTemplateNotice('');
-  };
-
-  const copyTemplate = async () => {
-    try {
-      await navigator.clipboard.writeText(JSON.stringify(getShopPreset(), null, 2));
-      setTemplateError('');
-      setTemplateNotice('JSON copiado al portapapeles');
-    } catch {
-      setTemplateNotice('');
-      setTemplateError('No se pudo copiar el JSON');
-    }
-  };
-
   const downloadTemplate = () => {
     const blob = new Blob([JSON.stringify(getShopPreset(), null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -177,7 +167,7 @@ export function ShopAdmin() {
     URL.revokeObjectURL(url);
   };
 
-  const applyTemplate = async () => {
+  const applyTemplate = () => {
     setTemplateError('');
     setTemplateNotice('');
     const raw = templateJson.trim();
@@ -343,16 +333,7 @@ export function ShopAdmin() {
     setPopupCfg(nextPopup);
     setShopThemeId('');
 
-    const saved = await persistShopConfig({
-      banner: nextBanner,
-      popup: nextPopup,
-      colors: nextColors,
-    });
-    if (saved) {
-      setTemplateNotice('Plantilla aplicada y guardada en la tienda.');
-    } else {
-      setTemplateError('La plantilla se aplicó, pero no se pudo guardar. Probá con el botón Guardar.');
-    }
+    setTemplateNotice('Plantilla aplicada. Presioná Guardar para publicarla en la tienda.');
   };
 
   return (
@@ -438,19 +419,11 @@ export function ShopAdmin() {
             </p>
           </div>
 
-          <div className="flex items-center justify-end gap-2">
-            {hasPendingChanges && (
+          {hasPendingChanges && (
+            <div className="flex items-center justify-end gap-2">
               <Button variant="ghost" size="sm" onClick={discardShopColors}>Descartar</Button>
-            )}
-            <Button
-              size="sm"
-              onClick={saveShopColors}
-              disabled={!hasPendingChanges || savingPalette}
-              title={hasPendingChanges ? 'Guardar los cambios de la tienda' : 'No hay cambios que guardar'}>
-              {savingPalette ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-              Guardar
-            </Button>
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -461,7 +434,7 @@ export function ShopAdmin() {
             <h3 className="text-base font-medium text-foreground">Plantilla JSON</h3>
           </div>
           <p className="text-sm text-muted-foreground">
-            Pegá un JSON con <code className="rounded bg-muted px-1 py-0.5 text-xs">colors</code>, <code className="rounded bg-muted px-1 py-0.5 text-xs">banner</code> y <code className="rounded bg-muted px-1 py-0.5 text-xs">popup</code> para aplicar y guardar la apariencia de la tienda.
+            Pegá un JSON con <code className="rounded bg-muted px-1 py-0.5 text-xs">colors</code>, <code className="rounded bg-muted px-1 py-0.5 text-xs">banner</code> y <code className="rounded bg-muted px-1 py-0.5 text-xs">popup</code> para aplicar la apariencia de la tienda. Después presioná Guardar.
           </p>
           <textarea
             value={templateJson}
@@ -477,21 +450,20 @@ export function ShopAdmin() {
           {templateNotice && (
             <p className="text-xs font-medium text-emerald-600">{templateNotice}</p>
           )}
-          <div className="grid gap-2 sm:grid-cols-2">
-            <Button variant="outline" onClick={fillTemplateFromCurrent}>
-              Cargar tienda actual
-            </Button>
-            <Button variant="outline" onClick={copyTemplate} className="gap-1.5">
-              <Copy className="h-4 w-4" />
-              Copiar JSON
-            </Button>
+          <div className="grid gap-2 sm:grid-cols-3">
             <Button variant="outline" onClick={downloadTemplate} className="gap-1.5">
               <Download className="h-4 w-4" />
               Descargar JSON
             </Button>
-            <Button onClick={applyTemplate} disabled={savingPalette}>
+            <Button
+              variant="outline"
+              onClick={saveShopColors}
+              disabled={!hasPendingChanges || savingPalette}>
               {savingPalette ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}
-              Aplicar y guardar
+              Guardar
+            </Button>
+            <Button onClick={applyTemplate}>
+              Aplicar
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
