@@ -81,6 +81,7 @@ export function ProductImageSlider({ images, alt, compact = false, className = '
       <div
         ref={containerRef}
         className="relative overflow-hidden select-none"
+        style={{ touchAction: 'pan-y' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -88,11 +89,11 @@ export function ProductImageSlider({ images, alt, compact = false, className = '
       >
         <div className="aspect-square relative">
           <div
-            className="absolute inset-0 flex transition-transform duration-300 ease-out"
+            className="absolute inset-0 flex w-full transition-transform duration-300 ease-out"
             style={{ transform: `translateX(-${current * 100}%)${touchStart !== null ? ` translateX(${touchDelta}px)` : ''}` }}
           >
             {validImages.map((img, i) => (
-              <div key={i} className="min-w-full h-full shrink-0">
+              <div key={i} className="w-full min-w-0 h-full shrink-0 overflow-hidden">
                 <img src={img} alt={`${alt} ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
               </div>
             ))}
