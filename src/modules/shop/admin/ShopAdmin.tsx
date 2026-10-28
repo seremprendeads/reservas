@@ -338,6 +338,41 @@ export function ShopAdmin() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-3 border-b pb-4 mb-6 overflow-x-auto lg:flex-wrap">
+        <button onClick={() => setView('dashboard')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'dashboard' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <BarChart3 className="w-4 h-4 inline mr-1.5" />Dashboard
+        </button>
+        <button onClick={() => setView('products')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'products' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <Package className="w-4 h-4 inline mr-1.5" />Productos
+        </button>
+        <button onClick={() => setView('categories')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'categories' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          Categorías
+        </button>
+        <button onClick={() => setView('orders')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'orders' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <ShoppingCart className="w-4 h-4 inline mr-1.5" />Ventas
+        </button>
+        <button onClick={() => setView('popup')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'popup' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <Megaphone className="w-4 h-4 inline mr-1.5" />Popup
+        </button>
+        <button onClick={() => setView('banner')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'banner' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <Timer className="w-4 h-4 inline mr-1.5" />Banner
+        </button>
+        <button onClick={() => setView('avisos')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'avisos' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <MessageSquare className="w-4 h-4 inline mr-1.5" />Avisos
+        </button>
+        <button onClick={() => setView('trash')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'trash' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <Archive className="w-4 h-4 inline mr-1.5" />Papelera
+        </button>
+      </div>
+      {view === 'dashboard' && <ShopDashboard />}
+      {view === 'products' && <ProductsManager />}
+      {view === 'categories' && <CategoriesManager />}
+      {view === 'orders' && <OrdersList />}
+      {view === 'popup' && <ShopPopupTab />}
+      {view === 'banner' && <ShopBannerTab />}
+      {view === 'avisos' && <ShopAvisosTab />}
+      {view === 'trash' && <ProductsTrash />}
+
       <Card>
         <CardContent className="p-5 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -471,41 +506,6 @@ export function ShopAdmin() {
           </p>
         </CardContent>
       </Card>
-
-      <div className="flex items-center gap-3 border-b pb-4 mb-6 overflow-x-auto lg:flex-wrap">
-        <button onClick={() => setView('dashboard')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'dashboard' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
-          <BarChart3 className="w-4 h-4 inline mr-1.5" />Dashboard
-        </button>
-        <button onClick={() => setView('products')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'products' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
-          <Package className="w-4 h-4 inline mr-1.5" />Productos
-        </button>
-        <button onClick={() => setView('categories')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'categories' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
-          Categorías
-        </button>
-        <button onClick={() => setView('orders')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'orders' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
-          <ShoppingCart className="w-4 h-4 inline mr-1.5" />Ventas
-        </button>
-        <button onClick={() => setView('popup')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'popup' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
-          <Megaphone className="w-4 h-4 inline mr-1.5" />Popup
-        </button>
-        <button onClick={() => setView('banner')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'banner' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
-          <Timer className="w-4 h-4 inline mr-1.5" />Banner
-        </button>
-        <button onClick={() => setView('avisos')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'avisos' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
-          <MessageSquare className="w-4 h-4 inline mr-1.5" />Avisos
-        </button>
-        <button onClick={() => setView('trash')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'trash' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
-          <Archive className="w-4 h-4 inline mr-1.5" />Papelera
-        </button>
-      </div>
-      {view === 'dashboard' && <ShopDashboard />}
-      {view === 'products' && <ProductsManager />}
-      {view === 'categories' && <CategoriesManager />}
-      {view === 'orders' && <OrdersList />}
-      {view === 'popup' && <ShopPopupTab />}
-      {view === 'banner' && <ShopBannerTab />}
-      {view === 'avisos' && <ShopAvisosTab />}
-      {view === 'trash' && <ProductsTrash />}
     </div>
   );
 }
