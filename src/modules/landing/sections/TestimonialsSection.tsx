@@ -31,18 +31,36 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
             <div key={i} className={`${ts.cardRadius} ${ts.cardShadow} p-8 text-center sm:text-left`}
               style={{ backgroundColor: theme.testimonials_card_bg_color, border: `1px solid ${theme.text_color}06` }}>
               <div className="flex gap-0.5 mb-5 justify-center sm:justify-start">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <Star key={j} className="h-4 w-4" style={{ color: j < t.rating ? '#f59e0b' : '#e5e7eb', fill: j < t.rating ? '#f59e0b' : 'none' }} />
-                ))}
+                {Array.from({ length: 5 }).map((_, j) => {
+                  const active = j < t.rating;
+                  const starColor = active
+                    ? (theme.testimonials_star_color || '#f59e0b')
+                    : (theme.testimonials_star_empty_color || '#e5e7eb');
+                  return (
+                    <Star key={j} className="h-4 w-4" style={{ color: starColor, fill: active ? starColor : 'none' }} />
+                  );
+                })}
               </div>
               <p style={{ ...bodyStyle, color: theme.testimonials_text_color || '#666666', fontSize: fontSize(theme.testimonials_text_size), ...textStyleExtras(theme, 'testimonials_text') }} className="text-sm leading-relaxed mb-6">
                 &ldquo;{t.text}&rdquo;
               </p>
               <div className="flex items-center justify-center sm:justify-start gap-3">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-medium text-sm"
-                  style={{ background: `linear-gradient(135deg, ${theme.primary_color}, ${theme.secondary_color})` }}>
-                  {t.name.charAt(0).toUpperCase()}
-                </div>
+                {t.image_url ? (
+                  <img
+                    src={t.image_url}
+                    alt={t.name}
+                    className="w-9 h-9 rounded-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center font-medium text-sm"
+                    style={{
+                      background: theme.testimonials_avatar_bg_color || `linear-gradient(135deg, ${theme.primary_color}, ${theme.secondary_color})`,
+                      color: theme.testimonials_avatar_text_color || '#ffffff',
+                    }}>
+                    {t.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <span style={{ ...bodyStyle, color: theme.testimonials_text_color || theme.text_color, fontWeight: 500, fontSize: fontSize(theme.testimonials_text_size), ...textStyleExtras(theme, 'testimonials_text') }} className="text-sm">{t.name}</span>
               </div>
             </div>

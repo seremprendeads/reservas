@@ -42,7 +42,12 @@ export function useLandingUpload({ business, setLogoUrl, setSections }: UseLandi
     setUploadingImage(target);
     setLocalUploadError(null);
     try {
-      const blob = await compressImage(file, { maxWidth: 1920, maxHeight: 1080 });
+      // Las fotos de perfil de Testimonios no necesitan 1920 px: con 800 px
+      // alcanza para el círculo y el archivo queda mucho más liviano.
+      const dimensions = target.startsWith('testimonial_image_')
+        ? { maxWidth: 800, maxHeight: 800 }
+        : { maxWidth: 1920, maxHeight: 1080 };
+      const blob = await compressImage(file, dimensions);
       // La carpeta la antepone uploadStorageFile con el business_id de la sesion.
       const publicUrl = await uploadStorageFile(
         'branding',
@@ -95,6 +100,14 @@ export function useLandingUpload({ business, setLogoUrl, setSections }: UseLandi
           const items = [...prev.secondary_services.items];
           items[idx] = { ...items[idx], image_url: publicUrl };
           return { ...prev, secondary_services: { ...prev.secondary_services, items } };
+        });
+      } else if (target.startsWith('testimonial_image_')) {
+        const idx = parseInt(target.slice('testimonial_image_'.length));
+        setSections(prev => {
+          const items = [...prev.testimonials.items];
+          if (!items[idx]) return prev;
+          items[idx] = { ...items[idx], image_url: publicUrl };
+          return { ...prev, testimonials: { ...prev.testimonials, items } };
         });
       } else if (target.startsWith('gallery_')) {
         const idx = parseInt(target.split('_')[1]);

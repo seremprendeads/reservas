@@ -17,7 +17,7 @@ interface TestimonialsTabProps {
 export function TestimonialsTab({ sections, updateSection, triggerUpload, uploadingImage, theme, updateTheme }: TestimonialsTabProps) {
   const t = sections.testimonials;
   const addItem = () => {
-    updateSection('testimonials', { ...t, items: [...t.items, { name: '', text: '', rating: 5 }] });
+    updateSection('testimonials', { ...t, items: [...t.items, { name: '', text: '', rating: 5, image_url: null }] });
   };
   const removeItem = (i: number) => {
     updateSection('testimonials', { ...t, items: t.items.filter((_, idx) => idx !== i) });
@@ -51,6 +51,34 @@ export function TestimonialsTab({ sections, updateSection, triggerUpload, upload
         fallback={DEFAULT_THEME.testimonials_card_bg_color}
         onChange={v => updateTheme('testimonials_card_bg_color', v)}
       />
+      <SectionColorField
+        label="Color de las estrellas"
+        description="Estrellas que corresponden a la calificación."
+        value={theme.testimonials_star_color}
+        fallback={DEFAULT_THEME.testimonials_star_color}
+        onChange={v => updateTheme('testimonials_star_color', v)}
+      />
+      <SectionColorField
+        label="Color de estrellas vacías"
+        description="Estrellas restantes de la calificación."
+        value={theme.testimonials_star_empty_color}
+        fallback={DEFAULT_THEME.testimonials_star_empty_color}
+        onChange={v => updateTheme('testimonials_star_empty_color', v)}
+      />
+      <SectionColorField
+        label="Color del círculo sin foto"
+        description="Se usa cuando el testimonio no tiene foto de perfil. Vacío = degradado del tema."
+        value={theme.testimonials_avatar_bg_color}
+        fallback=""
+        onChange={v => updateTheme('testimonials_avatar_bg_color', v)}
+      />
+      <SectionColorField
+        label="Color de la inicial"
+        description="Letra que se muestra dentro del círculo cuando no hay foto."
+        value={theme.testimonials_avatar_text_color}
+        fallback={DEFAULT_THEME.testimonials_avatar_text_color}
+        onChange={v => updateTheme('testimonials_avatar_text_color', v)}
+      />
       <div>
         <label className="text-sm font-medium text-foreground">Link a reseñas de Google (opcional)</label>
         <Input value={t.google_review_url || ''} onChange={e => updateSection('testimonials', { ...t, google_review_url: e.target.value || null })}
@@ -70,6 +98,26 @@ export function TestimonialsTab({ sections, updateSection, triggerUpload, upload
             </Button>
           </div>
           <Input value={item.name} onChange={e => updateItem(i, 'name', e.target.value)} placeholder="Nombre del cliente" className="h-12 rounded-xl" />
+          <div>
+            <label className="text-sm font-medium text-foreground mb-2 block">Foto de perfil (opcional)</label>
+            <div className="mb-2 rounded-xl border bg-muted/20 p-3 text-[11px] leading-relaxed text-muted-foreground space-y-1">
+              <p><span className="font-medium text-foreground">Medida recomendada:</span> 400 × 400 px (cuadrada). JPG o WebP.</p>
+              <p>Se comprime automáticamente al subirla. Si no subís foto, se muestra la inicial con los colores de arriba.</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="sm" onClick={() => triggerUpload(`testimonial_image_${i}`)} disabled={!!uploadingImage}>
+                {uploadingImage === `testimonial_image_${i}` ? 'Subiendo...' : item.image_url ? 'Cambiar' : 'Subir foto'}
+              </Button>
+              {item.image_url && (
+                <>
+                  <img src={item.image_url} alt="" className="h-12 w-12 rounded-full object-cover border" />
+                  <Button variant="ghost" size="sm" className="text-destructive" onClick={() => updateItem(i, 'image_url', null)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
           <textarea value={item.text} onChange={e => updateItem(i, 'text', e.target.value)} placeholder="Testimonio" rows={2}
             className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-200" />
           <div>

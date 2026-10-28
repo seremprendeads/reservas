@@ -151,7 +151,7 @@ export interface LandingSections {
   testimonials: {
     title: string;
     subtitle: string;
-    items: { name: string; text: string; rating: number }[];
+    items: { name: string; text: string; rating: number; image_url?: string | null }[];
     google_review_url: string | null;
     background_image?: string | null;
     background_fixed?: boolean;
@@ -398,6 +398,12 @@ export interface LandingTheme {
   gallery_bg_color: string;
   testimonials_bg_color: string;
   testimonials_card_bg_color: string;
+  /** Color de las estrellas activas y de las vacías. */
+  testimonials_star_color: string;
+  testimonials_star_empty_color: string;
+  /** Color del círculo y de la inicial cuando el testimonio no tiene foto. */
+  testimonials_avatar_bg_color: string;
+  testimonials_avatar_text_color: string;
   faq_bg_color: string;
   faq_item_bg_color: string;
   map_bg_color: string;
