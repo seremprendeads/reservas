@@ -35,6 +35,8 @@ export function ShopAdmin() {
   const [templateJson, setTemplateJson] = useState('');
   const [templateError, setTemplateError] = useState('');
   const [templateNotice, setTemplateNotice] = useState('');
+  const [savedFlash, setSavedFlash] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     if (!bannerLoaded || !popupLoaded || !colorsLoaded || savedColors) return;
@@ -95,15 +97,18 @@ export function ShopAdmin() {
   const saveShopColors = async () => {
     setTemplateError('');
     setTemplateNotice('');
+    setSaveError('');
+    setSavedFlash(false);
     const saved = await persistShopConfig({
       banner: bannerCfg,
       popup: popupCfg,
       colors: colorsCfg,
     });
     if (saved) {
-      setTemplateNotice('Cambios guardados en la tienda.');
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 2500);
     } else {
-      setTemplateError('No se pudieron guardar los cambios. Revisá la sesión e intentá de nuevo.');
+      setSaveError('No se pudieron guardar los cambios. Revisá la sesión e intentá de nuevo.');
     }
   };
 
@@ -485,17 +490,10 @@ export function ShopAdmin() {
           {templateNotice && (
             <p className="text-xs font-medium text-emerald-600">{templateNotice}</p>
           )}
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-2">
             <Button variant="outline" onClick={downloadTemplate} className="gap-1.5">
               <Download className="h-4 w-4" />
               Descargar JSON
-            </Button>
-            <Button
-              variant="outline"
-              onClick={saveShopColors}
-              disabled={!hasPendingChanges || savingPalette}>
-              {savingPalette ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}
-              Guardar
             </Button>
             <Button onClick={applyTemplate}>
               Aplicar
@@ -506,6 +504,21 @@ export function ShopAdmin() {
           </p>
         </CardContent>
       </Card>
+
+      <div className="space-y-2 pb-20">
+        {saveError && <p className="text-xs font-medium text-destructive">{saveError}</p>}
+        {hasPendingChanges && <p className="text-xs font-medium text-amber-600">Cambios sin guardar</p>}
+        <Button
+          onClick={saveShopColors}
+          disabled={savingPalette}
+          className={`w-full h-12 text-base gap-1.5 ${savedFlash ? 'bg-emerald-600 hover:bg-emerald-600 text-white' : ''}`}>
+          {savingPalette
+            ? <><Loader2 className="h-4 w-4 animate-spin" />Guardando...</>
+            : savedFlash
+              ? <><Check className="h-4 w-4" />¡Guardado!</>
+              : 'Guardar'}
+        </Button>
+      </div>
     </div>
   );
 }
