@@ -447,6 +447,7 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
             ts={ts}
             headingStyle={headingStyle}
             bodyStyle={bodyStyle}
+            getIcon={getIcon}
           />
         </div>
       )}

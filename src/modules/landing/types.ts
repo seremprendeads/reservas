@@ -184,7 +184,19 @@ export interface LandingSections {
   };
   plans: {
     title: string;
-    items: { name: string; detail: string; bg_color: string; text_color: string; button_color: string }[];
+    items: {
+      name: string;
+      detail: string;
+      bg_color: string;
+      text_color: string;
+      button_color: string;
+      /** Servicios incluidos en el pack, con ícono y precio opcional. */
+      features?: { icon: string; text: string; price?: string }[];
+      /** Total del pack, se muestra al final de la lista de servicios. */
+      total?: string;
+      /** Texto del botón. Vacío = "Reservar". */
+      button_text?: string;
+    }[];
     background_image?: string | null;
     background_fixed?: boolean;
     background_position?: string;

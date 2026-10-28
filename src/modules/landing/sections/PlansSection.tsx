@@ -12,6 +12,7 @@ interface PlansSectionProps {
   ts: TemplateStyles;
   headingStyle: React.CSSProperties;
   bodyStyle: React.CSSProperties;
+  getIcon: (name: string) => React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
 }
 
 // Mismo formato que FloatingWhatsApp.tsx: si no arranca con el código de
@@ -23,7 +24,7 @@ function whatsappLinkFor(phone: string, message: string): string {
   return `https://wa.me/${withCountry}?text=${encodeURIComponent(message)}`;
 }
 
-export function PlansSection({ plans, whatsapp, theme, ts, headingStyle, bodyStyle }: PlansSectionProps) {
+export function PlansSection({ plans, whatsapp, theme, ts, headingStyle, bodyStyle, getIcon }: PlansSectionProps) {
   if (!plans.items.length) return null;
 
   return (
@@ -43,14 +44,36 @@ export function PlansSection({ plans, whatsapp, theme, ts, headingStyle, bodySty
                 <h3 style={{ ...headingStyle, fontWeight: 700, color: button, fontSize: fontSize(theme.plans_title_size), ...textStyleExtras(theme, 'plans_title') }} className="text-xl mb-3">
                   {plan.name}
                 </h3>
-                <p style={{ ...bodyStyle, color: text, opacity: 0.75, fontSize: fontSize(theme.plans_text_size), ...textStyleExtras(theme, 'plans_text') }} className="text-sm leading-relaxed flex-1 mb-6 whitespace-pre-line">
-                  {plan.detail}
-                </p>
+                {plan.detail && (
+                  <p style={{ ...bodyStyle, color: text, opacity: 0.75, fontSize: fontSize(theme.plans_text_size), ...textStyleExtras(theme, 'plans_text') }} className="text-sm leading-relaxed flex-1 mb-5 whitespace-pre-line">
+                    {plan.detail}
+                  </p>
+                )}
+                {!!plan.features?.length && (
+                  <ul className="space-y-2.5 mb-6 flex-1">
+                    {plan.features.map((feature, fi) => {
+                      const Icon = getIcon(feature.icon);
+                      return (
+                        <li key={fi} className="flex items-center gap-3 text-sm" style={{ color: text, ...bodyStyle }}>
+                          <Icon className="h-4 w-4 shrink-0" style={{ color: button }} />
+                          <span className="flex-1 leading-snug">{feature.text}</span>
+                          {feature.price && <span className="shrink-0 font-medium whitespace-nowrap">{feature.price}</span>}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                {plan.total && (
+                  <div className="flex items-center justify-between gap-3 border-t pt-4 mb-6" style={{ borderColor: `${text}1a`, color: text }}>
+                    <span className="text-sm font-medium">Total</span>
+                    <span style={{ ...headingStyle, color: button, fontWeight: 700, fontSize: fontSize(theme.plans_title_size) }}>{plan.total}</span>
+                  </div>
+                )}
                 {whatsapp && (
-                  <a href={whatsappLinkFor(whatsapp, `Hola! Quiero consultar por el plan "${plan.name}"`)} target="_blank" rel="noopener noreferrer"
+                  <a href={whatsappLinkFor(whatsapp, `Hola! Quiero reservar el plan "${plan.name}"`)} target="_blank" rel="noopener noreferrer"
                     className={`inline-flex items-center justify-center px-6 py-3 ${theme.button_border_radius} font-medium text-sm text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]`}
                     style={{ backgroundColor: button }}>
-                    Consultar
+                    {plan.button_text || 'Reservar'}
                   </a>
                 )}
               </div>
