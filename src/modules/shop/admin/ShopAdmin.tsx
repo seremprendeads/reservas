@@ -126,11 +126,15 @@ export function ShopAdmin() {
     <div className="space-y-6">
       <Card>
         <CardContent className="p-5 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="text-sm font-semibold text-foreground">Colores de la tienda</label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ml-auto">
               <Button variant="outline" size="sm" onClick={copyBrandingToShop}>Copiar colores</Button>
               <Button variant="outline" size="sm" onClick={resetShopColors} title="Restaurar valores predeterminados"><RotateCcw className="w-4 h-4" /></Button>
+              <a href={`/tienda/${business?.slug}`} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white shadow-sm transition-colors hover:bg-primary/90">
+                <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
+              </a>
             </div>
           </div>
 
@@ -147,9 +151,6 @@ export function ShopAdmin() {
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${generalCfg.show_in_booking ? 'translate-x-5' : ''}`} />
             </button>
           </div>
-          <a href={`/tienda/${business?.slug}`} target="_blank" rel="noopener noreferrer" className="mb-3 inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-border text-foreground hover:bg-accent w-fit">
-            <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
-          </a>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {allThemes.map(t => (
               <button key={t.id} onClick={() => previewShopTheme(t.id)}
