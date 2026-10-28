@@ -379,20 +379,6 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
         </div>
       )}
 
-      {hasSection('plans') && (
-        <div className="relative overflow-hidden">
-          <ParallaxImage imageUrl={s.plans.background_image} overlayColor={s.plans.background_overlay_color} overlayOpacity={s.plans.background_overlay_opacity} backgroundPosition={s.plans.background_position} enabled={(s.plans.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
-          <PlansSection
-            plans={s.plans}
-            whatsapp={s.footer?.whatsapp || ''}
-            theme={theme}
-            ts={ts}
-            headingStyle={headingStyle}
-            bodyStyle={bodyStyle}
-          />
-        </div>
-      )}
-
       {/* ─── GALLERY ─── */}
       {hasSection('gallery') && galleryImages.length > 0 && (
         <div className="relative overflow-hidden">
@@ -448,6 +434,21 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
             )}
           </div>
         </section>
+      )}
+
+      {/* ─── PLANS ─── */}
+      {hasSection('plans') && (
+        <div className="relative overflow-hidden">
+          <ParallaxImage imageUrl={s.plans.background_image} overlayColor={s.plans.background_overlay_color} overlayOpacity={s.plans.background_overlay_opacity} backgroundPosition={s.plans.background_position} enabled={(s.plans.background_fixed ?? s.dividers?.parallax !== false) && !s.dividers?.hero_about?.enabled && !s.dividers?.cta_footer?.enabled} />
+          <PlansSection
+            plans={s.plans}
+            whatsapp={s.footer?.whatsapp || ''}
+            theme={theme}
+            ts={ts}
+            headingStyle={headingStyle}
+            bodyStyle={bodyStyle}
+          />
+        </div>
       )}
 
       {/* ─── TESTIMONIALS ─── */}
