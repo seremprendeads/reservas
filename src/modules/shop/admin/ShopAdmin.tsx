@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink, X, Megaphone, Timer, MessageSquare, Copy, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink, X, Megaphone, Timer, MessageSquare, Copy, Check, FileJson, Download } from 'lucide-react';
 import { supabase, ShopBannerConfig, ShopPopupConfig, ShopSocialConfig, ShopGeneralConfig, ShopColorsConfig, ShopSocialEntry as SocialEntry } from '../../../lib/supabase';
 import { allThemes } from '../../../themes';
 import { useBusiness } from '../../../contexts/BusinessContext';
@@ -32,6 +32,9 @@ export function ShopAdmin() {
   // Foto de los colores que están realmente guardados, para poder descartar.
   const [savedColors, setSavedColors] = useState<{ banner: ShopBannerConfig; popup: ShopPopupConfig; colors: ShopColorsConfig } | null>(null);
   const [savingPalette, setSavingPalette] = useState(false);
+  const [templateJson, setTemplateJson] = useState('');
+  const [templateError, setTemplateError] = useState('');
+  const [templateNotice, setTemplateNotice] = useState('');
 
   useEffect(() => {
     if (!bannerLoaded || !popupLoaded || !colorsLoaded || savedColors) return;
@@ -120,6 +123,213 @@ export function ShopAdmin() {
     setBannerCfg(SHOP_BANNER_DEFAULTS);
     setPopupCfg(SHOP_POPUP_DEFAULTS);
     setColorsCfg(SHOP_COLORS_DEFAULTS);
+  };
+
+  const getShopPreset = () => ({
+    version: 1,
+    type: 'tienda-branding',
+    shop: {
+      colors: colorsCfg,
+      banner: bannerCfg,
+      popup: popupCfg,
+    },
+  });
+
+  const fillTemplateFromCurrent = () => {
+    setTemplateJson(JSON.stringify(getShopPreset(), null, 2));
+    setTemplateError('');
+    setTemplateNotice('');
+  };
+
+  const copyTemplate = async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(getShopPreset(), null, 2));
+      setTemplateError('');
+      setTemplateNotice('JSON copiado al portapapeles');
+    } catch {
+      setTemplateNotice('');
+      setTemplateError('No se pudo copiar el JSON');
+    }
+  };
+
+  const downloadTemplate = () => {
+    const blob = new Blob([JSON.stringify(getShopPreset(), null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tienda-${(business?.slug || 'tienda').replace(/[^a-z0-9-_]+/gi, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const applyTemplate = () => {
+    setTemplateError('');
+    setTemplateNotice('');
+    const raw = templateJson.trim();
+    if (!raw) {
+      setTemplateError('Pegá un JSON primero.');
+      return;
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      setTemplateError('El JSON no es válido. Revisá comas y comillas.');
+      return;
+    }
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      setTemplateError('El JSON debe ser un objeto.');
+      return;
+    }
+
+    const root = parsed as Record<string, unknown>;
+    const source = root.shop && typeof root.shop === 'object' && !Array.isArray(root.shop)
+      ? root.shop as Record<string, unknown>
+      : root;
+
+    if (!['colors', 'banner', 'popup'].some(key => source[key] !== undefined)) {
+      setTemplateError('No se encontraron campos de la tienda en el JSON.');
+      return;
+    }
+
+    const asObject = (value: unknown, label: string) => {
+      if (value === undefined) return undefined;
+      if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        throw new Error(`"${label}" debe ser un objeto.`);
+      }
+      return value as Record<string, unknown>;
+    };
+
+    const readString = (obj: Record<string, unknown>, key: string, label: string) => {
+      const value = obj[key];
+      if (value === undefined) return undefined;
+      if (typeof value !== 'string') throw new Error(`"${label}" debe ser un texto.`);
+      return value;
+    };
+
+    const readNullableString = (obj: Record<string, unknown>, key: string, label: string) => {
+      const value = obj[key];
+      if (value === undefined) return undefined;
+      if (value === null) return null;
+      if (typeof value !== 'string') throw new Error(`"${label}" debe ser un texto o null.`);
+      return value;
+    };
+
+    const readBoolean = (obj: Record<string, unknown>, key: string, label: string) => {
+      const value = obj[key];
+      if (value === undefined) return undefined;
+      if (typeof value !== 'boolean') throw new Error(`"${label}" debe ser true o false.`);
+      return value;
+    };
+
+    const readColor = (obj: Record<string, unknown>, key: string, label: string) => {
+      const value = readString(obj, key, label);
+      if (value === undefined) return undefined;
+      const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(value.trim());
+      if (!match) throw new Error(`"${label}" debe ser un color hex (ej. #2563eb).`);
+      const hex = match[1].length === 3
+        ? match[1].split('').map(c => c + c).join('')
+        : match[1];
+      return `#${hex.toLowerCase()}`;
+    };
+
+    const readOpacity = (obj: Record<string, unknown>, key: string, label: string) => {
+      const value = obj[key];
+      if (value === undefined) return undefined;
+      const num = typeof value === 'number'
+        ? value
+        : typeof value === 'string' && value.trim() !== ''
+          ? Number(value)
+          : NaN;
+      if (!Number.isFinite(num) || num < 0 || num > 100) {
+        throw new Error(`"${label}" debe ser un número entre 0 y 100.`);
+      }
+      return Math.round(num);
+    };
+
+    const nextColors: ShopColorsConfig = { ...colorsCfg };
+    const nextBanner: ShopBannerConfig = { ...bannerCfg };
+    const nextPopup: ShopPopupConfig = { ...popupCfg };
+
+    try {
+      const colors = asObject(source.colors, 'colors');
+      if (colors) {
+        (Object.keys(SHOP_COLORS_DEFAULTS) as (keyof ShopColorsConfig)[]).forEach(key => {
+          const value = readColor(colors, key, `colors.${key}`);
+          if (value !== undefined) nextColors[key] = value;
+        });
+      }
+
+      const banner = asObject(source.banner, 'banner');
+      if (banner) {
+        const enabled = readBoolean(banner, 'enabled', 'banner.enabled');
+        if (enabled !== undefined) nextBanner.enabled = enabled;
+
+        const text = readString(banner, 'text', 'banner.text');
+        if (text !== undefined) nextBanner.text = text;
+
+        const buttonText = readString(banner, 'button_text', 'banner.button_text');
+        if (buttonText !== undefined) nextBanner.button_text = buttonText;
+
+        const buttonUrl = readString(banner, 'button_url', 'banner.button_url');
+        if (buttonUrl !== undefined) nextBanner.button_url = buttonUrl;
+
+        const endDate = readString(banner, 'end_date', 'banner.end_date');
+        if (endDate !== undefined) nextBanner.end_date = endDate;
+
+        const gradientFrom = readColor(banner, 'gradient_from', 'banner.gradient_from');
+        if (gradientFrom !== undefined) nextBanner.gradient_from = gradientFrom;
+
+        const gradientTo = readColor(banner, 'gradient_to', 'banner.gradient_to');
+        if (gradientTo !== undefined) nextBanner.gradient_to = gradientTo;
+
+        const textColor = readColor(banner, 'text_color', 'banner.text_color');
+        if (textColor !== undefined) nextBanner.text_color = textColor;
+      }
+
+      const popup = asObject(source.popup, 'popup');
+      if (popup) {
+        const enabled = readBoolean(popup, 'enabled', 'popup.enabled');
+        if (enabled !== undefined) nextPopup.enabled = enabled;
+
+        const title = readString(popup, 'title', 'popup.title');
+        if (title !== undefined) nextPopup.title = title;
+
+        const subtitle = readString(popup, 'subtitle', 'popup.subtitle');
+        if (subtitle !== undefined) nextPopup.subtitle = subtitle;
+
+        const description = readString(popup, 'description', 'popup.description');
+        if (description !== undefined) nextPopup.description = description;
+
+        const buttonText = readString(popup, 'button_text', 'popup.button_text');
+        if (buttonText !== undefined) nextPopup.button_text = buttonText;
+
+        const buttonUrl = readString(popup, 'button_url', 'popup.button_url');
+        if (buttonUrl !== undefined) nextPopup.button_url = buttonUrl;
+
+        const imageUrl = readNullableString(popup, 'image_url', 'popup.image_url');
+        if (imageUrl !== undefined) nextPopup.image_url = imageUrl;
+
+        const overlayColor = readColor(popup, 'overlay_color', 'popup.overlay_color');
+        if (overlayColor !== undefined) nextPopup.overlay_color = overlayColor;
+
+        const overlayOpacity = readOpacity(popup, 'overlay_opacity', 'popup.overlay_opacity');
+        if (overlayOpacity !== undefined) nextPopup.overlay_opacity = overlayOpacity;
+      }
+    } catch (err) {
+      setTemplateError(err instanceof Error ? err.message : 'No se pudo aplicar la plantilla.');
+      return;
+    }
+
+    setColorsCfg(nextColors);
+    setBannerCfg(nextBanner);
+    setPopupCfg(nextPopup);
+    setShopThemeId('');
+    setTemplateNotice('Plantilla aplicada. Guardá los cambios de la tienda.');
   };
 
   return (
@@ -218,6 +428,51 @@ export function ShopAdmin() {
               Guardar
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <FileJson className="h-5 w-5 text-primary" />
+            <h3 className="text-base font-medium text-foreground">Plantilla JSON</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Pegá un JSON con <code className="rounded bg-muted px-1 py-0.5 text-xs">colors</code>, <code className="rounded bg-muted px-1 py-0.5 text-xs">banner</code> y <code className="rounded bg-muted px-1 py-0.5 text-xs">popup</code> para aplicar la apariencia de la tienda. Después de aplicarlo, guardá los cambios.
+          </p>
+          <textarea
+            value={templateJson}
+            onChange={(e) => { setTemplateJson(e.target.value); setTemplateError(''); setTemplateNotice(''); }}
+            rows={14}
+            spellCheck={false}
+            placeholder={'{\n  "version": 1,\n  "type": "tienda-branding",\n  "shop": {\n    "colors": {\n      "primary": "#2563eb",\n      "primary_hover": "#1d4ed8",\n      "primary_light": "#dbeafe",\n      "background": "#ffffff",\n      "card_bg": "#f8fafc",\n      "text": "#0f172a",\n      "text_muted": "#64748b",\n      "border": "#e2e8f0"\n    },\n    "banner": { "enabled": false },\n    "popup": { "enabled": false }\n  }\n}'}
+            className="w-full resize-y rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          {templateError && (
+            <p className="text-xs font-medium text-destructive">{templateError}</p>
+          )}
+          {templateNotice && (
+            <p className="text-xs font-medium text-emerald-600">{templateNotice}</p>
+          )}
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button variant="outline" onClick={fillTemplateFromCurrent}>
+              Cargar tienda actual
+            </Button>
+            <Button variant="outline" onClick={copyTemplate} className="gap-1.5">
+              <Copy className="h-4 w-4" />
+              Copiar JSON
+            </Button>
+            <Button variant="outline" onClick={downloadTemplate} className="gap-1.5">
+              <Download className="h-4 w-4" />
+              Descargar JSON
+            </Button>
+            <Button onClick={applyTemplate}>
+              Aplicar JSON
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Las imágenes se guardan como URLs. El JSON no modifica la Bio, la Landing ni otros negocios.
+          </p>
         </CardContent>
       </Card>
 
