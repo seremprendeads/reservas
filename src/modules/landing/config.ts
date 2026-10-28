@@ -408,6 +408,8 @@ export const DEFAULT_THEME: LandingTheme = {
   testimonials_star_color: '#f59e0b',
   testimonials_star_empty_color: '#e5e7eb',
   testimonials_avatar_bg_color: '',
+  testimonials_avatar_gradient_from: '',
+  testimonials_avatar_gradient_to: '',
   testimonials_avatar_text_color: '#ffffff',
   faq_bg_color: '#ffffff',
   faq_item_bg_color: '#ffffff',

@@ -403,6 +403,8 @@ export interface LandingTheme {
   testimonials_star_empty_color: string;
   /** Color del círculo y de la inicial cuando el testimonio no tiene foto. */
   testimonials_avatar_bg_color: string;
+  testimonials_avatar_gradient_from: string;
+  testimonials_avatar_gradient_to: string;
   testimonials_avatar_text_color: string;
   faq_bg_color: string;
   faq_item_bg_color: string;

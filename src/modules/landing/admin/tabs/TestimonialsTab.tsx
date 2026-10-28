@@ -66,11 +66,25 @@ export function TestimonialsTab({ sections, updateSection, triggerUpload, upload
         onChange={v => updateTheme('testimonials_star_empty_color', v)}
       />
       <SectionColorField
-        label="Color del círculo sin foto"
-        description="Se usa cuando el testimonio no tiene foto de perfil. Vacío = degradado del tema."
+        label="Color de fondo del avatar (sin foto)"
+        description="Si elegís un color, reemplaza el degradado. Vacío = degradado de abajo."
         value={theme.testimonials_avatar_bg_color}
         fallback=""
         onChange={v => updateTheme('testimonials_avatar_bg_color', v)}
+      />
+      <SectionColorField
+        label="Avatar sin foto: degradado desde"
+        description="Primer color del degradado. Vacío = color principal del tema."
+        value={theme.testimonials_avatar_gradient_from}
+        fallback={theme.primary_color}
+        onChange={v => updateTheme('testimonials_avatar_gradient_from', v)}
+      />
+      <SectionColorField
+        label="Avatar sin foto: degradado hasta"
+        description="Segundo color del degradado. Vacío = color secundario del tema."
+        value={theme.testimonials_avatar_gradient_to}
+        fallback={theme.secondary_color}
+        onChange={v => updateTheme('testimonials_avatar_gradient_to', v)}
       />
       <SectionColorField
         label="Color de la inicial"

@@ -55,7 +55,8 @@ export function TestimonialsSection({ testimonials, theme, ts, headingStyle, bod
                 ) : (
                   <div className="w-9 h-9 rounded-full flex items-center justify-center font-medium text-sm"
                     style={{
-                      background: theme.testimonials_avatar_bg_color || `linear-gradient(135deg, ${theme.primary_color}, ${theme.secondary_color})`,
+                      background: theme.testimonials_avatar_bg_color
+                        || `linear-gradient(135deg, ${theme.testimonials_avatar_gradient_from || theme.primary_color}, ${theme.testimonials_avatar_gradient_to || theme.secondary_color})`,
                       color: theme.testimonials_avatar_text_color || '#ffffff',
                     }}>
                     {t.name.charAt(0).toUpperCase()}
