@@ -3,7 +3,6 @@ import type { LandingSections, LandingTheme } from '../types';
 import { fontSize } from '../lib/font-size';
 import { textStyleExtras } from '../lib/text-style';
 import { ParallaxImage } from '../components/ParallaxImage';
-import { useScrollPulse } from '../hooks/useScrollPulse';
 
 type TemplateStyles = { sectionSpacing: string; buttonRadius: string };
 
@@ -20,7 +19,6 @@ interface CtaSectionProps {
 }
 
 export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, bodyStyle, handleSmoothScroll, parallax }: CtaSectionProps) {
-  const pulse = useScrollPulse();
   const buttonBackground = theme.cta_button_bg || `linear-gradient(135deg, ${theme.button_color}, ${theme.secondary_color})`;
 
   return (
@@ -60,7 +58,7 @@ export function CtaSection({ cta, logoUrl, logoShape, theme, ts, headingStyle, b
           }}>
           <span
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-0 ${theme.button_border_radius} ${pulse ? 'animate-whatsapp-pulse motion-reduce:animate-none' : 'opacity-0'}`}
+            className={`pointer-events-none absolute inset-0 ${theme.button_border_radius} animate-whatsapp-pulse motion-reduce:animate-none`}
             style={{ background: buttonBackground }}
           />
           <span className="relative z-10 inline-flex items-center">
