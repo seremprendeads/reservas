@@ -40,6 +40,11 @@ export function MainServiceSection({ mainService, theme, ts, headingStyle, bodyS
         <p style={{ ...bodyStyle, color: theme.main_service_text_color || '#666666', fontSize: fontSize(theme.main_service_text_size), ...textStyleExtras(theme, 'main_service_text') }} className="text-base sm:text-lg leading-relaxed">
           {mainService.description}
         </p>
+        {mainService.image_url && (
+          <div className={`mt-10 overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.06)] ${ts.cardRadius}`}>
+            <img src={mainService.image_url} alt={mainService.title} className="w-full h-auto object-cover" loading="lazy" />
+          </div>
+        )}
       </div>
     </section>
   );

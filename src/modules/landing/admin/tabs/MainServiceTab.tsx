@@ -1,3 +1,5 @@
+import { Trash2 } from 'lucide-react';
+import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Separator } from '../../../../components/ui/separator';
 import { IconSelector } from '../components/IconSelector';
@@ -87,6 +89,27 @@ export function MainServiceTab({ sections, updateSection, triggerUpload, uploadi
         <label className="text-sm font-medium text-foreground">Descripción</label>
         <textarea value={ms.description} onChange={e => updateSection('main_service', { ...ms, description: e.target.value })} rows={4}
           className="mt-1.5 w-full h-24 rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-200" />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground mb-2 block">Imagen debajo del texto</label>
+        <div className="mb-3 rounded-xl border bg-muted/20 p-3 text-[11px] leading-relaxed text-muted-foreground space-y-1">
+          <p><span className="font-medium text-foreground">Medida recomendada:</span> 1600 × 900 px (horizontal, proporción 16:9).</p>
+          <p>Se muestra a lo ancho del texto y se comprime automáticamente al subirla.</p>
+          <p>Formato JPG o WebP, idealmente de menos de 500 KB.</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm" onClick={() => triggerUpload('main_service_image')} disabled={!!uploadingImage}>
+            {uploadingImage === 'main_service_image' ? 'Subiendo...' : ms.image_url ? 'Cambiar' : 'Subir imagen'}
+          </Button>
+          {ms.image_url && (
+            <>
+              <img src={ms.image_url} alt="" className="h-16 w-32 rounded-xl object-cover border" />
+              <Button variant="ghost" size="sm" className="text-destructive" onClick={() => updateSection('main_service', { ...ms, image_url: null })}>
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       <Separator />

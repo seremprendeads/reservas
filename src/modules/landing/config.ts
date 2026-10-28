@@ -118,6 +118,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
     title: 'Nuestro servicio principal',
     subtitle: '',
     description: 'Describí el servicio estrella de tu negocio. Explicá qué lo hace especial y por qué los clientes lo eligen.',
+    image_url: null,
   },
   secondary_services: {
     title: 'Otros servicios',

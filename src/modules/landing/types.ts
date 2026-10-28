@@ -106,6 +106,7 @@ export interface LandingSections {
     title: string;
     subtitle: string;
     description: string;
+    image_url?: string | null;
     background_image?: string | null;
     background_fixed?: boolean;
     background_position?: string;
