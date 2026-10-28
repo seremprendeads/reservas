@@ -42,13 +42,12 @@ export function ShopAdmin() {
   }, [bannerLoaded, popupLoaded, colorsLoaded, bannerCfg, popupCfg, colorsCfg, savedColors]);
 
   // Hay cambios sin guardar si el preview difiere de lo que esta en la base.
-  const hasPendingColors = !!savedColors && (
-    bannerCfg.gradient_from !== savedColors.banner.gradient_from ||
-    bannerCfg.gradient_to !== savedColors.banner.gradient_to ||
-    bannerCfg.text_color !== savedColors.banner.text_color ||
-    popupCfg.overlay_color !== savedColors.popup.overlay_color ||
-    (Object.keys(SHOP_COLORS_DEFAULTS) as (keyof ShopColorsConfig)[])
-      .some(k => colorsCfg[k] !== savedColors.colors[k])
+  // Antes solo miraba algunos colores, asi que aplicar un JSON que cambiaba
+  // textos, botones, imagen u opacidad del banner/popup no habilitaba Guardar.
+  const hasPendingChanges = !!savedColors && (
+    JSON.stringify(bannerCfg) !== JSON.stringify(savedColors.banner) ||
+    JSON.stringify(popupCfg) !== JSON.stringify(savedColors.popup) ||
+    JSON.stringify(colorsCfg) !== JSON.stringify(savedColors.colors)
   );
 
   // Elegir una paleta SOLO cambia el estado local: se ve en la vista previa y no
@@ -72,19 +71,33 @@ export function ShopAdmin() {
     setPopupCfg({ ...popupCfg, overlay_color: t.tokens.primary });
   };
 
-  const saveShopColors = async () => {
+  const persistShopConfig = async (next: {
+    banner: ShopBannerConfig;
+    popup: ShopPopupConfig;
+    colors: ShopColorsConfig;
+  }) => {
     setSavingPalette(true);
     try {
       // Secuencial a proposito: cada save() relee branding, mergea su clave en
       // shop_config y lo vuelve a escribir. En paralelo las tres leen la misma
       // base y la ultima que escribe pisa a las otras dos.
-      await saveColors(colorsCfg);
-      await saveBanner(bannerCfg);
-      await savePopup(popupCfg);
-      setSavedColors({ banner: bannerCfg, popup: popupCfg, colors: colorsCfg });
+      const colorsSaved = await saveColors(next.colors);
+      const bannerSaved = await saveBanner(next.banner);
+      const popupSaved = await savePopup(next.popup);
+      if (!colorsSaved || !bannerSaved || !popupSaved) return false;
+      setSavedColors(next);
+      return true;
     } finally {
       setSavingPalette(false);
     }
+  };
+
+  const saveShopColors = async () => {
+    await persistShopConfig({
+      banner: bannerCfg,
+      popup: popupCfg,
+      colors: colorsCfg,
+    });
   };
 
   const discardShopColors = () => {
@@ -164,7 +177,7 @@ export function ShopAdmin() {
     URL.revokeObjectURL(url);
   };
 
-  const applyTemplate = () => {
+  const applyTemplate = async () => {
     setTemplateError('');
     setTemplateNotice('');
     const raw = templateJson.trim();
@@ -329,7 +342,17 @@ export function ShopAdmin() {
     setBannerCfg(nextBanner);
     setPopupCfg(nextPopup);
     setShopThemeId('');
-    setTemplateNotice('Plantilla aplicada. Guardá los cambios de la tienda.');
+
+    const saved = await persistShopConfig({
+      banner: nextBanner,
+      popup: nextPopup,
+      colors: nextColors,
+    });
+    if (saved) {
+      setTemplateNotice('Plantilla aplicada y guardada en la tienda.');
+    } else {
+      setTemplateError('La plantilla se aplicó, pero no se pudo guardar. Probá con el botón Guardar.');
+    }
   };
 
   return (
@@ -384,7 +407,7 @@ export function ShopAdmin() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-foreground">Vista previa</p>
-              {hasPendingColors
+              {hasPendingChanges
                 ? <span className="text-xs font-medium text-amber-600">Cambios sin guardar</span>
                 : <span className="text-xs text-muted-foreground">Guardado</span>}
             </div>
@@ -416,14 +439,14 @@ export function ShopAdmin() {
           </div>
 
           <div className="flex items-center justify-end gap-2">
-            {hasPendingColors && (
+            {hasPendingChanges && (
               <Button variant="ghost" size="sm" onClick={discardShopColors}>Descartar</Button>
             )}
             <Button
               size="sm"
               onClick={saveShopColors}
-              disabled={!hasPendingColors || savingPalette}
-              title={hasPendingColors ? 'Guardar los colores de la tienda' : 'No hay cambios que guardar'}>
+              disabled={!hasPendingChanges || savingPalette}
+              title={hasPendingChanges ? 'Guardar los cambios de la tienda' : 'No hay cambios que guardar'}>
               {savingPalette ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               Guardar
             </Button>
@@ -438,7 +461,7 @@ export function ShopAdmin() {
             <h3 className="text-base font-medium text-foreground">Plantilla JSON</h3>
           </div>
           <p className="text-sm text-muted-foreground">
-            Pegá un JSON con <code className="rounded bg-muted px-1 py-0.5 text-xs">colors</code>, <code className="rounded bg-muted px-1 py-0.5 text-xs">banner</code> y <code className="rounded bg-muted px-1 py-0.5 text-xs">popup</code> para aplicar la apariencia de la tienda. Después de aplicarlo, guardá los cambios.
+            Pegá un JSON con <code className="rounded bg-muted px-1 py-0.5 text-xs">colors</code>, <code className="rounded bg-muted px-1 py-0.5 text-xs">banner</code> y <code className="rounded bg-muted px-1 py-0.5 text-xs">popup</code> para aplicar y guardar la apariencia de la tienda.
           </p>
           <textarea
             value={templateJson}
@@ -466,8 +489,9 @@ export function ShopAdmin() {
               <Download className="h-4 w-4" />
               Descargar JSON
             </Button>
-            <Button onClick={applyTemplate}>
-              Aplicar JSON
+            <Button onClick={applyTemplate} disabled={savingPalette}>
+              {savingPalette ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}
+              Aplicar y guardar
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -1277,33 +1301,41 @@ function useShopSubConfig<T>(key: 'banner' | 'popup' | 'social' | 'general' | 'c
     }, [business?.id, key]);
 
   const save = useCallback(async (next: T) => {
-    if (!business?.id) return;
+    if (!business?.id) return false;
     setSaving(true);
-    const { data } = await supabase
-      .from('branding')
-      .select('*')
-      .eq('business_id', business.id)
-      .maybeSingle();
-    if (!data) { setSaving(false); return; }
-    const currentShopConfig = (data.shop_config || {}) as Record<string, unknown>;
-    await authInvoke('admin-update-branding', {
-      logo_url: data.logo_url,
-      title: data.title,
-      subtitle: data.subtitle,
-      primary_color: data.primary_color,
-      background_color: data.background_color,
-      card_bg_color: data.card_bg_color,
-      text_color: data.text_color,
-      muted_color: data.muted_color,
-      caption_color: data.caption_color,
-      background_image_url: data.background_image_url,
-      bg_opacity: data.bg_opacity,
-      overlay_color: data.overlay_color,
-      header_color: data.header_color,
-      header_opacity: data.header_opacity,
-      shop_config: { ...currentShopConfig, [key]: next },
-    });
-    setSaving(false);
+    try {
+      const { data, error: readError } = await supabase
+        .from('branding')
+        .select('*')
+        .eq('business_id', business.id)
+        .maybeSingle();
+      if (readError || !data) return false;
+
+      const currentShopConfig = (data.shop_config || {}) as Record<string, unknown>;
+      const { error } = await authInvoke('admin-update-branding', {
+        logo_url: data.logo_url,
+        logo_shape: data.logo_shape,
+        title: data.title,
+        subtitle: data.subtitle,
+        primary_color: data.primary_color,
+        background_color: data.background_color,
+        card_bg_color: data.card_bg_color,
+        text_color: data.text_color,
+        muted_color: data.muted_color,
+        caption_color: data.caption_color,
+        background_image_url: data.background_image_url,
+        bg_opacity: data.bg_opacity,
+        overlay_color: data.overlay_color,
+        header_color: data.header_color,
+        header_opacity: data.header_opacity,
+        shop_config: { ...currentShopConfig, [key]: next },
+      });
+      return !error;
+    } catch {
+      return false;
+    } finally {
+      setSaving(false);
+    }
   }, [business?.id, key]);
 
     return { config, setConfig, saving, save, loaded };
