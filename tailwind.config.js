@@ -98,7 +98,7 @@ export default {
         'accordion-down': 'accordion-down 0.25s ease-out',
         'accordion-up': 'accordion-up 0.25s ease-out',
         'fade-in': 'fade-in 0.3s ease-out',
-        'whatsapp-scroll': 'whatsapp-scroll 0.8s ease-in-out infinite',
+        'whatsapp-scroll': 'whatsapp-scroll 2.5s ease-in-out infinite',
       },
     },
   },
