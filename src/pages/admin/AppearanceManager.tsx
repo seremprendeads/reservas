@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { XCircle, RotateCcw, Circle, Square } from 'lucide-react';
+import { XCircle, RotateCcw, Circle, Square, FileJson, Download, Copy } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Branding } from '../../lib/supabase';
 import { compressImage as compressImageUtil } from '../../lib/image-utils';
@@ -41,6 +41,8 @@ export function AppearanceManager({
   const [headerOpacity, setHeaderOpacity] = useState(branding?.header_opacity ?? 26);
   const [saving, setSaving] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
+  const [templateJson, setTemplateJson] = useState('');
+  const [templateError, setTemplateError] = useState('');
   const logo = useImageUpload({
     bucket: 'branding',
     filePrefix: 'logo',
@@ -101,6 +103,215 @@ export function AppearanceManager({
 
   const handleBgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     bg.handleFileChange(e, (url) => setBgImageUrl(url), (msg) => showSuccess(msg));
+  };
+
+  const getBrandingPreset = () => ({
+    version: 1,
+    type: 'reservas-branding',
+    branding: {
+      logo_url: logoUrl,
+      logo_shape: logoShape,
+      title,
+      subtitle,
+      primary_color: primaryColor,
+      background_color: bgColor,
+      card_bg_color: cardBgColor,
+      text_color: textColor,
+      muted_color: mutedColor,
+      caption_color: captionColor,
+      background_image_url: bgImageUrl,
+      bg_opacity: bgOpacity,
+      overlay_color: overlayColor,
+      header_color: headerColor,
+      header_opacity: headerOpacity,
+    },
+  });
+
+  const fillTemplateFromCurrent = () => {
+    setTemplateJson(JSON.stringify(getBrandingPreset(), null, 2));
+    setTemplateError('');
+  };
+
+  const copyTemplate = async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(getBrandingPreset(), null, 2));
+      showSuccess('JSON copiado al portapapeles');
+    } catch {
+      showSuccess('No se pudo copiar el JSON');
+    }
+  };
+
+  const downloadTemplate = () => {
+    const blob = new Blob([JSON.stringify(getBrandingPreset(), null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `branding-${(business?.slug || 'reservas').replace(/[^a-z0-9-_]+/gi, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const applyTemplate = () => {
+    setTemplateError('');
+    const raw = templateJson.trim();
+    if (!raw) {
+      setTemplateError('Pegá un JSON primero.');
+      return;
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      setTemplateError('El JSON no es válido. Revisá comas y comillas.');
+      return;
+    }
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      setTemplateError('El JSON debe ser un objeto.');
+      return;
+    }
+
+    const root = parsed as Record<string, unknown>;
+    const source = root.branding && typeof root.branding === 'object' && !Array.isArray(root.branding)
+      ? root.branding as Record<string, unknown>
+      : root;
+
+    const knownKeys = [
+      'logo_url', 'logo_shape', 'title', 'subtitle',
+      'primary_color', 'background_color', 'card_bg_color', 'text_color',
+      'muted_color', 'caption_color', 'background_image_url', 'bg_opacity',
+      'overlay_color', 'header_color', 'header_opacity',
+    ];
+    if (!knownKeys.some(key => source[key] !== undefined)) {
+      setTemplateError('No se encontraron campos de branding en el JSON.');
+      return;
+    }
+
+    const readString = (key: string) => {
+      const value = source[key];
+      if (value === undefined) return undefined;
+      if (typeof value !== 'string') throw new Error(`"${key}" debe ser un texto.`);
+      return value;
+    };
+
+    const readColor = (key: string) => {
+      const value = readString(key);
+      if (value === undefined) return undefined;
+      const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(value.trim());
+      if (!match) throw new Error(`"${key}" debe ser un color hex (ej. #059669).`);
+      const hex = match[1].length === 3
+        ? match[1].split('').map(c => c + c).join('')
+        : match[1];
+      return `#${hex.toLowerCase()}`;
+    };
+
+    const readOpacity = (key: string) => {
+      const value = source[key];
+      if (value === undefined) return undefined;
+      const num = typeof value === 'number'
+        ? value
+        : typeof value === 'string' && value.trim() !== ''
+          ? Number(value)
+          : NaN;
+      if (!Number.isFinite(num) || num < 0 || num > 100) {
+        throw new Error(`"${key}" debe ser un número entre 0 y 100.`);
+      }
+      return Math.round(num);
+    };
+
+    const next = {
+      logoUrl,
+      logoShape,
+      title,
+      subtitle,
+      primaryColor,
+      bgColor,
+      cardBgColor,
+      textColor,
+      mutedColor,
+      captionColor,
+      bgImageUrl,
+      bgOpacity,
+      overlayColor,
+      headerColor,
+      headerOpacity,
+    };
+
+    try {
+      const logoUrlValue = readString('logo_url');
+      if (logoUrlValue !== undefined) next.logoUrl = logoUrlValue;
+
+      const shape = readString('logo_shape');
+      if (shape !== undefined) {
+        if (shape !== 'circle' && shape !== 'square') {
+          throw new Error('"logo_shape" debe ser "circle" o "square".');
+        }
+        next.logoShape = shape;
+      }
+
+      const titleValue = readString('title');
+      if (titleValue !== undefined) next.title = titleValue;
+
+      const subtitleValue = readString('subtitle');
+      if (subtitleValue !== undefined) next.subtitle = subtitleValue;
+
+      const primary = readColor('primary_color');
+      if (primary !== undefined) next.primaryColor = primary;
+
+      const background = readColor('background_color');
+      if (background !== undefined) next.bgColor = background;
+
+      const cardBg = readColor('card_bg_color');
+      if (cardBg !== undefined) next.cardBgColor = cardBg;
+
+      const text = readColor('text_color');
+      if (text !== undefined) next.textColor = text;
+
+      const muted = readColor('muted_color');
+      if (muted !== undefined) next.mutedColor = muted;
+
+      const caption = readColor('caption_color');
+      if (caption !== undefined) next.captionColor = caption;
+
+      const backgroundImage = readString('background_image_url');
+      if (backgroundImage !== undefined) next.bgImageUrl = backgroundImage;
+
+      const bgOpacityValue = readOpacity('bg_opacity');
+      if (bgOpacityValue !== undefined) next.bgOpacity = bgOpacityValue;
+
+      const overlay = readColor('overlay_color');
+      if (overlay !== undefined) next.overlayColor = overlay;
+
+      const header = readColor('header_color');
+      if (header !== undefined) next.headerColor = header;
+
+      const headerOpacityValue = readOpacity('header_opacity');
+      if (headerOpacityValue !== undefined) next.headerOpacity = headerOpacityValue;
+    } catch (err) {
+      setTemplateError(err instanceof Error ? err.message : 'No se pudo aplicar la plantilla.');
+      return;
+    }
+
+    setLogoUrl(next.logoUrl);
+    setLogoShape(next.logoShape);
+    setTitle(next.title);
+    setSubtitle(next.subtitle);
+    setPrimaryColor(next.primaryColor);
+    setBgColor(next.bgColor);
+    setCardBgColor(next.cardBgColor);
+    setTextColor(next.textColor);
+    setMutedColor(next.mutedColor);
+    setCaptionColor(next.captionColor);
+    setBgImageUrl(next.bgImageUrl);
+    setBgOpacity(next.bgOpacity);
+    setOverlayColor(next.overlayColor);
+    setHeaderColor(next.headerColor);
+    setHeaderOpacity(next.headerOpacity);
+    setSelectedThemeId('');
+    showSuccess('Plantilla aplicada. Guardá la apariencia para confirmar.');
   };
 
   const saveBranding = async () => {
@@ -280,6 +491,51 @@ export function AppearanceManager({
                   </div>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+
+          {/* Plantilla JSON */}
+          <Card className="shadow-[0_8px_30px_rgba(0,0,0,.05)] border-border/60">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 font-display">
+                <FileJson className="h-5 w-5 text-primary" />
+                Plantilla JSON
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Pegá un JSON con <code className="rounded bg-muted px-1 py-0.5 text-xs">branding</code> para aplicar colores, logo, textos, fondos y opacidades. Después de aplicarlo, guardá la apariencia.
+              </p>
+              <textarea
+                value={templateJson}
+                onChange={(e) => { setTemplateJson(e.target.value); setTemplateError(''); }}
+                rows={14}
+                spellCheck={false}
+                placeholder={'{\n  "version": 1,\n  "type": "reservas-branding",\n  "branding": {\n    "title": "Reserva tu Turno",\n    "subtitle": "Sistema de Reserva",\n    "logo_shape": "circle",\n    "primary_color": "#059669",\n    "background_color": "#111827",\n    "card_bg_color": "#1f2937",\n    "text_color": "#ffffff",\n    "muted_color": "#e6e6e6",\n    "caption_color": "#e6e6e6",\n    "bg_opacity": 80,\n    "overlay_color": "#111827",\n    "header_color": "#1f2937",\n    "header_opacity": 26\n  }\n}'}
+                className="w-full resize-y rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              {templateError && (
+                <p className="text-xs font-medium text-destructive">{templateError}</p>
+              )}
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button variant="outline" onClick={fillTemplateFromCurrent}>
+                  Cargar apariencia actual
+                </Button>
+                <Button variant="outline" onClick={copyTemplate} className="gap-1.5">
+                  <Copy className="h-4 w-4" />
+                  Copiar JSON
+                </Button>
+                <Button variant="outline" onClick={downloadTemplate} className="gap-1.5">
+                  <Download className="h-4 w-4" />
+                  Descargar JSON
+                </Button>
+                <Button onClick={applyTemplate}>
+                  Aplicar JSON
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Las imágenes se guardan como URLs. El JSON no modifica otros negocios.
+              </p>
             </CardContent>
           </Card>
 
