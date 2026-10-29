@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink, X, Megaphone, Timer, MessageSquare, Copy, Check, FileJson, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, BarChart3, ShoppingCart, Loader2, RotateCcw, Archive, ExternalLink, X, Megaphone, Timer, MessageSquare, Copy, Check, FileJson, Download, Palette } from 'lucide-react';
 import { supabase, ShopBannerConfig, ShopPopupConfig, ShopSocialConfig, ShopGeneralConfig, ShopColorsConfig, ShopSocialEntry as SocialEntry } from '../../../lib/supabase';
 import { allThemes } from '../../../themes';
 import { useBusiness } from '../../../contexts/BusinessContext';
@@ -23,7 +23,7 @@ import { uploadStorageFile } from '../../../lib/storage-upload';
 
 export function ShopAdmin() {
   const { business } = useBusiness();
-  const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'trash' | 'popup' | 'banner' | 'avisos'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'trash' | 'popup' | 'banner' | 'avisos' | 'apariencia'>('dashboard');
   const { config: bannerCfg, setConfig: setBannerCfg, save: saveBanner, loaded: bannerLoaded } = useShopSubConfig('banner', SHOP_BANNER_DEFAULTS);
   const { config: popupCfg, setConfig: setPopupCfg, save: savePopup, loaded: popupLoaded } = useShopSubConfig('popup', SHOP_POPUP_DEFAULTS);
   const { config: generalCfg, setConfig: setGeneralCfg, save: saveGeneral } = useShopSubConfig('general', SHOP_GENERAL_DEFAULTS);
@@ -365,6 +365,9 @@ export function ShopAdmin() {
         <button onClick={() => setView('avisos')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'avisos' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <MessageSquare className="w-4 h-4 inline mr-1.5" />Avisos
         </button>
+        <button onClick={() => setView('apariencia')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'apariencia' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
+          <Palette className="w-4 h-4 inline mr-1.5" />Apariencia
+        </button>
         <button onClick={() => setView('trash')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'trash' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <Archive className="w-4 h-4 inline mr-1.5" />Papelera
         </button>
@@ -378,6 +381,8 @@ export function ShopAdmin() {
       {view === 'avisos' && <ShopAvisosTab />}
       {view === 'trash' && <ProductsTrash />}
 
+      {view === 'apariencia' && (
+        <>
       <Card>
         <CardContent className="p-5 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -519,6 +524,8 @@ export function ShopAdmin() {
               : 'Guardar'}
         </Button>
       </div>
+        </>
+      )}
     </div>
   );
 }
