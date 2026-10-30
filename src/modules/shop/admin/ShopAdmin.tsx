@@ -343,6 +343,12 @@ export function ShopAdmin() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center">
+        <a href={`/tienda/${business?.slug}`} target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white shadow-sm transition-colors hover:bg-primary/90">
+          <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
+        </a>
+      </div>
       <div className="flex items-center gap-3 border-b pb-4 mb-6 overflow-x-auto lg:flex-wrap">
         <button onClick={() => setView('dashboard')} className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${view === 'dashboard' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'}`}>
           <BarChart3 className="w-4 h-4 inline mr-1.5" />Dashboard
@@ -390,10 +396,6 @@ export function ShopAdmin() {
             <div className="flex items-center gap-2 ml-auto">
               <Button variant="outline" size="sm" onClick={copyBrandingToShop}>Copiar colores</Button>
               <Button variant="outline" size="sm" onClick={resetShopColors} title="Restaurar valores predeterminados"><RotateCcw className="w-4 h-4" /></Button>
-              <a href={`/tienda/${business?.slug}`} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white shadow-sm transition-colors hover:bg-primary/90">
-                <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
-              </a>
             </div>
           </div>
 
