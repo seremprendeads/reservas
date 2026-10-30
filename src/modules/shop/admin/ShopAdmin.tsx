@@ -343,7 +343,7 @@ export function ShopAdmin() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center">
+      <div className="flex items-center justify-end">
         <a href={`/tienda/${business?.slug}`} target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white shadow-sm transition-colors hover:bg-primary/90">
           <ExternalLink className="w-4 h-4 mr-1.5" />Ver tienda
