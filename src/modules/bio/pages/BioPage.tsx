@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Gift, ChevronDown, Copy, Check } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { BioProfile, BioLink } from '../types';
 
@@ -18,6 +18,8 @@ export function BioPage() {
   const [links, setLinks] = useState<BioLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [promoOpen, setPromoOpen] = useState(false);
+  const [promoCopied, setPromoCopied] = useState(false);
 
   const [isPremium, setIsPremium] = useState(true); // asume premium hasta verificar
 
@@ -89,7 +91,22 @@ export function BioPage() {
 
   // En plan free: máximo 3 links visibles
   // Los links extra siguen en DB, simplemente no se muestran hasta que vuelvan a tener un plan
-  const visibleLinks = isPremium ? links : links.slice(0, 3);
+  const regularLinks = links.filter(l => l.icon !== 'promo');
+  const visibleLinks = isPremium ? regularLinks : regularLinks.slice(0, 3);
+
+  const promoLink = links.find(l => l.icon === 'promo') || null;
+  const promoEnabled = !!promoLink && promoLink.color !== 'off' && !!promoLink.title && !!promoLink.url;
+
+  const copyPromoCode = async () => {
+    if (!promoLink) return;
+    try {
+      await navigator.clipboard.writeText(promoLink.title);
+      setPromoCopied(true);
+      setTimeout(() => setPromoCopied(false), 2000);
+    } catch {
+      // Si el navegador bloquea el portapapeles, el código queda visible para copiarlo a mano.
+    }
+  };
 
   const overlayOpacity = (profile.bg_opacity ?? 0) / 100;
   const overlayColor = profile.bg_overlay_color || '#000000';
@@ -204,6 +221,55 @@ const socialLinks = [
             );
           })}
         </div>
+
+        {/* Promociones y descuentos (Bio Pro) */}
+        {isPremium && promoEnabled && promoLink && (
+          <div className="w-full mt-4">
+            <button
+              type="button"
+              onClick={() => {
+                setPromoOpen(open => !open);
+                if (!promoOpen) trackClick(promoLink.id);
+              }}
+              className="flex w-full items-center justify-center gap-2 py-4 px-6 text-sm font-semibold transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5"
+              style={{
+                background: profile.primary_color,
+                color: '#ffffff',
+                borderRadius: getButtonRadius(profile.button_style),
+                boxShadow: profile.button_shadow ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
+              }}>
+              <Gift className="h-4 w-4" />
+              Promociones y descuentos
+              <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${promoOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {promoOpen && (
+              <div className="mt-3 overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg">
+                <img
+                  src={promoLink.url}
+                  alt="Promociones y descuentos"
+                  className="w-full rounded-xl bg-gray-50 object-contain"
+                />
+                <p className="mt-3 text-xs leading-relaxed text-gray-600">
+                  Copiá el código y usalo en la tienda o al reservar.
+                </p>
+                <div className="mt-2 flex items-center gap-2">
+                  <code className="flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-center font-mono text-base font-semibold tracking-wider text-gray-900">
+                    {promoLink.title}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={copyPromoCode}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-700">
+                    {promoCopied
+                      ? <><Check className="h-3.5 w-3.5" />Copiado</>
+                      : <><Copy className="h-3.5 w-3.5" />Copiar</>}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Social icons */}
         {socialLinks.length > 0 && (

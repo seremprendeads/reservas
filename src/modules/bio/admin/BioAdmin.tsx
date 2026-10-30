@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   User, Link as LinkIcon, Palette, BarChart3, QrCode, Plus, Trash2,
   GripVertical, ExternalLink, Copy, Check, Loader2, Eye, EyeOff,
-  Download, Upload, X, RotateCcw, AlertTriangle,
+  Download, Upload, X, RotateCcw, AlertTriangle, Gift,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { uploadStorageFile } from '../../../lib/storage-upload';
@@ -19,7 +19,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '../../../components/ui/dialog';
 
-type Tab = 'profile' | 'links' | 'appearance' | 'stats' | 'qr';
+type Tab = 'profile' | 'links' | 'promos' | 'appearance' | 'stats' | 'qr';
 
 const ICON_MAP: Record<string, string> = {};
 
@@ -52,6 +52,8 @@ function SocialIcon({ name }: { name: string }) {
 
 export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const { business } = useBusiness();
+  const trialActive = !!business?.is_trial && (!business.trial_ends_at || new Date(business.trial_ends_at) > new Date());
+  const isPro = trialActive || (!business?.is_trial && !!business?.plan && business.plan !== 'free');
   const [tab, setTab] = useState<Tab>('profile');
   const [profile, setProfile] = useState<BioProfile | null>(null);
   const [links, setLinks] = useState<BioLink[]>([]);
@@ -66,8 +68,15 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [bioThemeId, setBioThemeId] = useState('');
+  const [promoCode, setPromoCode] = useState('');
+  const [promoImage, setPromoImage] = useState('');
+  const [promoEnabled, setPromoEnabled] = useState(false);
+  const [promoSaving, setPromoSaving] = useState(false);
+  const [promoSaved, setPromoSaved] = useState(false);
+  const [promoCopied, setPromoCopied] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bgInputRef = useRef<HTMLInputElement>(null);
+  const promoInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const profileRef = useRef<BioProfile | null>(null);
@@ -94,6 +103,24 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   }, [adminEmail, business?.id, business?.slug]);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
+
+  const promoLink = links.find(l => l.icon === 'promo') || null;
+  const promoLinkId = promoLink?.id;
+  const promoLinkTitle = promoLink?.title;
+  const promoLinkUrl = promoLink?.url;
+  const promoLinkColor = promoLink?.color;
+
+  useEffect(() => {
+    if (!promoLinkId) {
+      setPromoCode('');
+      setPromoImage('');
+      setPromoEnabled(false);
+      return;
+    }
+    setPromoCode(promoLinkTitle || '');
+    setPromoImage(promoLinkUrl || '');
+    setPromoEnabled(promoLinkColor !== 'off');
+  }, [promoLinkId, promoLinkTitle, promoLinkUrl, promoLinkColor]);
 
   useEffect(() => {
     return () => {
@@ -319,6 +346,49 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     }
   };
 
+  const uploadPromoImage = async (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    setUploading(true);
+    try {
+      let blob: Blob = file;
+      if (file.size > 500 * 1024 && file.type !== 'image/gif') {
+        blob = await new Promise<Blob>((resolve, reject) => {
+          const img = new Image();
+          const url = URL.createObjectURL(file);
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            const canvas = document.createElement('canvas');
+            const maxW = 1200, maxH = 1600;
+            let w = img.width, h = img.height;
+            if (w > maxW) { h = h * maxW / w; w = maxW; }
+            if (h > maxH) { w = w * maxH / h; h = maxH; }
+            canvas.width = Math.round(w);
+            canvas.height = Math.round(h);
+            canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const fmt = canvas.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+            canvas.toBlob(b => b ? resolve(b) : reject(new Error('Compresión fallida')), fmt, 0.85);
+          };
+          img.onerror = () => reject(new Error('Error al leer imagen'));
+          img.src = url;
+        });
+      }
+      const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+      const publicUrl = await uploadStorageFile(
+        'branding',
+        `bio-promo-${adminEmail.replace(/[^a-zA-Z0-9]/g, '_')}-${Date.now()}.${ext}`,
+        blob,
+        blob.type === 'image/webp' ? 'image/webp' : 'image/jpeg',
+      );
+      setPromoImage(publicUrl);
+    } catch (err) {
+      console.error('Promo upload error:', err);
+      mostrarError('No se pudo subir la imagen de la promoción. Intentá de nuevo.');
+    } finally {
+      if (promoInputRef.current) promoInputRef.current.value = '';
+      setUploading(false);
+    }
+  };
+
   const loadStats = useCallback(async () => {
     if (!profile) return;
     // H4 (auditoria RLS): no hay SELECT anonimo en bio_stats; las estadisticas
@@ -405,14 +475,15 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     setEditingLink(null);
   };
 
-  const removeLink = async (id: string) => {
+  const removeLink = async (id: string): Promise<boolean> => {
     const { data: result, error } = await authInvoke('admin-update-bio', { action: 'delete_link', linkId: id });
     const fallo = falloDe(result, error);
     if (fallo) {
       mostrarError(fallo);
-      return;
+      return false;
     }
     setLinks(prev => prev.filter(l => l.id !== id));
+    return true;
   };
 
   const toggleLink = async (id: string, isActive: boolean) => {
@@ -426,11 +497,87 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     setLinks(prev => prev.map(l => l.id === id ? { ...l, is_active: isActive } : l));
   };
 
+  const persistPromo = async (next: { code: string; image: string; enabled: boolean }) => {
+    const code = next.code.trim();
+    const image = next.image.trim();
+    if (next.enabled && (!code || !image)) {
+      mostrarError('Completá el código y subí la imagen para activar la promoción.');
+      return false;
+    }
+    setPromoSaving(true);
+    setPromoSaved(false);
+    try {
+      const existing = links.find(l => l.icon === 'promo');
+      const fields = {
+        title: code,
+        url: image,
+        icon: 'promo',
+        color: next.enabled ? 'on' : 'off',
+        is_active: true,
+      };
+      if (existing) {
+        const { data: result, error } = await authInvoke('admin-update-bio', {
+          action: 'update_link',
+          linkId: existing.id,
+          link: fields,
+        });
+        const fallo = falloDe(result, error);
+        if (fallo) {
+          mostrarError(fallo);
+          return false;
+        }
+        setLinks(prev => prev.map(l => l.id === existing.id ? { ...l, ...fields } : l));
+      } else {
+        await ensureProfile();
+        const { data: result, error } = await authInvoke('admin-update-bio', {
+          action: 'add_link',
+          link: { ...fields, sort_order: links.length },
+        });
+        const fallo = falloDe(result, error);
+        if (fallo) {
+          mostrarError(fallo);
+          return false;
+        }
+        if (result?.link) setLinks(prev => [...prev, result.link]);
+      }
+      setPromoSaved(true);
+      setTimeout(() => setPromoSaved(false), 2000);
+      return true;
+    } finally {
+      setPromoSaving(false);
+    }
+  };
+
+  const savePromo = () => persistPromo({ code: promoCode, image: promoImage, enabled: promoEnabled });
+
+  const deletePromo = async () => {
+    if (!promoLink) return;
+    const ok = await removeLink(promoLink.id);
+    if (!ok) return;
+    setPromoCode('');
+    setPromoImage('');
+    setPromoEnabled(false);
+  };
+
+  const copyPromoCode = async () => {
+    if (!promoCode.trim()) return;
+    try {
+      await navigator.clipboard.writeText(promoCode.trim());
+      setPromoCopied(true);
+      setTimeout(() => setPromoCopied(false), 2000);
+    } catch {
+      mostrarError('No se pudo copiar el código.');
+    }
+  };
+
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin" /></div>;
+
+  const regularLinks = links.filter(l => l.icon !== 'promo');
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'profile', label: 'Perfil', icon: <User className="w-4 h-4" /> },
     { id: 'links', label: 'Enlaces', icon: <LinkIcon className="w-4 h-4" /> },
+    { id: 'promos', label: 'Promos', icon: <Gift className="w-4 h-4" /> },
     { id: 'appearance', label: 'Apariencia', icon: <Palette className="w-4 h-4" /> },
     { id: 'stats', label: 'Estadísticas', icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'qr', label: 'QR', icon: <QrCode className="w-4 h-4" /> },
@@ -610,17 +757,17 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
             <Card className="border-border/50">
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Enlaces ({links.length})</p>
+                  <p className="text-sm font-medium">Enlaces ({regularLinks.length})</p>
                   <Button size="sm" onClick={() => setShowAddLink(true)} className="gap-1"><Plus className="w-3.5 h-3.5" />Agregar</Button>
                 </div>
-                {links.length === 0 ? (
+                {regularLinks.length === 0 ? (
                   <div className="py-10 text-center">
                     <LinkIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
                     <p className="text-sm text-muted-foreground">Agregá tu primer enlace</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {links.map(link => (
+                    {regularLinks.map(link => (
                       <div key={link.id}
                         draggable
                         onDragStart={() => handleDragStart(link.id)}
@@ -657,6 +804,99 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                     : saved ? <><Check className="w-4 h-4" />Guardado</>
                     : 'Guardar enlaces'}
                 </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Promos Tab */}
+          {tab === 'promos' && (
+            <Card className="border-border/50">
+              <CardContent className="p-6 space-y-5">
+                <div className="flex items-start gap-3">
+                  <Gift className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium">Promociones y descuentos</p>
+                    <p className="text-xs text-muted-foreground">
+                      Subí una imagen con tu promo y el código que el cliente puede copiar. Se muestra como un botón debajo de tus enlaces.
+                    </p>
+                  </div>
+                </div>
+
+                {!isPro ? (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800/40 dark:bg-amber-950 dark:text-amber-100">
+                    Las promociones están disponibles en Bio Pro. Mejorá tu plan para mostrarlas en tu Bio.
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium">Mostrar promoción</p>
+                        <p className="text-xs text-muted-foreground">Aparece en la Bio debajo de los enlaces.</p>
+                      </div>
+                      <button onClick={() => setPromoEnabled(v => !v)}
+                        className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${promoEnabled ? 'bg-primary' : 'bg-muted'}`}>
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${promoEnabled ? 'translate-x-5' : ''}`} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Código de descuento</label>
+                      <div className="flex items-center gap-2">
+                        <Input value={promoCode} onChange={e => setPromoCode(e.target.value)}
+                          placeholder="Ej: SPA10" className="font-mono" />
+                        <Button variant="outline" size="sm" onClick={copyPromoCode} disabled={!promoCode.trim()} className="gap-1.5 shrink-0">
+                          {promoCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                          {promoCopied ? 'Copiado' : 'Copiar'}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        El cliente lo copia desde tu Bio y lo usa en la tienda o al reservar.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Imagen de la promoción</label>
+                      <input ref={promoInputRef} type="file" accept="image/*" className="hidden"
+                        onChange={e => { const f = e.target.files?.[0]; if (f) uploadPromoImage(f); }} />
+                      {promoImage ? (
+                        <div className="relative group rounded-xl overflow-hidden border">
+                          <img src={promoImage} alt="Promoción" className="w-full max-h-80 object-contain bg-muted/30" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <Button variant="secondary" size="sm" onClick={() => promoInputRef.current?.click()} disabled={uploading} className="gap-1">
+                              {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} Cambiar
+                            </Button>
+                            <Button variant="destructive" size="sm" onClick={() => setPromoImage('')} className="gap-1">
+                              <X className="w-3.5 h-3.5" /> Quitar
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button onClick={() => promoInputRef.current?.click()} disabled={uploading}
+                          className="w-full h-40 rounded-xl border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center hover:border-primary/50 hover:bg-accent/50 transition-colors">
+                          {uploading ? <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /> : <Upload className="w-6 h-6 text-muted-foreground" />}
+                          <p className="text-sm text-muted-foreground mt-1">Subir imagen de la promoción</p>
+                          <p className="text-xs text-muted-foreground/70">JPG, PNG o WebP</p>
+                        </button>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Podés hacerla en Canva. Se muestra completa, sin recortes.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button onClick={savePromo} disabled={promoSaving} className="flex-1 gap-1.5">
+                        {promoSaving ? <><Loader2 className="w-4 h-4 animate-spin" />Guardando...</>
+                          : promoSaved ? <><Check className="w-4 h-4" />Guardado</>
+                          : 'Guardar promoción'}
+                      </Button>
+                      {promoLink && (
+                        <Button variant="outline" onClick={deletePromo} className="gap-1.5">
+                          <Trash2 className="w-4 h-4" />Eliminar
+                        </Button>
+                      )}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
@@ -1058,7 +1298,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                       {profile?.city && <p className="text-xs mt-1" style={profile?.description_color ? { color: profile.description_color } : { opacity: 0.5 }}>{profile.city}</p>}
                     </div>
                     <div className="w-full space-y-2.5">
-                      {links.filter(l => l.is_active).map(link => (
+                      {links.filter(l => l.is_active && l.icon !== 'promo').map(link => (
                         <div key={link.id}
                           className={`w-full px-4 py-3 text-sm font-medium text-center transition-all hover:scale-[1.02] ${
                             getButtonRadius(profile?.button_style || 'rounded')
@@ -1070,6 +1310,15 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                           {link.title}
                         </div>
                       ))}
+                      {isPro && promoEnabled && promoCode.trim() && promoImage.trim() && (
+                        <div
+                          className={`w-full px-4 py-3 text-sm font-medium text-center transition-all hover:scale-[1.02] ${
+                            getButtonRadius(profile?.button_style || 'rounded')
+                          } ${profile?.button_shadow ? 'shadow-md hover:shadow-lg' : ''}`}
+                          style={{ background: profile?.primary_color || '#059669', color: '#ffffff' }}>
+                          Promociones y descuentos
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-3">
                       {profile?.social_instagram && <span className={`transition-opacity ${profile?.social_icon_color ? '' : 'opacity-60 hover:opacity-100'}`} style={{ color: profile.social_icon_color || undefined }}><SocialIcon name="instagram" /></span>}
