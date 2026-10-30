@@ -555,12 +555,6 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                       placeholder="info@spa.com" />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Sitio web</label>
-                  <Input defaultValue={profile?.website || ''} key={profile?.id || 'new-web'}
-                    onChange={e => handleFieldChange('website', e.target.value || null)} onBlur={saveDraft}
-                    placeholder="https://..." />
-                </div>
                 <div className="h-px bg-border/50" />
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Redes sociales</p>
                 <div className="grid grid-cols-2 gap-3">
