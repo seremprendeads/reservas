@@ -16,7 +16,6 @@ export function BioPage() {
   const { slug } = useParams<{ slug: string }>();
   const [profile, setProfile] = useState<BioProfile | null>(null);
   const [links, setLinks] = useState<BioLink[]>([]);
-  const [bookingBgColor, setBookingBgColor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -43,9 +42,6 @@ export function BioPage() {
 
       const { data: l } = await supabase.from('bio_links').select('*').eq('profile_id', p.id).eq('is_active', true).order('sort_order');
       if (l) setLinks(l);
-
-      const { data: branding } = await supabase.from('branding').select('background_color').eq('business_id', biz.id).maybeSingle();
-      if (branding?.background_color) setBookingBgColor(branding.background_color);
 
       setLoading(false);
 
@@ -191,8 +187,7 @@ const socialLinks = [
         {/* Links */}
         <div className="w-full mt-8 space-y-4">
           {visibleLinks.map((link, i) => {
-            const isTienda = /tienda|shop/i.test(link.title);
-            const bgColor = link.color || (isTienda && bookingBgColor) || profile.primary_color;
+            const bgColor = link.color || profile.primary_color;
             return (
               <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"
                 onClick={() => trackClick(link.id)}
