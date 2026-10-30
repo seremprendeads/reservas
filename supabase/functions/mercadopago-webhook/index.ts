@@ -213,7 +213,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: existingBooking, error: findError } = await supabase
       .from("bookings")
-      .select("id, business_id, booking_date, booking_time, customer_name, booking_code, payment_status, amount")
+      .select("id, business_id, booking_date, booking_time, customer_name, booking_code, payment_status, amount, promo_id")
       .eq("booking_code", extRef)
       .eq("business_id", prov.business_id)
       .maybeSingle();
@@ -267,10 +267,18 @@ Deno.serve(async (req: Request) => {
       })
       .eq("booking_code", extRef)
       .eq("business_id", businessId)
+      .neq("payment_status", "approved")
       .select()
       .maybeSingle();
 
     if (error) throw error;
+
+    // Suma un uso de la promocion recien cuando el pago se aprueba. El .neq de
+    // arriba hace que solo UN aviso simultaneo llegue a este punto.
+    const promoReserva = (existingBooking as unknown as { promo_id: string | null }).promo_id;
+    if (booking && promoReserva) {
+      await supabase.rpc("increment_promo_use", { p_promo_id: promoReserva });
+    }
 
     // Aviso al duenio del negocio via ntfy
     if (booking) {
@@ -319,7 +327,7 @@ async function procesarPedidoTienda(
 ): Promise<Response> {
   const { data: order, error: findError } = await supabase
     .from("shop_orders")
-    .select("id, payment_status, total")
+    .select("id, payment_status, total, promo_id")
     .eq("id", orderId)
     .eq("business_id", businessId)
     .maybeSingle();
@@ -354,13 +362,25 @@ async function procesarPedidoTienda(
     return new Response("Amount mismatch", { status: 200 });
   }
 
-  const { error: updateError } = await supabase
+  const { data: aprobado, error: updateError } = await supabase
     .from("shop_orders")
     .update({ payment_status: "approved", payment_id: paymentId })
     .eq("id", orderId)
-    .eq("business_id", businessId);
+    .eq("business_id", businessId)
+    .neq("payment_status", "approved")
+    .select("id");
 
   if (updateError) throw updateError;
+
+  // Otro aviso simultaneo ya lo proceso: no descontar stock ni usos dos veces.
+  if (!aprobado || aprobado.length === 0) {
+    return new Response("Already processed", { status: 200 });
+  }
+
+  const promoPedido = (order as unknown as { promo_id: string | null }).promo_id;
+  if (promoPedido) {
+    await supabase.rpc("increment_promo_use", { p_promo_id: promoPedido });
+  }
 
   const { data: items } = await supabase
     .from("shop_order_items")

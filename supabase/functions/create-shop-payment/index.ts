@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createServiceClient, jsonSuccess, jsonError, corsHeaders, checkRateLimit } from "../_shared/auth.ts";
 import { descifrar } from "../_shared/crypto.ts";
+import { buscarPromo, normalizarCodigo, redondear } from "../_shared/promo.ts";
 
 // ============================================================================
 // create-shop-payment
@@ -103,8 +104,66 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Promocion: el descuento se calcula ACA sobre el total real (nunca sobre
+    // lo que diga el navegador). El total del pedido queda ya con descuento,
+    // asi el webhook compara contra el monto que Mercado Pago realmente cobra.
+    total = redondear(total);
+    const codigoPromo = normalizarCodigo(body.promo_code);
+    let promo: { id: string; code: string } | null = null;
+    let descuento = 0;
+    if (codigoPromo) {
+      const r = await buscarPromo(supabase, business.id, codigoPromo, "shop", total);
+      if (!r.ok) return jsonError(r.error, 400);
+      promo = { id: r.promo.id, code: r.promo.code };
+      descuento = r.descuento;
+    }
+    const totalFinal = redondear(total - descuento);
+
     // Deja el pedido con el total real, no el que calculo el navegador.
-    await supabase.from("shop_orders").update({ total }).eq("id", order_id);
+    await supabase.from("shop_orders").update({
+      total: totalFinal,
+      promo_id: promo?.id ?? null,
+      promo_code: promo?.code ?? null,
+      discount_amount: descuento,
+    }).eq("id", order_id);
+
+    // Descuento del 100%: no hay nada que cobrar (Mercado Pago no acepta $0).
+    // Se aprueba el pedido y se descuenta el stock aca mismo, igual que haria
+    // el webhook. El update condicional evita procesarlo dos veces.
+    if (totalFinal <= 0) {
+      const { data: aprobado } = await supabase
+        .from("shop_orders")
+        .update({ payment_status: "approved", payment_id: "PROMO-" + (promo?.code ?? "GRATIS") })
+        .eq("id", order_id)
+        .eq("business_id", business.id)
+        .eq("payment_status", "pending")
+        .select("id");
+      if (aprobado && aprobado.length > 0) {
+        for (const item of orderItems) {
+          const { error: stockError } = await supabase.rpc("decrement_stock", {
+            p_product_id: item.product_id,
+            p_quantity: item.quantity,
+            p_reference: order_id,
+          });
+          if (stockError) console.error("No se pudo descontar stock:", item.product_id, stockError);
+        }
+        if (promo) await supabase.rpc("increment_promo_use", { p_promo_id: promo.id });
+      }
+      return jsonSuccess({ free: true, order_id });
+    }
+
+    // Con descuento, Mercado Pago recibe un unico item con el total ya rebajado
+    // (no acepta items con precio negativo).
+    if (descuento > 0) {
+      mpItems.length = 0;
+      mpItems.push({
+        id: order_id,
+        title: `Pedido en tienda (código ${promo!.code})`,
+        unit_price: totalFinal,
+        quantity: 1,
+        currency_id: products?.[0]?.currency || "ARS",
+      });
+    }
 
     const { data: mpConfig } = await supabase
       .from("payment_providers")

@@ -55,6 +55,11 @@ export function useAdminNav(
 
     const modules: NavItem[] = moduleNavItems
       .filter(m => {
+        // Promociones: los codigos se usan en Tienda o en Reservas, asi que
+        // aparece si el plan incluye alguno de los dos.
+        if (m.id === 'promotions') {
+          return enabledModules.includes('shop') || enabledModules.includes('reservas');
+        }
         const requiredModule = moduleViewToModuleId[m.id];
         if (!requiredModule) return true;
         return enabledModules.includes(requiredModule);

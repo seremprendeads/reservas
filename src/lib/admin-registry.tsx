@@ -1,10 +1,11 @@
 import React from 'react';
-import { ShoppingCart, Link, Sparkles, CreditCard } from 'lucide-react';
+import { ShoppingCart, Link, Sparkles, CreditCard, Tag } from 'lucide-react';
 import type { View } from '../pages/admin/types';
 import { BioAdmin } from '../modules/bio/admin/BioAdmin';
 import { LandingAdmin } from '../modules/landing/admin/LandingAdmin';
 import { ShopAdmin } from '../modules/shop/admin/ShopAdmin';
 import { PaymentsAdmin } from '../modules/payments/admin/PaymentsAdmin';
+import { PromotionsAdmin } from '../modules/promotions/admin/PromotionsAdmin';
 
 export interface AdminModuleEntry {
   id: View;
@@ -39,6 +40,14 @@ export const adminModules: AdminModuleEntry[] = [
     navIcon: <Sparkles className="h-5 w-5" />,
     viewTitle: 'Constructor de sitio web',
     navPosition: 9,
+  },
+  {
+    id: 'promotions',
+    component: PromotionsAdmin,
+    navLabel: 'Promociones y ofertas',
+    navIcon: <Tag className="h-5 w-5" />,
+    viewTitle: 'Promociones y ofertas',
+    navPosition: 7.5,
   },
   {
     id: 'payments',

@@ -183,7 +183,14 @@ export function AdminSidebar({
 
           {NAV_GROUPS.map(group => {
             // Tienda va sola, después de Presencia y antes de Sistema
-            const standaloneBefore = group.id === 'sistema' ? renderStandalone('shop') : null;
+            const standaloneBefore = group.id === 'sistema'
+              ? (
+                <>
+                  {renderStandalone('shop')}
+                  {renderStandalone('promotions')}
+                </>
+              )
+              : null;
             // No mostrar grupos sin secciones disponibles (ej. Gestión en plan gratuito)
             if (!group.ids.some(id => getItemById(id))) {
               return standaloneBefore ? <Fragment key={group.id}>{standaloneBefore}</Fragment> : null;

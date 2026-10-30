@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Phone, Mail, ArrowLeft, AlertCircle } from 'lucide-react';
+import { User, Phone, Mail, ArrowLeft, AlertCircle, Tag, Loader2 } from 'lucide-react';
 import { useBooking } from '../contexts/BookingContext';
 import { supabase, Settings } from '../lib/supabase';
 import { useBusiness } from '../contexts/BusinessContext';
@@ -15,6 +15,59 @@ export function BookingForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<Settings | null>(null);
+
+  // Codigo de promocion. El descuento lo calcula el servidor sobre el precio
+  // real; aca solo se muestra. Solo tiene sentido si el negocio cobra online.
+  const [paymentEnabled, setPaymentEnabled] = useState(false);
+  const [promoInput, setPromoInput] = useState('');
+  const [promoError, setPromoError] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; name: string; discount_amount: number; final_amount: number; free: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!business?.slug) return;
+    supabase.functions
+      .invoke('public-payment-enabled', { body: { business_slug: business.slug } })
+      .then(({ data }) => setPaymentEnabled(!!data?.enabled))
+      .catch(() => setPaymentEnabled(false));
+  }, [business?.slug]);
+
+  const readFunctionError = async (err: unknown, fallback: string): Promise<string> => {
+    const ctx = (err as { context?: Response } | null)?.context;
+    if (ctx && typeof ctx.json === 'function') {
+      try {
+        const b = await ctx.clone().json();
+        if (b?.error) return b.error;
+      } catch { /* sin body JSON */ }
+    }
+    return fallback;
+  };
+
+  const applyPromo = async () => {
+    const code = promoInput.trim();
+    if (!code || !business?.slug) return;
+    setPromoLoading(true);
+    setPromoError('');
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-promo', {
+        body: { business_slug: business.slug, code, scope: 'reservas', service_id: bookingData.service?.id },
+      });
+      if (error) throw new Error(await readFunctionError(error, 'No pudimos validar el código. Intentá de nuevo.'));
+      if (!data?.valid) {
+        setAppliedPromo(null);
+        setPromoError(data?.message || 'Código inválido o vencido');
+        return;
+      }
+      setAppliedPromo({
+        code: data.code, name: data.name,
+        discount_amount: data.discount_amount, final_amount: data.final_amount, free: !!data.free,
+      });
+    } catch (err) {
+      setPromoError(err instanceof Error ? err.message : 'No pudimos validar el código');
+    } finally {
+      setPromoLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (business?.id) loadSettings();
@@ -116,11 +169,20 @@ export function BookingForm() {
           email,
           name,
           service_id: bookingData.service?.id,
+          promo_code: appliedPromo?.code,
         },
       });
 
       if (prefError || !preference) {
-        throw new Error('Error al crear preferencia de pago');
+        throw new Error(await readFunctionError(prefError, 'Error al crear preferencia de pago'));
+      }
+
+      // Descuento del 100%: el servidor ya confirmó la reserva, no hay pago.
+      if (preference.free) {
+        setPaymentInfo('', bookingCode, 0, bookingData.currency);
+        setPaymentStatus('approved');
+        setStep('confirmation');
+        return;
       }
 
       // El preference_id lo persiste create-payment (service_role): el browser
@@ -128,7 +190,7 @@ export function BookingForm() {
       // UPDATE directo: fallaria en silencio y agregarla como policy abriria
       // modificaciones de estados/montos de reservas ajenas.
 
-      setPaymentInfo(preference.id, bookingCode, bookingData.amount, bookingData.currency);
+      setPaymentInfo(preference.id, bookingCode, appliedPromo ? appliedPromo.final_amount : bookingData.amount, bookingData.currency);
       setStep('payment');
     } catch (error) {
       console.error('Error:', error);
@@ -254,12 +316,71 @@ export function BookingForm() {
             )}
           </div>
 
+          {bookingData.amount > 0 && paymentEnabled && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                ¿Tenés un código de descuento?
+              </label>
+              {appliedPromo ? (
+                <div className="flex items-center justify-between rounded-xl border-2 border-booking-primary px-4 h-12">
+                  <span className="flex items-center gap-2 font-semibold text-gray-800">
+                    <Tag className="w-4 h-4 text-booking-primary" />{appliedPromo.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setAppliedPromo(null); setPromoInput(''); }}
+                    className="text-sm text-gray-500 underline"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={promoInput}
+                      onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyPromo(); } }}
+                      placeholder="CÓDIGO"
+                      maxLength={40}
+                      className="flex-1 min-w-0 px-4 h-12 rounded-xl border-2 border-gray-200 font-mono uppercase focus:border-booking-primary focus:outline-none focus:ring-2 focus:ring-booking-primary"
+                    />
+                    <button
+                      type="button"
+                      onClick={applyPromo}
+                      disabled={promoLoading || !promoInput.trim()}
+                      className="px-5 h-12 rounded-xl bg-booking-primary text-white font-semibold disabled:opacity-40"
+                    >
+                      {promoLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Aplicar'}
+                    </button>
+                  </div>
+                  {promoError && <p className="text-red-500 text-sm mt-1">{promoError}</p>}
+                </>
+              )}
+            </div>
+          )}
+
           {bookingData.amount > 0 && (
-            <div className="bg-gray-50 rounded-xl p-5 flex justify-between items-center">
-              <span className="text-gray-700 font-medium">Total a pagar:</span>
-              <span className="text-2xl font-bold text-booking-primary">
-                ${bookingData.amount.toLocaleString('es-AR')}
-              </span>
+            <div className="bg-gray-50 rounded-xl p-5 space-y-2">
+              {appliedPromo && (
+                <>
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>Precio</span>
+                    <span>${bookingData.amount.toLocaleString('es-AR')}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-semibold text-booking-primary">
+                    <span>Descuento ({appliedPromo.code})</span>
+                    <span>-${appliedPromo.discount_amount.toLocaleString('es-AR')}</span>
+                  </div>
+                </>
+              )}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-700 font-medium">Total a pagar:</span>
+                <span className="text-2xl font-bold text-booking-primary">
+                  {appliedPromo?.free ? 'Gratis' : `$${(appliedPromo ? appliedPromo.final_amount : bookingData.amount).toLocaleString('es-AR')}`}
+                </span>
+              </div>
             </div>
           )}
 
@@ -270,7 +391,7 @@ export function BookingForm() {
               hover:bg-booking-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed
               transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            {loading ? 'Procesando...' : 'Continuar al pago'}
+            {loading ? 'Procesando...' : appliedPromo?.free ? 'Confirmar reserva' : 'Continuar al pago'}
           </button>
         </form>
       </div>

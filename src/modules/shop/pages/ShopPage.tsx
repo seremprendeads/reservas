@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback, useRef, CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
-import { Search, ShoppingCart, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Package, Check, X, MapPin, Lock, Wallet, ShieldCheck } from 'lucide-react';
+import { Search, ShoppingCart, Minus, Plus, Trash2, Loader2, ChevronLeft, ShoppingBag, Package, Check, X, MapPin, Lock, Wallet, ShieldCheck, Tag } from 'lucide-react';
 import type { InputHTMLAttributes } from 'react';
 import { supabase, ShopConfig, ShopColorsConfig } from '../../../lib/supabase';
 import { useBusiness } from '../../../contexts/BusinessContext';
@@ -16,6 +16,23 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     MercadoPago: any;
   }
+}
+
+// Resultado de validate-promo: el descuento lo calcula el servidor sobre el
+// precio real; aca solo se muestra.
+type AppliedPromo = { code: string; name: string; discount_amount: number; final_amount: number; free: boolean };
+
+// Cuando una Edge Function responde != 2xx, supabase-js deja el mensaje real en
+// error.context (un Response). Lo leemos para mostrar el motivo verdadero.
+async function leerMensajeError(error: unknown, fallback: string): Promise<string> {
+  const ctx = (error as { context?: Response } | null)?.context;
+  if (ctx && typeof ctx.json === 'function') {
+    try {
+      const body = await ctx.clone().json();
+      if (body?.error) return body.error;
+    } catch { /* sin body JSON */ }
+  }
+  return fallback;
 }
 
 // Sin la sigla de la moneda: el cliente final ya sabe en que paga.
@@ -51,6 +68,10 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
   const [customerNotes, setCustomerNotes] = useState('');
   const [checkoutError, setCheckoutError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null);
+  const [promoError, setPromoError] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
   const [negocioNoEncontrado, setNegocioNoEncontrado] = useState(false);
   const [cartToast, setCartToast] = useState<string | null>(null);
   const cartToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -121,6 +142,43 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
     setView('cart');
   };
 
+  // Si el carrito cambia, el descuento calculado deja de valer: hay que volver
+  // a aplicar el codigo (el campo conserva lo que escribio).
+  useEffect(() => { setAppliedPromo(null); setPromoError(''); }, [subtotal]);
+
+  const applyPromo = async () => {
+    const code = promoInput.trim();
+    if (!code || !business?.slug) return;
+    setPromoLoading(true);
+    setPromoError('');
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-promo', {
+        body: {
+          business_slug: business.slug,
+          code,
+          scope: 'shop',
+          items: items.map(i => ({ product_id: i.product.id, quantity: i.quantity })),
+        },
+      });
+      if (error) throw new Error(await leerMensajeError(error, 'No pudimos validar el código. Intentá de nuevo.'));
+      if (!data?.valid) {
+        setAppliedPromo(null);
+        setPromoError(data?.message || 'Código inválido o vencido');
+        return;
+      }
+      setAppliedPromo({
+        code: data.code, name: data.name,
+        discount_amount: data.discount_amount, final_amount: data.final_amount, free: !!data.free,
+      });
+    } catch (err) {
+      setPromoError(err instanceof Error ? err.message : 'No pudimos validar el código');
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const removePromo = () => { setAppliedPromo(null); setPromoInput(''); setPromoError(''); };
+
   const startCheckout = async () => {
     if (!customerName.trim() || !customerEmail.trim() || !customerPhone.trim() || !customerNotes.trim()) {
       setCheckoutError('Completá todos los datos, incluido el detalle del pedido');
@@ -183,11 +241,21 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
         body: {
           business_slug: business.slug,
           order_id: orderId,
+          promo_code: appliedPromo?.code,
         },
       });
 
+      // Descuento del 100%: el servidor ya aprobó el pedido, no hay pago que hacer.
+      if (prefData?.free) {
+        clearCart();
+        setOrderSuccess(true);
+        return;
+      }
+
       if (prefError || !prefData?.id) {
-        throw new Error(prefData?.error || 'No se pudo iniciar el pago. Intentá de nuevo.');
+        throw new Error(
+          prefData?.error || await leerMensajeError(prefError, 'No se pudo iniciar el pago. Intentá de nuevo.')
+        );
       }
 
       setCheckoutInfo({ preferenceId: prefData.id, orderId });
@@ -302,6 +370,9 @@ function ShopPageContent({ forcedSlug }: { forcedSlug?: string }) {
             customerPhone={customerPhone} setCustomerPhone={setCustomerPhone}
             customerNotes={customerNotes} setCustomerNotes={setCustomerNotes}
             onStartCheckout={startCheckout} checkoutLoading={checkoutLoading} checkoutError={checkoutError}
+            promoInput={promoInput} setPromoInput={setPromoInput} appliedPromo={appliedPromo}
+            promoError={promoError} promoLoading={promoLoading}
+            onApplyPromo={applyPromo} onRemovePromo={removePromo}
           />
         )}
 
@@ -564,7 +635,8 @@ function TrustNote() {
 function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCart,
   customerName, setCustomerName, customerEmail, setCustomerEmail, customerPhone, setCustomerPhone,
   customerNotes, setCustomerNotes,
-  onStartCheckout, checkoutLoading, checkoutError
+  onStartCheckout, checkoutLoading, checkoutError,
+  promoInput, setPromoInput, appliedPromo, promoError, promoLoading, onApplyPromo, onRemovePromo
 }: {
   items: CartItem[]; subtotal: number; currency: string;
   onUpdateQuantity: (id: string, q: number, size?: string | null) => void;
@@ -575,6 +647,8 @@ function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCa
   customerPhone: string; setCustomerPhone: (v: string) => void;
   customerNotes: string; setCustomerNotes: (v: string) => void;
   onStartCheckout: () => Promise<void>; checkoutLoading: boolean; checkoutError: string;
+  promoInput: string; setPromoInput: (v: string) => void; appliedPromo: AppliedPromo | null;
+  promoError: string; promoLoading: boolean; onApplyPromo: () => void; onRemovePromo: () => void;
 }) {
   const [showForm, setShowForm] = useState(false);
 
@@ -683,13 +757,55 @@ function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCa
               <dt style={{ color: 'var(--booking-text-muted)' }}>Envío</dt>
               <dd style={{ color: 'var(--booking-text-muted)' }}>A coordinar</dd>
             </div>
+            {appliedPromo && (
+              <div className="flex justify-between font-semibold">
+                <dt style={{ color: 'var(--booking-primary)' }}>Descuento ({appliedPromo.code})</dt>
+                <dd style={{ color: 'var(--booking-primary)' }}>-{formatPrice(appliedPromo.discount_amount)}</dd>
+              </div>
+            )}
           </dl>
+
+          {/* Codigo de promocion: se valida en el servidor contra el precio real */}
+          <div className="mt-4">
+            {appliedPromo ? (
+              <div className="flex items-center justify-between rounded-xl border px-3 py-2 text-sm" style={{ borderColor: 'var(--booking-primary)', color: 'var(--booking-text)' }}>
+                <span className="flex items-center gap-2 font-semibold"><Tag className="h-4 w-4" style={{ color: 'var(--booking-primary)' }} />{appliedPromo.name}</span>
+                <button onClick={onRemovePromo} className="text-xs underline" style={{ color: 'var(--booking-text-muted)' }}>Quitar</button>
+              </div>
+            ) : (
+              <>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoInput}
+                    onChange={e => setPromoInput(e.target.value.toUpperCase())}
+                    onKeyDown={e => { if (e.key === 'Enter') onApplyPromo(); }}
+                    placeholder="Código de descuento"
+                    maxLength={40}
+                    className="min-w-0 flex-1 rounded-xl border px-3 py-2.5 text-sm font-mono uppercase focus:outline-none"
+                    style={{ borderColor: 'var(--booking-border)', backgroundColor: 'var(--booking-card-bg)', color: 'var(--booking-text)' }}
+                  />
+                  <button
+                    onClick={onApplyPromo}
+                    disabled={promoLoading || !promoInput.trim()}
+                    className="rounded-xl px-4 text-sm font-semibold text-white transition-opacity disabled:opacity-40"
+                    style={{ backgroundColor: 'var(--booking-primary)' }}
+                  >
+                    {promoLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aplicar'}
+                  </button>
+                </div>
+                {promoError && <p className="mt-1.5 text-xs" style={{ color: 'var(--booking-error)' }}>{promoError}</p>}
+              </>
+            )}
+          </div>
 
           <div className="my-4 border-t" style={{ borderColor: 'var(--booking-border)' }} />
 
           <div className="mb-5 flex items-baseline justify-between">
             <span className="text-sm font-bold" style={{ color: 'var(--booking-text)' }}>Total</span>
-            <span className="text-xl font-bold" style={{ color: 'var(--booking-primary)' }}>{formatPrice(subtotal)}</span>
+            <span className="text-xl font-bold" style={{ color: 'var(--booking-primary)' }}>
+              {appliedPromo?.free ? 'Gratis' : formatPrice(appliedPromo ? appliedPromo.final_amount : subtotal)}
+            </span>
           </div>
 
           {!showForm ? (
@@ -717,7 +833,7 @@ function CartScreen({ items, subtotal, onUpdateQuantity, onRemoveItem, onClearCa
                 style={{ backgroundColor: 'var(--booking-primary)' }}
               >
                 {checkoutLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
-                {checkoutLoading ? 'Procesando...' : 'Continuar al pago'}
+                {checkoutLoading ? 'Procesando...' : appliedPromo?.free ? 'Confirmar pedido' : 'Continuar al pago'}
               </button>
             </div>
           )}

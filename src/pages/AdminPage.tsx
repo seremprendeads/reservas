@@ -276,6 +276,7 @@ export function AdminPage() {
           />
         );
       case 'payments':
+      case 'promotions':
       case 'shop':
       case 'bio':
       case 'landing': {

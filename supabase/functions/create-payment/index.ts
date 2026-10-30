@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createServiceClient, jsonSuccess, jsonError, corsHeaders, checkRateLimit } from "../_shared/auth.ts";
 import { descifrar } from "../_shared/crypto.ts";
+import { buscarPromo, normalizarCodigo, redondear } from "../_shared/promo.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -99,13 +100,76 @@ Deno.serve(async (req: Request) => {
       return jsonError("No se pudo determinar el precio de la reserva", 400);
     }
 
+    // Promocion: se recalcula ACA sobre el precio real. El monto final se guarda
+    // en bookings.amount (con service_role; el navegador no puede tocarlo), asi
+    // el webhook compara contra exactamente lo que Mercado Pago va a cobrar.
+    const codigoPromo = normalizarCodigo(body.promo_code);
+    let montoFinal = validAmount;
+    if (codigoPromo) {
+      const { data: reserva } = await supabase
+        .from("bookings")
+        .select("payment_status")
+        .eq("booking_code", bookingCode)
+        .eq("business_id", business.id)
+        .maybeSingle();
+      if (!reserva) return jsonError("Reserva no encontrada", 404);
+      if (reserva.payment_status !== "pending") return jsonError("Esta reserva ya fue procesada", 400);
+
+      const r = await buscarPromo(supabase, business.id, codigoPromo, "reservas", validAmount);
+      if (!r.ok) return jsonError(r.error, 400);
+      montoFinal = r.final;
+
+      await supabase.from("bookings").update({
+        amount: montoFinal,
+        promo_id: r.promo.id,
+        promo_code: r.promo.code,
+        discount_amount: r.descuento,
+      }).eq("booking_code", bookingCode).eq("business_id", business.id);
+
+      // Descuento del 100%: no hay nada que cobrar. Se confirma la reserva aca
+      // (mismo resultado que el webhook) y no se crea preferencia de pago.
+      if (montoFinal <= 0) {
+        const { data: confirmada } = await supabase
+          .from("bookings")
+          .update({
+            payment_status: "approved",
+            payment_id: "PROMO-" + r.promo.code,
+            booking_status: "confirmed",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("booking_code", bookingCode)
+          .eq("business_id", business.id)
+          .eq("payment_status", "pending")
+          .select("customer_name, booking_date, booking_time")
+          .maybeSingle();
+
+        if (confirmada) {
+          await supabase.rpc("increment_promo_use", { p_promo_id: r.promo.id });
+
+          const ntfyTopic = Deno.env.get(`NTFY_TOPIC_${business.id.replace(/-/g, "_")}`) || Deno.env.get("NTFY_TOPIC");
+          if (ntfyTopic && Deno.env.get("NTFY_ENABLED") === "true") {
+            const fecha = new Date(confirmada.booking_date + "T12:00:00").toLocaleDateString("es-AR", {
+              weekday: "long", day: "numeric", month: "long",
+            });
+            await fetch(`https://ntfy.sh/${ntfyTopic}`, {
+              method: "POST",
+              headers: { Title: "Nueva reserva confirmada", Priority: "high", Tags: "white_check_mark,calendar", "Content-Type": "text/plain" },
+              body: `Cliente: ${confirmada.customer_name}\nFecha: ${fecha}\nHora: ${String(confirmada.booking_time).slice(0, 5)} hs\nCodigo: ${bookingCode} (promo ${r.promo.code})`,
+            }).catch(() => {});
+          }
+        }
+        return jsonSuccess({ free: true, bookingCode });
+      }
+    }
+    montoFinal = redondear(montoFinal);
+
     const preference = {
       items: [
         {
           id: bookingCode,
-          title: `Reserva ${bookingCode} - ${serviceName}`,
+          title: `Reserva ${bookingCode} - ${serviceName}${codigoPromo && montoFinal < validAmount ? ` (código ${codigoPromo})` : ""}`,
           description: serviceName,
-          unit_price: validAmount,
+          unit_price: montoFinal,
           quantity: 1,
           currency_id: "ARS",
         },
