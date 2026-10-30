@@ -7,7 +7,7 @@ import {
 import { supabase } from '../../../lib/supabase';
 import { uploadStorageFile } from '../../../lib/storage-upload';
 import { useBusiness } from '../../../contexts/BusinessContext';
-import { BioProfile, BioLink, BioStats } from '../types';
+import { BioProfile, BioLink, BioStats, DEFAULT_PROMO_LABEL, isPromoIcon, promoLabelFromIcon, promoIconForLabel } from '../types';
 import { BIO_BUTTON_STYLES, BIO_BG_PRESETS } from '../config';
 import { authInvoke } from '../../../pages/admin/helpers';
 import { allThemes } from '../../../themes';
@@ -70,6 +70,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
   const [bioThemeId, setBioThemeId] = useState('');
   const [promoCode, setPromoCode] = useState('');
   const [promoImage, setPromoImage] = useState('');
+  const [promoLabel, setPromoLabel] = useState(DEFAULT_PROMO_LABEL);
   const [promoEnabled, setPromoEnabled] = useState(false);
   const [promoSaving, setPromoSaving] = useState(false);
   const [promoSaved, setPromoSaved] = useState(false);
@@ -104,23 +105,26 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
-  const promoLink = links.find(l => l.icon === 'promo') || null;
+  const promoLink = links.find(l => isPromoIcon(l.icon)) || null;
   const promoLinkId = promoLink?.id;
   const promoLinkTitle = promoLink?.title;
   const promoLinkUrl = promoLink?.url;
   const promoLinkColor = promoLink?.color;
+  const promoLinkIcon = promoLink?.icon;
 
   useEffect(() => {
     if (!promoLinkId) {
       setPromoCode('');
       setPromoImage('');
+      setPromoLabel(DEFAULT_PROMO_LABEL);
       setPromoEnabled(false);
       return;
     }
     setPromoCode(promoLinkTitle || '');
     setPromoImage(promoLinkUrl || '');
+    setPromoLabel(promoLabelFromIcon(promoLinkIcon));
     setPromoEnabled(promoLinkColor !== 'off');
-  }, [promoLinkId, promoLinkTitle, promoLinkUrl, promoLinkColor]);
+  }, [promoLinkId, promoLinkTitle, promoLinkUrl, promoLinkColor, promoLinkIcon]);
 
   useEffect(() => {
     return () => {
@@ -497,7 +501,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     setLinks(prev => prev.map(l => l.id === id ? { ...l, is_active: isActive } : l));
   };
 
-  const persistPromo = async (next: { code: string; image: string; enabled: boolean }) => {
+  const persistPromo = async (next: { label: string; code: string; image: string; enabled: boolean }) => {
     const code = next.code.trim();
     const image = next.image.trim();
     if (next.enabled && (!code || !image)) {
@@ -507,11 +511,11 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     setPromoSaving(true);
     setPromoSaved(false);
     try {
-      const existing = links.find(l => l.icon === 'promo');
+      const existing = links.find(l => isPromoIcon(l.icon));
       const fields = {
         title: code,
         url: image,
-        icon: 'promo',
+        icon: promoIconForLabel(next.label),
         color: next.enabled ? 'on' : 'off',
         is_active: true,
       };
@@ -548,7 +552,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     }
   };
 
-  const savePromo = () => persistPromo({ code: promoCode, image: promoImage, enabled: promoEnabled });
+  const savePromo = () => persistPromo({ label: promoLabel, code: promoCode, image: promoImage, enabled: promoEnabled });
 
   const deletePromo = async () => {
     if (!promoLink) return;
@@ -556,6 +560,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
     if (!ok) return;
     setPromoCode('');
     setPromoImage('');
+    setPromoLabel(DEFAULT_PROMO_LABEL);
     setPromoEnabled(false);
   };
 
@@ -572,7 +577,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin" /></div>;
 
-  const regularLinks = links.filter(l => l.icon !== 'promo');
+  const regularLinks = links.filter(l => !isPromoIcon(l.icon));
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'profile', label: 'Perfil', icon: <User className="w-4 h-4" /> },
@@ -837,6 +842,15 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                         className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${promoEnabled ? 'bg-primary' : 'bg-muted'}`}>
                         <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${promoEnabled ? 'translate-x-5' : ''}`} />
                       </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Texto del botón</label>
+                      <Input value={promoLabel} onChange={e => setPromoLabel(e.target.value)}
+                        placeholder="Ej: Promoción, Descuento, Regalo" maxLength={40} />
+                      <p className="text-xs text-muted-foreground">
+                        Así se verá el botón en tu Bio. Si lo dejás vacío se usa "{DEFAULT_PROMO_LABEL}".
+                      </p>
                     </div>
 
                     <div className="space-y-2">
@@ -1298,7 +1312,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                       {profile?.city && <p className="text-xs mt-1" style={profile?.description_color ? { color: profile.description_color } : { opacity: 0.5 }}>{profile.city}</p>}
                     </div>
                     <div className="w-full space-y-2.5">
-                      {links.filter(l => l.is_active && l.icon !== 'promo').map(link => (
+                      {links.filter(l => l.is_active && !isPromoIcon(l.icon)).map(link => (
                         <div key={link.id}
                           className={`w-full px-4 py-3 text-sm font-medium text-center transition-all hover:scale-[1.02] ${
                             getButtonRadius(profile?.button_style || 'rounded')
@@ -1316,7 +1330,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                             getButtonRadius(profile?.button_style || 'rounded')
                           } ${profile?.button_shadow ? 'shadow-md hover:shadow-lg' : ''}`}
                           style={{ background: profile?.primary_color || '#059669', color: '#ffffff' }}>
-                          Promociones y descuentos
+                          {promoLabel.trim() || DEFAULT_PROMO_LABEL}
                         </div>
                       )}
                     </div>

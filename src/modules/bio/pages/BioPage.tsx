@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2, Gift, ChevronDown, Copy, Check } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
-import { BioProfile, BioLink } from '../types';
+import { BioProfile, BioLink, isPromoIcon, promoLabelFromIcon } from '../types';
 
 const ICON_MAP: Record<string, string> = {};
 
@@ -91,10 +91,11 @@ export function BioPage() {
 
   // En plan free: máximo 3 links visibles
   // Los links extra siguen en DB, simplemente no se muestran hasta que vuelvan a tener un plan
-  const regularLinks = links.filter(l => l.icon !== 'promo');
+  const regularLinks = links.filter(l => !isPromoIcon(l.icon));
   const visibleLinks = isPremium ? regularLinks : regularLinks.slice(0, 3);
 
-  const promoLink = links.find(l => l.icon === 'promo') || null;
+  const promoLink = links.find(l => isPromoIcon(l.icon)) || null;
+  const promoLabel = promoLabelFromIcon(promoLink?.icon);
   const promoEnabled = !!promoLink && promoLink.color !== 'off' && !!promoLink.title && !!promoLink.url;
 
   const copyPromoCode = async () => {
@@ -239,7 +240,7 @@ const socialLinks = [
                 boxShadow: profile.button_shadow ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
               }}>
               <Gift className="h-4 w-4" />
-              Promociones y descuentos
+              {promoLabel}
               <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${promoOpen ? 'rotate-180' : ''}`} />
             </button>
 
@@ -247,7 +248,7 @@ const socialLinks = [
               <div className="mt-3 overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg">
                 <img
                   src={promoLink.url}
-                  alt="Promociones y descuentos"
+                  alt={promoLabel}
                   className="w-full rounded-xl bg-gray-50 object-contain"
                 />
                 <p className="mt-3 text-xs leading-relaxed text-gray-600">

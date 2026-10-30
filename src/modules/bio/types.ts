@@ -53,3 +53,18 @@ export type BioStats = {
   dailyClicks: { date: string; count: number }[];
   topLink: string;
 };
+
+export const DEFAULT_PROMO_LABEL = 'Promociones y descuentos';
+
+export function isPromoIcon(icon: string | null | undefined): boolean {
+  return icon === 'promo' || !!icon?.startsWith('promo:');
+}
+
+export function promoLabelFromIcon(icon: string | null | undefined): string {
+  if (!icon?.startsWith('promo:')) return DEFAULT_PROMO_LABEL;
+  return icon.slice('promo:'.length).trim() || DEFAULT_PROMO_LABEL;
+}
+
+export function promoIconForLabel(label: string): string {
+  return `promo:${label.trim() || DEFAULT_PROMO_LABEL}`;
+}
