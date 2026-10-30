@@ -220,10 +220,10 @@ const socialLinks = [
 
         {/* Footer */}
         <a href="https://bioweblink.com" target="_blank" rel="noopener noreferrer" className="mt-12 inline-flex flex-col items-center gap-1 group">
-          <span className="text-xl font-black tracking-tight opacity-40 group-hover:opacity-70 transition-opacity" style={{ color: textColor }}>
+          <span className="text-xl font-black tracking-tight transition-opacity" style={{ color: '#000000' }}>
             Powered by BiowebLink
           </span>
-          <span className="text-[10px] tracking-widest opacity-30 group-hover:opacity-50 transition-opacity" style={{ color: textColor }}>
+          <span className="text-[10px] tracking-widest transition-opacity" style={{ color: '#000000' }}>
             Tu Presencia Online
           </span>
         </a>
