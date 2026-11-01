@@ -25,6 +25,7 @@ import { MapTab } from './tabs/MapTab';
 import { FooterTab } from './tabs/FooterTab';
 import { DesignTab } from './tabs/DesignTab';
 import { PopupTab } from './tabs/PopupTab';
+import { MaintenanceTab } from './tabs/MaintenanceTab';
 import { ShopInviteTab } from './tabs/ShopInviteTab';
 import { SeoMarketingTab } from './tabs/SeoMarketingTab';
 import { DividersTab } from './tabs/DividersTab';
@@ -194,6 +195,9 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                 {activeTab === 'popup' && (
                   <PopupTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} theme={theme} updateTheme={updateTheme} />
                 )}
+                {activeTab === 'maintenance' && (
+                  <MaintenanceTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
+                )}
                 {activeTab === 'seo_marketing' && (
                   <SeoMarketingTab sections={sections} updateSection={updateSection} triggerUpload={triggerUpload} uploadingImage={uploadingImage} />
                 )}
@@ -259,11 +263,18 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
             </Card>
 
             <div className="mt-5 space-y-3">
-              <p className="text-xs text-muted-foreground">
-                {landing?.status === 'published' ? (
-                  <span className="text-emerald-600 font-medium">● Publicada</span>
-                ) : (
-                  <span className="text-amber-600 font-medium">● Borrador</span>
+              <p className="text-xs text-muted-foreground space-y-1">
+                <span className="block">
+                  {landing?.status === 'published' ? (
+                    <span className="text-emerald-600 font-medium">● Publicada</span>
+                  ) : (
+                    <span className="text-amber-600 font-medium">● Borrador</span>
+                  )}
+                </span>
+                {sections.maintenance?.enabled && (
+                  <span className="block text-amber-600 font-medium">
+                    ● Sitio en {sections.maintenance.mode === 'construction' ? 'construcción' : 'mantenimiento'}
+                  </span>
                 )}
               </p>
               <Button onClick={handleSaveAndClose} disabled={saving} className="w-full gap-1.5">
@@ -282,7 +293,7 @@ export function LandingAdmin({ business, activeTab: externalActiveTab, setActive
                 <span className="text-xs font-medium text-muted-foreground">Vista previa</span>
               </div>
               <div data-preview-container className="h-[600px] overflow-auto">
-                <PreviewPanel sections={sections} theme={theme} template={template} slug={slug} logoUrl={logoUrl} visibleSections={visibleSections} />
+                <PreviewPanel sections={sections} theme={theme} template={template} slug={slug} logoUrl={logoUrl} visibleSections={visibleSections} previewMaintenance={activeTab === 'maintenance'} />
               </div>
             </CardContent>
           </Card>

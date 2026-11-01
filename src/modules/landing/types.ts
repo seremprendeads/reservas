@@ -264,6 +264,24 @@ export interface LandingSections {
     overlay_opacity: number;
     background_position?: string;
   };
+  /**
+   * Página de "en construcción" / "en mantenimiento". Mientras esté activa,
+   * el sitio público muestra esta pantalla en lugar de la landing completa.
+   * El admin y la vista previa siguen viendo la landing normal.
+   */
+  maintenance: {
+    enabled: boolean;
+    mode: 'construction' | 'maintenance';
+    title: string;
+    message: string;
+    image_url: string | null;
+    bg_color: string;
+    text_color: string;
+    accent_color: string;
+    show_contact: boolean;
+    /** Fecha o texto libre opcional (ej: "Volvemos el lunes 10"). */
+    extra_text: string;
+  };
   shop_invite: {
     title: string;
     subtitle: string;

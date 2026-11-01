@@ -80,6 +80,8 @@ export function useLandingUpload({ business, setLogoUrl, setSections }: UseLandi
         setSections(prev => ({ ...prev, banner: { ...prev.banner, image_url: publicUrl } }));
       } else if (target === 'popup_image') {
         setSections(prev => ({ ...prev, popup: { ...prev.popup, image_url: publicUrl } }));
+      } else if (target === 'maintenance_image') {
+        setSections(prev => ({ ...prev, maintenance: { ...prev.maintenance, image_url: publicUrl } }));
       } else if (target === 'shop_invite_image') {
         setSections(prev => ({ ...prev, shop_invite: { ...prev.shop_invite, image_url: publicUrl } }));
       } else if (target === 'main_service_image') {

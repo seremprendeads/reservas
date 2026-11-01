@@ -2,6 +2,7 @@ import {
   Sparkles, Info, Star, Wrench, Heart, ImageIcon,
   MessageSquare, HelpCircle, MousePointerClick, Phone,
   Settings, Palette, MapPin, AlignLeft, Megaphone, ShoppingBag, Search, Waves, CreditCard, FileJson,
+  Construction,
 } from 'lucide-react';
 
 export const SECTION_ICONS: Record<string, typeof Sparkles> = {
@@ -18,7 +19,7 @@ export const LUCIDE_ICON_NAMES = [
   'Diamond', 'Triangle', 'Circle', 'Square', 'Hexagon', 'Pentagon',
 ];
 
-export type AdminTab = 'general' | 'menu' | 'hero' | 'about' | 'about_text' | 'main_service' | 'services' | 'why' | 'gallery' | 'banner' | 'shop_invite' | 'testimonials' | 'faq' | 'cta' | 'plans' | 'map' | 'popup' | 'seo_marketing' | 'footer' | 'design' | 'dividers' | 'preset_json';
+export type AdminTab = 'general' | 'menu' | 'hero' | 'about' | 'about_text' | 'main_service' | 'services' | 'why' | 'gallery' | 'banner' | 'shop_invite' | 'testimonials' | 'faq' | 'cta' | 'plans' | 'map' | 'popup' | 'maintenance' | 'seo_marketing' | 'footer' | 'design' | 'dividers' | 'preset_json';
 
 export const ADMIN_TABS: { id: AdminTab; label: string; icon: typeof Sparkles }[] = [
   { id: 'general', label: 'General', icon: Settings },
@@ -38,6 +39,7 @@ export const ADMIN_TABS: { id: AdminTab; label: string; icon: typeof Sparkles }[
   { id: 'plans', label: 'Planes', icon: CreditCard },
   { id: 'map', label: 'Mapa', icon: MapPin },
   { id: 'popup', label: 'Popup Marketing', icon: Megaphone },
+  { id: 'maintenance', label: 'En Construcción / Mantenimiento', icon: Construction },
   { id: 'seo_marketing', label: 'SEO Marketing', icon: Search },
   { id: 'footer', label: 'Footer', icon: Phone },
   { id: 'design', label: 'Diseño', icon: Palette },

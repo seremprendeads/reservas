@@ -203,6 +203,18 @@ export const DEFAULT_SECTIONS: LandingSections = {
     overlay_color: '#111827',
     overlay_opacity: 80,
   },
+  maintenance: {
+    enabled: false,
+    mode: 'maintenance',
+    title: 'Estamos trabajando en nuestro sitio',
+    message: 'Muy pronto vas a poder ver nuestra nueva web. Gracias por tu paciencia.',
+    image_url: null,
+    bg_color: '#111827',
+    text_color: '#ffffff',
+    accent_color: '#10b981',
+    show_contact: true,
+    extra_text: '',
+  },
   seo_marketing: {
     general: {
       meta_title: '',
@@ -353,6 +365,7 @@ export function mergeSections(loaded: Partial<LandingSections> | null | undefine
     cta: { ...DEFAULT_SECTIONS.cta, ...src.cta },
     map: { ...DEFAULT_SECTIONS.map, ...src.map },
     popup: { ...DEFAULT_SECTIONS.popup, ...src.popup },
+    maintenance: { ...DEFAULT_SECTIONS.maintenance, ...src.maintenance },
     footer: { ...DEFAULT_SECTIONS.footer, ...src.footer },
     plans: { ...DEFAULT_SECTIONS.plans, ...src.plans },
     hero: (src.hero || DEFAULT_SECTIONS.hero) as LandingSections['hero'],

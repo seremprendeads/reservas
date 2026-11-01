@@ -32,6 +32,7 @@ import { CtaSection } from '../sections/CtaSection';
 import { MapSection } from '../sections/MapSection';
 import { FooterSection } from '../sections/FooterSection';
 import { FloatingWhatsApp } from '../components/FloatingWhatsApp';
+import { MaintenancePage } from '../components/MaintenancePage';
 import { MarketingPopup } from '../sections/MarketingPopup';
 import { ShopInviteSection } from '../sections/ShopInviteSection';
 import { ParallaxImage } from '../components/ParallaxImage';
@@ -224,6 +225,20 @@ export function LandingPage({ initialData, isPreview, slug }: { initialData?: La
 
   if (!isPreview && !isModuleEnabled('landing')) {
     return <ModuleBlockedScreen moduleId="landing" />;
+  }
+
+  // Página en construcción / mantenimiento: reemplaza todo el sitio público.
+  // La vista previa del admin sigue mostrando la landing real (o la pantalla de
+  // mantenimiento desde su propia pestaña).
+  if (!isPreview && s.maintenance?.enabled) {
+    return (
+      <MaintenancePage
+        maintenance={s.maintenance}
+        theme={theme}
+        logoUrl={landing.logo_url || s.header.logo_image_url}
+        footer={s.footer}
+      />
+    );
   }
 
   const galleryImages = normalizeImages(s.gallery.images || []).slice(0, 6);
