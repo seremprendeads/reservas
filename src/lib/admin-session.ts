@@ -87,8 +87,14 @@ export function saveLoginSession(data: {
   if (data.businessId) {
     sessionStorage.setItem(KEYS.businessId, data.businessId);
   }
+  // Si el negocio no tiene prueba (plan pago), hay que borrar cualquier fecha
+  // vieja que haya quedado de un login anterior. Antes solo se escribía cuando
+  // venía una fecha, así que el sessionStorage conservaba el trial anterior y
+  // el panel seguía mostrando "Tu prueba está por vencer".
   if (data.trialEndsAt) {
     sessionStorage.setItem(KEYS.trialEndsAt, data.trialEndsAt);
+  } else {
+    sessionStorage.removeItem(KEYS.trialEndsAt);
   }
   if (data.mustChangePassword) {
     sessionStorage.setItem(KEYS.mustChangePassword, '1');

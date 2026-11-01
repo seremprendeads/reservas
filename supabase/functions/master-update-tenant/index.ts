@@ -112,6 +112,10 @@ Deno.serve(async (req: Request) => {
         updates = {
           plan,
           is_trial: false,       // al cambiar plan manualmente, el trial termina
+          // Se limpia la fecha para que no quede un trial viejo guardado: el
+          // panel y las funciones no deben seguir viendo una prueba vencida
+          // después de asignar un plan pago.
+          trial_ends_at: null,
           is_active: true,       // reactivar si estaba suspendido
         };
         break;

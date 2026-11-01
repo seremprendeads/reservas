@@ -2,20 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useBusiness } from '../../contexts/BusinessContext';
 import * as session from '../../lib/admin-session';
 
-// Sin fecha de prueba guardada no inventamos ninguna. Antes habia una fecha
-// fija que ya paso, asi que a un cliente con plan pago (sin trial_ends_at) el
-// panel le mostraba 0 dias y le disparaba el aviso de prueba vencida al entrar.
-function getTrialEndDate(): Date | null {
-  const stored = session.getTrialEndsAt();
-  if (stored) {
-    const d = new Date(stored);
-    if (!isNaN(d.getTime())) return d;
-  }
-  return null;
+function parseTrialEnd(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 export function useAdminAuth() {
-  const { setBusinessById } = useBusiness();
+  const { business, loading: businessLoading, setBusinessById } = useBusiness();
   const [loggedIn, setLoggedIn] = useState(session.isLoggedIn);
   const [adminEmail, setAdminEmail] = useState(session.getEmail);
   const [adminName, setAdminName] = useState(session.getName);
@@ -43,16 +37,24 @@ export function useAdminAuth() {
     setLoggedIn(false);
   };
 
+  // La fecha de prueba se toma del negocio cargado desde la base. Antes se leía
+  // siempre de sessionStorage, que podía conservar una fecha vieja de otro
+  // login y mostrar "Tu prueba está por vencer" a un cliente con plan pago.
   useEffect(() => {
-    if (!loggedIn) return;
+    if (!loggedIn || businessLoading) return;
+
+    const endDate = business
+      ? (business.is_trial ? parseTrialEnd(business.trial_ends_at) : null)
+      : parseTrialEnd(session.getTrialEndsAt());
+
+    if (!endDate) {
+      // Cliente con plan pago (o sin prueba): no hay cuenta regresiva ni aviso.
+      setTrialDaysLeft(null);
+      setTrialWarningOpen(false);
+      return;
+    }
 
     const checkTrial = () => {
-      const endDate = getTrialEndDate();
-      if (!endDate) {
-        // Cliente con plan pago: no hay cuenta regresiva ni aviso.
-        setTrialDaysLeft(null);
-        return;
-      }
       const diffMs = endDate.getTime() - Date.now();
       const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
@@ -67,15 +69,21 @@ export function useAdminAuth() {
     checkTrial();
     const interval = setInterval(checkTrial, 60 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [loggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loggedIn, businessLoading, business?.is_trial, business?.trial_ends_at]);
 
   useEffect(() => {
-    if (!loggedIn) return;
+    if (!loggedIn || businessLoading) return;
+
+    const endDate = business
+      ? (business.is_trial ? parseTrialEnd(business.trial_ends_at) : null)
+      : parseTrialEnd(session.getTrialEndsAt());
+
+    if (!endDate) {
+      setTrialCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      return;
+    }
+
     const update = () => {
-      const endDate = getTrialEndDate();
-      // Sin fecha de prueba (cliente con plan pago) no hay cuenta regresiva:
-      // se deja el contador como esta en vez de forzarlo a cero.
-      if (!endDate) return;
       const diff = Math.max(0, endDate.getTime() - Date.now());
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -86,7 +94,7 @@ export function useAdminAuth() {
     update();
     const ticker = setInterval(update, 1000);
     return () => clearInterval(ticker);
-  }, [loggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loggedIn, businessLoading, business?.is_trial, business?.trial_ends_at]);
 
   const handleLogin = async (email: string, _token: string) => {
     setAdminEmail(email);

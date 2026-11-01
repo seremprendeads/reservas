@@ -66,7 +66,10 @@ Deno.serve(async (req: Request) => {
       biz?.is_trial &&
       biz?.trial_ends_at &&
       new Date(biz.trial_ends_at) < new Date();
-    const trialEndsAt = biz?.trial_ends_at || null;
+    // Solo devolvemos fecha si el negocio está realmente en prueba. Si ya tiene
+    // un plan pago, no debe quedar una fecha vieja que dispare el aviso de
+    // "prueba por vencer" en el panel.
+    const trialEndsAt = biz?.is_trial ? (biz.trial_ends_at || null) : null;
 
     return jsonSuccess({
       success: true,
