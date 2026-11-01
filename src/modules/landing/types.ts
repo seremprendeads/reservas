@@ -278,6 +278,8 @@ export interface LandingSections {
     bg_color: string;
     text_color: string;
     accent_color: string;
+    /** Mostrar el logo del negocio en la pantalla. Desactivado = sin logo. */
+    show_logo: boolean;
     show_contact: boolean;
     /** Fecha o texto libre opcional (ej: "Volvemos el lunes 10"). */
     extra_text: string;

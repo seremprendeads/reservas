@@ -28,7 +28,7 @@ export function MaintenancePage({ maintenance: m, theme, logoUrl, footer }: Main
       )}
 
       <div className="relative z-10 w-full max-w-xl text-center">
-        {logoUrl && (
+        {m.show_logo && logoUrl && (
           <img
             src={logoUrl}
             alt=""

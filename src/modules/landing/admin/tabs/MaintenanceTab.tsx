@@ -120,6 +120,21 @@ export function MaintenanceTab({ sections, updateSection, triggerUpload, uploadi
 
           <Separator />
 
+          <label className="flex items-start gap-3 rounded-xl border p-4 cursor-pointer hover:bg-muted/40 transition-all duration-200">
+            <input
+              type="checkbox"
+              checked={m.show_logo}
+              onChange={() => update({ show_logo: !m.show_logo })}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <span>
+              <span className="block text-sm font-medium text-foreground">Mostrar logo</span>
+              <span className="block text-xs text-muted-foreground mt-0.5">
+                Opcional. Usa el logo configurado en Menú o en el logo general de la landing. Si está desactivado, la pantalla se muestra sin logo.
+              </span>
+            </span>
+          </label>
+
           <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-muted/40 transition-all duration-200">
             <input
               type="checkbox"

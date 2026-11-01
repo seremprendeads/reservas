@@ -212,6 +212,7 @@ export const DEFAULT_SECTIONS: LandingSections = {
     bg_color: '#111827',
     text_color: '#ffffff',
     accent_color: '#10b981',
+    show_logo: false,
     show_contact: true,
     extra_text: '',
   },
