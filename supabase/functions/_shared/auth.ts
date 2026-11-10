@@ -173,9 +173,29 @@ export async function authenticateMaster(req: Request): Promise<
 }
 
 // Verify JWT token from Authorization header
-export async function authenticateToken(req: Request): Promise<
-  | { admin: { id: string; email: string; name: string | null; business_id: string | null }; businessId: string }
-  | { error: string; status: 401 }
+export interface AuthenticateTokenOptions {
+  allowPendingPasswordChange?: boolean;
+}
+
+export async function authenticateToken(
+  req: Request,
+  options: AuthenticateTokenOptions = {}
+): Promise<
+  | {
+      admin: {
+        id: string;
+        email: string;
+        name: string | null;
+        business_id: string | null;
+        must_change_password: boolean;
+      };
+      businessId: string;
+    }
+  | {
+      error: string;
+      status: 401 | 403;
+      code?: "must_change_password";
+    }
 > {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
@@ -198,7 +218,7 @@ export async function authenticateToken(req: Request): Promise<
   const supabase = createServiceClient();
   const { data: admin } = await supabase
     .from("admin_users")
-    .select("id, email, name, business_id")
+    .select("id, email, name, business_id, must_change_password")
     .eq("id", payload.sub)
     .maybeSingle();
 
@@ -210,6 +230,16 @@ export async function authenticateToken(req: Request): Promise<
   // Un admin sin negocio debe completar el flujo /create-business.
   if (!admin.business_id) {
     return { error: "No tenés un negocio asociado. Completá el registro en /create-business.", status: 401 as const };
+  }
+
+  // Cambio obligatorio pendiente: bloquear todo salvo los endpoints que
+  // explícitamente permiten operar mientras se cambia la contraseña.
+  if (admin.must_change_password === true && !options.allowPendingPasswordChange) {
+    return {
+      error: "Debés cambiar tu contraseña antes de continuar",
+      status: 403 as const,
+      code: "must_change_password" as const,
+    };
   }
 
   return { admin, businessId: admin.business_id as string };

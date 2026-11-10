@@ -7,7 +7,9 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const auth = await authenticateToken(req);
+    const auth = await authenticateToken(req, {
+      allowPendingPasswordChange: true,
+    });
     if ("error" in auth) return jsonUnauthorized();
 
     const access = await checkBioAccess(auth.businessId);
