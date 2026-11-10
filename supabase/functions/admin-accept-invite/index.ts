@@ -2,8 +2,24 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { authenticateAdmin, createServiceClient, jsonSuccess, jsonError, jsonUnauthorized, corsHeaders } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
+  const ENDPOINT_DISABLED: boolean = true;
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  // Endpoint obsoleto: deshabilitado temporalmente para la beta privada.
+  if (ENDPOINT_DISABLED) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Endpoint deshabilitado temporalmente.",
+      }),
+      {
+        status: 410,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 
   try {
