@@ -651,12 +651,12 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left: Editor */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className="lg:col-span-3 min-w-0 space-y-4">
           {/* Tabs */}
-          <div className="flex gap-1 bg-muted/50 p-1 rounded-xl">
+          <div className="flex flex-wrap gap-1 bg-muted/50 p-1 rounded-xl">
             {tabs.map(t => (
               <button key={t.id} onClick={() => setTab(t.id)}
-                className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all flex-1 justify-center ${
+                className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all flex-1 basis-0 min-w-fit justify-center whitespace-nowrap cursor-pointer select-none ${
                   tab === t.id ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}>
                 {t.icon}<span className="hidden sm:inline">{t.label}</span>
