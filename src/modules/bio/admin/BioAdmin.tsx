@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   User, Link as LinkIcon, Palette, BarChart3, QrCode, Plus, Trash2,
   GripVertical, ExternalLink, Copy, Check, Loader2, Eye, EyeOff,
-  Download, Upload, X, RotateCcw, AlertTriangle, Gift,
+  Download, Upload, X, RotateCcw, AlertTriangle, Gift, Share2,
 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { supabase } from '../../../lib/supabase';
 import { uploadStorageFile } from '../../../lib/storage-upload';
 import { useBusiness } from '../../../contexts/BusinessContext';
@@ -433,10 +434,33 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
 
   const publicUrl = `${window.location.origin}/bio/${business?.slug || '...'}`;
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(publicUrl);
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = publicUrl;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareLink = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: profile?.name || 'Mi Bio', text: 'Visitá mi bio', url: publicUrl });
+        return;
+      } catch {
+        return;
+      }
+    }
+    void copyLink();
   };
 
   const handleDragStart = (id: string) => setDragId(id);
@@ -1266,10 +1290,23 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
                   <p className="text-sm font-medium">Código QR de tu bio</p>
                   <p className="text-xs text-muted-foreground">Escanealo para abrir tu página</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="w-full max-w-sm space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">Enlace de tu bio</label>
+                  <Input
+                    readOnly
+                    value={publicUrl}
+                    onFocus={e => e.currentTarget.select()}
+                    onClick={e => e.currentTarget.select()}
+                    className="text-xs font-mono"
+                  />
+                </div>
+                <div className="flex flex-wrap justify-center gap-2">
                   <Button variant="outline" size="sm" onClick={copyLink} className="gap-1.5">
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copied ? 'Copiado' : 'Copiar enlace'}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={shareLink} className="gap-1.5">
+                    <Share2 className="w-3.5 h-3.5" /> Compartir
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => downloadQR(publicUrl, profile?.primary_color || '#059669')} className="gap-1.5">
                     <Download className="w-3.5 h-3.5" /> Descargar PNG
@@ -1425,76 +1462,33 @@ function EditLinkDialog({ link, onClose, onSave }: { link: BioLink; onClose: () 
   );
 }
 
-function QrCodeFromUrl({ color }: { url: string; color: string }) {
-  const size = 200;
-  const modules = 25;
-  const cellSize = size / modules;
-  const grid: boolean[][] = [];
-  for (let r = 0; r < modules; r++) {
-    grid[r] = [];
-    for (let c = 0; c < modules; c++) {
-      const isFinder = (r < 7 && c < 7) || (r < 7 && c >= modules - 7) || (r >= modules - 7 && c < 7);
-      const isBorder = isFinder && (r === 0 || r === 6 || c === 0 || c === 6 || (r >= modules - 7 && r === modules - 1) || (c >= modules - 7 && c === modules - 1));
-      const isInner = isFinder && r >= 2 && r <= 4 && c >= 2 && c <= 4;
-      const isInner2 = isFinder && r >= modules - 5 && r <= modules - 3 && c >= 2 && c <= 4;
-      const isInner3 = isFinder && r >= 2 && r <= 4 && c >= modules - 5 && c <= modules - 3;
-      if (isBorder || isInner || isInner2 || isInner3) {
-        grid[r][c] = true;
-      } else {
-        grid[r][c] = Math.random() > 0.55;
-      }
-    }
+function QrCodeFromUrl({ url, color }: { url: string; color: string }) {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setSrc(null);
+    QRCode.toDataURL(url, { width: 200, margin: 1, color: { dark: color, light: '#ffffff' } })
+      .then(dataUrl => { if (!cancelled) setSrc(dataUrl); })
+      .catch(() => { if (!cancelled) setSrc(null); });
+    return () => { cancelled = true; };
+  }, [url, color]);
+
+  if (!src) {
+    return (
+      <div className="w-[200px] h-[200px] flex items-center justify-center">
+        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
-  const cells: React.ReactNode[] = [];
-  for (let r = 0; r < modules; r++) {
-    for (let c = 0; c < modules; c++) {
-      if (grid[r][c]) {
-        cells.push(<rect key={`${r}-${c}`} x={c * cellSize} y={r * cellSize} width={cellSize} height={cellSize} rx={1} fill={color} />);
-      }
-    }
-  }
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} xmlns="http://www.w3.org/2000/svg">
-      <rect width={size} height={size} fill="white" />
-      {cells}
-    </svg>
-  );
+
+  return <img src={src} alt="Código QR de tu bio" width={200} height={200} className="block" />;
 }
 
-function downloadQR(_url: string, color: string): void {
-  const size = 512;
-  const modules = 25;
-  const cellSize = size / modules;
-  const grid: boolean[][] = [];
-  for (let r = 0; r < modules; r++) {
-    grid[r] = [];
-    for (let c = 0; c < modules; c++) {
-      const isFinder = (r < 7 && c < 7) || (r < 7 && c >= modules - 7) || (r >= modules - 7 && c < 7);
-      const isBorder = isFinder && (r === 0 || r === 6 || c === 0 || c === 6 || (r >= modules - 7 && r === modules - 1) || (c >= modules - 7 && c === modules - 1));
-      const isInner = isFinder && r >= 2 && r <= 4 && c >= 2 && c <= 4;
-      const isInner2 = isFinder && r >= modules - 5 && r <= modules - 3 && c >= 2 && c <= 4;
-      const isInner3 = isFinder && r >= 2 && r <= 4 && c >= modules - 5 && c <= modules - 3;
-      grid[r][c] = isBorder || isInner || isInner2 || isInner3 || Math.random() > 0.55;
-    }
-  }
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = color;
-  for (let r = 0; r < modules; r++) {
-    for (let c = 0; c < modules; c++) {
-      if (grid[r][c]) {
-        ctx.beginPath();
-        ctx.roundRect(c * cellSize, r * cellSize, cellSize, cellSize, 2);
-        ctx.fill();
-      }
-    }
-  }
+async function downloadQR(url: string, color: string): Promise<void> {
+  const dataUrl = await QRCode.toDataURL(url, { width: 512, margin: 2, color: { dark: color, light: '#ffffff' } });
   const link = document.createElement('a');
   link.download = 'qr-bio.png';
-  link.href = canvas.toDataURL('image/png');
+  link.href = dataUrl;
   link.click();
 }
