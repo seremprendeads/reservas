@@ -1283,7 +1283,7 @@ export function BioAdmin({ adminEmail }: { adminEmail: string }) {
         {/* Right: Preview */}
         <div className="lg:col-span-2">
           <div className="sticky top-4">
-            <div className="mx-auto max-w-[280px]">
+            <div className="mx-auto max-w-[280px] mt-12">
               <div className="rounded-[2.5rem] border-[6px] border-gray-900 bg-gray-900 overflow-hidden shadow-2xl">
                 <div className="rounded-[2rem] overflow-hidden relative" style={{
                   backgroundColor: profile?.bg_solid_color || '#ffffff',
